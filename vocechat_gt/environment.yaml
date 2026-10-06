@@ -1,0 +1,79 @@
+schema_version: pengent-web-gt-v1
+
+environment:
+  id: "vocechat-0.5.36-local"
+  application: "VoceChat (vocechat-server + vocechat-web)"
+  version_or_commit: >-
+    Deployed server binary reports 0.5.36 (GET /api/admin/system/version). Reference server source tree:
+    vocechat-server-rust-0.5.36 (Cargo package version 0.3.3). Web frontend: vocechat-web 0.9.122
+    (package.json). The server and web client are treated as one deployed Web application.
+  deployment_profile: >-
+    Docker image privoce/vocechat-server:latest serving both the JSON API and the bundled SPA on
+    http://localhost:3009. SQLite data store; single-node. Dynamic login config observed at runtime:
+    who_can_sign_up=EveryOne, guest=true, password=true, magic_link=true; google/github/metamask/oidc/
+    third_party/passkey disabled. SMTP disabled (/api/admin/smtp/enabled=false). Agora disabled
+    (/api/admin/agora/enabled=false). Server initialized (an admin already exists).
+  base_urls:
+    - "http://localhost:3009"
+    - "http://localhost:3009/api"
+
+scope:
+  included:
+    - "VoceChat JSON API under /api (token, user, group, message, resource, favorite, license, bot, admin/*)"
+    - "Realtime SSE endpoint /api/user/events"
+    - "Bundled single-page web client served from / (HashRouter routes live in the URL fragment)"
+    - "Static SPA assets (/static/*, /locales/*, PWA manifest/icons, service workers) and embeddable widget pages"
+    - "OpenAPI documentation/spec routes (/api/doc, /api/doc2, /api/doc3, /api/swagger, /api/spec)"
+  excluded:
+    - "Third-party services only brokered by the server (Agora REST, Firebase FCM, Google/GitHub/OIDC IdPs, Cloudflare tunnel edge, VoceSpace, Stripe/vera.nicegoodthings.com payment host)"
+    - "doc.voce.chat documentation images loaded by the login page (external origin)"
+    - "The payment host PAYMENT_URL_PREFIX used by the License UI (not part of the deployed app)"
+
+black_box_profile:
+  provided_information:
+    - "Base URL http://localhost:3009"
+  provided_accounts:
+    - identity: "admin"
+      role: "Admin"
+      credential_ref: "gt fixture admin (admin@gt.test); see auth.har / localhost.har"
+    - identity: "user"
+      role: "User"
+      credential_ref: "gt fixture non-admin user (e.g. test@test.com / bob/carol fixtures)"
+    - identity: "anonymous"
+      role: "Guest"
+      credential_ref: "no credentials"
+  api_docs_provided: true          # /api/spec, /api/swagger are reachable unauthenticated on the deployment
+  source_code_provided: true       # vocechat_src/ (server + web) supplied for reference GT construction
+  other:
+    - "Guest login is enabled, so an anonymous visitor can also obtain a guest session via GET /api/token/login_guest."
+
+reset:
+  procedure_ref: "Recreate the Docker container from privoce/vocechat-server:latest with a fresh data volume; the user authorizes destructive testing against this local instance."
+  initial_state: "Server already initialized with an admin and a few fixture users/groups (uids 1..~6, groups incl. public gt-public and private gt-admin-private); no favorites."
+
+annotation:
+  source_revision: "vocechat-server-rust-0.5.36 (Cargo 0.3.3) + vocechat-web 0.9.122"
+  annotator: "teckchuanyeo@gmail.com"
+  date: "2026-10-06"
+  reachability_policy: >-
+    black_box_reachable is annotated against the application's INTENDED configuration, not the incidental
+    feature-flag state of this deployment. Features that are merely toggled off by runtime config but whose
+    toggles are reachable in-scope admin endpoints (login providers/passkey via /admin/login/config, SMTP via
+    /admin/smtp/config, Agora via /admin/agora/config) are marked reachable=true with the enabling step as a
+    stated precondition; routes that answer 403/503 (not 404) are in scope, not excluded. Actions that also
+    need an un-mintable external provider (real IdP, reachable SMTP server, live Agora backend) carry an
+    explicit "EXTERNAL DEPENDENCY: ..." reachability_condition. See annotation_issues issue-005.
+  notes: >-
+    Attack surface was enumerated primarily from the server source (poem-openapi handlers in
+    vocechat-server-rust-0.5.36/src/api/*.rs, routes mounted in server.rs and api/mod.rs) and the web
+    client service definitions (vocechat-web/src/app/services/*.ts), then verified and completed against
+    the two runtime captures (vocechat_gt/auth.har, vocechat_gt/localhost.har). The deployed 0.5.36 binary
+    exposes endpoints that are NOT in the public 0.3.3 source tree but are called by vocechat-web 0.9.122
+    (notifications, passkey, custom pages, cloudflared, vocespace, admin bot-chat, group announcements,
+    contacts, message bulk delete, admin/system/common & files); these are annotated from the frontend
+    contract + runtime and are flagged in each node's gt.notes and in annotation_issues.yaml.
+    Finally, the deployed server's own OpenAPI spec (GET /api/spec, version 0.5.36, 197 operations) was
+    fetched live and reconciled: the L1 API surface now has 1:1 parity with the deployed binary, and the
+    26 operations present only in the binary (bot slash-command subsystem, WebSocket event streams, user
+    avo params, parse_tokens, agora channel-event callback, etc.) are annotated from the spec with
+    sources=[documentation] and gt.visibility=white_box (see annotation_issues issue-007).

@@ -1,0 +1,36 @@
+schema_version: pengent-web-gt-v1
+
+environment:
+  id: "<env-id>"
+  application: "<application-name>"
+  version_or_commit: "<exact version/commit>"
+  deployment_profile: "<exact benchmark deployment/configuration>"
+  base_urls:
+    - "<base-url>"
+
+scope:
+  included:
+    - "<in-scope application/component>"
+  excluded:
+    - "<scoring harness / unrelated service / disabled component / etc.>"
+
+black_box_profile:
+  provided_information:
+    - "base URL(s)"
+  provided_accounts:
+    - identity: "<stable identity label used in identity_statuses>"
+      role: "<Guest/User/Admin/etc.>"
+      credential_ref: "<reference only; do not store plaintext secrets>"
+  api_docs_provided: false
+  source_code_provided: false
+  other: []
+
+reset:
+  procedure_ref: "<reset script/doc/command>"
+  initial_state: "<initial benchmark state>"
+
+annotation:
+  source_revision: "<revision used for annotation>"
+  annotator: "<name>"
+  date: "<YYYY-MM-DD>"
+  notes: null

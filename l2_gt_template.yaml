@@ -1,0 +1,190 @@
+schema_version: pengent-web-gt-v1
+environment_id: "<env-id>"
+
+nodes:
+  - id: "gt-action-001"
+
+    # Human-readable.
+    name: "User reads resource"
+    kind: "normal"
+    description: "Authenticated user reads one resource by stable identifier."
+
+    # Stable semantic Action key.
+    action_key: "user_read_resource_resource"
+
+    subject:
+      id: "actor"
+      identity: "CurrentUser"
+      role: "User"
+      auth_context: "Session"
+
+    operation:
+      business: "read_resource"
+      crud: "Read"  # Create | Read | Update | Delete
+
+    object:
+      kind: "entity"   # entity | state | relation
+      id: "resource"
+      type: "Resource"
+      name: "Resource"
+      entity: "Resource"
+      role: "target"
+
+      # Only meaningful for state/attribute objects.
+      attribute: ""
+      state_field: ""
+
+      binding:
+        source: "request"   # request | response | subject | semantic | implicit
+        field: "resource_id"
+        resource: "ResourceID(resource)"
+
+      participants: []
+      constraints: []
+
+    # Req = facts that must hold BEFORE this Action succeeds.
+    requirements:
+      - type: "authentication"
+        fact:
+          predicate: "Authenticated"
+          arguments:
+            - kind: "subject"
+              id: "actor"
+              type: "User"
+              relative_role: "SELF"
+            - "Session"
+        reason: "Endpoint requires a valid user session."
+
+      - type: "knowledge"
+        fact:
+          predicate: "Know"
+          arguments:
+            - kind: "subject"
+              id: "actor"
+              type: "User"
+              relative_role: "SELF"
+            - kind: "reference"
+              type: "ResourceID"
+              target:
+                kind: "entity"
+                id: "resource"
+                type: "Resource"
+                role: "target"
+        reason: "Request requires resource_id."
+
+      - type: "existence"
+        fact:
+          predicate: "Exists"
+          arguments:
+            - kind: "entity"
+              id: "resource"
+              type: "Resource"
+              role: "target"
+        reason: "Invalid/nonexistent identifiers produce object-not-found behavior."
+
+    # Eff = facts made true/false by this Action.
+    # For Read, Pengent keeps only generated Know(...) effects.
+    effects:
+      gen:
+        - fact:
+            predicate: "Know"
+            arguments:
+              - kind: "subject"
+                id: "actor"
+                type: "User"
+                relative_role: "SELF"
+              - kind: "reference"
+                type: "ResourceID"
+                target:
+                  kind: "entity"
+                  id: "resource"
+                  type: "Resource"
+                  role: "target"
+          basis: "io_reference"
+          reason: "Response returns id as a reference-capable ResourceID."
+
+      kill: []
+
+    # Account for every relevant flow=true / mergeable field in the bound method.
+    io_accounting:
+      - direction: "input"
+        field: "resource_id / ResourceID(resource)"
+        disposition: "req"  # input: req | object_attribute
+        facts:
+          - "Know(actor:User[SELF],ResourceID(resource:Resource{target}))"
+        ignored_reason: ""
+
+      - direction: "output"
+        field: "id / ResourceID(resource)"
+        disposition: "gen"  # output: gen | observed_only
+        facts:
+          - "Know(actor:User[SELF],ResourceID(resource:Resource{target}))"
+        ignored_reason: ""
+
+      - direction: "output"
+        field: "name / ResourceName(resource)"
+        disposition: "observed_only"
+        facts: []
+        ignored_reason: "Display/business attribute; not a stable object reference and Read does not create state."
+
+    l1_bindings:
+      - l1_key: "https://target.example/api/resource/{resource_id}"
+        methods: ["GET"]
+        selector:
+          field: ""
+          values: []
+
+    confidence: 1.0
+    reasoning: "Operation and Req/Eff are confirmed from route semantics, source, and runtime behavior."
+
+    # Compatibility fields emitted by Pengent L2Node.to_dict().
+    # Keep them in the human GT so the file is a superset of Pengent output.
+    l1_keys:
+      - "https://target.example/api/resource/{resource_id}"
+
+    # These are compact projections; validator/exporter may regenerate them.
+    consumes:
+      - "Authenticated(actor:User[SELF],Session)"
+      - "Know(actor:User[SELF],ResourceID(resource:Resource{target}))"
+      - "Exists(resource:Resource{target})"
+
+    produces:
+      - "Know(actor:User[SELF],ResourceID(resource:Resource{target}))"
+
+    # Legacy/compatibility semantic-object fields retained by Pengent.
+    object_type: "entity"
+    lifecycle: ""
+    operations: []
+    secondary_objects: []
+
+    # Human-GT-only extension.
+    gt:
+      visibility:
+        minimum: "black_box"  # black_box | grey_box | white_box
+        reason: "Business read operation can be inferred from the UI/API behavior."
+
+      black_box_reachable: true
+
+      reachability_conditions:
+        - "Valid user session"
+        - "Known resource identifier"
+
+      observable_evidence:
+        - observer_l1_key: "https://target.example/api/resource/{resource_id}"
+          expected: "200 response contains the requested resource."
+
+      evidence:
+        - type: "source"
+          ref: "<file:line>"
+          supports: "Subject/operation/object/requirements"
+        - type: "runtime"
+          ref: "<request/response reference>"
+          supports: "Reachability and observable result"
+
+      notes: null
+
+# DO NOT manually annotate Pengent semantic dependency edges.
+# They are deterministically rebuilt from requirements / effects.
+edges: []
+
+annotation_issues: []

@@ -1,0 +1,158 @@
+schema_version: pengent-web-gt-v1
+environment_id: "vocechat-0.5.36-local"
+
+issues:
+  - id: "issue-001"
+    location: "cross-schema (deployment vs. reference source tree)"
+    description: >-
+      The deployed server reports version 0.5.36 (GET /api/admin/system/version) but the supplied server
+      source tree is vocechat-server-rust-0.5.36 with Cargo package version 0.3.3, whose OpenApiService in
+      src/api/mod.rs registers only 16 API groups. The deployed binary and the vocechat-web 0.9.122 client
+      exercise additional endpoints not present in that source tree. These were annotated from the frontend
+      service definitions + TS types and (where exercised) the HAR captures, with gt.visibility and
+      gt.black_box_reachable scored conservatively. Their server-side authorisation could not be confirmed
+      from source.
+    evidence:
+      - type: "runtime"
+        ref: "vocechat_gt/auth.har entry #12"
+        supports: "GET /api/admin/system/version returned text 0.5.36"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/Cargo.toml:3"
+        supports: "version = \"0.3.3\""
+      - type: "source"
+        ref: "vocechat-web/src/app/services/server.ts, notification.ts, adminBotChat.ts"
+        supports: "Endpoints (page/*, cloudflared/*, vocespace/*, notification/*, bot_chat/*, system/common, system/files, contacts, search, bulk delete) called by the deployed client but absent from the source tree"
+    proposed_resolution: >-
+      RESOLVED for enumeration: the live deployed spec (GET http://localhost:3009/api/spec, version 0.5.36,
+      197 operations) was fetched and reconciled, so the L1 surface now has full parity with the deployed
+      binary (all 197 spec operations represented; see the 26 binary-only ops annotated from the spec with
+      sources=[documentation] and gt.visibility=white_box). What remains unresolved is only the
+      implementation detail / exact server-side authorisation of those binary-only handlers, since the
+      matching 0.5.36 source is still unavailable. Their request/response contracts are spec-accurate.
+
+  - id: "issue-002"
+    location: "L2:user_edit_message / user_delete_message / user_react_to_message / user_bulk_delete_messages"
+    description: >-
+      Message edit / like / delete / reply are implemented as append-only reaction overlay messages, not as
+      row mutations. do_reaction (message_api.rs) and internal_send_message (message.rs) append a new
+      Reaction record and only rewrite the *merged* view; the original message payload stays in the message
+      db, so GET /{gid|uid}/history still returns the pre-edit / pre-delete payload. Modelling edit/delete as
+      Update(State)/Delete was therefore approximated with state_field content and basis state_transition,
+      and the fact that the original remains readable is recorded here rather than as a KILL Exists.
+    evidence:
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/message.rs:694-735"
+        supports: "Reaction Edit updates merged message only; Like/Delete produce no merged update"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/message_api.rs:85-99"
+        supports: "DELETE /message/{mid} appends a Delete reaction via do_reaction"
+    proposed_resolution: "Acceptable within the closed fact language; flagged so reviewers do not expect a hard KILL Exists(message)."
+
+  - id: "issue-003"
+    location: "L2:user_logout_session"
+    description: >-
+      Logout (GET /api/token/logout) deletes only the refresh-token and device rows for (uid, device) and
+      kicks the SSE stream. The access token is a stateless signed JWT and remains valid until expiry
+      (token_expiry_seconds, 300s in the shipped config). The KILL is modelled as Exists(session:Session)
+      for the device session, but the bearer access token is not actually revoked.
+    evidence:
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/token.rs:1281-1322"
+        supports: "logout deletes refresh_token + device rows only"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/token.rs:90-99"
+        supports: "api_checker validates the JWT statelessly; no server-side session store for access tokens"
+    proposed_resolution: "Represented as session deletion; residual access-token validity noted for reviewers."
+
+  - id: "issue-004"
+    location: "L1/L2: numerous endpoints have no server-side authentication in source"
+    description: >-
+      Several handlers take no Token extractor and are reachable anonymously in the source tree:
+      GET /api/user (list all users incl. e-mails), GET /api/user/{uid}, GET /api/group/{gid} (incl. private
+      member lists & pinned content), GET /api/user/check_email (enumeration oracle), GET /api/resource/file,
+      /api/resource/archive, /api/resource/archive/attachment, /api/favorite/attachment/{uid}/{id}/{aid},
+      GET /api/resource/open_graphic_parse (SSRF), GET /api/license, and GET /api/admin/{login,google_auth,
+      github_auth}/config. GET /api/admin/agora/config has its admin check commented out and returns
+      app_certificate/rtm_secret to any session. These are annotated with subject=Anonymous (or User) and
+      flagged; they are likely the highest-value items of the attack surface.
+    evidence:
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/user.rs:656-664, 891-904"
+        supports: "get_user / get_all_users have no Token parameter"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/admin_agora.rs:100-115"
+        supports: "get_config admin check is commented out"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/resource.rs:341-487"
+        supports: "download_file / archive / open_graphic_parse take no Token"
+    proposed_resolution: >-
+      The deployed 0.5.36 build may have added auth to some of these (base.query.ts whiteList401 tolerates
+      401 on getGoogleAuthConfig/getGithubAuthConfig, hinting at a change). Not re-verified at runtime because
+      the captures were taken while authenticated; left as source-accurate with a note.
+
+  - id: "issue-005"
+    location: "L2/L1: 20 config-gated actions and the intended-configuration reachability policy"
+    description: >-
+      This GT represents the application's full INTENDED attack surface, not the incidental feature-flag state
+      of this particular deployment. 20 actions are gated by runtime configuration that is itself toggled
+      through in-scope admin endpoints (passkey ×6 via POST /api/admin/login/config; OIDC/Google/GitHub login
+      authorize & bind; send-login-magic-link and all SMTP mail actions via POST /api/admin/smtp/config; Agora
+      token/usage/channel actions and the voice WebSocket via POST /api/admin/agora/config; and
+      bootstrap_admin, which is reachable in the documented fresh-install/reset state). Because enabling a
+      feature via an admin API is a stated workflow precondition (permitted by the reachability definition),
+      these are annotated black_box_reachable=true with the enabling step recorded as a positive
+      reachability_condition, NOT false. The routes are all mounted and callable in the deployment (they
+      answer 403/503, not 404), so they are in scope rather than excluded. Two categories are distinguished
+      in the per-action reachability_conditions: (1) pure config toggles with no external dependency (passkey,
+      Agora local token generation, bootstrap_admin) are exercisable end-to-end once enabled; (2) actions that
+      additionally need an un-mintable external provider/infrastructure carry an explicit
+      "EXTERNAL DEPENDENCY: ..." precondition - OIDC/Google/GitHub (a reachable IdP), SMTP mail (a reachable
+      mail server), and Agora usage/channel queries (a live Agora backend). Visibility is recorded
+      independently of reachability throughout.
+    evidence:
+      - type: "runtime"
+        ref: "vocechat_gt/auth.har entry #30"
+        supports: "/api/admin/login/config is itself reachable and shows the toggles (passkey/google/github/metamask/oidc), confirming features are config-gated, not unmounted"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/admin_login.rs, admin_smtp.rs, admin_agora.rs"
+        supports: "Each feature is driven by dynamic config set through an admin endpoint, so the gate is an achievable precondition"
+    proposed_resolution: >-
+      Interpretation recorded intentionally (intended-configuration GT). To runtime-confirm category-1 actions,
+      flip the relevant admin config on the live instance and exercise end-to-end; category-2 actions also
+      require the named external provider.
+
+  - id: "issue-007"
+    location: "L1/L2: 26 operations present only in the deployed 0.5.36 binary"
+    description: >-
+      The live GET /api/spec exposes 26 operations absent from both the 0.3.3 source tree and vocechat-web
+      0.9.122: the whole bot slash-command subsystem (GET/POST /bot/command, PUT/DELETE /bot/command/{id},
+      DELETE /bot/delete/{mid}, PUT /bot/edit/{mid}, POST /bot/reply/{mid}, GET /bot/{user|group}/{id}/messages,
+      GET/PUT /bot/secret, POST /bot/send_mail), WebSocket event streams (GET /api/user/events_ws,
+      /api/voice/avo/events_ws), generative-avatar params (GET/PUT /api/user/avo), /api/user/{uid}/command,
+      POST /api/user/{contacts/search,send_mail,update_conv}, POST /api/token/parse_tokens, GET
+      /admin/system/update_webclient, GET /admin/vocespace/enabled, POST /admin/agora/channel_event_callback,
+      and the canonical GET /admin/agora/channel/user/{channel_name}/{hosts_only} and
+      /admin/agora/channel/user/property/{uid}/{channel_name}. They are annotated from the spec contracts
+      with gt.visibility=white_box (identifiable black-box only via the server's own /api/spec),
+      sources=[documentation], and confidence 0.55-0.65 because the handler logic/authorisation is not in
+      source. Their L1 surface now matches the deployed binary 1:1.
+    evidence:
+      - type: "documentation"
+        ref: "GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36, 197 operations)"
+        supports: "Existence, methods, path params, and request/response schemas of all 26 binary-only operations"
+    proposed_resolution: >-
+      Contracts are spec-accurate; server-side auth/effects should be confirmed if the 0.5.36 source or live
+      probing becomes available. POST /admin/agora/channel_event_callback and POST /token/parse_tokens are
+      unauthenticated per the spec and are high-value items to verify.
+
+  - id: "issue-006"
+    location: "L1: GET /api/bot/user/{uid} and /api/bot/group/{gid}"
+    description: >-
+      The bot handlers declare a path parameter :uid / :gid but actually bind the id from the QUERY string
+      (Query<i64>), so the path segment is ignored. The L1 node keeps the documented path template and records
+      the real query parameter; the semantic reference_fields point at the query value.
+    evidence:
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/bot.rs:115-150"
+        supports: "user_info/group_info read uid/gid from Query, not Path"
+    proposed_resolution: "Annotated as-is; noted so the path/query discrepancy is not treated as an error."

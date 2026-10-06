@@ -1,0 +1,13 @@
+schema_version: pengent-web-gt-v1
+environment_id: "<env-id>"
+
+issues:
+  # - id: "issue-001"
+  #   location: "L1:<key> | L2:<action_key> | cross-schema"
+  #   description: "<what cannot be represented or is ambiguous>"
+  #   evidence:
+  #     - type: "source"
+  #       ref: "<file:line>"
+  #       supports: "<claim>"
+  #   proposed_resolution: "<optional suggestion; do NOT edit schema yourself>"
+  []

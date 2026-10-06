@@ -1,0 +1,181 @@
+schema_version: pengent-web-gt-v1
+environment_id: "<env-id>"
+
+nodes:
+  - key: "https://target.example/api/resource/{resource_id}"
+    kind: "api"  # api | page | static
+
+    # All legitimate/observed methods for this normalized route.
+    methods: ["GET"]
+
+    # Runtime-observed status/content evidence; keep identity-specific details below.
+    statuses: [200, 401]
+    content_types: ["application/json"]
+
+    # Query-parameter NAMES only.
+    params: []
+
+    # Union of flow=true business-data fields from io_variants.
+    inputs: ["resource_id"]
+    outputs: ["id", "name"]
+
+    # Pengent compatibility compact request shape.
+    input_spec:
+      format: "plain"  # json | plain | ""
+      fields: ["resource_id"]
+
+    # Keep method-specific contracts separate.
+    io_variants:
+      - method: "GET"
+        content_types: ["application/json"]
+
+        # Union-like compatibility lists for this method.
+        inputs: ["resource_id"]
+        outputs: ["id", "name"]
+
+        # Backward-compatible compact input object.
+        input: {}
+
+        request:
+          body_format: "none"   # json | form | raw | none
+          body_example: {}
+          fields:
+            - name: "resource_id"
+              location: "path"  # path | query | header | body
+              path: ""
+              type: "string"
+              required: true
+              flow: true
+              description: "Stable reference to the target resource."
+
+        response:
+          format: "json"        # json | scalar | raw | empty | unknown
+          scalar_type: null
+
+          # Use these only when the whole response is an unnamed scalar/raw/root-array business value.
+          value_name: null
+          value_type: null
+          value_flow: false
+          value_description: null
+
+          fields:
+            - name: "id"
+              path: "id"
+              type: "string"
+              flow: true
+              description: "Stable returned resource identifier."
+            - name: "name"
+              path: "name"
+              type: "string"
+              flow: true
+              description: "Display/business attribute."
+
+        reason: "<why the request/response contract is correct>"
+        evidence: "<source/runtime evidence supporting this variant>"
+
+    # Stable endpoint-level business hint.
+    operation_semantic: "read_resource"
+
+    # EXACTLY resources with mergeable=true below.
+    semantic_inputs:
+      - "ResourceID(resource)"
+    semantic_outputs:
+      - "ResourceID(resource)"
+      - "ResourceName(resource)"
+
+    semantic_input_decisions:
+      - raw_field: "resource_id"
+        resource: "ResourceID(resource)"
+        mergeable: true
+        value_kind: "identifier"
+        reference_capable: true
+        reference_fields: ["resource_id"]
+        reason: "Stable path identifier used to select the resource."
+
+    semantic_output_decisions:
+      - raw_field: "id"
+        resource: "ResourceID(resource)"
+        mergeable: true
+        value_kind: "identifier"
+        reference_capable: true
+        reference_fields: ["id"]
+        reason: "Stable resource identifier returned by the endpoint."
+
+      - raw_field: "name"
+        resource: "ResourceName(resource)"
+        mergeable: true
+        value_kind: "attribute"
+        reference_capable: false
+        reference_fields: []
+        reason: "Business attribute shared across resource endpoints, but not an object reference."
+
+    samples:
+      - identity: "user"
+        method: "GET"
+        status: 200
+        url: "https://target.example/api/resource/123"
+        request_body: null
+        response_body_sample: '{"id":"123","name":"example"}'
+        source: "manual_runtime_probe"
+
+    sources:
+      - "runtime"
+      - "source"
+
+    referrers:
+      - "https://target.example/resources"
+
+    resource_types:
+      - "fetch"
+
+    js_sources:
+      - "https://target.example/static/app.js"
+
+    identity_statuses:
+      anonymous: [401]
+      user: [200]
+
+    route_confirmed: true
+
+    runtime_api_prefixes:
+      - "https://target.example/api"
+
+    # Human-GT-only extension.
+    gt:
+      visibility:
+        minimum: "black_box"  # black_box | grey_box | white_box
+        reason: "Endpoint is called by the user-visible frontend and appears in network traffic."
+
+      black_box_reachable: true
+
+      reachability_conditions:
+        - "Valid user session"
+        - "Known resource_id"
+
+      evidence:
+        - type: "runtime"
+          ref: "<request/trace reference>"
+          supports: "Route, method, status, response fields"
+        - type: "source"
+          ref: "<file:line>"
+          supports: "Path parameter, handler semantics, response schema"
+
+      notes: null
+
+edges:
+  - src: "https://target.example/resources"
+    dst: "https://target.example/api/resource/{resource_id}"
+    methods: ["GET"]
+    triggers: ["fetch"]
+
+    # Human-GT-only extension.
+    gt:
+      evidence:
+        - type: "runtime"
+          ref: "<browser/network trace>"
+          supports: "Frontend page issues this API request"
+
+excluded_items:
+  # - item: "<route/component>"
+  #   reason: "<disabled/unmounted/test-only/out-of-scope>"
+  []
