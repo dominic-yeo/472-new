@@ -26,19 +26,24 @@ issues:
       RESOLVED for enumeration: the live deployed spec (GET http://localhost:3009/api/spec, version 0.5.36,
       197 operations) was fetched and reconciled, so the L1 surface now has full parity with the deployed
       binary (all 197 spec operations represented; see the 26 binary-only ops annotated from the spec with
-      sources=[documentation] and gt.visibility=white_box). What remains unresolved is only the
+      sources=[documentation] and gt.visibility=black_box, per issue-007). What remains unresolved is only the
       implementation detail / exact server-side authorisation of those binary-only handlers, since the
       matching 0.5.36 source is still unavailable. Their request/response contracts are spec-accurate.
 
   - id: "issue-002"
-    location: "L2:user_edit_message / user_delete_message / user_react_to_message / user_bulk_delete_messages"
+    location: >-
+      L2: user_edit_message, user_react_to_message, user_delete_message, user_reply_to_message_message,
+      user_bulk_delete_messages, and the bot variants bot_edit_message, bot_delete_message,
+      bot_reply_message_message. (Verified by source sweep to be the complete set of the append-only pattern;
+      pin/unpin are genuine pinned_message table mutations and are modelled as real State changes, not here.)
     description: >-
-      Message edit / like / delete / reply are implemented as append-only reaction overlay messages, not as
-      row mutations. do_reaction (message_api.rs) and internal_send_message (message.rs) append a new
-      Reaction record and only rewrite the *merged* view; the original message payload stays in the message
-      db, so GET /{gid|uid}/history still returns the pre-edit / pre-delete payload. Modelling edit/delete as
-      Update(State)/Delete was therefore approximated with state_field content and basis state_transition,
-      and the fact that the original remains readable is recorded here rather than as a KILL Exists.
+      Message edit / like / delete / reply (for both the session API and the bot API) are implemented as
+      append-only reaction overlay messages, not as row mutations. do_reaction (message_api.rs) and
+      internal_send_message (message.rs) append a new Reaction record and only rewrite the *merged* view; the
+      original message payload stays in the message db, so GET /{gid|uid}/history still returns the pre-edit /
+      pre-delete payload. Modelling edit as KILL+GEN State(content) and delete as GEN State(visibility,
+      deleted) was therefore chosen over a hard KILL Exists(message); reply is a plain Create of a new
+      message. The fact that the original remains readable is recorded here.
     evidence:
       - type: "source"
         ref: "vocechat-server-rust-0.5.36/src/api/message.rs:694-735"
@@ -49,20 +54,42 @@ issues:
     proposed_resolution: "Acceptable within the closed fact language; flagged so reviewers do not expect a hard KILL Exists(message)."
 
   - id: "issue-003"
-    location: "L2:user_logout_session"
+    location: >-
+      Systemic (not logout-specific). L2: user_logout_session, user_delete_own_device, user_delete_own_account,
+      admin_delete_user_account, admin_update_user_account (status=Frozen branch), user_change_own_password.
     description: >-
-      Logout (GET /api/token/logout) deletes only the refresh-token and device rows for (uid, device) and
-      kicks the SSE stream. The access token is a stateless signed JWT and remains valid until expiry
-      (token_expiry_seconds, 300s in the shipped config). The KILL is modelled as Exists(session:Session)
-      for the device session, but the bearer access token is not actually revoked.
+      api_checker (token.rs:90-99) authenticates every request purely by verifying the access-token JWT
+      signature and that its type is AccessToken - it performs NO database, user-status or device lookup. The
+      access token is therefore a bearer credential that CANNOT be revoked server-side; it stays valid until
+      expiry (token_expiry_seconds = 300s in the shipped config). A source sweep shows this affects every
+      session/user-invalidating action, not just logout:
+      (a) logout - deletes refresh_token+device rows and kicks the SSE stream, but the access token keeps
+      working;
+      (b) delete_device - deletes the device row and kicks it, yet a request bearing that device's access
+      token still authenticates (no device check in api_checker);
+      (c) delete_current_user and admin delete_user - the user row is removed and streams kicked, but a
+      token-only endpoint still passes api_checker (cache-dependent handlers then fail on the missing uid);
+      (d) admin update_user with status=Frozen - kicks the user's streams, but their existing access token
+      still authenticates API calls for up to 300s, so a freeze is not immediate;
+      (e) change_password - does NOT kick anything and does not invalidate existing tokens, so sessions issued
+      before a password change (e.g. after credential compromise) remain usable until expiry.
+      Only the refresh-token half of the session is revocable (logout/renew rewrite refresh_token rows); the
+      KILLs in these actions model the DB/stream state, with this residual access-token validity recorded
+      here as the shared caveat.
     evidence:
       - type: "source"
-        ref: "vocechat-server-rust-0.5.36/src/api/token.rs:1281-1322"
-        supports: "logout deletes refresh_token + device rows only"
-      - type: "source"
         ref: "vocechat-server-rust-0.5.36/src/api/token.rs:90-99"
-        supports: "api_checker validates the JWT statelessly; no server-side session store for access tokens"
-    proposed_resolution: "Represented as session deletion; residual access-token validity noted for reviewers."
+        supports: "api_checker validates only the JWT signature + TokenType==AccessToken; no DB/status/device store for access tokens"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/token.rs:1281-1322"
+        supports: "logout deletes refresh_token + device rows and kicks streams only"
+      - type: "source"
+        ref: "vocechat-server-rust-0.5.36/src/api/admin_user.rs (update, status=Frozen) and user.rs (change_password, delete_device)"
+        supports: "freeze/password-change/device-delete kick or mutate DB state but never invalidate the issued access JWT"
+    proposed_resolution: >-
+      CWE-613-class residual bearer-token validity (<=300s), applied consistently across the six actions.
+      Mitigated in practice by the short TTL; a true fix needs an access-token denylist / status re-check in
+      api_checker. Not a known CVE.
 
   - id: "issue-004"
     location: "L1/L2: numerous endpoints have no server-side authentication in source"
@@ -72,9 +99,18 @@ issues:
       member lists & pinned content), GET /api/user/check_email (enumeration oracle), GET /api/resource/file,
       /api/resource/archive, /api/resource/archive/attachment, /api/favorite/attachment/{uid}/{id}/{aid},
       GET /api/resource/open_graphic_parse (SSRF), GET /api/license, and GET /api/admin/{login,google_auth,
-      github_auth}/config. GET /api/admin/agora/config has its admin check commented out and returns
-      app_certificate/rtm_secret to any session. These are annotated with subject=Anonymous (or User) and
-      flagged; they are likely the highest-value items of the attack surface.
+      github_auth}/config. A full source sweep (handlers lacking any Token/TokenInQuery/api_key/X-SECRET
+      extractor) adds these further no-auth reads that were not in the original list:
+      GET /api/admin/system/organization (discloses server_id + org name/description),
+      GET /api/admin/smtp/enabled (boolean), and GET /api/resource/{avatar,group_avatar} (any user/group image
+      by id). Benign public endpoints in the same no-auth set (login, register, renew, login_guest,
+      metamask/nonce, check_magic_token, send_*_magic_link, license/check, resource/organization/logo,
+      admin/system/version, admin/system/initialized, create_admin) are intentionally unauthenticated and are
+      not flagged. Separately, GET /api/admin/agora/config DOES take a Token (so it is any-authenticated-user,
+      not anonymous) but its admin check is commented out and it returns app_certificate/rtm_secret to any
+      session. All are annotated with subject=Anonymous (or User for agora/config); the sensitive ones (user
+      directory incl. e-mails, private group membership, SSRF, secret disclosure) are the highest-value items
+      of the attack surface.
     evidence:
       - type: "source"
         ref: "vocechat-server-rust-0.5.36/src/api/user.rs:656-664, 891-904"
@@ -116,6 +152,13 @@ issues:
       - type: "source"
         ref: "vocechat-server-rust-0.5.36/src/api/admin_login.rs, admin_smtp.rs, admin_agora.rs"
         supports: "Each feature is driven by dynamic config set through an admin endpoint, so the gate is an achievable precondition"
+    known_limitation: >-
+      The admin config-write actions (update_login_policy, update_smtp_config, update_agora_config, etc.)
+      record a generic state effect (e.g. State(server, login, updated)) rather than a per-toggle state such
+      as State(server, login_passkey, enabled). As a result the dependency graph does not automatically link
+      a specific enabling write to the specific gated action it unlocks; the linkage is expressed in prose in
+      each gated action's reachability_conditions instead. Per-toggle state modelling was not introduced
+      because these endpoints write the whole config object; refining it would be a schema-level change.
     proposed_resolution: >-
       Interpretation recorded intentionally (intended-configuration GT). To runtime-confirm category-1 actions,
       flip the relevant admin config on the live instance and exercise end-to-end; category-2 actions also
@@ -133,9 +176,12 @@ issues:
       /admin/system/update_webclient, GET /admin/vocespace/enabled, POST /admin/agora/channel_event_callback,
       and the canonical GET /admin/agora/channel/user/{channel_name}/{hosts_only} and
       /admin/agora/channel/user/property/{uid}/{channel_name}. They are annotated from the spec contracts
-      with gt.visibility=white_box (identifiable black-box only via the server's own /api/spec),
-      sources=[documentation], and confidence 0.55-0.65 because the handler logic/authorisation is not in
-      source. Their L1 surface now matches the deployed binary 1:1.
+      with gt.visibility=black_box (their existence and contract are discoverable via the deployment's own
+      unauthenticated OpenAPI spec at GET /api/spec, which is part of the supplied black-box profile with
+      api_docs_provided=true - inspecting served API docs is black-box discovery under this repo's
+      definitions), sources=[documentation], and confidence 0.55-0.65 because the handler logic/authorisation
+      is not in source. Their L1 surface now matches the deployed binary 1:1 (the full spec snapshot is saved
+      at vocechat_gt/openapi_spec_0.5.36.json).
     evidence:
       - type: "documentation"
         ref: "GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36, 197 operations)"
@@ -144,6 +190,37 @@ issues:
       Contracts are spec-accurate; server-side auth/effects should be confirmed if the 0.5.36 source or live
       probing becomes available. POST /admin/agora/channel_event_callback and POST /token/parse_tokens are
       unauthenticated per the spec and are high-value items to verify.
+
+  - id: "issue-008"
+    location: "L2: cross-action producer/consumer fact reconciliation (dependency-graph integrity)"
+    description: >-
+      L2 actions are authored independently, so Pengent's derived semantic edges only form where one action's
+      produced Eff.gen fact matches another's consumed Req fact. A reconciliation linter (generators/lint_l2.py,
+      now gating the build) checks every consumed fact against all produced facts on a canonical key that drops
+      per-action bookkeeping (entity local-id and {role}, and a reference target's downstream role) while
+      keeping the load-bearing parts (predicate, subject/principal [relative_role], reference type, object
+      type). It found and this revision fixed four genuine label drifts that would have left edges unformed:
+      (1) GET /resource/file consumed Exists(File) that no action produced -> upload_file_chunk (and the bot
+      variant) now GEN Exists(File), linking upload->download; (2) DELETE /user/devices/{device} consumed
+      Exists(Device) with no producer -> reconciled as a login-implied root; (3) user_update_contact_remark
+      consumed Know(UserID(contact:ContactRelation)) - a type error (a UserID reference whose target was typed
+      ContactRelation instead of User) -> corrected to Know(UserID(contact_user:User)); and the peer-vs-entity
+      mismatch class (a uid learned from the directory as User{target} vs used as a recipient/member/peer
+      User[PEER]) is reconciled by the canonical matcher rather than by forcing identical role tags. Final
+      state: 28 consumed facts matched by a producer, 17 approved ROOT preconditions, 0 unresolved drift.
+    evidence:
+      - type: "documentation"
+        ref: "vocechat_gt/generators/lint_l2.py (build gate) and generators/README.md"
+        supports: "Canonical-key reconciliation; 28 matched / 17 roots / 0 drift at build time"
+    known_limitation: >-
+      The canonical matcher encodes the assumption that Pengent links produced/consumed facts modulo
+      per-action entity role/id (the sensible design); it has not been verified against Pengent's own matcher.
+      The 17 ROOTs are approved by rule (authorization axioms, bot key, device-from-login, external inputs the
+      caller brings); if Pengent expects any of those to be produced in-graph, the allowlist in lint_l2.py is
+      the single place to revisit.
+    proposed_resolution: >-
+      Keep lint_l2 as a build gate so future authoring cannot reintroduce dangling consumed facts; confirm the
+      role-insensitive matching assumption against Pengent when available.
 
   - id: "issue-006"
     location: "L1: GET /api/bot/user/{uid} and /api/bot/group/{gid}"
@@ -155,4 +232,8 @@ issues:
       - type: "source"
         ref: "vocechat-server-rust-0.5.36/src/api/bot.rs:115-150"
         supports: "user_info/group_info read uid/gid from Query, not Path"
-    proposed_resolution: "Annotated as-is; noted so the path/query discrepancy is not treated as an error."
+    proposed_resolution: >-
+      Annotated as-is; noted so the path/query discrepancy is not treated as an error. A source sweep for
+      Query-bound-vs-declared-path params confirms these two bot handlers are the ONLY occurrences in the
+      available source tree. The binary-only /bot/{user,group}/{id}/messages handlers (issue-007) could not
+      be swept; their spec declares path params, and that is how they are annotated.

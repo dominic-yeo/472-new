@@ -7,8 +7,25 @@ environment:
     Deployed server binary reports 0.5.36 (GET /api/admin/system/version). Reference server source tree:
     vocechat-server-rust-0.5.36 (Cargo package version 0.3.3). Web frontend: vocechat-web 0.9.122
     (package.json). The server and web client are treated as one deployed Web application.
+  image_digest: "privoce/vocechat-server@sha256:bb324e9ce9ba5e53d863e381d7c272688a377aff39e7063438ab7fe5df7b29c5"
+  openapi_spec_ref: >-
+    vocechat_gt/openapi_spec_0.5.36.json - the live GET http://localhost:3009/api/spec snapshot (server 0.5.36,
+    197 operations) used to reconcile the surface; included in the deliverable as primary enumeration evidence.
+  spec_reconciliation: >-
+    All 197 OpenAPI operations are represented in L1 (set difference spec-minus-GT = empty). The GT's
+    contract-bearing API method-variant count (195) differs from 197 only because the six literal page
+    operations GET/PUT/DELETE /api/page/landing and /api/page/after_signin collapse into one normalized node
+    /api/page/{page} (3 variants, -3), while /api/page/apikey is kept literally; the GT additionally covers
+    non-OpenAPI routes not counted in the 197 (/health, /metrics, /api/doc, /api/doc2, /api/doc3, /api/swagger,
+    /api/spec). No spec operation is missing.
+  source_trees: >-
+    Reference source accompanies the deliverable under vocechat_src/: vocechat-server-rust-0.5.36 (server,
+    Cargo 0.3.3 - see issue-001) and vocechat-web (frontend, package.json 0.9.122, ~434 TS/TSX files). All
+    gt.evidence source refs (vocechat-web/src/app/services/*.ts:line, vocechat-server-rust-*/src/api/*.rs:line)
+    resolve against these trees and must be bundled with the YAML for the refs to be checkable.
   deployment_profile: >-
-    Docker image privoce/vocechat-server:latest serving both the JSON API and the bundled SPA on
+    Docker image privoce/vocechat-server:latest (digest sha256:bb324e9c…, pinned above for reproducibility)
+    serving both the JSON API and the bundled SPA on
     http://localhost:3009. SQLite data store; single-node. Dynamic login config observed at runtime:
     who_can_sign_up=EveryOne, guest=true, password=true, magic_link=true; google/github/metamask/oidc/
     third_party/passkey disabled. SMTP disabled (/api/admin/smtp/enabled=false). Agora disabled

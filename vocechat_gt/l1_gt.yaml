@@ -385,9 +385,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Not referenced by the web frontend (no service/fetch call); identifiable from server source or the OpenAPI spec
-        only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Knowledge of the server third_party_secret (admin can read it via GET /admin/system/third_party_secret)
@@ -719,84 +720,85 @@ nodes:
         type: string
         required: true
         flow: false
-        description: Credential discriminator password|magiclink|google|github|oidc|metamask|thirdparty.
+        description: Credential discriminator password|magiclink|google|github|oidc|metamask|thirdparty (selects which of
+          the conditional fields below apply).
       - name: email
         location: body
         path: credential.email
         type: string
-        required: true
+        required: false
         flow: true
-        description: Account e-mail (type=password).
+        description: Account e-mail. Required ONLY when credential.type=password.
       - name: password
         location: body
         path: credential.password
         type: string
-        required: true
+        required: false
         flow: true
-        description: Account password (type=password).
+        description: Account password. Required ONLY when credential.type=password.
       - name: magic_token
         location: body
         path: credential.magic_token
         type: string
-        required: true
+        required: false
         flow: true
-        description: Login/invite magic token (type=magiclink; optional for oauth types).
+        description: Login/invite magic token. Required for type=magiclink; optional for oauth types.
       - name: extra_name
         location: body
         path: credential.extra_name
         type: string
         required: false
         flow: false
-        description: Name for auto-registration via magic link.
+        description: Name for auto-registration via magic link (type=magiclink).
       - name: id_token
         location: body
         path: credential.id_token
         type: string
-        required: true
+        required: false
         flow: true
-        description: Google ID token (type=google).
+        description: Google ID token. Required ONLY when credential.type=google.
       - name: code
         location: body
         path: credential.code
         type: string
-        required: true
+        required: false
         flow: true
-        description: OAuth code (type=github|oidc).
+        description: OAuth code. Required ONLY when credential.type=github|oidc.
       - name: state
         location: body
         path: credential.state
         type: string
-        required: true
+        required: false
         flow: true
-        description: OIDC state (type=oidc).
+        description: OIDC state. Required ONLY when credential.type=oidc.
       - name: public_address
         location: body
         path: credential.public_address
         type: string
-        required: true
+        required: false
         flow: true
-        description: Wallet address (type=metamask).
+        description: Wallet address. Required ONLY when credential.type=metamask.
       - name: nonce
         location: body
         path: credential.nonce
         type: string
-        required: true
+        required: false
         flow: true
-        description: Nonce from /token/metamask/nonce.
+        description: Nonce from /token/metamask/nonce. Required ONLY when credential.type=metamask.
       - name: signature
         location: body
         path: credential.signature
         type: string
-        required: true
+        required: false
         flow: true
-        description: Wallet signature.
+        description: Wallet signature. Required ONLY when credential.type=metamask.
       - name: key
         location: body
         path: credential.key
         type: string
-        required: true
+        required: false
         flow: true
-        description: Third-party key from /token/create_third_party_key (type=thirdparty).
+        description: Third-party key from /token/create_third_party_key. Required ONLY when credential.type=thirdparty.
       - name: device
         location: body
         path: device
@@ -1320,8 +1322,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: No frontend service calls /token/bind in vocechat-web 0.9.122; known from server source/OpenAPI only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Non-guest session
@@ -4025,6 +4029,9 @@ nodes:
   - after_mid
   - users_version
   outputs:
+  - events_uid
+  - events_gid
+  - events_mid
   - events
   input_spec:
     format: ''
@@ -4041,6 +4048,9 @@ nodes:
     - after_mid
     - users_version
     outputs:
+    - events_uid
+    - events_gid
+    - events_mid
     - events
     input: {}
     request:
@@ -4082,10 +4092,30 @@ nodes:
       value_type: string
       value_flow: true
       value_description: SSE stream (users_snapshot, users_state, related_groups, user_settings, chat, kick, heartbeat, ...).
-      fields: []
+      fields:
+      - name: events_uid
+        path: data.users[].uid
+        type: integer
+        flow: true
+        description: User ids delivered in users_snapshot/users_state/users_log events.
+      - name: events_gid
+        path: data.groups[].gid
+        type: integer
+        flow: true
+        description: Group ids delivered in related_groups/joined_group events.
+      - name: events_mid
+        path: data.mid
+        type: integer
+        flow: true
+        description: Message ids delivered in chat events.
+      - name: events_email
+        path: data.users[].email
+        type: string
+        flow: false
+        description: User e-mails exposed in users_snapshot (disclosure, but not an object reference).
     reason: Request/response contract read from the poem-openapi handler signature and payload structs. 403 when the token's
-      device has no device row (create_user_event_receiver user.rs:1694-1726). Stream includes every non-guest user's e-mail
-      in users_snapshot.
+      device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries uid/gid/mid references (and
+      every non-guest user's e-mail in users_snapshot) that enable follow-on actions.
     evidence: source vocechat-server-rust-0.5.36/src/api/user.rs:943; frontend vocechat-web/src/hooks/useStreaming/index.ts:168;
       runtime auth.har#66 (user -> 200), auth.har#96 (user -> 200), localhost.har#11 (admin -> 200)
   operation_semantic: subscribe_user_events
@@ -4095,6 +4125,9 @@ nodes:
   - UserLogVersion(user_log)
   semantic_outputs:
   - EventStream(session)
+  - GroupID(group)
+  - MessageID(message)
+  - UserID(user)
   semantic_input_decisions:
   - raw_field: api-key
     resource: AccessToken(session)
@@ -4119,6 +4152,30 @@ nodes:
     reference_fields: []
     reason: Client-side users snapshot version cursor.
   semantic_output_decisions:
+  - raw_field: events_uid
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data.users[].uid
+    reason: User id delivered inside the event stream.
+  - raw_field: events_gid
+    resource: GroupID(group)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data.groups[].gid
+    reason: Group id delivered inside the event stream.
+  - raw_field: events_mid
+    resource: MessageID(message)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data.mid
+    reason: Message id delivered inside the event stream.
   - raw_field: events
     resource: EventStream(session)
     mergeable: true
@@ -4191,8 +4248,8 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #11 (2026-10-06T08:36:14.402Z)'
       supports: GET http://localhost:3009/api/user/events?limit=500&api-key=<redacted>&after_mid=27&users_version=11 as admin
         -> 200
-    notes: '[GET] 403 when the token''s device has no device row (create_user_event_receiver user.rs:1694-1726). Stream includes
-      every non-guest user''s e-mail in users_snapshot.'
+    notes: '[GET] 403 when the token''s device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries
+      uid/gid/mid references (and every non-guest user''s e-mail in users_snapshot) that enable follow-on actions.'
 - key: http://localhost:3009/api/user/devices
   kind: api
   methods:
@@ -7298,8 +7355,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Web frontend 0.9.122 uses POST /admin/agora/token instead; known from source/OpenAPI.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Admin configures Agora via POST /api/admin/agora/config (enabled=true); the RTC token is computed locally from the configured
@@ -12276,8 +12335,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Not referenced by web frontend 0.9.122; source/OpenAPI only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Admin configures Agora via POST /api/admin/agora/config (enabled=true)
@@ -16062,8 +16123,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Not referenced by web frontend; source/OpenAPI only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -16301,8 +16364,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Not referenced by web frontend; source/OpenAPI only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -16419,8 +16484,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Not referenced by web frontend; source/OpenAPI only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -16582,8 +16649,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Not referenced by web frontend; source/OpenAPI only.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -24199,9 +24268,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -24377,9 +24447,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -24492,9 +24563,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -24629,9 +24701,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -24766,9 +24839,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -24962,9 +25036,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -25178,9 +25253,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -25317,9 +25393,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Bot API key in x-api-key header (admin creates it via POST /api/admin/user/bot-api-key/{uid})
@@ -25460,9 +25537,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Admin configures SMTP via POST /api/admin/smtp/config (enabled=true)
@@ -25607,9 +25685,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token in X-API-Key header (obtained from POST /api/token/login or /api/user/register)
@@ -25832,9 +25911,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token in X-API-Key header (obtained from POST /api/token/login or /api/user/register)
@@ -26004,9 +26084,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token in X-API-Key header (obtained from POST /api/token/login or /api/user/register)
@@ -26142,9 +26223,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Admin configures SMTP via POST /api/admin/smtp/config (enabled=true)
@@ -26283,9 +26365,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token in X-API-Key header (obtained from POST /api/token/login or /api/user/register)
@@ -26306,17 +26389,23 @@ nodes:
   content_types:
   - application/octet-stream
   params:
+  - api-key
   - after_mid
   - limit
   - users_version
   inputs:
+  - api-key
   - after_mid
   - users_version
   outputs:
+  - events_uid
+  - events_gid
+  - events_mid
   - events
   input_spec:
     format: ''
     fields:
+    - api-key
     - after_mid
     - users_version
   io_variants:
@@ -26324,15 +26413,26 @@ nodes:
     content_types:
     - application/octet-stream
     inputs:
+    - api-key
     - after_mid
     - users_version
     outputs:
+    - events_uid
+    - events_gid
+    - events_mid
     - events
     input: {}
     request:
       body_format: none
       body_example: {}
       fields:
+      - name: api-key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Access token presented as a query param for the WebSocket upgrade (same as /user/events).
       - name: after_mid
         location: query
         path: ''
@@ -26361,17 +26461,44 @@ nodes:
       value_type: string
       value_flow: true
       value_description: WebSocket upgrade carrying the same event stream as /user/events.
-      fields: []
+      fields:
+      - name: events_uid
+        path: data.users[].uid
+        type: integer
+        flow: true
+        description: User ids in the stream.
+      - name: events_gid
+        path: data.groups[].gid
+        type: integer
+        flow: true
+        description: Group ids in the stream.
+      - name: events_mid
+        path: data.mid
+        type: integer
+        flow: true
+        description: Message ids in the stream.
     reason: Contract taken from the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); the 0.3.3 source tree does not
-      contain this handler. WebSocket variant of /user/events (HTTP 101 upgrade).
+      contain this handler. WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as
+      the SSE variant.
     evidence: source
   operation_semantic: subscribe_user_events_ws
   semantic_inputs:
+  - AccessToken(session)
   - MessageID(message)
   - UserLogVersion(user_log)
   semantic_outputs:
   - EventStream(session)
+  - GroupID(group)
+  - MessageID(message)
+  - UserID(user)
   semantic_input_decisions:
+  - raw_field: api-key
+    resource: AccessToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Access token passed in query for EventSource (credential).
   - raw_field: after_mid
     resource: MessageID(message)
     mergeable: true
@@ -26388,6 +26515,30 @@ nodes:
     reference_fields: []
     reason: Client-side users snapshot version cursor.
   semantic_output_decisions:
+  - raw_field: events_uid
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data.users[].uid
+    reason: User id delivered inside the event stream.
+  - raw_field: events_gid
+    resource: GroupID(group)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data.groups[].gid
+    reason: Group id delivered inside the event stream.
+  - raw_field: events_mid
+    resource: MessageID(message)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data.mid
+    reason: Message id delivered inside the event stream.
   - raw_field: events
     resource: EventStream(session)
     mergeable: true
@@ -26414,9 +26565,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token passed as api-key query parameter
@@ -26425,9 +26577,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
-    notes: '[GET] WebSocket variant of /user/events (HTTP 101 upgrade). Operation present only in the deployed 0.5.36 binary''s
-      OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken from the
-      live spec.'
+    notes: '[GET] WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE
+      variant. Operation present only in the deployed 0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3
+      source tree and from vocechat-web 0.9.122. Contract taken from the live spec.'
 - key: http://localhost:3009/api/voice/avo/events_ws
   kind: api
   methods:
@@ -26439,9 +26591,11 @@ nodes:
   content_types:
   - application/octet-stream
   params:
+  - api-key
   - room_type
   - room_id
   inputs:
+  - api-key
   - room_type
   - room_id
   outputs:
@@ -26449,6 +26603,7 @@ nodes:
   input_spec:
     format: ''
     fields:
+    - api-key
     - room_type
     - room_id
   io_variants:
@@ -26456,6 +26611,7 @@ nodes:
     content_types:
     - application/octet-stream
     inputs:
+    - api-key
     - room_type
     - room_id
     outputs:
@@ -26465,6 +26621,13 @@ nodes:
       body_format: none
       body_example: {}
       fields:
+      - name: api-key
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Access token presented as a query param for the WebSocket upgrade.
       - name: room_type
         location: query
         path: ''
@@ -26492,10 +26655,18 @@ nodes:
     evidence: source
   operation_semantic: subscribe_voice_events_ws
   semantic_inputs:
+  - AccessToken(session)
   - GroupID(group)
   semantic_outputs:
   - EventStream(session)
   semantic_input_decisions:
+  - raw_field: api-key
+    resource: AccessToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Access token passed in query for EventSource (credential).
   - raw_field: room_type
     resource: VoiceRoomType(voice_room)
     mergeable: false
@@ -26538,9 +26709,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - An active voice/Avo room exists
@@ -26662,9 +26834,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions: []
     evidence:
@@ -26740,9 +26913,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token of an administrator (is_admin=true)
@@ -26830,9 +27004,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Valid access token in X-API-Key header (obtained from POST /api/token/login or /api/user/register)
@@ -26922,9 +27097,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions: []
     evidence:
@@ -27057,9 +27233,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Admin configures Agora via POST /api/admin/agora/config (enabled=true)
@@ -27186,9 +27363,10 @@ nodes:
   - http://localhost:3009/api
   gt:
     visibility:
-      minimum: white_box
-      reason: Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and
-        not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint.
+      minimum: black_box
+      reason: Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated
+        OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator
+        used, not the minimum access to identify it.
     black_box_reachable: true
     reachability_conditions:
     - Admin configures Agora via POST /api/admin/agora/config (enabled=true)

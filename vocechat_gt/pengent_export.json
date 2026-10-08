@@ -535,8 +535,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by the web frontend (no service/fetch call); identifiable from server source or the OpenAPI spec only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -975,34 +975,34 @@
                   "type": "string",
                   "required": true,
                   "flow": false,
-                  "description": "Credential discriminator password|magiclink|google|github|oidc|metamask|thirdparty."
+                  "description": "Credential discriminator password|magiclink|google|github|oidc|metamask|thirdparty (selects which of the conditional fields below apply)."
                 },
                 {
                   "name": "email",
                   "location": "body",
                   "path": "credential.email",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Account e-mail (type=password)."
+                  "description": "Account e-mail. Required ONLY when credential.type=password."
                 },
                 {
                   "name": "password",
                   "location": "body",
                   "path": "credential.password",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Account password (type=password)."
+                  "description": "Account password. Required ONLY when credential.type=password."
                 },
                 {
                   "name": "magic_token",
                   "location": "body",
                   "path": "credential.magic_token",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Login/invite magic token (type=magiclink; optional for oauth types)."
+                  "description": "Login/invite magic token. Required for type=magiclink; optional for oauth types."
                 },
                 {
                   "name": "extra_name",
@@ -1011,70 +1011,70 @@
                   "type": "string",
                   "required": false,
                   "flow": false,
-                  "description": "Name for auto-registration via magic link."
+                  "description": "Name for auto-registration via magic link (type=magiclink)."
                 },
                 {
                   "name": "id_token",
                   "location": "body",
                   "path": "credential.id_token",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Google ID token (type=google)."
+                  "description": "Google ID token. Required ONLY when credential.type=google."
                 },
                 {
                   "name": "code",
                   "location": "body",
                   "path": "credential.code",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "OAuth code (type=github|oidc)."
+                  "description": "OAuth code. Required ONLY when credential.type=github|oidc."
                 },
                 {
                   "name": "state",
                   "location": "body",
                   "path": "credential.state",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "OIDC state (type=oidc)."
+                  "description": "OIDC state. Required ONLY when credential.type=oidc."
                 },
                 {
                   "name": "public_address",
                   "location": "body",
                   "path": "credential.public_address",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Wallet address (type=metamask)."
+                  "description": "Wallet address. Required ONLY when credential.type=metamask."
                 },
                 {
                   "name": "nonce",
                   "location": "body",
                   "path": "credential.nonce",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Nonce from /token/metamask/nonce."
+                  "description": "Nonce from /token/metamask/nonce. Required ONLY when credential.type=metamask."
                 },
                 {
                   "name": "signature",
                   "location": "body",
                   "path": "credential.signature",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Wallet signature."
+                  "description": "Wallet signature. Required ONLY when credential.type=metamask."
                 },
                 {
                   "name": "key",
                   "location": "body",
                   "path": "credential.key",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "flow": true,
-                  "description": "Third-party key from /token/create_third_party_key (type=thirdparty)."
+                  "description": "Third-party key from /token/create_third_party_key. Required ONLY when credential.type=thirdparty."
                 },
                 {
                   "name": "device",
@@ -1754,8 +1754,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "No frontend service calls /token/bind in vocechat-web 0.9.122; known from server source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -5514,6 +5514,9 @@
           "users_version"
         ],
         "outputs": [
+          "events_uid",
+          "events_gid",
+          "events_mid",
           "events"
         ],
         "input_spec": {
@@ -5536,6 +5539,9 @@
               "users_version"
             ],
             "outputs": [
+              "events_uid",
+              "events_gid",
+              "events_mid",
               "events"
             ],
             "input": {},
@@ -5588,9 +5594,38 @@
               "value_type": "string",
               "value_flow": true,
               "value_description": "SSE stream (users_snapshot, users_state, related_groups, user_settings, chat, kick, heartbeat, ...).",
-              "fields": []
+              "fields": [
+                {
+                  "name": "events_uid",
+                  "path": "data.users[].uid",
+                  "type": "integer",
+                  "flow": true,
+                  "description": "User ids delivered in users_snapshot/users_state/users_log events."
+                },
+                {
+                  "name": "events_gid",
+                  "path": "data.groups[].gid",
+                  "type": "integer",
+                  "flow": true,
+                  "description": "Group ids delivered in related_groups/joined_group events."
+                },
+                {
+                  "name": "events_mid",
+                  "path": "data.mid",
+                  "type": "integer",
+                  "flow": true,
+                  "description": "Message ids delivered in chat events."
+                },
+                {
+                  "name": "events_email",
+                  "path": "data.users[].email",
+                  "type": "string",
+                  "flow": false,
+                  "description": "User e-mails exposed in users_snapshot (disclosure, but not an object reference)."
+                }
+              ]
             },
-            "reason": "Request/response contract read from the poem-openapi handler signature and payload structs. 403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream includes every non-guest user's e-mail in users_snapshot.",
+            "reason": "Request/response contract read from the poem-openapi handler signature and payload structs. 403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries uid/gid/mid references (and every non-guest user's e-mail in users_snapshot) that enable follow-on actions.",
             "evidence": "source vocechat-server-rust-0.5.36/src/api/user.rs:943; frontend vocechat-web/src/hooks/useStreaming/index.ts:168; runtime auth.har#66 (user -> 200), auth.har#96 (user -> 200), localhost.har#11 (admin -> 200)"
           }
         ],
@@ -5601,7 +5636,10 @@
           "UserLogVersion(user_log)"
         ],
         "semantic_outputs": [
-          "EventStream(session)"
+          "EventStream(session)",
+          "GroupID(group)",
+          "MessageID(message)",
+          "UserID(user)"
         ],
         "semantic_input_decisions": [
           {
@@ -5635,6 +5673,39 @@
           }
         ],
         "semantic_output_decisions": [
+          {
+            "raw_field": "events_uid",
+            "resource": "UserID(user)",
+            "mergeable": true,
+            "value_kind": "identifier",
+            "reference_capable": true,
+            "reference_fields": [
+              "data.users[].uid"
+            ],
+            "reason": "User id delivered inside the event stream."
+          },
+          {
+            "raw_field": "events_gid",
+            "resource": "GroupID(group)",
+            "mergeable": true,
+            "value_kind": "identifier",
+            "reference_capable": true,
+            "reference_fields": [
+              "data.groups[].gid"
+            ],
+            "reason": "Group id delivered inside the event stream."
+          },
+          {
+            "raw_field": "events_mid",
+            "resource": "MessageID(message)",
+            "mergeable": true,
+            "value_kind": "identifier",
+            "reference_capable": true,
+            "reference_fields": [
+              "data.mid"
+            ],
+            "reason": "Message id delivered inside the event stream."
+          },
           {
             "raw_field": "events",
             "resource": "EventStream(session)",
@@ -5733,7 +5804,7 @@
               "supports": "GET http://localhost:3009/api/user/events?limit=500&api-key=<redacted>&after_mid=27&users_version=11 as admin -> 200"
             }
           ],
-          "notes": "[GET] 403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream includes every non-guest user's e-mail in users_snapshot."
+          "notes": "[GET] 403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries uid/gid/mid references (and every non-guest user's e-mail in users_snapshot) that enable follow-on actions."
         },
         "first_round": 0,
         "last_round": 0,
@@ -10017,8 +10088,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Web frontend 0.9.122 uses POST /admin/agora/token instead; known from source/OpenAPI."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -16994,8 +17065,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend 0.9.122; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -22158,8 +22229,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -22485,8 +22556,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -22656,8 +22727,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -22885,8 +22956,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -33368,8 +33439,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -33604,8 +33675,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -33767,8 +33838,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -33958,8 +34029,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -34149,8 +34220,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -34421,8 +34492,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -34718,8 +34789,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -34910,8 +34981,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -35101,8 +35172,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -35305,8 +35376,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -35606,8 +35677,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -35843,8 +35914,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -36028,8 +36099,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -36218,8 +36289,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -36255,20 +36326,26 @@
           "application/octet-stream"
         ],
         "params": [
+          "api-key",
           "after_mid",
           "limit",
           "users_version"
         ],
         "inputs": [
+          "api-key",
           "after_mid",
           "users_version"
         ],
         "outputs": [
+          "events_uid",
+          "events_gid",
+          "events_mid",
           "events"
         ],
         "input_spec": {
           "format": "",
           "fields": [
+            "api-key",
             "after_mid",
             "users_version"
           ]
@@ -36280,10 +36357,14 @@
               "application/octet-stream"
             ],
             "inputs": [
+              "api-key",
               "after_mid",
               "users_version"
             ],
             "outputs": [
+              "events_uid",
+              "events_gid",
+              "events_mid",
               "events"
             ],
             "input": {},
@@ -36291,6 +36372,15 @@
               "body_format": "none",
               "body_example": {},
               "fields": [
+                {
+                  "name": "api-key",
+                  "location": "query",
+                  "path": "",
+                  "type": "string",
+                  "required": true,
+                  "flow": true,
+                  "description": "Access token presented as a query param for the WebSocket upgrade (same as /user/events)."
+                },
                 {
                   "name": "after_mid",
                   "location": "query",
@@ -36327,21 +36417,56 @@
               "value_type": "string",
               "value_flow": true,
               "value_description": "WebSocket upgrade carrying the same event stream as /user/events.",
-              "fields": []
+              "fields": [
+                {
+                  "name": "events_uid",
+                  "path": "data.users[].uid",
+                  "type": "integer",
+                  "flow": true,
+                  "description": "User ids in the stream."
+                },
+                {
+                  "name": "events_gid",
+                  "path": "data.groups[].gid",
+                  "type": "integer",
+                  "flow": true,
+                  "description": "Group ids in the stream."
+                },
+                {
+                  "name": "events_mid",
+                  "path": "data.mid",
+                  "type": "integer",
+                  "flow": true,
+                  "description": "Message ids in the stream."
+                }
+              ]
             },
-            "reason": "Contract taken from the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); the 0.3.3 source tree does not contain this handler. WebSocket variant of /user/events (HTTP 101 upgrade).",
+            "reason": "Contract taken from the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); the 0.3.3 source tree does not contain this handler. WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE variant.",
             "evidence": "source"
           }
         ],
         "operation_semantic": "subscribe_user_events_ws",
         "semantic_inputs": [
+          "AccessToken(session)",
           "MessageID(message)",
           "UserLogVersion(user_log)"
         ],
         "semantic_outputs": [
-          "EventStream(session)"
+          "EventStream(session)",
+          "GroupID(group)",
+          "MessageID(message)",
+          "UserID(user)"
         ],
         "semantic_input_decisions": [
+          {
+            "raw_field": "api-key",
+            "resource": "AccessToken(session)",
+            "mergeable": true,
+            "value_kind": "credential",
+            "reference_capable": false,
+            "reference_fields": [],
+            "reason": "Access token passed in query for EventSource (credential)."
+          },
           {
             "raw_field": "after_mid",
             "resource": "MessageID(message)",
@@ -36364,6 +36489,39 @@
           }
         ],
         "semantic_output_decisions": [
+          {
+            "raw_field": "events_uid",
+            "resource": "UserID(user)",
+            "mergeable": true,
+            "value_kind": "identifier",
+            "reference_capable": true,
+            "reference_fields": [
+              "data.users[].uid"
+            ],
+            "reason": "User id delivered inside the event stream."
+          },
+          {
+            "raw_field": "events_gid",
+            "resource": "GroupID(group)",
+            "mergeable": true,
+            "value_kind": "identifier",
+            "reference_capable": true,
+            "reference_fields": [
+              "data.groups[].gid"
+            ],
+            "reason": "Group id delivered inside the event stream."
+          },
+          {
+            "raw_field": "events_mid",
+            "resource": "MessageID(message)",
+            "mergeable": true,
+            "value_kind": "identifier",
+            "reference_capable": true,
+            "reference_fields": [
+              "data.mid"
+            ],
+            "reason": "Message id delivered inside the event stream."
+          },
           {
             "raw_field": "events",
             "resource": "EventStream(session)",
@@ -36399,8 +36557,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -36414,7 +36572,7 @@
               "supports": "GET route, parameters and request/response schema"
             }
           ],
-          "notes": "[GET] WebSocket variant of /user/events (HTTP 101 upgrade). Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken from the live spec."
+          "notes": "[GET] WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE variant. Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken from the live spec."
         },
         "first_round": 0,
         "last_round": 0,
@@ -36437,10 +36595,12 @@
           "application/octet-stream"
         ],
         "params": [
+          "api-key",
           "room_type",
           "room_id"
         ],
         "inputs": [
+          "api-key",
           "room_type",
           "room_id"
         ],
@@ -36450,6 +36610,7 @@
         "input_spec": {
           "format": "",
           "fields": [
+            "api-key",
             "room_type",
             "room_id"
           ]
@@ -36461,6 +36622,7 @@
               "application/octet-stream"
             ],
             "inputs": [
+              "api-key",
               "room_type",
               "room_id"
             ],
@@ -36472,6 +36634,15 @@
               "body_format": "none",
               "body_example": {},
               "fields": [
+                {
+                  "name": "api-key",
+                  "location": "query",
+                  "path": "",
+                  "type": "string",
+                  "required": false,
+                  "flow": true,
+                  "description": "Access token presented as a query param for the WebSocket upgrade."
+                },
                 {
                   "name": "room_type",
                   "location": "query",
@@ -36507,12 +36678,22 @@
         ],
         "operation_semantic": "subscribe_voice_events_ws",
         "semantic_inputs": [
+          "AccessToken(session)",
           "GroupID(group)"
         ],
         "semantic_outputs": [
           "EventStream(session)"
         ],
         "semantic_input_decisions": [
+          {
+            "raw_field": "api-key",
+            "resource": "AccessToken(session)",
+            "mergeable": true,
+            "value_kind": "credential",
+            "reference_capable": false,
+            "reference_fields": [],
+            "reason": "Access token passed in query for EventSource (credential)."
+          },
           {
             "raw_field": "room_type",
             "resource": "VoiceRoomType(voice_room)",
@@ -36570,8 +36751,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -36738,8 +36919,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [],
@@ -36841,8 +37022,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -36965,8 +37146,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -37092,8 +37273,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [],
@@ -37279,8 +37460,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -37455,8 +37636,8 @@
         ],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -42819,7 +43000,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -42921,9 +43127,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -42984,7 +43192,8 @@
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -42996,7 +43205,9 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "LoginConfig.password=true (enabled by default in the deployment)"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -43066,7 +43277,33 @@
           "participants": [],
           "constraints": []
         },
-        "requirements": [],
+        "requirements": [
+          {
+            "type": "knowledge",
+            "fact": {
+              "predicate": "Know",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                {
+                  "kind": "reference",
+                  "type": "MagicToken",
+                  "target": {
+                    "kind": "entity",
+                    "id": "session",
+                    "type": "Session",
+                    "role": "created"
+                  }
+                }
+              ]
+            },
+            "reason": "The caller must possess a valid MagicToken to authenticate via magiclink."
+          }
+        ],
         "effects": {
           "gen": [
             {
@@ -43123,7 +43360,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -43146,9 +43408,11 @@
           {
             "direction": "input",
             "field": "magic_token / MagicToken(magic_link)",
-            "disposition": "object_attribute",
-            "facts": [],
-            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
+            "disposition": "req",
+            "facts": [
+              "Know(actor:User[SELF],MagicToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "input",
@@ -43232,9 +43496,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -43291,11 +43557,14 @@
         "l1_keys": [
           "http://localhost:3009/api/token/login"
         ],
-        "consumes": [],
+        "consumes": [
+          "Know(actor:User[SELF],MagicToken(session:Session{created}))"
+        ],
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -43307,7 +43576,9 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "LoginConfig.magic_link=true"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -43377,7 +43648,33 @@
           "participants": [],
           "constraints": []
         },
-        "requirements": [],
+        "requirements": [
+          {
+            "type": "knowledge",
+            "fact": {
+              "predicate": "Know",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                {
+                  "kind": "reference",
+                  "type": "ExternalIdToken",
+                  "target": {
+                    "kind": "entity",
+                    "id": "session",
+                    "type": "Session",
+                    "role": "created"
+                  }
+                }
+              ]
+            },
+            "reason": "The caller must possess a valid ExternalIdToken to authenticate via google."
+          }
+        ],
         "effects": {
           "gen": [
             {
@@ -43434,7 +43731,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -43457,9 +43779,11 @@
           {
             "direction": "input",
             "field": "id_token / ExternalIdToken(external_account)",
-            "disposition": "object_attribute",
-            "facts": [],
-            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
+            "disposition": "req",
+            "facts": [
+              "Know(actor:User[SELF],ExternalIdToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "input",
@@ -43536,9 +43860,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -43595,11 +43921,14 @@
         "l1_keys": [
           "http://localhost:3009/api/token/login"
         ],
-        "consumes": [],
+        "consumes": [
+          "Know(actor:User[SELF],ExternalIdToken(session:Session{created}))"
+        ],
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -43611,7 +43940,10 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "Admin enables google via POST /api/admin/login/config",
+            "EXTERNAL DEPENDENCY: a valid Google ID token from Google"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -43681,7 +44013,33 @@
           "participants": [],
           "constraints": []
         },
-        "requirements": [],
+        "requirements": [
+          {
+            "type": "knowledge",
+            "fact": {
+              "predicate": "Know",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                {
+                  "kind": "reference",
+                  "type": "OAuthCode",
+                  "target": {
+                    "kind": "entity",
+                    "id": "session",
+                    "type": "Session",
+                    "role": "created"
+                  }
+                }
+              ]
+            },
+            "reason": "The caller must possess a valid OAuthCode to authenticate via github."
+          }
+        ],
         "effects": {
           "gen": [
             {
@@ -43738,7 +44096,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -43761,9 +44144,11 @@
           {
             "direction": "input",
             "field": "code / OAuthCode(external_account)",
-            "disposition": "object_attribute",
-            "facts": [],
-            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
+            "disposition": "req",
+            "facts": [
+              "Know(actor:User[SELF],OAuthCode(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "input",
@@ -43840,9 +44225,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -43899,11 +44286,14 @@
         "l1_keys": [
           "http://localhost:3009/api/token/login"
         ],
-        "consumes": [],
+        "consumes": [
+          "Know(actor:User[SELF],OAuthCode(session:Session{created}))"
+        ],
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -43915,7 +44305,10 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "Admin enables github via POST /api/admin/login/config",
+            "EXTERNAL DEPENDENCY: a valid GitHub OAuth code from GitHub"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -43985,7 +44378,33 @@
           "participants": [],
           "constraints": []
         },
-        "requirements": [],
+        "requirements": [
+          {
+            "type": "knowledge",
+            "fact": {
+              "predicate": "Know",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                {
+                  "kind": "reference",
+                  "type": "OAuthCode",
+                  "target": {
+                    "kind": "entity",
+                    "id": "session",
+                    "type": "Session",
+                    "role": "created"
+                  }
+                }
+              ]
+            },
+            "reason": "The caller must possess a valid OAuthCode to authenticate via oidc."
+          }
+        ],
         "effects": {
           "gen": [
             {
@@ -44042,7 +44461,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -44065,9 +44509,11 @@
           {
             "direction": "input",
             "field": "code / OAuthCode(external_account)",
-            "disposition": "object_attribute",
-            "facts": [],
-            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
+            "disposition": "req",
+            "facts": [
+              "Know(actor:User[SELF],OAuthCode(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "input",
@@ -44144,9 +44590,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -44203,11 +44651,14 @@
         "l1_keys": [
           "http://localhost:3009/api/token/login"
         ],
-        "consumes": [],
+        "consumes": [
+          "Know(actor:User[SELF],OAuthCode(session:Session{created}))"
+        ],
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -44219,7 +44670,11 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "Admin configures an OIDC issuer via POST /api/admin/login/config",
+            "A pending OIDC flow started via POST /api/token/openid/authorize",
+            "EXTERNAL DEPENDENCY: a reachable OIDC provider that returns the code"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -44289,7 +44744,33 @@
           "participants": [],
           "constraints": []
         },
-        "requirements": [],
+        "requirements": [
+          {
+            "type": "knowledge",
+            "fact": {
+              "predicate": "Know",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                {
+                  "kind": "reference",
+                  "type": "WalletSignature",
+                  "target": {
+                    "kind": "entity",
+                    "id": "session",
+                    "type": "Session",
+                    "role": "created"
+                  }
+                }
+              ]
+            },
+            "reason": "The caller must possess a valid WalletSignature to authenticate via metamask."
+          }
+        ],
         "effects": {
           "gen": [
             {
@@ -44346,7 +44827,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -44368,6 +44874,15 @@
           },
           {
             "direction": "input",
+            "field": "signature / WalletSignature(external_account)",
+            "disposition": "req",
+            "facts": [
+              "Know(actor:User[SELF],WalletSignature(session:Session{created}))"
+            ],
+            "ignored_reason": ""
+          },
+          {
+            "direction": "input",
             "field": "public_address / WalletAddress(external_account)",
             "disposition": "object_attribute",
             "facts": [],
@@ -44376,13 +44891,6 @@
           {
             "direction": "input",
             "field": "nonce / WalletNonce(external_account)",
-            "disposition": "object_attribute",
-            "facts": [],
-            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
-          },
-          {
-            "direction": "input",
-            "field": "signature / WalletSignature(external_account)",
             "disposition": "object_attribute",
             "facts": [],
             "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
@@ -44448,9 +44956,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -44507,11 +45017,14 @@
         "l1_keys": [
           "http://localhost:3009/api/token/login"
         ],
-        "consumes": [],
+        "consumes": [
+          "Know(actor:User[SELF],WalletSignature(session:Session{created}))"
+        ],
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -44523,7 +45036,10 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "Admin enables metamask via POST /api/admin/login/config",
+            "A nonce obtained from GET /api/token/metamask/nonce, signed by the caller's own wallet"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -44593,7 +45109,33 @@
           "participants": [],
           "constraints": []
         },
-        "requirements": [],
+        "requirements": [
+          {
+            "type": "knowledge",
+            "fact": {
+              "predicate": "Know",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                {
+                  "kind": "reference",
+                  "type": "ThirdPartyLoginKey",
+                  "target": {
+                    "kind": "entity",
+                    "id": "session",
+                    "type": "Session",
+                    "role": "created"
+                  }
+                }
+              ]
+            },
+            "reason": "The caller must possess a valid ThirdPartyLoginKey to authenticate via thirdparty."
+          }
+        ],
         "effects": {
           "gen": [
             {
@@ -44650,7 +45192,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Response returns the access/refresh tokens."
+              "reason": "Response returns the access token."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Response returns the refresh token (consumed by POST /api/token/renew)."
             }
           ],
           "kill": []
@@ -44673,9 +45240,11 @@
           {
             "direction": "input",
             "field": "key / ThirdPartyLoginKey(session)",
-            "disposition": "object_attribute",
-            "facts": [],
-            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
+            "disposition": "req",
+            "facts": [
+              "Know(actor:User[SELF],ThirdPartyLoginKey(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "input",
@@ -44752,9 +45321,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -44811,11 +45382,14 @@
         "l1_keys": [
           "http://localhost:3009/api/token/login"
         ],
-        "consumes": [],
+        "consumes": [
+          "Know(actor:User[SELF],ThirdPartyLoginKey(session:Session{created}))"
+        ],
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -44827,7 +45401,10 @@
             "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
           },
           "black_box_reachable": true,
-          "reachability_conditions": [],
+          "reachability_conditions": [
+            "LoginConfig.third_party=true",
+            "A key minted via POST /api/token/create_third_party_key (needs the server third_party_secret)"
+          ],
           "observable_evidence": [
             {
               "observer_l1_key": "http://localhost:3009/api/token/login",
@@ -44954,7 +45531,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Tokens returned in the body."
+              "reason": "Access token returned in the body."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Refresh token returned (consumed by /api/token/renew)."
             }
           ],
           "kill": []
@@ -44972,9 +45574,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -45033,7 +45637,8 @@
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -45177,6 +45782,31 @@
               },
               "basis": "io_reference",
               "reason": "A fresh access token is returned."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "A rotated refresh token is returned (re-usable by a subsequent renew)."
             }
           ],
           "kill": [
@@ -45228,9 +45858,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{target}))"
+            ],
+            "ignored_reason": ""
           }
         ],
         "l1_bindings": [
@@ -45255,7 +45887,8 @@
         ],
         "produces": [
           "State(session:Session{target},refresh_token,rotated)",
-          "Know(actor:User[SELF],AccessToken(session:Session{target}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{target}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{target}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -45916,8 +46549,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "No frontend service calls /token/bind in vocechat-web 0.9.122; known from server source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -46449,8 +47082,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by the web frontend (no service/fetch call); identifiable from server source or the OpenAPI spec only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -46579,7 +47212,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Tokens returned."
+              "reason": "Access token returned."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Refresh token returned (consumed by /api/token/renew)."
             }
           ],
           "kill": []
@@ -46639,9 +47297,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -46700,7 +47360,8 @@
         "produces": [
           "Exists(user:User{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -48890,6 +49551,36 @@
           },
           "participants": [
             {
+              "id": "other_user",
+              "type": "User",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            },
+            {
+              "id": "group",
+              "type": "Group",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            },
+            {
+              "id": "message",
+              "type": "Message",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            },
+            {
               "id": "device",
               "type": "Device",
               "role": "target",
@@ -48938,7 +49629,83 @@
           }
         ],
         "effects": {
-          "gen": [],
+          "gen": [
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "UserID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "other_user",
+                      "type": "User",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "users_snapshot/users_state expose every non-guest user's uid."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "GroupID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "group",
+                      "type": "Group",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "related_groups/joined_group expose group ids."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "MessageID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "message",
+                      "type": "Message",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "chat events expose message ids."
+            }
+          ],
           "kill": []
         },
         "io_accounting": [
@@ -48965,6 +49732,40 @@
           },
           {
             "direction": "output",
+            "field": "events_uid / UserID(user)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],UserID(other_user:User{target}))"
+            ],
+            "ignored_reason": ""
+          },
+          {
+            "direction": "output",
+            "field": "events_gid / GroupID(group)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],GroupID(group:Group{target}))"
+            ],
+            "ignored_reason": ""
+          },
+          {
+            "direction": "output",
+            "field": "events_mid / MessageID(message)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],MessageID(message:Message{target}))"
+            ],
+            "ignored_reason": ""
+          },
+          {
+            "direction": "output",
+            "field": "events_email / UserEmail(user)",
+            "disposition": "observed_only",
+            "facts": [],
+            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+          },
+          {
+            "direction": "output",
             "field": "events / EventStream(session)",
             "disposition": "observed_only",
             "facts": [],
@@ -48984,7 +49785,7 @@
           }
         ],
         "confidence": 0.9,
-        "reasoning": "Read-only subscription; stream content (incl. other users' e-mails) accounted observed_only.",
+        "reasoning": "Read-only subscription; the stream leaks reference-capable uid/gid/mid (modelled as Know gens) plus other users' e-mails (observed_only).",
         "l1_keys": [
           "http://localhost:3009/api/user/events"
         ],
@@ -48992,7 +49793,11 @@
           "Authenticated(actor:User[SELF],Session)",
           "State(device:Device{target},subscribed,active)"
         ],
-        "produces": [],
+        "produces": [
+          "Know(actor:User[SELF],UserID(other_user:User{target}))",
+          "Know(actor:User[SELF],GroupID(group:Group{target}))",
+          "Know(actor:User[SELF],MessageID(message:Message{target}))"
+        ],
         "object_type": "entity",
         "lifecycle": "",
         "operations": [],
@@ -49035,7 +49840,7 @@
               "supports": "GET http://localhost:3009/api/user/events?limit=500&api-key=<redacted>&users_version=13 as user -> 200"
             }
           ],
-          "notes": "403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream includes every non-guest user's e-mail in users_snapshot."
+          "notes": "403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries uid/gid/mid references (and every non-guest user's e-mail in users_snapshot) that enable follow-on actions."
         },
         "origin": "human-ground-truth",
         "vuln_type": null,
@@ -50919,7 +51724,18 @@
             "field": "target_uid",
             "resource": "UserID(user)"
           },
-          "participants": [],
+          "participants": [
+            {
+              "id": "contact_user",
+              "type": "User",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            }
+          ],
           "constraints": []
         },
         "requirements": [
@@ -50955,14 +51771,14 @@
                   "type": "UserID",
                   "target": {
                     "kind": "entity",
-                    "id": "contact",
-                    "type": "ContactRelation",
+                    "id": "contact_user",
+                    "type": "User",
                     "role": "target"
                   }
                 }
               ]
             },
-            "reason": "Caller names the contact uid."
+            "reason": "Caller names the contact's user id (a UserID, learned from the directory/contacts)."
           }
         ],
         "effects": {
@@ -50993,7 +51809,7 @@
             "field": "contact_uid / contact_uid",
             "disposition": "req",
             "facts": [
-              "Know(actor:User[SELF],UserID(contact:ContactRelation{target}))"
+              "Know(actor:User[SELF],UserID(contact_user:User{target}))"
             ],
             "ignored_reason": ""
           },
@@ -51024,7 +51840,7 @@
         ],
         "consumes": [
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],UserID(contact:ContactRelation{target}))"
+          "Know(actor:User[SELF],UserID(contact_user:User{target}))"
         ],
         "produces": [
           "State(contact:ContactRelation{target},remark,updated)"
@@ -52145,11 +52961,11 @@
         "test_log": []
       },
       {
-        "id": "gt-user_create_group_group",
-        "name": "Create a group",
+        "id": "gt-user_create_private_group_group",
+        "name": "Create a private group",
         "kind": "normal",
-        "description": "Create a group.",
-        "action_key": "user_create_group_group",
+        "description": "Create a private group.",
+        "action_key": "user_create_private_group_group",
         "subject": {
           "id": "actor",
           "identity": "CurrentUser",
@@ -52164,7 +52980,7 @@
           "kind": "entity",
           "id": "group",
           "type": "Group",
-          "name": "New group (channel)",
+          "name": "New private group (channel)",
           "entity": "Group",
           "role": "created",
           "attribute": "",
@@ -52174,7 +52990,19 @@
             "field": "gid",
             "resource": "GroupID(group)"
           },
-          "participants": [],
+          "participants": [
+            {
+              "id": "member",
+              "type": "User",
+              "role": "member",
+              "relative_role": "PEER",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            }
+          ],
           "constraints": []
         },
         "requirements": [
@@ -52210,7 +53038,7 @@
                 ]
               },
               "basis": "action_semantics",
-              "reason": "A new group row and membership are created."
+              "reason": "A new private group row is created."
             },
             {
               "fact": {
@@ -52232,7 +53060,52 @@
                 ]
               },
               "basis": "relation_transition",
-              "reason": "Creator becomes owner (private groups)."
+              "reason": "Creator becomes the owner of a private group."
+            },
+            {
+              "fact": {
+                "predicate": "Relation",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "entity",
+                    "id": "group",
+                    "type": "Group",
+                    "role": "created"
+                  },
+                  "Member"
+                ]
+              },
+              "basis": "relation_transition",
+              "reason": "Creator is added as a member."
+            },
+            {
+              "fact": {
+                "predicate": "Relation",
+                "arguments": [
+                  {
+                    "kind": "principal",
+                    "id": "member",
+                    "type": "User",
+                    "role": "member",
+                    "relative_role": "PEER"
+                  },
+                  {
+                    "kind": "entity",
+                    "id": "group",
+                    "type": "Group",
+                    "role": "created"
+                  },
+                  "Member"
+                ]
+              },
+              "basis": "relation_transition",
+              "reason": "Any uids in members[] are added as members."
             },
             {
               "fact": {
@@ -52308,13 +53181,15 @@
               "POST"
             ],
             "selector": {
-              "field": "",
-              "values": []
+              "field": "is_public",
+              "values": [
+                false
+              ]
             }
           }
         ],
         "confidence": 0.9,
-        "reasoning": "Public groups require admin (group.rs:140-143).",
+        "reasoning": "is_public=false branch: owner=creator, creator+members[] added to group_user (group.rs:150-212).",
         "l1_keys": [
           "http://localhost:3009/api/group"
         ],
@@ -52324,6 +53199,238 @@
         "produces": [
           "Exists(group:Group{created})",
           "Relation(actor:User[SELF],group:Group{created},Owner)",
+          "Relation(actor:User[SELF],group:Group{created},Member)",
+          "Relation(member:User[PEER],group:Group{created},Member)",
+          "Know(actor:User[SELF],GroupID(group:Group{created}))"
+        ],
+        "object_type": "entity",
+        "lifecycle": "",
+        "operations": [],
+        "secondary_objects": [],
+        "gt": {
+          "visibility": {
+            "minimum": "black_box",
+            "reason": "Called by the shipped web client; visible in JS bundle and network traffic."
+          },
+          "black_box_reachable": true,
+          "reachability_conditions": [
+            "Valid access token in X-API-Key header",
+            "Non-guest account (guest_forbidden middleware, middleware.rs:6-23)",
+            "Valid access token in X-API-Key header (obtained from POST /api/token/login or /api/user/register)"
+          ],
+          "observable_evidence": [
+            {
+              "observer_l1_key": "http://localhost:3009/api/group",
+              "expected": "POST http://localhost:3009/api/group reflects the create_group outcome described above."
+            }
+          ],
+          "evidence": [
+            {
+              "type": "source",
+              "ref": "vocechat-server-rust-0.5.36/src/api/group.rs:131",
+              "supports": "POST handler: route, parameters, auth checks and response type"
+            },
+            {
+              "type": "source",
+              "ref": "vocechat-web/src/app/services/channel.ts:39",
+              "supports": "POST called by deployed web client; request shape"
+            },
+            {
+              "type": "runtime",
+              "ref": "vocechat_gt/localhost.har entry #38 (2026-10-06T08:36:52.265Z)",
+              "supports": "POST http://localhost:3009/api/group as admin -> 200"
+            }
+          ],
+          "notes": null
+        },
+        "origin": "human-ground-truth",
+        "vuln_type": null,
+        "severity": "",
+        "created_at": "",
+        "test_log": []
+      },
+      {
+        "id": "gt-admin_create_public_group_group-1",
+        "name": "Create a public group",
+        "kind": "normal",
+        "description": "Create a public group.",
+        "action_key": "admin_create_public_group_group",
+        "subject": {
+          "id": "actor",
+          "identity": "Administrator",
+          "role": "Admin",
+          "auth_context": "Session"
+        },
+        "operation": {
+          "business": "create_group",
+          "crud": "Create"
+        },
+        "object": {
+          "kind": "entity",
+          "id": "group",
+          "type": "Group",
+          "name": "New public group (channel)",
+          "entity": "Group",
+          "role": "created",
+          "attribute": "",
+          "state_field": "",
+          "binding": {
+            "source": "response",
+            "field": "gid",
+            "resource": "GroupID(group)"
+          },
+          "participants": [],
+          "constraints": []
+        },
+        "requirements": [
+          {
+            "type": "authentication",
+            "fact": {
+              "predicate": "Authenticated",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                "Session"
+              ]
+            },
+            "reason": "Endpoint requires a valid authenticated session."
+          },
+          {
+            "type": "authorization",
+            "fact": {
+              "predicate": "Can",
+              "arguments": [
+                {
+                  "kind": "subject",
+                  "id": "actor",
+                  "type": "User",
+                  "relative_role": "SELF"
+                },
+                "Create",
+                {
+                  "kind": "entity",
+                  "id": "group",
+                  "type": "Group",
+                  "role": "created"
+                }
+              ]
+            },
+            "reason": "Only an administrator may create a public group (group.rs:140-143)."
+          }
+        ],
+        "effects": {
+          "gen": [
+            {
+              "fact": {
+                "predicate": "Exists",
+                "arguments": [
+                  {
+                    "kind": "entity",
+                    "id": "group",
+                    "type": "Group",
+                    "role": "created"
+                  }
+                ]
+              },
+              "basis": "action_semantics",
+              "reason": "A new public group row is created with owner=None and no explicit membership rows."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "GroupID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "group",
+                      "type": "Group",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "New gid returned."
+            }
+          ],
+          "kill": []
+        },
+        "io_accounting": [
+          {
+            "direction": "input",
+            "field": "group_name / GroupName(group)",
+            "disposition": "object_attribute",
+            "facts": [],
+            "ignored_reason": "New business content/payload for this action; not a pre-existing object reference."
+          },
+          {
+            "direction": "input",
+            "field": "description / GroupDescription(group)",
+            "disposition": "object_attribute",
+            "facts": [],
+            "ignored_reason": "New business content/payload for this action; not a pre-existing object reference."
+          },
+          {
+            "direction": "input",
+            "field": "is_public / GroupVisibility(group)",
+            "disposition": "object_attribute",
+            "facts": [],
+            "ignored_reason": "New value written by this action; accounted as the object state it sets, not a Know precondition."
+          },
+          {
+            "direction": "input",
+            "field": "members / UserID(user)",
+            "disposition": "object_attribute",
+            "facts": [],
+            "ignored_reason": "Flow input not tied to a precondition fact; carried as part of the action payload."
+          },
+          {
+            "direction": "output",
+            "field": "gid / GroupID(group)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],GroupID(group:Group{created}))"
+            ],
+            "ignored_reason": ""
+          }
+        ],
+        "l1_bindings": [
+          {
+            "l1_key": "http://localhost:3009/api/group",
+            "methods": [
+              "POST"
+            ],
+            "selector": {
+              "field": "is_public",
+              "values": [
+                true
+              ]
+            }
+          }
+        ],
+        "confidence": 0.9,
+        "reasoning": "is_public=true branch: admin-only, owner=None, members[] must be empty, no group_user rows (group.rs:140-170).",
+        "l1_keys": [
+          "http://localhost:3009/api/group"
+        ],
+        "consumes": [
+          "Authenticated(actor:User[SELF],Session)",
+          "Can(actor:User[SELF],Create,group:Group{created})"
+        ],
+        "produces": [
+          "Exists(group:Group{created})",
           "Know(actor:User[SELF],GroupID(group:Group{created}))"
         ],
         "object_type": "entity",
@@ -55800,8 +56907,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Web frontend 0.9.122 uses POST /admin/agora/token instead; known from source/OpenAPI."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -57749,8 +58856,7 @@
           }
         ],
         "effects": {
-          "gen": [],
-          "kill": [
+          "gen": [
             {
               "fact": {
                 "predicate": "State",
@@ -57761,14 +58867,15 @@
                     "type": "Message",
                     "role": "target"
                   },
-                  "content",
+                  "visibility",
                   "deleted"
                 ]
               },
               "basis": "state_transition",
-              "reason": "A Delete-reaction tombstone is appended; /history still returns the original payload."
+              "reason": "A Delete-reaction tombstone is appended, establishing the message's deleted/hidden state in the merged view."
             }
-          ]
+          ],
+          "kill": []
         },
         "io_accounting": [
           {
@@ -57801,7 +58908,7 @@
           }
         ],
         "confidence": 0.9,
-        "reasoning": "Append-only delete overlay rather than row removal (message_api.rs:85; see annotation_issues).",
+        "reasoning": "Append-only delete overlay rather than row removal: GEN the resulting deleted state (not KILL it); /history still returns the original payload (message_api.rs:85; see annotation_issues issue-002).",
         "l1_keys": [
           "http://localhost:3009/api/message/{mid}"
         ],
@@ -57811,7 +58918,9 @@
           "Exists(message:Message{target})",
           "Can(actor:User[SELF],Delete,message:Message{target})"
         ],
-        "produces": [],
+        "produces": [
+          "State(message:Message{target},visibility,deleted)"
+        ],
         "object_type": "entity",
         "lifecycle": "",
         "operations": [],
@@ -58180,8 +59289,7 @@
           }
         ],
         "effects": {
-          "gen": [],
-          "kill": [
+          "gen": [
             {
               "fact": {
                 "predicate": "State",
@@ -58192,14 +59300,15 @@
                     "type": "Message",
                     "role": "target"
                   },
-                  "content",
+                  "visibility",
                   "deleted"
                 ]
               },
               "basis": "state_transition",
-              "reason": "Each listed message gets a delete overlay."
+              "reason": "Each listed message gets a delete overlay establishing its deleted state."
             }
-          ]
+          ],
+          "kill": []
         },
         "io_accounting": [
           {
@@ -58240,7 +59349,9 @@
           "Authenticated(actor:User[SELF],Session)",
           "Know(actor:User[SELF],MessageID(message:Message{target}))"
         ],
-        "produces": [],
+        "produces": [
+          "State(message:Message{target},visibility,deleted)"
+        ],
         "object_type": "collection",
         "lifecycle": "",
         "operations": [],
@@ -58580,6 +59691,21 @@
             },
             {
               "fact": {
+                "predicate": "Exists",
+                "arguments": [
+                  {
+                    "kind": "entity",
+                    "id": "file",
+                    "type": "File",
+                    "role": "created"
+                  }
+                ]
+              },
+              "basis": "action_semantics",
+              "reason": "The last chunk materialises a stored file (consumed by GET /resource/file)."
+            },
+            {
+              "fact": {
                 "predicate": "Know",
                 "arguments": [
                   {
@@ -58664,6 +59790,7 @@
         ],
         "produces": [
           "State(upload:Upload{target},bytes,appended)",
+          "Exists(file:File{created})",
           "Know(actor:User[SELF],FilePath(file:File{created}))"
         ],
         "object_type": "entity",
@@ -63940,15 +65067,15 @@
         "test_log": []
       },
       {
-        "id": "gt-admin_read_system_settings",
+        "id": "gt-user_read_system_settings",
         "name": "Read system settings",
         "kind": "normal",
         "description": "Read system settings.",
-        "action_key": "admin_read_system_settings",
+        "action_key": "user_read_system_settings",
         "subject": {
           "id": "actor",
-          "identity": "Administrator",
-          "role": "Admin",
+          "identity": "CurrentUser",
+          "role": "User",
           "auth_context": "Session"
         },
         "operation": {
@@ -64093,7 +65220,7 @@
           }
         ],
         "confidence": 0.9,
-        "reasoning": "Subject/Operation/Object and Req/Eff derived from the handler semantics and payload contract.",
+        "reasoning": "Runtime shows a non-admin user succeeds (auth.har#54 and #93, uid 10 is_admin=false -> 200); the read is therefore a CurrentUser action, not Admin-only. The PUT counterpart remains admin.",
         "l1_keys": [
           "http://localhost:3009/api/admin/system/common"
         ],
@@ -65168,8 +66295,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend 0.9.122; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -65838,8 +66965,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -75473,8 +76600,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -75745,8 +76872,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -75917,8 +77044,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -76053,6 +77180,21 @@
             },
             {
               "fact": {
+                "predicate": "Exists",
+                "arguments": [
+                  {
+                    "kind": "entity",
+                    "id": "file",
+                    "type": "File",
+                    "role": "created"
+                  }
+                ]
+              },
+              "basis": "action_semantics",
+              "reason": "The last chunk materialises a stored file."
+            },
+            {
+              "fact": {
                 "predicate": "Know",
                 "arguments": [
                   {
@@ -76136,6 +77278,7 @@
         ],
         "produces": [
           "State(upload:Upload{target},bytes,appended)",
+          "Exists(file:File{created})",
           "Know(actor:User[SELF],FilePath(file:File{created}))"
         ],
         "object_type": "entity",
@@ -76144,8 +77287,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Not referenced by web frontend; source/OpenAPI only."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -76813,7 +77956,32 @@
                 ]
               },
               "basis": "io_reference",
-              "reason": "Tokens returned."
+              "reason": "Access token returned."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "RefreshToken",
+                    "target": {
+                      "kind": "entity",
+                      "id": "session",
+                      "type": "Session",
+                      "role": "created"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Refresh token returned (consumed by /api/token/renew)."
             }
           ],
           "kill": []
@@ -76847,9 +78015,11 @@
           {
             "direction": "output",
             "field": "refresh_token / RefreshToken(session)",
-            "disposition": "observed_only",
-            "facts": [],
-            "ignored_reason": "Observed in the response but not a generated semantic fact of this action."
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -76910,7 +78080,8 @@
         "produces": [
           "Exists(session:Session{created})",
           "Authenticated(actor:User[SELF],Session)",
-          "Know(actor:User[SELF],AccessToken(session:Session{created}))"
+          "Know(actor:User[SELF],AccessToken(session:Session{created}))",
+          "Know(actor:User[SELF],RefreshToken(session:Session{created}))"
         ],
         "object_type": "entity",
         "lifecycle": "",
@@ -77427,8 +78598,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -77611,8 +78782,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -77815,8 +78986,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -77983,8 +79154,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -78093,8 +79264,7 @@
           }
         ],
         "effects": {
-          "gen": [],
-          "kill": [
+          "gen": [
             {
               "fact": {
                 "predicate": "State",
@@ -78105,14 +79275,15 @@
                     "type": "Message",
                     "role": "target"
                   },
-                  "content",
+                  "visibility",
                   "deleted"
                 ]
               },
               "basis": "state_transition",
-              "reason": "A delete overlay is appended (append-only model)."
+              "reason": "A delete overlay is appended, establishing the deleted state (append-only model)."
             }
-          ]
+          ],
+          "kill": []
         },
         "io_accounting": [
           {
@@ -78153,15 +79324,17 @@
           "Authenticated(actor:User[SELF],APIToken)",
           "Know(actor:User[SELF],MessageID(message:Message{target}))"
         ],
-        "produces": [],
+        "produces": [
+          "State(message:Message{target},visibility,deleted)"
+        ],
         "object_type": "entity",
         "lifecycle": "",
         "operations": [],
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -78359,8 +79532,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -78577,8 +79750,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -78826,8 +79999,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -79080,8 +80253,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -79229,8 +80402,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -79391,8 +80564,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -79547,8 +80720,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -79769,8 +80942,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -79888,8 +81061,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -80085,8 +81258,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -80267,8 +81440,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -80459,8 +81632,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -80614,8 +81787,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -80672,7 +81845,38 @@
             "field": "",
             "resource": "AccessToken(session)"
           },
-          "participants": [],
+          "participants": [
+            {
+              "id": "other_user",
+              "type": "User",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            },
+            {
+              "id": "group",
+              "type": "Group",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            },
+            {
+              "id": "message",
+              "type": "Message",
+              "role": "target",
+              "binding": {
+                "source": "request",
+                "field": "",
+                "resource": ""
+              }
+            }
+          ],
           "constraints": []
         },
         "requirements": [
@@ -80690,14 +81894,97 @@
                 "Session"
               ]
             },
-            "reason": "Token presented for the WebSocket upgrade."
+            "reason": "Token presented (api-key query param) for the WebSocket upgrade."
           }
         ],
         "effects": {
-          "gen": [],
+          "gen": [
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "UserID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "other_user",
+                      "type": "User",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Stream exposes user ids."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "GroupID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "group",
+                      "type": "Group",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Stream exposes group ids."
+            },
+            {
+              "fact": {
+                "predicate": "Know",
+                "arguments": [
+                  {
+                    "kind": "subject",
+                    "id": "actor",
+                    "type": "User",
+                    "relative_role": "SELF"
+                  },
+                  {
+                    "kind": "reference",
+                    "type": "MessageID",
+                    "target": {
+                      "kind": "entity",
+                      "id": "message",
+                      "type": "Message",
+                      "role": "target"
+                    }
+                  }
+                ]
+              },
+              "basis": "io_reference",
+              "reason": "Stream exposes message ids."
+            }
+          ],
           "kill": []
         },
         "io_accounting": [
+          {
+            "direction": "input",
+            "field": "api-key / AccessToken(session)",
+            "disposition": "object_attribute",
+            "facts": [],
+            "ignored_reason": "Credential/secret presented for this action; proof material, not a stable object reference."
+          },
           {
             "direction": "input",
             "field": "after_mid / MessageID(message)",
@@ -80711,6 +81998,33 @@
             "disposition": "object_attribute",
             "facts": [],
             "ignored_reason": "Pagination cursor over an existing collection; not a semantic object of this action."
+          },
+          {
+            "direction": "output",
+            "field": "events_uid / UserID(user)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],UserID(other_user:User{target}))"
+            ],
+            "ignored_reason": ""
+          },
+          {
+            "direction": "output",
+            "field": "events_gid / GroupID(group)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],GroupID(group:Group{target}))"
+            ],
+            "ignored_reason": ""
+          },
+          {
+            "direction": "output",
+            "field": "events_mid / MessageID(message)",
+            "disposition": "gen",
+            "facts": [
+              "Know(actor:User[SELF],MessageID(message:Message{target}))"
+            ],
+            "ignored_reason": ""
           },
           {
             "direction": "output",
@@ -80733,22 +82047,26 @@
           }
         ],
         "confidence": 0.6,
-        "reasoning": "WebSocket (HTTP 101) variant of /user/events.",
+        "reasoning": "WebSocket (HTTP 101) variant of /user/events; carries the same reference-bearing event stream.",
         "l1_keys": [
           "http://localhost:3009/api/user/events_ws"
         ],
         "consumes": [
           "Authenticated(actor:User[SELF],Session)"
         ],
-        "produces": [],
+        "produces": [
+          "Know(actor:User[SELF],UserID(other_user:User{target}))",
+          "Know(actor:User[SELF],GroupID(group:Group{target}))",
+          "Know(actor:User[SELF],MessageID(message:Message{target}))"
+        ],
         "object_type": "entity",
         "lifecycle": "",
         "operations": [],
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -80768,7 +82086,7 @@
               "supports": "GET route, parameters and request/response schema"
             }
           ],
-          "notes": "WebSocket variant of /user/events (HTTP 101 upgrade)."
+          "notes": "WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE variant."
         },
         "origin": "human-ground-truth",
         "vuln_type": null,
@@ -80847,6 +82165,13 @@
             "ignored_reason": "References a group inside the payload but is not a precondition fact of this action."
           },
           {
+            "direction": "input",
+            "field": "api-key / AccessToken(session)",
+            "disposition": "object_attribute",
+            "facts": [],
+            "ignored_reason": "Flow input not tied to a precondition fact; carried as part of the action payload."
+          },
+          {
             "direction": "output",
             "field": "events / EventStream(session)",
             "disposition": "observed_only",
@@ -80881,8 +82206,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -81028,8 +82353,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [],
@@ -81157,8 +82482,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -81276,8 +82601,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
@@ -81394,8 +82719,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [],
@@ -81599,8 +82924,8 @@
         "secondary_objects": [],
         "gt": {
           "visibility": {
-            "minimum": "white_box",
-            "reason": "Present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); not in the 0.3.3 source tree and not called by vocechat-web 0.9.122. Identifiable black-box only via the server's own spec endpoint."
+            "minimum": "black_box",
+            "reason": "Endpoint existence and request/response contract are discoverable black-box via the deployment's unauthenticated OpenAPI spec at GET /api/spec (api_docs_provided=true in the black-box profile); source is the evidence the annotator used, not the minimum access to identify it."
           },
           "black_box_reachable": true,
           "reachability_conditions": [
