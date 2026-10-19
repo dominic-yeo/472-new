@@ -1,0 +1,339 @@
+
+^^$	files.views.pages.index		
+^^(?P<slug>[\w.-]*)$	files.views.pages.get_page		get_page
+^^about	files.views.pages.about		about
+^^add_subtitle	files.views.pages.add_subtitle		add_subtitle
+^^api/v1/categories$	files.views.categories.CategoryList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/categories/(?P<uid>[\w.-]{1,36})$	files.views.categories.CategoryDetail	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/categories/contributor$	files.views.categories.CategoryListContributor	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/comments$	files.views.comments.CommentList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/encode_profiles/$	files.views.encoding.EncodeProfileList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/manage_comments$	files.management_views.CommentList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/manage_media$	files.management_views.MediaList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/manage_users$	files.management_views.UserList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media$	files.views.media.MediaList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media-auth$	files.views.media_auth.media_auth		media_auth
+^^api/v1/media/$	files.views.media.MediaList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)$	files.views.media.MediaDetail	GET,POST,PUT,PATCH,DELETE	api_get_media
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/actions$	files.views.media.MediaActions	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/chapters$	files.views.pages.video_chapters		
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/comments$	files.views.comments.CommentDetail	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/comments/(?P<uid>[\w-]*)$	files.views.comments.CommentDetail	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/pdf$	files.views.media_auth.view_pdf		view_pdf
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/share$	files.views.media.media_share		
+^^api/v1/media/(?P<friendly_token>[\w\-_]*)/trim_video$	files.views.pages.trim_video		
+^^api/v1/media/user/bulk_actions$	files.views.media.MediaBulkUserActions	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/media/user/bulk_actions/$	files.views.media.MediaBulkUserActions	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/migrations/$	migrationservice.views.MigrationServiceViewSet		migrations-list
+^^api/v1/migrations/(?P<pk>[^/.]+)/$	migrationservice.views.MigrationServiceViewSet		migrations-detail
+^^api/v1/migrations/(?P<pk>[^/.]+)/abort/$	migrationservice.views.MigrationServiceViewSet		migrations-abort
+^^api/v1/migrations/(?P<pk>[^/.]+)/check_connection/$	migrationservice.views.MigrationServiceViewSet		migrations-check-connection
+^^api/v1/migrations/(?P<pk>[^/.]+)/pause/$	migrationservice.views.MigrationServiceViewSet		migrations-pause
+^^api/v1/migrations/(?P<pk>[^/.]+)/progress/$	migrationservice.views.MigrationServiceViewSet		migrations-progress
+^^api/v1/migrations/(?P<pk>[^/.]+)/records/$	migrationservice.views.MigrationServiceViewSet		migrations-records
+^^api/v1/migrations/(?P<pk>[^/.]+)/rerun/$	migrationservice.views.MigrationServiceViewSet		migrations-rerun
+^^api/v1/migrations/(?P<pk>[^/.]+)/resume/$	migrationservice.views.MigrationServiceViewSet		migrations-resume
+^^api/v1/migrations/(?P<pk>[^/.]+)/source_categories/$	migrationservice.views.MigrationServiceViewSet		migrations-source-categories
+^^api/v1/migrations/(?P<pk>[^/.]+)/source_roles/$	migrationservice.views.MigrationServiceViewSet		migrations-source-roles
+^^api/v1/migrations/(?P<pk>[^/.]+)/start/$	migrationservice.views.MigrationServiceViewSet		migrations-start
+^^api/v1/migrations/check_connection/$	migrationservice.views.MigrationServiceViewSet		migrations-check-unsaved-connection
+^^api/v1/migrations/lti_platforms/$	migrationservice.views.MigrationServiceViewSet		migrations-lti-platforms
+^^api/v1/migrations/server_time/$	migrationservice.views.MigrationServiceViewSet		migrations-server-time
+^^api/v1/migrations/source_categories/$	migrationservice.views.MigrationServiceViewSet		migrations-unsaved-source-categories
+^^api/v1/migrations/source_roles/$	migrationservice.views.MigrationServiceViewSet		migrations-unsaved-source-roles
+^^api/v1/playlists$	files.views.playlists.PlaylistList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/playlists/$	files.views.playlists.PlaylistList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/playlists/(?P<friendly_token>[\w\-_]*)$	files.views.playlists.PlaylistDetail	GET,POST,PUT,PATCH,DELETE	api_get_playlist
+^^api/v1/search$	files.views.media.MediaSearch	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/tags$	files.views.categories.TagList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/tasks$	files.views.tasks.TasksList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/tasks/$	files.views.tasks.TasksList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/tasks/(?P<friendly_token>[\w|\W]*)$	files.views.tasks.TaskDetail	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/user/action/(?P<action>[\w]*)$	files.views.user.UserActions	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/users$	users.views.UserList	GET,POST,PUT,PATCH,DELETE	api_users
+^^api/v1/users/$	users.views.UserList	GET,POST,PUT,PATCH,DELETE	
+^^api/v1/users/(?P<username>[\w@._-]*)$	users.views.UserDetail	GET,POST,PUT,PATCH,DELETE	api_get_user
+^^api/v1/users/(?P<username>[\w@._-]*)/contact	users.views.contact_user	POST	api_contact_user
+^^categories$	files.views.pages.categories		categories
+^^channel/(?P<friendly_token>[\w]*)$	users.views.view_channel		view_channel
+^^channel/(?P<friendly_token>[\w]*)/edit$	users.views.edit_channel		edit_channel
+^^contact$	files.views.pages.contact		contact
+^^edit	files.views.pages.edit_media		edit_media
+^^edit_category/(?P<uid>[\w-]+)$	files.views.pages.edit_category		edit_category
+^^edit_chapters	files.views.pages.edit_chapters		edit_chapters
+^^edit_subtitle	files.views.pages.edit_subtitle		edit_subtitle
+^^edit_video	files.views.pages.edit_video		edit_video
+^^embed	files.views.pages.embed_media		get_embed
+^^featured$	files.views.pages.featured_media		
+^^fu/^upload/$	uploader.views.FineUploaderView	POST	upload
+^^history$	files.views.pages.history		history
+^^latest$	files.views.pages.latest_media		
+^^liked$	files.views.pages.liked_media		liked_media
+^^manage/comments$	files.views.pages.manage_comments		manage_comments
+^^manage/media$	files.views.pages.manage_media		manage_media
+^^manage/users$	files.views.pages.manage_users		manage_users
+^^members	files.views.pages.members		members
+^^migrations$	migrationservice.views.migrations_list		migrations_list
+^^migrations/new$	migrationservice.views.migration_new		migration_new
+^^migrations/new/(?P<source>[\w-]+)$	migrationservice.views.migration_edit		migration_new_source
+^^playlist/(?P<friendly_token>[\w\-_]*)$	files.views.pages.view_playlist		get_playlist
+^^playlists/(?P<friendly_token>[\w\-_]*)$	files.views.pages.view_playlist		get_playlist
+^^popular$	files.views.pages.recommended_media		
+^^publish	files.views.pages.publish_media		publish_media
+^^recommended$	files.views.pages.recommended_media		
+^^record_screen	files.views.pages.record_screen		record_screen
+^^replace_media	files.views.pages.replace_media		replace_media
+^^rss/search	files.feeds.<files.feeds.SearchRSSFeed object at 0x71afef6b8c20>		
+^^scpublisher	files.views.pages.upload_media		upload_media
+^^search	files.views.pages.search		search
+^^setlanguage	files.views.pages.setlanguage		setlanguage
+^^tags	files.views.pages.tags		tags
+^^tinymce/upload/	files.tinymce_handlers.upload_image		tinymce_upload_image
+^^tos$	files.views.pages.tos		terms_of_service
+^^upload	files.views.pages.upload_media		upload_media
+^^user/(?P<username>[\w@._-]*)$	users.views.view_user		get_user
+^^user/(?P<username>[\w@._-]*)/$	users.views.view_user		get_user
+^^user/(?P<username>[\w@._-]*)/about$	users.views.view_user_about		get_user_about
+^^user/(?P<username>[\w@._-]*)/edit$	users.views.edit_user		edit_user
+^^user/(?P<username>[\w@._-]*)/playlists$	users.views.view_user_playlists		get_user_playlists
+^^user/(?P<username>[\w@._-]*)/shared_by_me	users.views.shared_by_me		shared_by_me
+^^user/(?P<username>[\w@._-]*)/shared_with_me	users.views.shared_with_me		shared_with_me
+^^view	files.views.pages.view_media		get_media
+^__debug__/history_refresh/	debug_toolbar.panels.history.views.history_refresh		history_refresh
+^__debug__/history_sidebar/	debug_toolbar.panels.history.views.history_sidebar		history_sidebar
+^__debug__/render_panel/	debug_toolbar.views.render_panel		render_panel
+^__debug__/sql_explain/	debug_toolbar.panels.sql.views.sql_explain		sql_explain
+^__debug__/sql_profile/	debug_toolbar.panels.sql.views.sql_profile		sql_profile
+^__debug__/sql_select/	debug_toolbar.panels.sql.views.sql_select		sql_select
+^__debug__/template_source/	debug_toolbar.panels.templates.views.template_source		template_source
+^accounts/3rdparty/	allauth.socialaccount.views.ConnectionsView	GET,POST,PUT,PATCH,DELETE	socialaccount_connections
+^accounts/3rdparty/login/cancelled/	allauth.socialaccount.views.LoginCancelledView	GET,POST,PUT,PATCH,DELETE	socialaccount_login_cancelled
+^accounts/3rdparty/login/error/	allauth.socialaccount.views.LoginErrorView	GET,POST,PUT,PATCH,DELETE	socialaccount_login_error
+^accounts/3rdparty/signup/	allauth.socialaccount.views.SignupView	GET,POST,PUT,PATCH,DELETE	socialaccount_signup
+^accounts/^confirm-email/(?P<key>[-:\w]+)/$	allauth.account.views.ConfirmEmailView	GET,POST,PUT,PATCH,DELETE	account_confirm_email
+^accounts/^password/reset/key/(?P<uidb36>[0-9A-Za-z]+)-(?P<key>.+)/$	allauth.account.views.PasswordResetFromKeyView	GET,POST,PUT,PATCH,DELETE	account_reset_password_from_key
+^accounts/^saml/(?P<organization_slug>[^/]+)/acs/	allauth.socialaccount.providers.saml.views.ACSView	GET,POST,PUT,PATCH,DELETE	saml_acs
+^accounts/^saml/(?P<organization_slug>[^/]+)/acs/finish/	allauth.socialaccount.providers.saml.views.FinishACSView	GET,POST,PUT,PATCH,DELETE	saml_finish_acs
+^accounts/^saml/(?P<organization_slug>[^/]+)/login/	allauth.socialaccount.providers.saml.views.LoginView	GET,POST,PUT,PATCH,DELETE	saml_login
+^accounts/^saml/(?P<organization_slug>[^/]+)/metadata/	allauth.socialaccount.providers.saml.views.MetadataView	GET,POST,PUT,PATCH,DELETE	saml_metadata
+^accounts/^saml/(?P<organization_slug>[^/]+)/sls/	allauth.socialaccount.providers.saml.views.SLSView	GET,POST,PUT,PATCH,DELETE	saml_sls
+^accounts/confirm-email/	allauth.account.views.email_verification_sent		account_email_verification_sent
+^accounts/email/	allauth.account.views.EmailView	GET,POST,PUT,PATCH,DELETE	account_email
+^accounts/inactive/	allauth.account.views.AccountInactiveView	GET,POST,PUT,PATCH,DELETE	account_inactive
+^accounts/login	allauth.account.views.LoginView	GET,POST,PUT,PATCH,DELETE	login_system
+^accounts/login/	allauth.account.views.LoginView	GET,POST,PUT,PATCH,DELETE	account_login
+^accounts/login/code/confirm/	allauth.account.views.ConfirmLoginCodeView	GET,POST,PUT,PATCH,DELETE	account_confirm_login_code
+^accounts/logout/	allauth.account.views.LogoutView	GET,POST,PUT,PATCH,DELETE	account_logout
+^accounts/password/change/	allauth.account.views.PasswordChangeView	GET,POST,PUT,PATCH,DELETE	account_change_password
+^accounts/password/reset/	allauth.account.views.PasswordResetView	GET,POST,PUT,PATCH,DELETE	account_reset_password
+^accounts/password/reset/done/	allauth.account.views.PasswordResetDoneView	GET,POST,PUT,PATCH,DELETE	account_reset_password_done
+^accounts/password/reset/key/done/	allauth.account.views.PasswordResetFromKeyDoneView	GET,POST,PUT,PATCH,DELETE	account_reset_password_from_key_done
+^accounts/password/set/	allauth.account.views.PasswordSetView	GET,POST,PUT,PATCH,DELETE	account_set_password
+^accounts/reauthenticate/	allauth.account.views.ReauthenticateView	GET,POST,PUT,PATCH,DELETE	account_reauthenticate
+^accounts/signup/	allauth.account.views.SignupView	GET,POST,PUT,PATCH,DELETE	account_signup
+^accounts/social/connections/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+^accounts/social/login/cancelled/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+^accounts/social/login/error/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+^accounts/social/signup/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+^api-auth/login/	django.contrib.auth.views.LoginView	GET,POST,PUT,PATCH,DELETE	login
+^api-auth/logout/	django.contrib.auth.views.LogoutView	POST	logout
+^api/v1/login	users.views.LoginView	GET,POST,PUT,PATCH,DELETE	user-login
+^api/v1/user/token	users.views.UserToken	GET,POST,PUT,PATCH,DELETE	user-token
+^api/v1/whoami	users.views.UserWhoami	GET,POST,PUT,PATCH,DELETE	user-whoami
+^i18n/setlang/	django.views.i18n.set_language		set_language
+^lti/embed/<str:friendly_token>/	lti.views.EmbedMediaLTIView	GET,POST,PUT,PATCH,DELETE	embed_media
+^lti/jwks/	lti.views.JWKSView	GET,POST,PUT,PATCH,DELETE	jwks
+^lti/launch/	lti.views.LaunchView	GET,POST,PUT,PATCH,DELETE	launch
+^lti/my-media/	lti.views.MyMediaLTIView	GET,POST,PUT,PATCH,DELETE	my_media
+^lti/oidc/login/	lti.views.OIDCLoginView	GET,POST,PUT,PATCH,DELETE	oidc_login
+^lti/public-key/	lti.views.PublicKeyPEMView	GET,POST,PUT,PATCH,DELETE	public_key_pem
+^lti/select-media/	lti.deep_linking.SelectMediaView	GET,POST,PUT,PATCH,DELETE	select_media
+^migrations/<int:pk>	migrationservice.views.migration_detail		migration_detail
+^migrations/<int:pk>/edit	migrationservice.views.migration_edit		migration_edit
+^rss/	files.feeds.<files.feeds.IndexRSSFeed object at 0x71afef6b8d70>		
+^swagger(?P<format>\.json|\.yaml)$	drf_yasg.views.SchemaView	GET,POST,PUT,PATCH,DELETE	schema-json
+^swagger/$	drf_yasg.views.SchemaView	GET,POST,PUT,PATCH,DELETE	schema-swagger-ui
+admin/	django.contrib.admin.sites.index		index
+admin/(?P<url>.*)$	django.contrib.admin.sites.catch_all_view		
+admin/^(?P<app_label>auth|account|socialaccount|sites|authtoken|files|users|lti|migrationservice)/$	django.contrib.admin.sites.app_index		app_list
+admin/account/emailaddress/	django.contrib.admin.options.changelist_view		account_emailaddress_changelist
+admin/account/emailaddress/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/account/emailaddress/<path:object_id>/change/	django.contrib.admin.options.change_view		account_emailaddress_change
+admin/account/emailaddress/<path:object_id>/delete/	django.contrib.admin.options.delete_view		account_emailaddress_delete
+admin/account/emailaddress/<path:object_id>/history/	django.contrib.admin.options.history_view		account_emailaddress_history
+admin/account/emailaddress/add/	django.contrib.admin.options.add_view		account_emailaddress_add
+admin/auth/group/	django.contrib.admin.options.changelist_view		auth_group_changelist
+admin/auth/group/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/auth/group/<path:object_id>/change/	django.contrib.admin.options.change_view		auth_group_change
+admin/auth/group/<path:object_id>/delete/	django.contrib.admin.options.delete_view		auth_group_delete
+admin/auth/group/<path:object_id>/history/	django.contrib.admin.options.history_view		auth_group_history
+admin/auth/group/add/	django.contrib.admin.options.add_view		auth_group_add
+admin/authtoken/tokenproxy/	django.contrib.admin.options.changelist_view		authtoken_tokenproxy_changelist
+admin/authtoken/tokenproxy/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/authtoken/tokenproxy/<path:object_id>/change/	django.contrib.admin.options.change_view		authtoken_tokenproxy_change
+admin/authtoken/tokenproxy/<path:object_id>/delete/	django.contrib.admin.options.delete_view		authtoken_tokenproxy_delete
+admin/authtoken/tokenproxy/<path:object_id>/history/	django.contrib.admin.options.history_view		authtoken_tokenproxy_history
+admin/authtoken/tokenproxy/add/	django.contrib.admin.options.add_view		authtoken_tokenproxy_add
+admin/autocomplete/	django.contrib.admin.sites.autocomplete_view		autocomplete
+admin/files/category/	django.contrib.admin.options.changelist_view		files_category_changelist
+admin/files/category/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/category/<path:object_id>/change/	django.contrib.admin.options.change_view		files_category_change
+admin/files/category/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_category_delete
+admin/files/category/<path:object_id>/history/	django.contrib.admin.options.history_view		files_category_history
+admin/files/category/add/	django.contrib.admin.options.add_view		files_category_add
+admin/files/comment/	django.contrib.admin.options.changelist_view		files_comment_changelist
+admin/files/comment/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/comment/<path:object_id>/change/	django.contrib.admin.options.change_view		files_comment_change
+admin/files/comment/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_comment_delete
+admin/files/comment/<path:object_id>/history/	django.contrib.admin.options.history_view		files_comment_history
+admin/files/comment/add/	django.contrib.admin.options.add_view		files_comment_add
+admin/files/encodeprofile/	django.contrib.admin.options.changelist_view		files_encodeprofile_changelist
+admin/files/encodeprofile/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/encodeprofile/<path:object_id>/change/	django.contrib.admin.options.change_view		files_encodeprofile_change
+admin/files/encodeprofile/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_encodeprofile_delete
+admin/files/encodeprofile/<path:object_id>/history/	django.contrib.admin.options.history_view		files_encodeprofile_history
+admin/files/encodeprofile/add/	django.contrib.admin.options.add_view		files_encodeprofile_add
+admin/files/encoding/	django.contrib.admin.options.changelist_view		files_encoding_changelist
+admin/files/encoding/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/encoding/<path:object_id>/change/	django.contrib.admin.options.change_view		files_encoding_change
+admin/files/encoding/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_encoding_delete
+admin/files/encoding/<path:object_id>/history/	django.contrib.admin.options.history_view		files_encoding_history
+admin/files/encoding/add/	django.contrib.admin.options.add_view		files_encoding_add
+admin/files/language/	django.contrib.admin.options.changelist_view		files_language_changelist
+admin/files/language/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/language/<path:object_id>/change/	django.contrib.admin.options.change_view		files_language_change
+admin/files/language/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_language_delete
+admin/files/language/<path:object_id>/history/	django.contrib.admin.options.history_view		files_language_history
+admin/files/language/add/	django.contrib.admin.options.add_view		files_language_add
+admin/files/media/	django.contrib.admin.options.changelist_view		files_media_changelist
+admin/files/media/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/media/<path:object_id>/change/	django.contrib.admin.options.change_view		files_media_change
+admin/files/media/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_media_delete
+admin/files/media/<path:object_id>/history/	django.contrib.admin.options.history_view		files_media_history
+admin/files/media/add/	django.contrib.admin.options.add_view		files_media_add
+admin/files/page/	django.contrib.admin.options.changelist_view		files_page_changelist
+admin/files/page/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/page/<path:object_id>/change/	django.contrib.admin.options.change_view		files_page_change
+admin/files/page/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_page_delete
+admin/files/page/<path:object_id>/history/	django.contrib.admin.options.history_view		files_page_history
+admin/files/page/add/	django.contrib.admin.options.add_view		files_page_add
+admin/files/subtitle/	django.contrib.admin.options.changelist_view		files_subtitle_changelist
+admin/files/subtitle/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/subtitle/<path:object_id>/change/	django.contrib.admin.options.change_view		files_subtitle_change
+admin/files/subtitle/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_subtitle_delete
+admin/files/subtitle/<path:object_id>/history/	django.contrib.admin.options.history_view		files_subtitle_history
+admin/files/subtitle/add/	django.contrib.admin.options.add_view		files_subtitle_add
+admin/files/tag/	django.contrib.admin.options.changelist_view		files_tag_changelist
+admin/files/tag/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/tag/<path:object_id>/change/	django.contrib.admin.options.change_view		files_tag_change
+admin/files/tag/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_tag_delete
+admin/files/tag/<path:object_id>/history/	django.contrib.admin.options.history_view		files_tag_history
+admin/files/tag/add/	django.contrib.admin.options.add_view		files_tag_add
+admin/files/tinymcemedia/	django.contrib.admin.options.changelist_view		files_tinymcemedia_changelist
+admin/files/tinymcemedia/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/tinymcemedia/<path:object_id>/change/	django.contrib.admin.options.change_view		files_tinymcemedia_change
+admin/files/tinymcemedia/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_tinymcemedia_delete
+admin/files/tinymcemedia/<path:object_id>/history/	django.contrib.admin.options.history_view		files_tinymcemedia_history
+admin/files/tinymcemedia/add/	django.contrib.admin.options.add_view		files_tinymcemedia_add
+admin/files/transcriptionrequest/	django.contrib.admin.options.changelist_view		files_transcriptionrequest_changelist
+admin/files/transcriptionrequest/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/transcriptionrequest/<path:object_id>/change/	django.contrib.admin.options.change_view		files_transcriptionrequest_change
+admin/files/transcriptionrequest/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_transcriptionrequest_delete
+admin/files/transcriptionrequest/<path:object_id>/history/	django.contrib.admin.options.history_view		files_transcriptionrequest_history
+admin/files/transcriptionrequest/add/	django.contrib.admin.options.add_view		files_transcriptionrequest_add
+admin/files/videotrimrequest/	django.contrib.admin.options.changelist_view		files_videotrimrequest_changelist
+admin/files/videotrimrequest/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/files/videotrimrequest/<path:object_id>/change/	django.contrib.admin.options.change_view		files_videotrimrequest_change
+admin/files/videotrimrequest/<path:object_id>/delete/	django.contrib.admin.options.delete_view		files_videotrimrequest_delete
+admin/files/videotrimrequest/<path:object_id>/history/	django.contrib.admin.options.history_view		files_videotrimrequest_history
+admin/files/videotrimrequest/add/	django.contrib.admin.options.add_view		files_videotrimrequest_add
+admin/jsi18n/	django.contrib.admin.sites.i18n_javascript		jsi18n
+admin/login/	django.contrib.admin.sites.login		login
+admin/logout/	django.contrib.admin.sites.logout		logout
+admin/lti/ltilaunchlog/	django.contrib.admin.options.changelist_view		lti_ltilaunchlog_changelist
+admin/lti/ltilaunchlog/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/lti/ltilaunchlog/<path:object_id>/change/	django.contrib.admin.options.change_view		lti_ltilaunchlog_change
+admin/lti/ltilaunchlog/<path:object_id>/delete/	django.contrib.admin.options.delete_view		lti_ltilaunchlog_delete
+admin/lti/ltilaunchlog/<path:object_id>/history/	django.contrib.admin.options.history_view		lti_ltilaunchlog_history
+admin/lti/ltilaunchlog/add/	django.contrib.admin.options.add_view		lti_ltilaunchlog_add
+admin/lti/ltiplatform/	django.contrib.admin.options.changelist_view		lti_ltiplatform_changelist
+admin/lti/ltiplatform/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/lti/ltiplatform/<path:object_id>/change/	django.contrib.admin.options.change_view		lti_ltiplatform_change
+admin/lti/ltiplatform/<path:object_id>/delete/	django.contrib.admin.options.delete_view		lti_ltiplatform_delete
+admin/lti/ltiplatform/<path:object_id>/history/	django.contrib.admin.options.history_view		lti_ltiplatform_history
+admin/lti/ltiplatform/add/	django.contrib.admin.options.add_view		lti_ltiplatform_add
+admin/lti/ltiresourcelink/	django.contrib.admin.options.changelist_view		lti_ltiresourcelink_changelist
+admin/lti/ltiresourcelink/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/lti/ltiresourcelink/<path:object_id>/change/	django.contrib.admin.options.change_view		lti_ltiresourcelink_change
+admin/lti/ltiresourcelink/<path:object_id>/delete/	django.contrib.admin.options.delete_view		lti_ltiresourcelink_delete
+admin/lti/ltiresourcelink/<path:object_id>/history/	django.contrib.admin.options.history_view		lti_ltiresourcelink_history
+admin/lti/ltiresourcelink/add/	django.contrib.admin.options.add_view		lti_ltiresourcelink_add
+admin/lti/ltirolemapping/	django.contrib.admin.options.changelist_view		lti_ltirolemapping_changelist
+admin/lti/ltirolemapping/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/lti/ltirolemapping/<path:object_id>/change/	django.contrib.admin.options.change_view		lti_ltirolemapping_change
+admin/lti/ltirolemapping/<path:object_id>/delete/	django.contrib.admin.options.delete_view		lti_ltirolemapping_delete
+admin/lti/ltirolemapping/<path:object_id>/history/	django.contrib.admin.options.history_view		lti_ltirolemapping_history
+admin/lti/ltirolemapping/add/	django.contrib.admin.options.add_view		lti_ltirolemapping_add
+admin/lti/ltitoolkeys/	django.contrib.admin.options.changelist_view		lti_ltitoolkeys_changelist
+admin/lti/ltitoolkeys/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/lti/ltitoolkeys/<path:object_id>/change/	django.contrib.admin.options.change_view		lti_ltitoolkeys_change
+admin/lti/ltitoolkeys/<path:object_id>/delete/	django.contrib.admin.options.delete_view		lti_ltitoolkeys_delete
+admin/lti/ltitoolkeys/<path:object_id>/history/	django.contrib.admin.options.history_view		lti_ltitoolkeys_history
+admin/lti/ltitoolkeys/add/	django.contrib.admin.options.add_view		lti_ltitoolkeys_add
+admin/lti/ltiusermapping/	django.contrib.admin.options.changelist_view		lti_ltiusermapping_changelist
+admin/lti/ltiusermapping/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/lti/ltiusermapping/<path:object_id>/change/	django.contrib.admin.options.change_view		lti_ltiusermapping_change
+admin/lti/ltiusermapping/<path:object_id>/delete/	django.contrib.admin.options.delete_view		lti_ltiusermapping_delete
+admin/lti/ltiusermapping/<path:object_id>/history/	django.contrib.admin.options.history_view		lti_ltiusermapping_history
+admin/lti/ltiusermapping/add/	django.contrib.admin.options.add_view		lti_ltiusermapping_add
+admin/migrationservice/migrationrecord/	django.contrib.admin.options.changelist_view		migrationservice_migrationrecord_changelist
+admin/migrationservice/migrationrecord/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/migrationservice/migrationrecord/<path:object_id>/change/	django.contrib.admin.options.change_view		migrationservice_migrationrecord_change
+admin/migrationservice/migrationrecord/<path:object_id>/delete/	django.contrib.admin.options.delete_view		migrationservice_migrationrecord_delete
+admin/migrationservice/migrationrecord/<path:object_id>/history/	django.contrib.admin.options.history_view		migrationservice_migrationrecord_history
+admin/migrationservice/migrationrecord/add/	django.contrib.admin.options.add_view		migrationservice_migrationrecord_add
+admin/migrationservice/migrationservice/	django.contrib.admin.options.changelist_view		migrationservice_migrationservice_changelist
+admin/migrationservice/migrationservice/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/migrationservice/migrationservice/<path:object_id>/change/	django.contrib.admin.options.change_view		migrationservice_migrationservice_change
+admin/migrationservice/migrationservice/<path:object_id>/delete/	django.contrib.admin.options.delete_view		migrationservice_migrationservice_delete
+admin/migrationservice/migrationservice/<path:object_id>/history/	django.contrib.admin.options.history_view		migrationservice_migrationservice_history
+admin/migrationservice/migrationservice/add/	django.contrib.admin.options.add_view		migrationservice_migrationservice_add
+admin/password_change/	django.contrib.admin.sites.password_change		password_change
+admin/password_change/done/	django.contrib.admin.sites.password_change_done		password_change_done
+admin/r/<path:content_type_id>/<path:object_id>/	django.contrib.contenttypes.views.shortcut		view_on_site
+admin/sites/site/	django.contrib.admin.options.changelist_view		sites_site_changelist
+admin/sites/site/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/sites/site/<path:object_id>/change/	django.contrib.admin.options.change_view		sites_site_change
+admin/sites/site/<path:object_id>/delete/	django.contrib.admin.options.delete_view		sites_site_delete
+admin/sites/site/<path:object_id>/history/	django.contrib.admin.options.history_view		sites_site_history
+admin/sites/site/add/	django.contrib.admin.options.add_view		sites_site_add
+admin/socialaccount/socialaccount/	django.contrib.admin.options.changelist_view		socialaccount_socialaccount_changelist
+admin/socialaccount/socialaccount/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/socialaccount/socialaccount/<path:object_id>/change/	django.contrib.admin.options.change_view		socialaccount_socialaccount_change
+admin/socialaccount/socialaccount/<path:object_id>/delete/	django.contrib.admin.options.delete_view		socialaccount_socialaccount_delete
+admin/socialaccount/socialaccount/<path:object_id>/history/	django.contrib.admin.options.history_view		socialaccount_socialaccount_history
+admin/socialaccount/socialaccount/add/	django.contrib.admin.options.add_view		socialaccount_socialaccount_add
+admin/socialaccount/socialapp/	django.contrib.admin.options.changelist_view		socialaccount_socialapp_changelist
+admin/socialaccount/socialapp/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/socialaccount/socialapp/<path:object_id>/change/	django.contrib.admin.options.change_view		socialaccount_socialapp_change
+admin/socialaccount/socialapp/<path:object_id>/delete/	django.contrib.admin.options.delete_view		socialaccount_socialapp_delete
+admin/socialaccount/socialapp/<path:object_id>/history/	django.contrib.admin.options.history_view		socialaccount_socialapp_history
+admin/socialaccount/socialapp/add/	django.contrib.admin.options.add_view		socialaccount_socialapp_add
+admin/socialaccount/socialtoken/	django.contrib.admin.options.changelist_view		socialaccount_socialtoken_changelist
+admin/socialaccount/socialtoken/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/socialaccount/socialtoken/<path:object_id>/change/	django.contrib.admin.options.change_view		socialaccount_socialtoken_change
+admin/socialaccount/socialtoken/<path:object_id>/delete/	django.contrib.admin.options.delete_view		socialaccount_socialtoken_delete
+admin/socialaccount/socialtoken/<path:object_id>/history/	django.contrib.admin.options.history_view		socialaccount_socialtoken_history
+admin/socialaccount/socialtoken/add/	django.contrib.admin.options.add_view		socialaccount_socialtoken_add
+admin/users/user/	django.contrib.admin.options.changelist_view		users_user_changelist
+admin/users/user/<path:object_id>/	django.views.generic.base.RedirectView	GET,POST,PUT,PATCH,DELETE	
+admin/users/user/<path:object_id>/change/	django.contrib.admin.options.change_view		users_user_change
+admin/users/user/<path:object_id>/delete/	django.contrib.admin.options.delete_view		users_user_delete
+admin/users/user/<path:object_id>/history/	django.contrib.admin.options.history_view		users_user_history
+admin/users/user/add/	django.contrib.admin.options.add_view		users_user_add
+docs/api/	drf_yasg.views.SchemaView	GET,POST,PUT,PATCH,DELETE	schema-redoc
+robots.txt	django.views.generic.base.TemplateView	GET,POST,PUT,PATCH,DELETE	
+tinymce/compressor/	tinymce.views.compressor		tinymce-compressor
+tinymce/filebrowser/	tinymce.views.filebrowser		tinymce-filebrowser
+tinymce/flatpages_link_list/	tinymce.views.flatpages_link_list		tinymce-linklist
+TOTAL 337

@@ -1,0 +1,36 @@
+# MediaCMS 9.2.1 identity-scoped runtime probe (deployment http://localhost, image mediacms/mediacms:latest)
+# Accounts: anon=no auth; user=alice (regular, DRF Token); admin=admin (superuser, DRF Token)
+# Fixtures: media PUB=Yt7r1RFGP(public,alice) PRIV=EzRFgOP5p(private,alice); category KgeToe8439eWLe9R; playlist UQSagkaGR; comment f5c42a51-...
+GET    /api/v1/media                          anon=200 user=200 admin=200
+GET    /api/v1/media/Yt7r1RFGP                 anon=200 user=200 admin=200
+GET    /api/v1/media/EzRFgOP5p (private)       anon=400 user=200 admin=200
+GET    /api/v1/media/doesnotexist              anon=400 user=400 admin=400   # missing media -> 400 (not 404)
+GET    /api/v1/media/{t}/comments              anon=200 user=200 admin=200
+GET    /api/v1/media/{t}/actions (reports)     anon=400 user=200 admin=200   # owner/editor only
+GET    /api/v1/search?q=clip                   anon=200 user=200 admin=200
+GET    /api/v1/categories                      anon=200 user=200 admin=200
+GET    /api/v1/categories/{uid}                anon=200 user=200 admin=200
+GET    /api/v1/categories/contributor          anon=200 user=200 admin=200   # anon -> [] 200
+GET    /api/v1/tags                            anon=200 user=200 admin=200
+GET    /api/v1/comments                        anon=200 user=200 admin=200
+GET    /api/v1/playlists                       anon=200 user=200 admin=200
+GET    /api/v1/playlists/{t}                   anon=200 user=200 admin=200
+GET    /api/v1/user/action/like                anon=200 user=200 admin=200
+GET    /api/v1/encode_profiles/                anon=200 user=200 admin=200
+GET    /api/v1/manage_media                    anon=403 user=403 admin=200   # editor+
+GET    /api/v1/manage_comments                 anon=403 user=403 admin=200   # editor+
+GET    /api/v1/manage_users                    anon=403 user=403 admin=200   # editor+
+GET    /api/v1/tasks                           anon=403 user=403 admin=200   # IsAdminUser
+GET    /api/v1/whoami                          anon=403 user=200 admin=200   # IsAuthenticated
+GET    /api/v1/user/token                      anon=403 user=200 admin=200
+GET    /api/v1/users                           anon=200 user=200 admin=200   # ALLOW_ANONYMOUS_USER_LISTING=True
+GET    /api/v1/users/alice                     anon=200 user=200 admin=200
+GET    /api/v1/migrations/                     anon=403 user=403 admin=200   # IsSuperUser
+GET    /api/v1/migrations/server_time/         anon=403 user=403 admin=200
+GET    /lti/jwks/                              anon=200 user=200 admin=200
+GET    /lti/public-key/                        anon=200 user=200 admin=200
+GET    /swagger.json                           anon=200 user=200 admin=200   # BUT body is an error page (schema gen crashes)
+POST   /api/v1/login                           anon=400 user=400 admin=400   # no body -> validation 400
+POST   /api/v1/media/{t}/actions               anon=400 user=400 admin=400   # no 'type' -> 400 (AllowAny reaches handler)
+DELETE /api/v1/media/doesnotexist              anon=403 user=400 admin=400   # IsAuthenticatedOrReadOnly blocks anon unsafe
+POST   /api/v1/media/user/bulk_actions         anon=403 user=400 admin=400   # IsAuthenticated; 400 no media_ids

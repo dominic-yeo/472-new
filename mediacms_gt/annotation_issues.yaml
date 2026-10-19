@@ -1,0 +1,184 @@
+schema_version: pengent-web-gt-v1
+environment_id: "mediacms-9.2.1"
+
+issues:
+  - id: "issue-001"
+    location: "L1:http://localhost/swagger.json (also /swagger/, /docs/api/)"
+    description: >-
+      The deployment serves a drf-yasg schema route publicly (AllowAny), but schema generation
+      crashes in this build: GET /swagger.json returns HTTP 200 whose body is the MediaCMS error
+      HTML template, not an OpenAPI document. So the running app's own API description is unusable
+      as the authoritative route list. Enumeration therefore used the live Django URL resolver dump
+      (mediacms_gt/url_dump.txt) plus the source handlers, verified by runtime probes.
+    evidence:
+      - type: "runtime"
+        ref: "curl http://localhost/swagger.json -> 200, body '<title> - error</title>' (mediacms_gt/runtime_probe.txt)"
+        supports: "Schema endpoint returns an error page, not JSON"
+      - type: "source"
+        ref: "cms/urls.py:11-15,32-34"
+        supports: "drf-yasg get_schema_view mounted public"
+    proposed_resolution: >-
+      Treat url_dump.txt as the authoritative enumeration for the running build; no schema change.
+      Sweep: this is the single spec endpoint; /swagger/ and /docs/api/ render the same failing schema.
+
+  - id: "issue-002"
+    location: "cross-schema (permission model)"
+    description: >-
+      REST_FRAMEWORK sets no DEFAULT_PERMISSION_CLASSES, so DRF's default (AllowAny) applies to every
+      APIView that does not set permission_classes. Views with NO explicit permission class are
+      therefore fully public: EncodeProfileList, CategoryList, CategoryDetail, CategoryListContributor,
+      TagList, MediaSearch, UserActions (and UserList, which instead branches on
+      ALLOW_ANONYMOUS_USER_LISTING). Confirmed anon=200 for all of these. Most are low-sensitivity
+      reads, but user listing (api/v1/users) enables unauthenticated user enumeration, and MediaActions
+      is AllowAny so anonymous like/dislike/report/watch are accepted (per ALLOW_ANONYMOUS_ACTIONS).
+    evidence:
+      - type: "source"
+        ref: "cms/settings.py:159-171 (no DEFAULT_PERMISSION_CLASSES); files/views/encoding.py:9 (no class)"
+        supports: "Default AllowAny; EncodeProfileList unprotected"
+      - type: "runtime"
+        ref: "mediacms_gt/runtime_probe.txt (encode_profiles/categories/tags/users anon=200)"
+        supports: "Public reads confirmed"
+    proposed_resolution: >-
+      Modeled as black_box visibility with subject Anonymous/CurrentUser as appropriate; the no-auth
+      reads carry gt.notes. Sweep over all APIView classes in files/views/* and users/views.py is
+      exhaustive (listed above); the set is complete for the mounted application API.
+
+  - id: "issue-003"
+    location: "L2:user_like_media / user_dislike_media / user_report_media / user_watch_media"
+    description: >-
+      Media actions are append-only: MediaActions.post enqueues save_user_action, which writes a new
+      MediaAction row (deduped by pre_save_action), rather than mutating the media. like/dislike/report/
+      watch are recorded events, not a toggled field on Media. They are modeled as State(media,action_*,
+      recorded) GEN with basis action_semantics, not as a counter mutation.
+    evidence:
+      - type: "source"
+        ref: "files/views/media.py:1059-1086; files/methods.py:49-92 (pre_save_action); actions/models.py:15-40"
+        supports: "Append-only MediaAction rows, dedup logic"
+    proposed_resolution: "No schema change; documented so reviewers read the GEN facts as event records."
+
+  - id: "issue-004"
+    location: "L1: lti/* (launch, oidc/login, select-media, my-media, embed); excluded_items"
+    description: >-
+      lti.urls is included unconditionally, so all LTI routes resolve, but USE_LTI=False in this
+      deployment and no LTIPlatform is configured. The launch/OIDC/deep-linking flow cannot complete
+      without an external LMS platform (an un-mintable external dependency), so those routes are placed
+      in excluded_items rather than the primary GT. The two publicly served key endpoints (lti/jwks/,
+      lti/public-key/) are kept as L1/L2 (confirmed anon=200).
+    evidence:
+      - type: "config"
+        ref: "in-container settings: USE_LTI=False; migrationservice/views.py:168-171 gates on USE_LTI"
+        supports: "LTI disabled in deployment"
+      - type: "source"
+        ref: "cms/urls.py:29; lti/urls.py; lti/views.py:199-253 (LaunchView needs platform)"
+        supports: "Routes mounted but require external LMS"
+    proposed_resolution: >-
+      Kept jwks/public-key; excluded the launch/OIDC/select/my-media/embed flow with reason.
+      Sweep: all lti/* routes accounted for (jwks+public-key in scope, rest excluded).
+
+  - id: "issue-005"
+    location: "cross-schema (editor/manager/advancedUser reachability)"
+    description: >-
+      Many actions are gated by MediaCMS roles: is_mediacms_editor = superuser|is_manager|is_editor;
+      is_mediacms_manager = superuser|is_manager; upload/comment can be gated on advancedUser/
+      email_verified via CAN_ADD_MEDIA/CAN_COMMENT (both 'all' here). No non-superuser editor/manager
+      account was provisioned in the benchmark, so editor/manager-subject actions
+      (editor_*, manager_*, MediaEditor/MediaManager subjects) are confirmed via the superuser 'admin'
+      (which satisfies every editor/manager check) and from source, not via a dedicated editor/manager
+      login. Their black_box_reachable=true is annotated against the intended configuration (such an
+      account is mintable by an admin or via manage_users/role flags).
+    evidence:
+      - type: "source"
+        ref: "files/methods.py:95-104,126-135,433-456; cms/permissions.py:29-78"
+        supports: "Role predicates and gates"
+    proposed_resolution: "No schema change; reachability reconstructed and flagged (confidence 0.75-0.9)."
+
+  - id: "issue-006"
+    location: "L2:admin_cancel_task ; L1:http://localhost/api/v1/tasks/{friendly_token}"
+    description: >-
+      TaskDetail.delete is a no-op: the revoke(uid, terminate=True) call is commented out, so DELETE
+      always returns 204 and cancels nothing. The action is annotated by intent (Delete task) with a
+      KILL Exists(task) effect but confidence 0.6 and a note that no effect actually occurs in this build.
+    evidence:
+      - type: "source"
+        ref: "files/views/tasks.py:20-30"
+        supports: "Commented-out revoke; unconditional 204"
+    proposed_resolution: "Behavior inferred (no working implementation); flagged low-confidence."
+
+  - id: "issue-007"
+    location: "L1/L2 (missing-object returns 400, not 404; private-media anon path)"
+    description: >-
+      get_object in MediaDetail/CommentDetail/PlaylistDetail/UserDetail wraps lookups in
+      'except BaseException' and returns HTTP 400 for a non-existent id (not 404). Runtime confirms
+      GET /api/v1/media/doesnotexist -> 400 for all identities. Also, MediaDetail.get is written to
+      return 401 for private media, but for an anonymous caller AnonymousUser.has_member_access_to_media
+      raises and is caught, yielding 400 (observed anon=400 on a private token). Exists() preconditions
+      are thus annotated as 'missing -> 400' rather than 404/410.
+    evidence:
+      - type: "source"
+        ref: "files/views/media.py:831-853,1015-1027; files/views/comments.py:74-90"
+        supports: "Broad except -> 400"
+      - type: "runtime"
+        ref: "mediacms_gt/runtime_probe.txt (missing=400; private anon=400, user=200)"
+        supports: "Observed status codes"
+    proposed_resolution: "No schema change; Exists requirements documented against the observed 400."
+
+  - id: "issue-008"
+    location: "L2:user_bulk_* (ownership scoping as a fact)"
+    description: >-
+      MediaBulkUserActions filters Media.objects.filter(user=request.user, friendly_token__in=media_ids),
+      so every bulk action implicitly acts only on media the caller owns. The six-predicate language
+      cannot cleanly express 'the selected collection is scoped to media owned by the subject'; it is
+      approximated with Can(actor, <crud>, media) authorization requirements plus a reachability
+      condition 'media owned by the caller'. Membership/ownership read queries (get_ownership,
+      *_membership) are also scoped this way.
+    evidence:
+      - type: "source"
+        ref: "files/views/media.py:429-432"
+        supports: "Owner-scoped queryset for all bulk actions"
+    proposed_resolution: >-
+      Represented via Can(...) + reachability_conditions. Candidate for a future ownership/collection
+      predicate; do not change the schema here. Sweep: applies to all 22 bulk action values uniformly.
+
+  - id: "issue-009"
+    location: "L2:anon_login ; cross-schema (logout)"
+    description: >-
+      Login (api/v1/login and allauth) issues/returns a DRF Token and establishes a session; the token
+      is long-lived (rest_framework.authtoken has no built-in expiry). There is no api/v1 logout that
+      revokes the token - session logout (allauth accounts/logout) ends the session cookie but a token
+      obtained via api/v1/login or api/v1/user/token remains valid. anon_login GENs Authenticated and
+      Know(AuthToken); no corresponding token-KILL action exists.
+    evidence:
+      - type: "source"
+        ref: "users/views.py:459-482; users/serializers.py:134-138; users/urls.py (no api logout)"
+        supports: "Token issuance; no api logout/token-revocation endpoint"
+    proposed_resolution: "Documented; allauth logout kept as a page node (session only)."
+
+  - id: "issue-010"
+    location: "L1/L2:http://localhost/api/v1/media-auth"
+    description: >-
+      media_auth is an internal nginx auth_request oracle: its real input is the X-Original-URI header
+      (the protected path), the query string is intentionally discarded, and it answers 204/403. Its
+      contract is not a user-facing request/response body, so it is modeled as a grey_box Read with the
+      authorization decision as its only semantics (Can(actor,Read,media-file)); the header input is
+      io_accounting object_attribute rather than a reference fact.
+    evidence:
+      - type: "source"
+        ref: "files/views/media_auth.py:178-212"
+        supports: "Header-driven path-only authorization oracle"
+    proposed_resolution: "Grey-box visibility; no schema change."
+
+  - id: "issue-011"
+    location: "L1 scope (Django auto-admin)"
+    description: >-
+      The Django admin (DJANGO_ADMIN_URL='admin/') is mounted and functional for staff, exposing
+      generic CRUD over ~30 registered models (~180 changelist/add/change/delete/history routes). These
+      are a real privileged surface but are framework-generated HTML form views without a JSON IO
+      contract, so they are recorded collectively in l1_gt.yaml excluded_items rather than enumerated as
+      ~180 per-route L1 nodes. This is a deliberate scoping decision, flagged for review.
+    evidence:
+      - type: "runtime"
+        ref: "mediacms_gt/url_dump.txt (admin/* entries)"
+        supports: "Admin CRUD routes present in the running build"
+    proposed_resolution: >-
+      If the benchmark wants the admin as primary GT, enumerate per model as page nodes. Left excluded
+      with rationale for now.
