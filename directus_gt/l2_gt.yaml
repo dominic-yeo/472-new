@@ -1,0 +1,7212 @@
+schema_version: pengent-web-gt-v1
+environment_id: directus-oss
+nodes:
+- id: gt-action-001
+  name: Log in
+  kind: normal
+  description: A visitor authenticates and receives access+refresh tokens.
+  action_key: user_login
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: user_login
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: response
+      field: ''
+      resource: AccessToken(session)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: &id006
+      predicate: Know
+      arguments:
+      - &id001
+        kind: subject
+        id: actor
+        type: User
+        relative_role: SELF
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies email + password.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: Caller becomes authenticated.
+    - fact: &id003
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AccessToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Returns access + refresh tokens.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Login email.
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: access_token / AccessToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AccessToken(session:Session{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/auth/login
+    methods: &id002
+    - POST
+    selector:
+      field: method
+      values: *id002
+  confidence: 0.9
+  reasoning: login returns access+refresh tokens.
+  l1_keys:
+  - http://localhost:8055/auth/login
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Know(actor:User[SELF],AccessToken(session:Session{created}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Brute-force / credential-stuffing; 'otp' for 2FA.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: login
+    notes: null
+- id: gt-action-002
+  name: Refresh token
+  kind: normal
+  description: A holder of a refresh token obtains a new access token.
+  action_key: refresh_token
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: refresh_token
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: access_token
+    binding:
+      source: request
+      field: ''
+      resource: AccessToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: &id008
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RefreshToken
+        target:
+          kind: entity
+          id: session
+          type: Session
+          role: held
+    reason: Caller presents a refresh token (body or cookie).
+  effects:
+    gen:
+    - fact: *id003
+      basis: io_reference
+      reason: Returns a fresh access token (+ rotated refresh).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: refresh_token / RefreshToken(session)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RefreshToken(session:Session{held}))
+    ignored_reason: ''
+  - direction: output
+    field: access_token / AccessToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AccessToken(session:Session{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/auth/refresh
+    methods: &id004
+    - POST
+    selector:
+      field: method
+      values: *id004
+  confidence: 0.85
+  reasoning: refresh mints a new access token.
+  l1_keys:
+  - http://localhost:8055/auth/refresh
+  consumes:
+  - Know(actor:User[SELF],RefreshToken(session:Session{held}))
+  produces:
+  - Know(actor:User[SELF],AccessToken(session:Session{created}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Token refresh.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public; consumes a refresh token (replay / rotation surface).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: refresh
+    notes: null
+- id: gt-action-003
+  name: Request password reset
+  kind: normal
+  description: A visitor requests a password-reset email.
+  action_key: password_request
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: password_request
+    crud: Create
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: reset_requested
+    binding:
+      source: request
+      field: ''
+      resource: UserEmail(user)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: target
+        - reset_requested
+        - 'true'
+      basis: state_transition
+      reason: A reset email is sent if the address matches.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Target email (enumeration oracle).
+  - direction: input
+    field: reset_url / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Reset link base (allow-listed).
+  l1_bindings:
+  - l1_key: http://localhost:8055/auth/password/request
+    methods: &id005
+    - POST
+    selector:
+      field: method
+      values: *id005
+  confidence: 0.75
+  reasoning: password/request is a public reset trigger.
+  l1_keys:
+  - http://localhost:8055/auth/password/request
+  consumes: []
+  produces:
+  - State(user:User{target},reset_requested,true)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password reset request.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Email enumeration; reset_url validated against PASSWORD_RESET_URL_ALLOW_LIST.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: password/request
+    notes: null
+- id: gt-action-004
+  name: Reset password
+  kind: normal
+  description: An actor with a reset token sets a new password.
+  action_key: password_reset
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: password_reset
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: password
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ResetToken
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: target
+    reason: Caller holds a valid reset token.
+  - type: knowledge
+    fact: *id006
+    reason: Caller supplies a new password.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: target
+        - password
+        - reset
+      basis: state_transition
+      reason: The user password is reset.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: token / ResetToken(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ResetToken(user:User{target}))
+    ignored_reason: ''
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/auth/password/reset
+    methods: &id007
+    - POST
+    selector:
+      field: method
+      values: *id007
+  confidence: 0.8
+  reasoning: password/reset with a token takes over an account.
+  l1_keys:
+  - http://localhost:8055/auth/password/reset
+  consumes:
+  - Know(actor:User[SELF],ResetToken(user:User{target}))
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - State(user:User{target},password,reset)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password reset.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF a valid reset token is held -> account takeover.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: password/reset
+    notes: null
+- id: gt-action-005
+  name: Log out
+  kind: normal
+  description: A user logs out, invalidating their refresh token.
+  action_key: logout
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: logout
+    crud: Delete
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: self
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: subject
+      field: ''
+      resource: RefreshToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id008
+    reason: Caller presents the refresh token/session to invalidate.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: The session is invalidated.
+  io_accounting:
+  - direction: input
+    field: refresh_token / RefreshToken(session)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RefreshToken(session:Session{held}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/auth/logout
+    methods: &id009
+    - POST
+    selector:
+      field: method
+      values: *id009
+  confidence: 0.9
+  reasoning: logout invalidates the session.
+  l1_keys:
+  - http://localhost:8055/auth/logout
+  consumes:
+  - Know(actor:User[SELF],RefreshToken(session:Session{held}))
+  produces: []
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Holder of a refresh token/session.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: logout
+    notes: null
+- id: gt-action-006
+  name: List auth providers
+  kind: normal
+  description: List auth providers.
+  action_key: list_auth_providers
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: list_auth_providers
+    crud: Read
+  object:
+    kind: entity
+    id: provider
+    type: Provider
+    name: Provider
+    entity: Provider
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: AuthProvider(provider)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthProvider(provider)
+          target:
+            kind: entity
+            id: provider
+            type: Provider
+            role: collection
+      basis: io_reference
+      reason: Returns provider.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: provider / AuthProvider(provider)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthProvider(provider)(provider:Provider{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/auth
+    methods: &id010
+    - GET
+    selector:
+      field: method
+      values: *id010
+  confidence: 0.8
+  reasoning: List auth providers.
+  l1_keys:
+  - http://localhost:8055/auth
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],AuthProvider(provider)(provider:Provider{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List auth providers.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Fingerprints configured SSO providers.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-007
+  name: Bootstrap first admin
+  kind: normal
+  description: An actor creates the first admin on an un-initialized instance.
+  action_key: server_setup
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: server_setup
+    crud: Create
+  object:
+    kind: entity
+    id: admin
+    type: AdminUser
+    name: AdminUser
+    entity: AdminUser
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(admin)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id006
+    reason: Caller supplies the first admin's email + password.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: admin
+          type: AdminUser
+          role: created
+      basis: action_semantics
+      reason: The first admin account is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: admin
+            type: AdminUser
+            role: created
+      basis: io_reference
+      reason: Returns success.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: admin.email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Admin email.
+  - direction: input
+    field: admin.password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: data / UserID(admin)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(admin:AdminUser{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/server/setup
+    methods: &id011
+    - POST
+    selector:
+      field: method
+      values: *id011
+  confidence: 0.85
+  reasoning: server/setup seizes admin on an un-provisioned instance.
+  l1_keys:
+  - http://localhost:8055/server/setup
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Exists(admin:AdminUser{created})
+  - Know(actor:User[SELF],UserID(admin:AdminUser{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Bootstrap admin.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public but ONLY while setup is not completed (no admin) -> first-boot takeover window.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: setup
+    notes: null
+- id: gt-action-008
+  name: Read OpenAPI spec
+  kind: normal
+  description: Read OpenAPI spec.
+  action_key: server_specs_oas
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: server_specs_oas
+    crud: Read
+  object:
+    kind: entity
+    id: spec
+    type: Spec
+    name: Spec
+    entity: Spec
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: OpenApiSpec(server)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id014
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - AccessToken
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: OpenApiSpec(server)
+          target:
+            kind: entity
+            id: spec
+            type: Spec
+            role: self
+      basis: io_reference
+      reason: Returns spec.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: spec / OpenApiSpec(server)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],OpenApiSpec(server)(spec:Spec{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/server/specs/oas
+    methods: &id012
+    - GET
+    selector:
+      field: method
+      values: *id012
+  confidence: 0.8
+  reasoning: Read OpenAPI spec.
+  l1_keys:
+  - http://localhost:8055/server/specs/oas
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],OpenApiSpec(server)(spec:Spec{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read OpenAPI spec.
+    black_box_reachable: true
+    reachability_conditions:
+    - OPENAPI_ENABLED; accountability-scoped. Discloses visible collections/fields (recon).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-009
+  name: Read server info
+  kind: normal
+  description: Read server info.
+  action_key: server_info
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: server_info
+    crud: Read
+  object:
+    kind: entity
+    id: info
+    type: Info
+    name: Info
+    entity: Info
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ServerInfo(server)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ServerInfo(server)
+          target:
+            kind: entity
+            id: info
+            type: Info
+            role: self
+      basis: io_reference
+      reason: Returns info.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: info / ServerInfo(server)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ServerInfo(server)(info:Info{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/server/info
+    methods: &id013
+    - GET
+    selector:
+      field: method
+      values: *id013
+  confidence: 0.8
+  reasoning: Read server info.
+  l1_keys:
+  - http://localhost:8055/server/info
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],ServerInfo(server)(info:Info{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read server info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (limited) / authenticated (more). Version + project fingerprinting.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-010
+  name: Read collection items
+  kind: normal
+  description: A caller reads a collection's items, permission-filtered.
+  action_key: item_read
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: item_read
+    crud: Read
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: collection
+      resource: ItemID(item)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets a collection by name.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: item
+        type: Item
+        role: scope
+    reason: Policy grants read on <collection> (public role if no token).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ItemID
+          target:
+            kind: entity
+            id: item
+            type: Item
+            role: collection
+      basis: io_reference
+      reason: Returns permission-filtered items.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: input
+    field: fields / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Field selection / relation traversal.
+  - direction: output
+    field: data / ItemID(item)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ItemID(item:Item{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection
+    methods:
+    - GET
+    - SEARCH
+    selector:
+      field: method
+      values:
+      - GET
+      - SEARCH
+  confidence: 0.85
+  reasoning: the generic read is the primary data surface.
+  l1_keys:
+  - http://localhost:8055/items/:collection
+  consumes:
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  - Can(actor:User[SELF],Read,item:Item{scope})
+  produces:
+  - Know(actor:User[SELF],ItemID(item:Item{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dynamic collection read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy read grant on the collection (public role if unauthenticated). 'fields'/'deep' traverse relations
+      and over-expose related data.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: readHandler
+    notes: null
+- id: gt-action-011
+  name: Create collection item
+  kind: normal
+  description: A caller creates an item in a collection.
+  action_key: item_create
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: item_create
+    crud: Create
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: collection
+      resource: ItemID(item)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets a collection.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: item
+        type: Item
+        role: new
+    reason: Policy grants create on <collection>.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: item
+          type: Item
+          role: created
+      basis: action_semantics
+      reason: An item is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ItemID
+          target:
+            kind: entity
+            id: item
+            type: Item
+            role: created
+      basis: io_reference
+      reason: Returns the created item.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: input
+    field: data / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Item fields (field-permission scoped).
+  - direction: output
+    field: data / ItemID(item)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ItemID(item:Item{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.85
+  reasoning: create writes an item; fields are field-permission scoped.
+  l1_keys:
+  - http://localhost:8055/items/:collection
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  - Can(actor:User[SELF],Create,item:Item{new})
+  produces:
+  - Exists(item:Item{created})
+  - Know(actor:User[SELF],ItemID(item:Item{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dynamic collection create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy create grant on the collection.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: POST
+    notes: null
+- id: gt-action-012
+  name: Update items (batch/query)
+  kind: normal
+  description: Update items (batch/query).
+  action_key: item_update_batch
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: item_update_batch
+    crud: Update
+  object:
+    kind: state
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: ItemID(item)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id015
+        kind: entity
+        id: item
+        type: Item
+        role: target
+    reason: Policy grants '<collection>.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets an existing collection.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id015
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection
+    methods: &id016
+    - PATCH
+    selector:
+      field: method
+      values: *id016
+  confidence: 0.8
+  reasoning: Update items (batch/query).
+  l1_keys:
+  - http://localhost:8055/items/:collection
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,item:Item{target})
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  produces:
+  - State(item:Item{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update items (batch/query).
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy update grant. Batch update by keys/query = high blast radius.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: updateByQuery mutates every matching row.
+- id: gt-action-013
+  name: Delete items (batch/query)
+  kind: normal
+  description: Delete items (batch/query).
+  action_key: item_delete_batch
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: item_delete_batch
+    crud: Delete
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: ItemID(item)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id017
+        kind: entity
+        id: item
+        type: Item
+        role: target
+    reason: Policy grants '<collection>.delete'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets an existing collection.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id017
+      basis: action_semantics
+      reason: The item is removed.
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection
+    methods: &id018
+    - DELETE
+    selector:
+      field: method
+      values: *id018
+  confidence: 0.8
+  reasoning: Delete items (batch/query).
+  l1_keys:
+  - http://localhost:8055/items/:collection
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Delete,item:Item{target})
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete items (batch/query).
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy delete grant. deleteByQuery is destructive at scale.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-014
+  name: Read one item
+  kind: normal
+  description: Read one item.
+  action_key: item_read_one
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: item_read_one
+    crud: Read
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ItemID(item)
+    participants:
+    - id: pk
+      type: Item
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ItemID
+        target:
+          kind: entity
+          id: pk
+          type: Item
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: item
+        type: Item
+        role: scope
+    reason: Policy grants '<collection>.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ItemID(item)
+          target:
+            kind: entity
+            id: item
+            type: Item
+            role: target
+      basis: io_reference
+      reason: Returns item.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / ItemID(item)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ItemID(pk:Item{target}))
+    ignored_reason: ''
+  - direction: output
+    field: item / ItemID(item)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ItemID(item)(item:Item{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection/:pk
+    methods: &id019
+    - GET
+    selector:
+      field: method
+      values: *id019
+  confidence: 0.8
+  reasoning: Read one item.
+  l1_keys:
+  - http://localhost:8055/items/:collection/:pk
+  consumes:
+  - Know(actor:User[SELF],ItemID(pk:Item{target}))
+  - Can(actor:User[SELF],Read,item:Item{scope})
+  produces:
+  - Know(actor:User[SELF],ItemID(item)(item:Item{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read one item.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy read grant. A permission without a row filter exposes any item by pk (IDOR surface).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: Row-level access = permission filter; missing filter -> IDOR.
+- id: gt-action-015
+  name: Update one item
+  kind: normal
+  description: Update one item.
+  action_key: item_update_one
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: item_update_one
+    crud: Update
+  object:
+    kind: state
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: ItemID(item)
+    participants:
+    - id: pk
+      type: Item
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id020
+        kind: entity
+        id: item
+        type: Item
+        role: target
+    reason: Policy grants '<collection>.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ItemID
+        target:
+          kind: entity
+          id: pk
+          type: Item
+          role: target
+    reason: Targets an existing item.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id020
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / ItemID(item)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ItemID(pk:Item{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection/:pk
+    methods: &id021
+    - PATCH
+    selector:
+      field: method
+      values: *id021
+  confidence: 0.8
+  reasoning: Update one item.
+  l1_keys:
+  - http://localhost:8055/items/:collection/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,item:Item{target})
+  - Know(actor:User[SELF],ItemID(pk:Item{target}))
+  produces:
+  - State(item:Item{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update one item.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy update grant; row filter governs whether others' items are editable (IDOR surface).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-016
+  name: Delete one item
+  kind: normal
+  description: Delete one item.
+  action_key: item_delete_one
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: item_delete_one
+    crud: Delete
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: ItemID(item)
+    participants:
+    - id: pk
+      type: Item
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id022
+        kind: entity
+        id: item
+        type: Item
+        role: target
+    reason: Policy grants '<collection>.delete'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ItemID
+        target:
+          kind: entity
+          id: pk
+          type: Item
+          role: target
+    reason: Targets an existing item.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id022
+      basis: action_semantics
+      reason: The item is removed.
+  io_accounting:
+  - direction: input
+    field: pk / ItemID(item)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ItemID(pk:Item{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/items/:collection/:pk
+    methods: &id023
+    - DELETE
+    selector:
+      field: method
+      values: *id023
+  confidence: 0.8
+  reasoning: Delete one item.
+  l1_keys:
+  - http://localhost:8055/items/:collection/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Delete,item:Item{target})
+  - Know(actor:User[SELF],ItemID(pk:Item{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete one item.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy delete grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-017
+  name: List users
+  kind: normal
+  description: List users.
+  action_key: list_users
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: list_users
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Policy grants 'directus_users.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: collection
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users
+    methods: &id024
+    - GET
+    - SEARCH
+    selector:
+      field: method
+      values: *id024
+  confidence: 0.8
+  reasoning: List users.
+  l1_keys:
+  - http://localhost:8055/users
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Read,user:User{scope})
+  produces:
+  - Know(actor:User[SELF],UserID(user)(user:User{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List users.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users read grant. PII exposure if over-granted.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-018
+  name: Create user
+  kind: normal
+  description: Create user.
+  action_key: create_user
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Policy grants 'directus_users.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A user is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: created
+      basis: io_reference
+      reason: Returns the new user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users
+    methods: &id025
+    - POST
+    selector:
+      field: method
+      values: *id025
+  confidence: 0.8
+  reasoning: Create user.
+  l1_keys:
+  - http://localhost:8055/users
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,user:User{target})
+  produces:
+  - Exists(user:User{created})
+  - Know(actor:User[SELF],UserID(user)(user:User{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create user.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users create grant. 'role' assigns privileges -> escalation if an admin role.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: Role assignment at creation = escalation lever.
+- id: gt-action-019
+  name: Read one user
+  kind: normal
+  description: Read one user.
+  action_key: read_user
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: read_user
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: pk
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: pk
+          type: User
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Policy grants 'directus_users.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: target
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(pk:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/:pk
+    methods: &id026
+    - GET
+    selector:
+      field: method
+      values: *id026
+  confidence: 0.8
+  reasoning: Read one user.
+  l1_keys:
+  - http://localhost:8055/users/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Know(actor:User[SELF],UserID(pk:User{target}))
+  - Can(actor:User[SELF],Read,user:User{scope})
+  produces:
+  - Know(actor:User[SELF],UserID(user)(user:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read one user.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users read grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-020
+  name: Update one user
+  kind: normal
+  description: Update one user.
+  action_key: update_user
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: update_user
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: role
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: pk
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id027
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Policy grants 'directus_users.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: pk
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id027
+        - role
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(pk:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/:pk
+    methods: &id028
+    - PATCH
+    selector:
+      field: method
+      values: *id028
+  confidence: 0.8
+  reasoning: Update one user.
+  l1_keys:
+  - http://localhost:8055/users/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(pk:User{target}))
+  produces:
+  - State(user:User{target},role,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update one user.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users update grant. PATCH role/password on another user (absent a row filter) = takeover
+      / escalation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: Account-takeover + privilege-escalation primitive.
+- id: gt-action-021
+  name: Delete one user
+  kind: normal
+  description: Delete one user.
+  action_key: delete_user
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: delete_user
+    crud: Delete
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: pk
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id029
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Policy grants 'directus_users.delete'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: pk
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id029
+      basis: action_semantics
+      reason: The user is removed.
+  io_accounting:
+  - direction: input
+    field: pk / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(pk:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/:pk
+    methods: &id030
+    - DELETE
+    selector:
+      field: method
+      values: *id030
+  confidence: 0.8
+  reasoning: Delete one user.
+  l1_keys:
+  - http://localhost:8055/users/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Delete,user:User{target})
+  - Know(actor:User[SELF],UserID(pk:User{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete one user.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users delete grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-022
+  name: Read own account
+  kind: normal
+  description: Read own account.
+  action_key: read_me
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: read_me
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: self
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/me
+    methods: &id031
+    - GET
+    selector:
+      field: method
+      values: *id031
+  confidence: 0.8
+  reasoning: Read own account.
+  l1_keys:
+  - http://localhost:8055/users/me
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],UserID(user)(user:User{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read own account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (or share).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-023
+  name: Update own account
+  kind: normal
+  description: Update own account.
+  action_key: update_me
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: update_me
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: profile
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: target
+        - profile
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/me
+    methods: &id032
+    - PATCH
+    selector:
+      field: method
+      values: *id032
+  confidence: 0.8
+  reasoning: Update own account.
+  l1_keys:
+  - http://localhost:8055/users/me
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - State(user:User{target},profile,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update own account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated. Editable-field allow-list governs self-escalation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: Must not expose role/policies for self-edit.
+- id: gt-action-024
+  name: Invite user
+  kind: normal
+  description: Invite user.
+  action_key: invite_user
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: invite_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Policy grants 'directus_users.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A user is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: created
+      basis: io_reference
+      reason: Returns the new user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/invite
+    methods: &id033
+    - POST
+    selector:
+      field: method
+      values: *id033
+  confidence: 0.8
+  reasoning: Invite user.
+  l1_keys:
+  - http://localhost:8055/users/invite
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,user:User{target})
+  produces:
+  - Exists(user:User{created})
+  - Know(actor:User[SELF],UserID(user)(user:User{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Invite user.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users create grant. Invites into an arbitrary 'role' (escalation if admin).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-025
+  name: Accept user invite
+  kind: normal
+  description: An invited actor sets a password and activates the account.
+  action_key: accept_invite
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: accept_invite
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: password
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: invite
+      type: Invite
+      role: held
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: InviteToken
+        target:
+          kind: entity
+          id: invite
+          type: Invite
+          role: held
+    reason: Caller holds an invite token.
+  - type: knowledge
+    fact: *id006
+    reason: Caller sets a password.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: target
+        - password
+        - set
+      basis: state_transition
+      reason: The invited account is activated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: token / InviteToken(invite)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],InviteToken(invite:Invite{held}))
+    ignored_reason: ''
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/invite/accept
+    methods: &id034
+    - POST
+    selector:
+      field: method
+      values: *id034
+  confidence: 0.8
+  reasoning: invite/accept activates an account from a token.
+  l1_keys:
+  - http://localhost:8055/users/invite/accept
+  consumes:
+  - Know(actor:User[SELF],InviteToken(invite:Invite{held}))
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - State(user:User{target},password,set)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Invite acceptance.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF a valid invite token is held.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: invite/accept
+    notes: null
+- id: gt-action-026
+  name: Self-register
+  kind: normal
+  description: A visitor self-registers an account.
+  action_key: register_user
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: register_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id006
+    reason: Caller supplies email + password.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A user is registered.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: created
+      basis: io_reference
+      reason: Returns success (pending verification).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Email.
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: data / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/register
+    methods: &id035
+    - POST
+    selector:
+      field: method
+      values: *id035
+  confidence: 0.8
+  reasoning: register opens self-service accounts when enabled.
+  l1_keys:
+  - http://localhost:8055/users/register
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Exists(user:User{created})
+  - Know(actor:User[SELF],UserID(user:User{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public self-registration.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF registration is enabled (settings). Rate-limited. Lands in the default role.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: register
+    notes: null
+- id: gt-action-027
+  name: Disable a user's 2FA (admin)
+  kind: normal
+  description: Disable a user's 2FA (admin).
+  action_key: disable_user_tfa
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: disable_user_tfa
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: tfa
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: pk
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id036
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Policy grants 'admin'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: pk
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id036
+        - tfa
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(pk:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/users/:pk/tfa/disable
+    methods: &id037
+    - POST
+    selector:
+      field: method
+      values: *id037
+  confidence: 0.8
+  reasoning: Disable a user's 2FA (admin).
+  l1_keys:
+  - http://localhost:8055/users/:pk/tfa/disable
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(pk:User{target}))
+  produces:
+  - State(user:User{target},tfa,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Disable a user's 2FA (admin).
+    black_box_reachable: true
+    reachability_conditions:
+    - accountability.admin. Disables a victim's 2FA (account-weakening).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-028
+  name: List roles
+  kind: normal
+  description: List roles.
+  action_key: list_roles
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: list_roles
+    crud: Read
+  object:
+    kind: entity
+    id: role
+    type: Role
+    name: Role
+    entity: Role
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoleID(role)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: role
+        type: Role
+        role: scope
+    reason: Policy grants 'directus_roles.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoleID(role)
+          target:
+            kind: entity
+            id: role
+            type: Role
+            role: collection
+      basis: io_reference
+      reason: Returns role.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: role / RoleID(role)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoleID(role)(role:Role{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/roles
+    methods: &id038
+    - GET
+    - SEARCH
+    selector:
+      field: method
+      values: *id038
+  confidence: 0.8
+  reasoning: List roles.
+  l1_keys:
+  - http://localhost:8055/roles
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Read,role:Role{scope})
+  produces:
+  - Know(actor:User[SELF],RoleID(role)(role:Role{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List roles.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_roles read grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/roles.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-029
+  name: Create role
+  kind: normal
+  description: Create role.
+  action_key: create_role
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_role
+    crud: Create
+  object:
+    kind: entity
+    id: role
+    type: Role
+    name: Role
+    entity: Role
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: RoleID(role)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: role
+        type: Role
+        role: target
+    reason: Policy grants 'directus_roles.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: role
+          type: Role
+          role: created
+      basis: action_semantics
+      reason: A role is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoleID(role)
+          target:
+            kind: entity
+            id: role
+            type: Role
+            role: created
+      basis: io_reference
+      reason: Returns the new role.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: role / RoleID(role)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoleID(role)(role:Role{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/roles
+    methods: &id039
+    - POST
+    selector:
+      field: method
+      values: *id039
+  confidence: 0.8
+  reasoning: Create role.
+  l1_keys:
+  - http://localhost:8055/roles
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,role:Role{target})
+  produces:
+  - Exists(role:Role{created})
+  - Know(actor:User[SELF],RoleID(role)(role:Role{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create role.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_roles create grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/roles.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-030
+  name: Update role (attach policies)
+  kind: normal
+  description: Update role (attach policies).
+  action_key: update_role
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: update_role
+    crud: Update
+  object:
+    kind: state
+    id: role
+    type: Role
+    name: Role
+    entity: Role
+    role: target
+    attribute: ''
+    state_field: policies
+    binding:
+      source: request
+      field: ''
+      resource: RoleID(role)
+    participants:
+    - id: pk
+      type: Role
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id040
+        kind: entity
+        id: role
+        type: Role
+        role: target
+    reason: Policy grants 'directus_roles.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoleID
+        target:
+          kind: entity
+          id: pk
+          type: Role
+          role: target
+    reason: Targets an existing role.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id040
+        - policies
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / RoleID(role)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoleID(pk:Role{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/roles/:pk
+    methods: &id041
+    - PATCH
+    selector:
+      field: method
+      values: *id041
+  confidence: 0.8
+  reasoning: Update role (attach policies).
+  l1_keys:
+  - http://localhost:8055/roles/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,role:Role{target})
+  - Know(actor:User[SELF],RoleID(pk:Role{target}))
+  produces:
+  - State(role:Role{target},policies,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update role (attach policies).
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_roles update grant. Attaching an admin-access policy = escalation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/roles.ts
+      supports: route + controller
+    notes: Role<->policy link is an escalation lever.
+- id: gt-action-031
+  name: Create policy (admin_access)
+  kind: normal
+  description: Create policy (admin_access).
+  action_key: create_policy
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_policy
+    crud: Create
+  object:
+    kind: entity
+    id: policy
+    type: Policy
+    name: Policy
+    entity: Policy
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: PolicyID(policy)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: policy
+        type: Policy
+        role: target
+    reason: Policy grants 'directus_policies.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: policy
+          type: Policy
+          role: created
+      basis: action_semantics
+      reason: A policy is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PolicyID(policy)
+          target:
+            kind: entity
+            id: policy
+            type: Policy
+            role: created
+      basis: io_reference
+      reason: Returns the new policy.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: policy / PolicyID(policy)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PolicyID(policy)(policy:Policy{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/policies
+    methods: &id042
+    - POST
+    selector:
+      field: method
+      values: *id042
+  confidence: 0.8
+  reasoning: Create policy (admin_access).
+  l1_keys:
+  - http://localhost:8055/policies
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,policy:Policy{target})
+  produces:
+  - Exists(policy:Policy{created})
+  - Know(actor:User[SELF],PolicyID(policy)(policy:Policy{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create policy (admin_access).
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_policies create grant. admin_access=true policy = full superuser.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/policies.ts
+      supports: route + controller
+    notes: 'TOP escalation: a policy carries the admin_access bypass flag.'
+- id: gt-action-032
+  name: List policies
+  kind: normal
+  description: List policies.
+  action_key: list_policies
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: list_policies
+    crud: Read
+  object:
+    kind: entity
+    id: policy
+    type: Policy
+    name: Policy
+    entity: Policy
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: PolicyID(policy)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: policy
+        type: Policy
+        role: scope
+    reason: Policy grants 'directus_policies.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PolicyID(policy)
+          target:
+            kind: entity
+            id: policy
+            type: Policy
+            role: collection
+      basis: io_reference
+      reason: Returns policy.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: policy / PolicyID(policy)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PolicyID(policy)(policy:Policy{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/policies
+    methods: &id043
+    - GET
+    - SEARCH
+    selector:
+      field: method
+      values: *id043
+  confidence: 0.8
+  reasoning: List policies.
+  l1_keys:
+  - http://localhost:8055/policies
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Read,policy:Policy{scope})
+  produces:
+  - Know(actor:User[SELF],PolicyID(policy)(policy:Policy{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List policies.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_policies read grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/policies.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-033
+  name: Update policy flags
+  kind: normal
+  description: Update policy flags.
+  action_key: update_policy
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: update_policy
+    crud: Update
+  object:
+    kind: state
+    id: policy
+    type: Policy
+    name: Policy
+    entity: Policy
+    role: target
+    attribute: ''
+    state_field: admin_access
+    binding:
+      source: request
+      field: ''
+      resource: PolicyID(policy)
+    participants:
+    - id: pk
+      type: Policy
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id044
+        kind: entity
+        id: policy
+        type: Policy
+        role: target
+    reason: Policy grants 'directus_policies.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PolicyID
+        target:
+          kind: entity
+          id: pk
+          type: Policy
+          role: target
+    reason: Targets an existing policy.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id044
+        - admin_access
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / PolicyID(policy)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PolicyID(pk:Policy{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/policies/:pk
+    methods: &id045
+    - PATCH
+    selector:
+      field: method
+      values: *id045
+  confidence: 0.8
+  reasoning: Update policy flags.
+  l1_keys:
+  - http://localhost:8055/policies/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,policy:Policy{target})
+  - Know(actor:User[SELF],PolicyID(pk:Policy{target}))
+  produces:
+  - State(policy:Policy{target},admin_access,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update policy flags.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_policies update grant. Flipping admin_access=true = escalation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/policies.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-034
+  name: Create permission rule
+  kind: normal
+  description: Create permission rule.
+  action_key: create_permission
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_permission
+    crud: Create
+  object:
+    kind: entity
+    id: permission
+    type: Permission
+    name: Permission
+    entity: Permission
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: PermissionID(permission)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: permission
+        type: Permission
+        role: target
+    reason: Policy grants 'directus_permissions.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: permission
+          type: Permission
+          role: created
+      basis: action_semantics
+      reason: A permission is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PermissionID(permission)
+          target:
+            kind: entity
+            id: permission
+            type: Permission
+            role: created
+      basis: io_reference
+      reason: Returns the new permission.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: permission / PermissionID(permission)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PermissionID(permission)(permission:Permission{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/permissions
+    methods: &id046
+    - POST
+    selector:
+      field: method
+      values: *id046
+  confidence: 0.8
+  reasoning: Create permission rule.
+  l1_keys:
+  - http://localhost:8055/permissions
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,permission:Permission{target})
+  produces:
+  - Exists(permission:Permission{created})
+  - Know(actor:User[SELF],PermissionID(permission)(permission:Permission{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create permission rule.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_permissions create grant. A broad/unfiltered rule opens data to the policy's holders.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: Permission rows are the content-API grants.
+- id: gt-action-035
+  name: List permission rules
+  kind: normal
+  description: List permission rules.
+  action_key: list_permissions
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: list_permissions
+    crud: Read
+  object:
+    kind: entity
+    id: permission
+    type: Permission
+    name: Permission
+    entity: Permission
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: PermissionID(permission)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: permission
+        type: Permission
+        role: scope
+    reason: Policy grants 'directus_permissions.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PermissionID(permission)
+          target:
+            kind: entity
+            id: permission
+            type: Permission
+            role: collection
+      basis: io_reference
+      reason: Returns permission.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: permission / PermissionID(permission)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PermissionID(permission)(permission:Permission{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/permissions
+    methods: &id047
+    - GET
+    - SEARCH
+    selector:
+      field: method
+      values: *id047
+  confidence: 0.8
+  reasoning: List permission rules.
+  l1_keys:
+  - http://localhost:8055/permissions
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Read,permission:Permission{scope})
+  produces:
+  - Know(actor:User[SELF],PermissionID(permission)(permission:Permission{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List permission rules.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_permissions read grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-036
+  name: Edit permission rule
+  kind: normal
+  description: Edit permission rule.
+  action_key: update_permission
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: update_permission
+    crud: Update
+  object:
+    kind: state
+    id: permission
+    type: Permission
+    name: Permission
+    entity: Permission
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: PermissionID(permission)
+    participants:
+    - id: pk
+      type: Permission
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id048
+        kind: entity
+        id: permission
+        type: Permission
+        role: target
+    reason: Policy grants 'directus_permissions.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PermissionID
+        target:
+          kind: entity
+          id: pk
+          type: Permission
+          role: target
+    reason: Targets an existing permission.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id048
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / PermissionID(permission)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PermissionID(pk:Permission{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/permissions/:pk
+    methods: &id049
+    - PATCH
+    selector:
+      field: method
+      values: *id049
+  confidence: 0.8
+  reasoning: Edit permission rule.
+  l1_keys:
+  - http://localhost:8055/permissions/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,permission:Permission{target})
+  - Know(actor:User[SELF],PermissionID(pk:Permission{target}))
+  produces:
+  - State(permission:Permission{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Edit permission rule.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_permissions update grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-037
+  name: Read own permissions
+  kind: normal
+  description: Read own permissions.
+  action_key: permissions_me
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: permissions_me
+    crud: Read
+  object:
+    kind: entity
+    id: permission
+    type: Permission
+    name: Permission
+    entity: Permission
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: PermissionID(permission)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PermissionID(permission)
+          target:
+            kind: entity
+            id: permission
+            type: Permission
+            role: self
+      basis: io_reference
+      reason: Returns permission.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: permission / PermissionID(permission)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PermissionID(permission)(permission:Permission{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/permissions/me
+    methods: &id050
+    - GET
+    selector:
+      field: method
+      values: *id050
+  confidence: 0.8
+  reasoning: Read own permissions.
+  l1_keys:
+  - http://localhost:8055/permissions/me
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],PermissionID(permission)(permission:Permission{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read own permissions.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; discloses the caller's effective grants.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-038
+  name: Assign policy to user/role
+  kind: normal
+  description: Assign policy to user/role.
+  action_key: assign_policy
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: assign_policy
+    crud: Create
+  object:
+    kind: entity
+    id: access
+    type: Access
+    name: Access
+    entity: Access
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: AccessID(access)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: access
+        type: Access
+        role: target
+    reason: Policy grants 'directus_access.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: access
+          type: Access
+          role: created
+      basis: action_semantics
+      reason: A access is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AccessID(access)
+          target:
+            kind: entity
+            id: access
+            type: Access
+            role: created
+      basis: io_reference
+      reason: Returns the new access.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: access / AccessID(access)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AccessID(access)(access:Access{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/access
+    methods: &id051
+    - POST
+    selector:
+      field: method
+      values: *id051
+  confidence: 0.8
+  reasoning: Assign policy to user/role.
+  l1_keys:
+  - http://localhost:8055/access
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,access:Access{target})
+  produces:
+  - Exists(access:Access{created})
+  - Know(actor:User[SELF],AccessID(access)(access:Access{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Assign policy to user/role.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_access create grant. Attaching an admin-access policy to a user = escalation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/access.ts
+      supports: route + controller
+    notes: directus_access junction = direct escalation lever.
+- id: gt-action-039
+  name: Upload file
+  kind: normal
+  description: A user uploads a file.
+  action_key: upload_file
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: upload_file
+    crud: Create
+  object:
+    kind: entity
+    id: file
+    type: File
+    name: File
+    entity: File
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: FileID(file)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: file
+        type: File
+        role: new
+    reason: Policy grants directus_files.create.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: file
+          type: File
+          role: created
+      basis: action_semantics
+      reason: A file is stored.
+    - fact: &id053
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FileID
+          target:
+            kind: entity
+            id: file
+            type: File
+            role: created
+      basis: io_reference
+      reason: Returns the file record.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: file / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Multipart upload.
+  - direction: output
+    field: data / FileID(file)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FileID(file:File{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/files
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: upload stores a file.
+  l1_keys:
+  - http://localhost:8055/files
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,file:File{new})
+  produces:
+  - Exists(file:File{created})
+  - Know(actor:User[SELF],FileID(file:File{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: File upload.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files create grant. Stored-file + content-type surface.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: POST
+    notes: null
+- id: gt-action-040
+  name: List files
+  kind: normal
+  description: List files.
+  action_key: list_files
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: list_files
+    crud: Read
+  object:
+    kind: entity
+    id: file
+    type: File
+    name: File
+    entity: File
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: FileID(file)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: file
+        type: File
+        role: scope
+    reason: Policy grants 'directus_files.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FileID(file)
+          target:
+            kind: entity
+            id: file
+            type: File
+            role: collection
+      basis: io_reference
+      reason: Returns file.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: file / FileID(file)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FileID(file)(file:File{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/files
+    methods: &id052
+    - GET
+    - SEARCH
+    selector:
+      field: method
+      values: *id052
+  confidence: 0.8
+  reasoning: List files.
+  l1_keys:
+  - http://localhost:8055/files
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Read,file:File{scope})
+  produces:
+  - Know(actor:User[SELF],FileID(file)(file:File{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List files.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files read grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-041
+  name: Import file from URL (SSRF)
+  kind: normal
+  description: A user makes the server fetch and store a remote URL (SSRF).
+  action_key: import_file_url
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: import_file_url
+    crud: Create
+  object:
+    kind: entity
+    id: file
+    type: File
+    name: File
+    entity: File
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: FileID(file)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: file
+        type: File
+        role: new
+    reason: Policy grants directus_files.create.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: file
+          type: File
+          role: created
+      basis: action_semantics
+      reason: Remote content is fetched + stored.
+    - fact: *id053
+      basis: io_reference
+      reason: Returns the stored file.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: url / RemoteURL(url)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Attacker-chosen URL the server GETs (SSRF).
+  - direction: output
+    field: data / FileID(file)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FileID(file:File{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/files/import
+    methods: &id054
+    - POST
+    selector:
+      field: method
+      values: *id054
+  confidence: 0.8
+  reasoning: files/import makes the server fetch an attacker URL.
+  l1_keys:
+  - http://localhost:8055/files/import
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,file:File{new})
+  produces:
+  - Exists(file:File{created})
+  - Know(actor:User[SELF],FileID(file:File{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Import-from-URL (SSRF).
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files create grant. Server-side fetch of an arbitrary 'url' = SSRF.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: import
+    notes: null
+- id: gt-action-042
+  name: Update/replace file
+  kind: normal
+  description: Update/replace file.
+  action_key: update_file
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: update_file
+    crud: Update
+  object:
+    kind: state
+    id: file
+    type: File
+    name: File
+    entity: File
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: FileID(file)
+    participants:
+    - id: pk
+      type: File
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id055
+        kind: entity
+        id: file
+        type: File
+        role: target
+    reason: Policy grants 'directus_files.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: FileID
+        target:
+          kind: entity
+          id: pk
+          type: File
+          role: target
+    reason: Targets an existing file.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id055
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / FileID(file)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],FileID(pk:File{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/files/:pk
+    methods: &id056
+    - PATCH
+    selector:
+      field: method
+      values: *id056
+  confidence: 0.8
+  reasoning: Update/replace file.
+  l1_keys:
+  - http://localhost:8055/files/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,file:File{target})
+  - Know(actor:User[SELF],FileID(pk:File{target}))
+  produces:
+  - State(file:File{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update/replace file.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files update grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-043
+  name: Download/transform asset
+  kind: normal
+  description: Download/transform asset.
+  action_key: download_asset
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: download_asset
+    crud: Read
+  object:
+    kind: entity
+    id: file
+    type: File
+    name: File
+    entity: File
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: FileID(file)
+    participants:
+    - id: pk
+      type: File
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: FileID
+        target:
+          kind: entity
+          id: pk
+          type: File
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: file
+        type: File
+        role: scope
+    reason: Policy grants 'file.read'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FileID(file)
+          target:
+            kind: entity
+            id: file
+            type: File
+            role: target
+      basis: io_reference
+      reason: Returns file.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / FileID(file)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],FileID(pk:File{target}))
+    ignored_reason: ''
+  - direction: output
+    field: file / FileID(file)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FileID(file)(file:File{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/assets/:pk/:filename?
+    methods: &id057
+    - GET
+    selector:
+      field: method
+      values: *id057
+  confidence: 0.8
+  reasoning: Download/transform asset.
+  l1_keys:
+  - http://localhost:8055/assets/:pk/:filename?
+  consumes:
+  - Know(actor:User[SELF],FileID(pk:File{target}))
+  - Can(actor:User[SELF],Read,file:File{scope})
+  produces:
+  - Know(actor:User[SELF],FileID(file)(file:File{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Download/transform asset.
+    black_box_reachable: true
+    reachability_conditions:
+    - Read access to the file (public if allowed). Arbitrary transform params = CPU/memory DoS.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/assets.ts
+      supports: route + controller
+    notes: Image-transform params are a resource-exhaustion surface.
+- id: gt-action-044
+  name: Create folder
+  kind: normal
+  description: Create folder.
+  action_key: create_folder
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_folder
+    crud: Create
+  object:
+    kind: entity
+    id: folder
+    type: Folder
+    name: Folder
+    entity: Folder
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: FolderID(folder)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: folder
+        type: Folder
+        role: target
+    reason: Policy grants 'directus_folders.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: folder
+          type: Folder
+          role: created
+      basis: action_semantics
+      reason: A folder is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FolderID(folder)
+          target:
+            kind: entity
+            id: folder
+            type: Folder
+            role: created
+      basis: io_reference
+      reason: Returns the new folder.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: folder / FolderID(folder)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FolderID(folder)(folder:Folder{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/folders
+    methods: &id058
+    - POST
+    selector:
+      field: method
+      values: *id058
+  confidence: 0.8
+  reasoning: Create folder.
+  l1_keys:
+  - http://localhost:8055/folders
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,folder:Folder{target})
+  produces:
+  - Exists(folder:Folder{created})
+  - Know(actor:User[SELF],FolderID(folder)(folder:Folder{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create folder.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_folders create grant.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/folders.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-045
+  name: Trigger flow
+  kind: normal
+  description: An actor triggers a flow, executing its operation chain server-side.
+  action_key: trigger_flow
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: trigger_flow
+    crud: Update
+  object:
+    kind: entity
+    id: flow
+    type: Flow
+    name: Flow
+    entity: Flow
+    role: invoked
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: pk
+      resource: FlowID(flow)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: FlowID
+        target:
+          kind: entity
+          id: flow
+          type: Flow
+          role: target
+    reason: References a flow by id.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: flow
+          type: Flow
+          role: target
+        - execution
+        - run
+      basis: action_semantics
+      reason: The flow's operation chain executes server-side.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / FlowID(flow)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],FlowID(flow:Flow{target}))
+    ignored_reason: ''
+  - direction: input
+    field: body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Payload passed into the flow.
+  l1_bindings:
+  - l1_key: http://localhost:8055/flows/trigger/:pk
+    methods: &id059
+    - GET
+    - POST
+    selector:
+      field: method
+      values: *id059
+  confidence: 0.8
+  reasoning: triggering a webhook flow runs its server-side chain.
+  l1_keys:
+  - http://localhost:8055/flows/trigger/:pk
+  consumes:
+  - Know(actor:User[SELF],FlowID(flow:Flow{target}))
+  produces:
+  - State(flow:Flow{target},execution,run)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Flow execution.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Per the flow''s trigger config: a ''webhook'' flow can be PUBLIC. Runs operations (request=SSRF,
+      exec=sandboxed JS, item mutations) with the flow''s accountability.'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/flows.ts
+      supports: webhookFlowHandler
+    notes: null
+- id: gt-action-046
+  name: Create flow
+  kind: normal
+  description: Create flow.
+  action_key: create_flow
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_flow
+    crud: Create
+  object:
+    kind: entity
+    id: flow
+    type: Flow
+    name: Flow
+    entity: Flow
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: FlowID(flow)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: flow
+        type: Flow
+        role: target
+    reason: Policy grants 'directus_flows.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: flow
+          type: Flow
+          role: created
+      basis: action_semantics
+      reason: A flow is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FlowID(flow)
+          target:
+            kind: entity
+            id: flow
+            type: Flow
+            role: created
+      basis: io_reference
+      reason: Returns the new flow.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: flow / FlowID(flow)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FlowID(flow)(flow:Flow{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/flows
+    methods: &id060
+    - POST
+    selector:
+      field: method
+      values: *id060
+  confidence: 0.8
+  reasoning: Create flow.
+  l1_keys:
+  - http://localhost:8055/flows
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,flow:Flow{target})
+  produces:
+  - Exists(flow:Flow{created})
+  - Know(actor:User[SELF],FlowID(flow)(flow:Flow{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create flow.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_flows create grant. A flow with request/exec operations = SSRF/code by configuration.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/flows.ts
+      supports: route + controller
+    notes: Flow authoring = server-side automation authoring.
+- id: gt-action-047
+  name: Create flow operation
+  kind: normal
+  description: Create flow operation.
+  action_key: create_operation
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_operation
+    crud: Create
+  object:
+    kind: entity
+    id: operation
+    type: Operation
+    name: Operation
+    entity: Operation
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: OperationID(operation)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: operation
+        type: Operation
+        role: target
+    reason: Policy grants 'directus_operations.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: operation
+          type: Operation
+          role: created
+      basis: action_semantics
+      reason: A operation is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: OperationID(operation)
+          target:
+            kind: entity
+            id: operation
+            type: Operation
+            role: created
+      basis: io_reference
+      reason: Returns the new operation.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: operation / OperationID(operation)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],OperationID(operation)(operation:Operation{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/operations
+    methods: &id061
+    - POST
+    selector:
+      field: method
+      values: *id061
+  confidence: 0.8
+  reasoning: Create flow operation.
+  l1_keys:
+  - http://localhost:8055/operations
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,operation:Operation{target})
+  produces:
+  - Exists(operation:Operation{created})
+  - Know(actor:User[SELF],OperationID(operation)(operation:Operation{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create flow operation.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_operations create grant. 'exec' = sandboxed JS; 'request' = SSRF.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/operations.ts
+      supports: route + controller
+    notes: 'Operation building blocks: exec (code) + request (SSRF).'
+- id: gt-action-048
+  name: Export schema snapshot
+  kind: normal
+  description: Export schema snapshot.
+  action_key: schema_snapshot
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: schema_snapshot
+    crud: Read
+  object:
+    kind: entity
+    id: schema
+    type: Schema
+    name: Schema
+    entity: Schema
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: SchemaSnapshot(schema)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: schema
+        type: Schema
+        role: scope
+    reason: Policy grants 'admin'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SchemaSnapshot(schema)
+          target:
+            kind: entity
+            id: schema
+            type: Schema
+            role: self
+      basis: io_reference
+      reason: Returns schema.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: schema / SchemaSnapshot(schema)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SchemaSnapshot(schema)(schema:Schema{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/schema/snapshot
+    methods: &id062
+    - GET
+    selector:
+      field: method
+      values: *id062
+  confidence: 0.8
+  reasoning: Export schema snapshot.
+  l1_keys:
+  - http://localhost:8055/schema/snapshot
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Read,schema:Schema{scope})
+  produces:
+  - Know(actor:User[SELF],SchemaSnapshot(schema)(schema:Schema{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Export schema snapshot.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin only (checkIsAdmin). Full data-model disclosure.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-049
+  name: Apply schema changes
+  kind: normal
+  description: Apply schema changes.
+  action_key: schema_apply
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: schema_apply
+    crud: Update
+  object:
+    kind: state
+    id: schema
+    type: Schema
+    name: Schema
+    entity: Schema
+    role: target
+    attribute: ''
+    state_field: model
+    binding:
+      source: request
+      field: ''
+      resource: SchemaSnapshot(schema)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id063
+        kind: entity
+        id: schema
+        type: Schema
+        role: target
+    reason: Policy grants 'admin'.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id063
+        - model
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:8055/schema/apply
+    methods: &id064
+    - POST
+    selector:
+      field: method
+      values: *id064
+  confidence: 0.8
+  reasoning: Apply schema changes.
+  l1_keys:
+  - http://localhost:8055/schema/apply
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,schema:Schema{target})
+  produces:
+  - State(schema:Schema{target},model,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Apply schema changes.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin only. Create/alter/drop collections+fields -> destructive + surface-widening.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: Whole-schema write; highest-impact data-model primitive.
+- id: gt-action-050
+  name: Create collection
+  kind: normal
+  description: Create collection.
+  action_key: create_collection
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: create_collection
+    crud: Create
+  object:
+    kind: entity
+    id: collection
+    type: Collection
+    name: Collection
+    entity: Collection
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: CollectionName(collection)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: collection
+        type: Collection
+        role: target
+    reason: Policy grants 'directus_collections.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: collection
+          type: Collection
+          role: created
+      basis: action_semantics
+      reason: A collection is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: CollectionName(collection)
+          target:
+            kind: entity
+            id: collection
+            type: Collection
+            role: created
+      basis: io_reference
+      reason: Returns the new collection.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: collection / CollectionName(collection)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection)(collection:Collection{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/collections
+    methods: &id065
+    - POST
+    selector:
+      field: method
+      values: *id065
+  confidence: 0.8
+  reasoning: Create collection.
+  l1_keys:
+  - http://localhost:8055/collections
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,collection:Collection{target})
+  produces:
+  - Exists(collection:Collection{created})
+  - Know(actor:User[SELF],CollectionName(collection)(collection:Collection{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create collection.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / directus_collections. Creates a DB table.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collections.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-051
+  name: Add field to collection
+  kind: normal
+  description: Add field to collection.
+  action_key: create_field
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: create_field
+    crud: Create
+  object:
+    kind: entity
+    id: field
+    type: Field
+    name: Field
+    entity: Field
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: FieldName(field)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: field
+        type: Field
+        role: target
+    reason: Policy grants 'directus_fields.create'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets an existing collection.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: field
+          type: Field
+          role: created
+      basis: action_semantics
+      reason: A field is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FieldName(field)
+          target:
+            kind: entity
+            id: field
+            type: Field
+            role: created
+      basis: io_reference
+      reason: Returns the new field.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: output
+    field: field / FieldName(field)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FieldName(field)(field:Field{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/fields/:collection
+    methods: &id066
+    - POST
+    selector:
+      field: method
+      values: *id066
+  confidence: 0.8
+  reasoning: Add field to collection.
+  l1_keys:
+  - http://localhost:8055/fields/:collection
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,field:Field{target})
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  produces:
+  - Exists(field:Field{created})
+  - Know(actor:User[SELF],FieldName(field)(field:Field{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Add field to collection.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / directus_fields. Alters DB columns.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/fields.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-052
+  name: Export collection data
+  kind: normal
+  description: A user exports a collection's readable data to a file.
+  action_key: export_data
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: export_data
+    crud: Read
+  object:
+    kind: entity
+    id: export
+    type: Export
+    name: Export
+    entity: Export
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: collection
+      resource: ExportFile(export)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets a collection.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: collection
+        type: Collection
+        role: scope
+    reason: Policy grants read on the collection.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ExportFile
+          target:
+            kind: entity
+            id: export
+            type: Export
+            role: created
+      basis: io_reference
+      reason: Exports query results to a file (exfiltration).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: output
+    field: file / ExportFile(export)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ExportFile(export:Export{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/utils/export/:collection
+    methods: &id067
+    - POST
+    selector:
+      field: method
+      values: *id067
+  confidence: 0.8
+  reasoning: utils/export dumps readable data to a file.
+  l1_keys:
+  - http://localhost:8055/utils/export/:collection
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  - Can(actor:User[SELF],Read,collection:Collection{scope})
+  produces:
+  - Know(actor:User[SELF],ExportFile(export:Export{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Data export (exfil).
+    black_box_reachable: true
+    reachability_conditions:
+    - Read permission on the collection. Bulk exfiltration to a file.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: export
+    notes: null
+- id: gt-action-053
+  name: Import file into collection
+  kind: normal
+  description: Import file into collection.
+  action_key: import_data
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: import_data
+    crud: Create
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: ItemID(item)
+    participants:
+    - id: collection
+      type: Collection
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: item
+        type: Item
+        role: target
+    reason: Policy grants '<collection>.create'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionName
+        target:
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Targets an existing collection.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: item
+          type: Item
+          role: created
+      basis: action_semantics
+      reason: A item is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ItemID(item)
+          target:
+            kind: entity
+            id: item
+            type: Item
+            role: created
+      basis: io_reference
+      reason: Returns the new item.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: collection / CollectionName(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: output
+    field: item / ItemID(item)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ItemID(item)(item:Item{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/utils/import/:collection
+    methods: &id068
+    - POST
+    selector:
+      field: method
+      values: *id068
+  confidence: 0.8
+  reasoning: Import file into collection.
+  l1_keys:
+  - http://localhost:8055/utils/import/:collection
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,item:Item{target})
+  - Know(actor:User[SELF],CollectionName(collection:Collection{target}))
+  produces:
+  - Exists(item:Item{created})
+  - Know(actor:User[SELF],ItemID(item)(item:Item{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Import file into collection.
+    black_box_reachable: true
+    reachability_conditions:
+    - Create permission on the collection. Bulk write from an uploaded file.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-054
+  name: Batch import
+  kind: normal
+  description: Batch import.
+  action_key: import_batch
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: import_batch
+    crud: Update
+  object:
+    kind: state
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: items
+    binding:
+      source: request
+      field: ''
+      resource: ItemID(item)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: item
+          type: Item
+          role: target
+        - items
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:8055/utils/import
+    methods: &id069
+    - POST
+    selector:
+      field: method
+      values: *id069
+  confidence: 0.8
+  reasoning: Batch import.
+  l1_keys:
+  - http://localhost:8055/utils/import
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - State(item:Item{target},items,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Batch import.
+    black_box_reachable: true
+    reachability_conditions:
+    - Create/update permission; 'dangerouslyAllowDelete' flag enables deletions.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: dangerouslyAllowDelete makes this destructive.
+- id: gt-action-055
+  name: Clear cache
+  kind: normal
+  description: Clear cache.
+  action_key: clear_cache
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: clear_cache
+    crud: Delete
+  object:
+    kind: entity
+    id: cache
+    type: Cache
+    name: Cache
+    entity: Cache
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: Cache(cache)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id070
+        kind: entity
+        id: cache
+        type: Cache
+        role: target
+    reason: Policy grants 'admin'.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id070
+      basis: action_semantics
+      reason: The cache is removed.
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:8055/utils/cache/clear
+    methods: &id071
+    - POST
+    selector:
+      field: method
+      values: *id071
+  confidence: 0.8
+  reasoning: Clear cache.
+  l1_keys:
+  - http://localhost:8055/utils/cache/clear
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Delete,cache:Cache{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Clear cache.
+    black_box_reachable: true
+    reachability_conditions:
+    - Permission-gated (admin for system cache). Availability/consistency impact.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-056
+  name: Install extension (code)
+  kind: normal
+  description: Install extension (code).
+  action_key: install_extension
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: install_extension
+    crud: Create
+  object:
+    kind: entity
+    id: extension
+    type: Extension
+    name: Extension
+    entity: Extension
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: ExtensionID(extension)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: extension
+        type: Extension
+        role: target
+    reason: Policy grants 'admin'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: extension
+          type: Extension
+          role: created
+      basis: action_semantics
+      reason: A extension is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ExtensionID(extension)
+          target:
+            kind: entity
+            id: extension
+            type: Extension
+            role: created
+      basis: io_reference
+      reason: Returns the new extension.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: extension / ExtensionID(extension)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ExtensionID(extension)(extension:Extension{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/extensions/registry/install
+    methods: &id072
+    - POST
+    selector:
+      field: method
+      values: *id072
+  confidence: 0.8
+  reasoning: Install extension (code).
+  l1_keys:
+  - http://localhost:8055/extensions/registry/install
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,extension:Extension{target})
+  produces:
+  - Exists(extension:Extension{created})
+  - Know(actor:User[SELF],ExtensionID(extension)(extension:Extension{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Install extension (code).
+    black_box_reachable: true
+    reachability_conditions:
+    - admin. Installs + loads third-party extension code -> code-execution-adjacent / supply-chain.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: Loading an extension executes untrusted code.
+- id: gt-action-057
+  name: Enable/disable/remove extension
+  kind: normal
+  description: Enable/disable/remove extension.
+  action_key: manage_extension
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: manage_extension
+    crud: Update
+  object:
+    kind: state
+    id: extension
+    type: Extension
+    name: Extension
+    entity: Extension
+    role: target
+    attribute: ''
+    state_field: enabled
+    binding:
+      source: request
+      field: ''
+      resource: ExtensionID(extension)
+    participants:
+    - id: pk
+      type: Extension
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id073
+        kind: entity
+        id: extension
+        type: Extension
+        role: target
+    reason: Policy grants 'admin'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ExtensionID
+        target:
+          kind: entity
+          id: pk
+          type: Extension
+          role: target
+    reason: Targets an existing extension.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id073
+        - enabled
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / ExtensionID(extension)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ExtensionID(pk:Extension{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/extensions/:pk
+    methods: &id074
+    - PATCH
+    - DELETE
+    selector:
+      field: method
+      values: *id074
+  confidence: 0.8
+  reasoning: Enable/disable/remove extension.
+  l1_keys:
+  - http://localhost:8055/extensions/:pk
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,extension:Extension{target})
+  - Know(actor:User[SELF],ExtensionID(pk:Extension{target}))
+  produces:
+  - State(extension:Extension{target},enabled,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Enable/disable/remove extension.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin. Toggling/removing extensions changes loaded server code.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-058
+  name: List extensions
+  kind: normal
+  description: List extensions.
+  action_key: list_extensions
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: list_extensions
+    crud: Read
+  object:
+    kind: entity
+    id: extension
+    type: Extension
+    name: Extension
+    entity: Extension
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ExtensionID(extension)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ExtensionID(extension)
+          target:
+            kind: entity
+            id: extension
+            type: Extension
+            role: collection
+      basis: io_reference
+      reason: Returns extension.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: extension / ExtensionID(extension)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ExtensionID(extension)(extension:Extension{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/extensions
+    methods: &id075
+    - GET
+    selector:
+      field: method
+      values: *id075
+  confidence: 0.8
+  reasoning: List extensions.
+  l1_keys:
+  - http://localhost:8055/extensions
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],ExtensionID(extension)(extension:Extension{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List extensions.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (app). Reveals installed extensions.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-059
+  name: Authenticate to a share
+  kind: normal
+  description: A visitor authenticates to a share and receives an item-scoped token.
+  action_key: share_auth
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: share_auth
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: response
+      field: ''
+      resource: AccessToken(session)
+    participants:
+    - id: share
+      type: Share
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ShareID
+        target:
+          kind: entity
+          id: share
+          type: Share
+          role: target
+    reason: Caller knows a share id (+ password if set).
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - ShareToken
+      basis: auth_transition
+      reason: Caller gets item-scoped accountability.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AccessToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Returns an access token scoped to the shared item.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: share / ShareID(share)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ShareID(share:Share{target}))
+    ignored_reason: ''
+  - direction: input
+    field: password / SharePassword(share)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Share password (if set).
+  - direction: output
+    field: access_token / AccessToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AccessToken(session:Session{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/shares/auth
+    methods: &id076
+    - POST
+    selector:
+      field: method
+      values: *id076
+  confidence: 0.85
+  reasoning: shares/auth issues an item-scoped token with no login.
+  l1_keys:
+  - http://localhost:8055/shares/auth
+  consumes:
+  - Know(actor:User[SELF],ShareID(share:Share{target}))
+  produces:
+  - Authenticated(actor:User[SELF],ShareToken)
+  - Know(actor:User[SELF],AccessToken(session:Session{created}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public share login.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Share id (+ password if set) -> item-scoped token. Guessable id / weak password = unauthenticated
+      data access.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: auth
+    notes: null
+- id: gt-action-060
+  name: Read share info
+  kind: normal
+  description: Read share info.
+  action_key: share_info
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: share_info
+    crud: Read
+  object:
+    kind: entity
+    id: share
+    type: Share
+    name: Share
+    entity: Share
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ShareID(share)
+    participants:
+    - id: pk
+      type: Share
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ShareID
+        target:
+          kind: entity
+          id: pk
+          type: Share
+          role: target
+    reason: References the target by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ShareID(share)
+          target:
+            kind: entity
+            id: share
+            type: Share
+            role: target
+      basis: io_reference
+      reason: Returns share.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / ShareID(share)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ShareID(pk:Share{target}))
+    ignored_reason: ''
+  - direction: output
+    field: share / ShareID(share)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ShareID(share)(share:Share{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/shares/info/:pk
+    methods: &id077
+    - GET
+    selector:
+      field: method
+      values: *id077
+  confidence: 0.8
+  reasoning: Read share info.
+  l1_keys:
+  - http://localhost:8055/shares/info/:pk
+  consumes:
+  - Know(actor:User[SELF],ShareID(pk:Share{target}))
+  produces:
+  - Know(actor:User[SELF],ShareID(share)(share:Share{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read share info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (no auth). Confirms a share exists + whether a password is set (oracle).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: Share existence/password oracle.
+- id: gt-action-061
+  name: Create a share
+  kind: normal
+  description: Create a share.
+  action_key: create_share
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_share
+    crud: Create
+  object:
+    kind: entity
+    id: share
+    type: Share
+    name: Share
+    entity: Share
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: ShareID(share)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: share
+        type: Share
+        role: target
+    reason: Policy grants '<collection>.share'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: share
+          type: Share
+          role: created
+      basis: action_semantics
+      reason: A share is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ShareID(share)
+          target:
+            kind: entity
+            id: share
+            type: Share
+            role: created
+      basis: io_reference
+      reason: Returns the new share.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: share / ShareID(share)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ShareID(share)(share:Share{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/shares
+    methods: &id078
+    - POST
+    selector:
+      field: method
+      values: *id078
+  confidence: 0.8
+  reasoning: Create a share.
+  l1_keys:
+  - http://localhost:8055/shares
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,share:Share{target})
+  produces:
+  - Exists(share:Share{created})
+  - Know(actor:User[SELF],ShareID(share)(share:Share{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create a share.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_shares + 'share' permission. Exposes an item to unauthenticated link holders.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: Deliberate public-exposure primitive.
+- id: gt-action-062
+  name: Read project settings
+  kind: normal
+  description: Read project settings.
+  action_key: read_settings
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: read_settings
+    crud: Read
+  object:
+    kind: entity
+    id: settings
+    type: Settings
+    name: Settings
+    entity: Settings
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: Settings(instance)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Settings(instance)
+          target:
+            kind: entity
+            id: settings
+            type: Settings
+            role: self
+      basis: io_reference
+      reason: Returns settings.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: settings / Settings(instance)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Settings(instance)(settings:Settings{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/settings
+    methods: &id079
+    - GET
+    selector:
+      field: method
+      values: *id079
+  confidence: 0.8
+  reasoning: Read project settings.
+  l1_keys:
+  - http://localhost:8055/settings
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],Settings(instance)(settings:Settings{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read project settings.
+    black_box_reachable: true
+    reachability_conditions:
+    - App users (some fields drive the login screen).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/settings.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-063
+  name: Update project settings
+  kind: normal
+  description: Update project settings.
+  action_key: update_settings
+  subject:
+    id: actor
+    identity: AdminUser
+    role: AdminAccess
+    auth_context: AccessToken
+  operation:
+    business: update_settings
+    crud: Update
+  object:
+    kind: state
+    id: settings
+    type: Settings
+    name: Settings
+    entity: Settings
+    role: target
+    attribute: ''
+    state_field: config
+    binding:
+      source: request
+      field: ''
+      resource: Settings(instance)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id080
+        kind: entity
+        id: settings
+        type: Settings
+        role: target
+    reason: Policy grants 'directus_settings.update'.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id080
+        - config
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:8055/settings
+    methods: &id081
+    - PATCH
+    selector:
+      field: method
+      values: *id081
+  confidence: 0.8
+  reasoning: Update project settings.
+  l1_keys:
+  - http://localhost:8055/settings
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,settings:Settings{target})
+  produces:
+  - State(settings:Settings{target},config,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update project settings.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_settings update (admin). Reconfigure storage/CORS/auth/registration/default role -> workspace-takeover-adjacent.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/settings.ts
+      supports: route + controller
+    notes: Controls registration, default roles, storage and CORS.
+- id: gt-action-064
+  name: Promote content version
+  kind: normal
+  description: Promote content version.
+  action_key: promote_version
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: promote_version
+    crud: Update
+  object:
+    kind: state
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: target
+    attribute: ''
+    state_field: main
+    binding:
+      source: request
+      field: ''
+      resource: VersionID(version)
+    participants:
+    - id: pk
+      type: Version
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id082
+        kind: entity
+        id: item
+        type: Item
+        role: target
+    reason: Policy grants '<collection>.update'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: VersionID
+        target:
+          kind: entity
+          id: pk
+          type: Version
+          role: target
+    reason: Targets an existing version.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id082
+        - main
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: pk / VersionID(version)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],VersionID(pk:Version{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/versions/:pk/promote
+    methods: &id083
+    - POST
+    selector:
+      field: method
+      values: *id083
+  confidence: 0.8
+  reasoning: Promote content version.
+  l1_keys:
+  - http://localhost:8055/versions/:pk/promote
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Update,item:Item{target})
+  - Know(actor:User[SELF],VersionID(pk:Version{target}))
+  produces:
+  - State(item:Item{target},main,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Promote content version.
+    black_box_reachable: true
+    reachability_conditions:
+    - Update permission on the versioned collection. Promotes draft content to live.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/versions.ts
+      supports: route + controller
+    notes: Draft->live publish path.
+- id: gt-action-065
+  name: Create content version
+  kind: normal
+  description: Create content version.
+  action_key: create_version
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_version
+    crud: Create
+  object:
+    kind: entity
+    id: version
+    type: Version
+    name: Version
+    entity: Version
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: VersionID(version)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: version
+        type: Version
+        role: target
+    reason: Policy grants 'directus_versions.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: version
+          type: Version
+          role: created
+      basis: action_semantics
+      reason: A version is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: VersionID(version)
+          target:
+            kind: entity
+            id: version
+            type: Version
+            role: created
+      basis: io_reference
+      reason: Returns the new version.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: version / VersionID(version)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],VersionID(version)(version:Version{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/versions
+    methods: &id084
+    - POST
+    selector:
+      field: method
+      values: *id084
+  confidence: 0.8
+  reasoning: Create content version.
+  l1_keys:
+  - http://localhost:8055/versions
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,version:Version{target})
+  produces:
+  - Exists(version:Version{created})
+  - Know(actor:User[SELF],VersionID(version)(version:Version{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create content version.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_versions + collection permission.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/versions.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-066
+  name: Comment on an item
+  kind: normal
+  description: Comment on an item.
+  action_key: create_comment
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: create_comment
+    crud: Create
+  object:
+    kind: entity
+    id: comment
+    type: Comment
+    name: Comment
+    entity: Comment
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: CommentID(comment)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: comment
+        type: Comment
+        role: target
+    reason: Policy grants 'directus_comments.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: comment
+          type: Comment
+          role: created
+      basis: action_semantics
+      reason: A comment is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: CommentID(comment)
+          target:
+            kind: entity
+            id: comment
+            type: Comment
+            role: created
+      basis: io_reference
+      reason: Returns the new comment.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: comment / CommentID(comment)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CommentID(comment)(comment:Comment{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/comments
+    methods: &id085
+    - POST
+    selector:
+      field: method
+      values: *id085
+  confidence: 0.8
+  reasoning: Comment on an item.
+  l1_keys:
+  - http://localhost:8055/comments
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,comment:Comment{target})
+  produces:
+  - Exists(comment:Comment{created})
+  - Know(actor:User[SELF],CommentID(comment)(comment:Comment{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Comment on an item.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_comments create grant. Stored content (studio-XSS surface).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/comments.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-067
+  name: Send notification
+  kind: normal
+  description: Send notification.
+  action_key: send_notification
+  subject:
+    id: actor
+    identity: AuthUser
+    role: AppUser
+    auth_context: AccessToken
+  operation:
+    business: send_notification
+    crud: Create
+  object:
+    kind: entity
+    id: notification
+    type: Notification
+    name: Notification
+    entity: Notification
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: NotificationID(notification)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id014
+    reason: Authenticated (token resolves to a policy).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: notification
+        type: Notification
+        role: target
+    reason: Policy grants 'directus_notifications.create'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: notification
+          type: Notification
+          role: created
+      basis: action_semantics
+      reason: A notification is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: NotificationID(notification)
+          target:
+            kind: entity
+            id: notification
+            type: Notification
+            role: created
+      basis: io_reference
+      reason: Returns the new notification.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: notification / NotificationID(notification)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],NotificationID(notification)(notification:Notification{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/notifications
+    methods: &id086
+    - POST
+    selector:
+      field: method
+      values: *id086
+  confidence: 0.8
+  reasoning: Send notification.
+  l1_keys:
+  - http://localhost:8055/notifications
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Can(actor:User[SELF],Create,notification:Notification{target})
+  produces:
+  - Exists(notification:Notification{created})
+  - Know(actor:User[SELF],NotificationID(notification)(notification:Notification{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Send notification.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_notifications create grant. Can message arbitrary users (in-app phishing).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/notifications.ts
+      supports: route + controller
+    notes: null
+- id: gt-action-068
+  name: GraphQL query/mutation
+  kind: normal
+  description: A caller queries/mutates via GraphQL under the same permission model.
+  action_key: graphql_query
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: graphql_query
+    crud: Read
+  object:
+    kind: entity
+    id: item
+    type: Item
+    name: Item
+    entity: Item
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ItemID(item)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: item
+        type: Item
+        role: scope
+    reason: Same policy permission model as REST (public role if no token).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ItemID
+          target:
+            kind: entity
+            id: item
+            type: Item
+            role: collection
+      basis: io_reference
+      reason: Returns query results (permission-filtered).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: GraphQL query (depth/complexity = DoS).
+  - direction: output
+    field: data / ItemID(item)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ItemID(item:Item{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8055/graphql
+    methods: &id087
+    - POST
+    - GET
+    selector:
+      field: method
+      values: *id087
+  confidence: 0.8
+  reasoning: GraphQL mirrors the REST permission model.
+  l1_keys:
+  - http://localhost:8055/graphql
+  consumes:
+  - Can(actor:User[SELF],Read,item:Item{scope})
+  produces:
+  - Know(actor:User[SELF],ItemID(item:Item{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: GraphQL (items).
+    black_box_reachable: true
+    reachability_conditions:
+    - Same accountability/permission model as REST, re-exposed as GraphQL. Introspection + query depth
+      = recon/DoS surface.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/graphql.ts
+      supports: items
+    notes: null
+edges: []
+annotation_issues: []

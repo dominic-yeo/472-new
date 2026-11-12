@@ -1,0 +1,69 @@
+schema_version: pengent-web-gt-v1
+environment_id: "ghost-oss"
+
+target:
+  application: "Ghost (OSS)"
+  version: "6.76.0-rc.0 (ghost/core/package.json)"
+  kind: "Node.js/Express publishing platform -- Admin API + Content API + Members API + Ember Admin SPA + themed frontend"
+  source_tree: "ghost/ (TryGhost/Ghost monorepo); core at ghost/core/server"
+  authoritative_routes:
+    - "ghost/core/server/web/api/endpoints/content/routes.js  (Content API)"
+    - "ghost/core/server/web/api/endpoints/admin/routes.js     (Admin API, ~180 routes)"
+    - "ghost/core/server/web/members/app.js                    (Members API)"
+  handler_semantics: "ghost/core/server/web/api/endpoints/admin/middleware.js (authAdminApi / publicAdminApi chains)"
+
+deployment:
+  origin: "http://localhost:2368"
+  mounts: "/ghost/api/content, /ghost/api/admin (web/api/app.js lazyUse); /members/api (web/parent/frontend.js)"
+  notes: >-
+    Ghost 5+ requires MySQL in production and blocks SQLite; the GT targets a standard install.
+    Admin SPA is served at /ghost/. A fresh install must be set up (owner created) via
+    POST /ghost/api/admin/authentication/setup before most endpoints work.
+
+auth_model:
+  content_api: "Content API key via ?key= or Authorization; read-only published content (authenticatePublic)."
+  admin_api: >-
+    authAdminApi chain = authenticateAdminApi (AdminSession cookie OR Admin API key JWT 'Ghost <id>:<secret>')
+    THEN authorizeAdminApi (role/permission). Bootstrap routes (session, authentication/setup|reset|invitation,
+    publicAdminApi /site) are UN-authenticated. authAdminApiWithUrl = token-in-URL (scheduler/gifts/poll).
+  members_api: "member session established from a magic-link / one-time-code (createSessionFromMagicLink)."
+  roles: "Owner > Administrator > Editor > Author > Contributor (+ custom); enforced by authorizeAdminApi per-endpoint."
+
+identities_needed:
+  - "anonymous (no auth)"
+  - "content_client (holds a Content API key)"
+  - "owner (first user; created at setup)"
+  - "administrator / editor / author (lower staff roles, to test role boundaries)"
+  - "member (magic-link session)"
+  - "integration (Admin API key)"
+
+notable_findings_source_derived:
+  - "Unauthenticated owner creation: POST /authentication/setup works only pre-setup (setup-race surface)."
+  - "Unauthenticated reset + magic-link requests = user-enumeration + email-bomb surfaces."
+  - "Member impersonation: GET /admin/members/:id/signin_urls mints a one-click sign-in URL AS the member."
+  - "Owner-only takeover primitive: PUT /admin/users/owner (transfer ownership)."
+  - "Mass data surfaces: GET /admin/db (full export), DELETE /admin/db (wipe), POST /admin/db (import)."
+  - "Code/SSRF-adjacent: POST /admin/themes/upload (ZIP), POST /admin/themes/install (remote fetch), POST /admin/webhooks (target_url)."
+  - "Creating an integration mints a persistent Admin API key."
+
+runtime_grounding:
+  status: "PARTIAL -- 14 L1 nodes route_confirmed against official ghost:6-alpine (dev/SQLite). All 3 auth planes grounded."
+  instance: "ghost:6-alpine, NODE_ENV=development, security__staffDeviceVerification=false, SQLite, http://localhost:2368."
+  identities_used: "anonymous | staff (admin session cookie, owner) | contentclient (minted Content API key)."
+  probe: "runtime/probe.ps1 -> runtime/probe_results/{matrix.json,fixtures.json,summary.txt}"
+  confirmed:
+    - "publicAdminApi /admin/site -> 200 (public)."
+    - "Admin API session plane: anon 403 vs owner-session 200 on posts/users/members/settings/integrations; owner POST /posts 201 (needs staffDeviceVerification=false -- see ghost-008)."
+    - "Content API: no key 403, with minted Content API key 200 (ghost-002)."
+    - "Bootstrap: isSetup 200; setup fresh 201; setup after owner 403 (one-time, ghost-003)."
+    - "password_reset enumeration oracle: known email 500 / unknown 404 (ghost-009)."
+    - "Members: /api/site 200 public; member self without session 204."
+  caveats:
+    - "staffDeviceVerification=TRUE (prod default) blocks the session plane without SMTP (ghost-008)."
+    - "send-magic-link returned 400 (request body shape not yet matched); role boundaries (ghost-004) need lower-role tokens."
+    - "Image is ghost:6-alpine (a release patch); GT source is v6.76.0-rc.0 -- minor version-divergence possible."
+
+status: >-
+  Source-derived GT at ghost/ v6.76.0-rc.0. validate_gt.py OK: 112 L1 nodes, 59 L2 actions, all 42
+  candidates covered. Runtime: PARTIALLY grounded (14 nodes route_confirmed; all 3 auth planes
+  confirmed) against ghost:6-alpine -- see runtime_grounding + annotation_issues ghost-008..010.

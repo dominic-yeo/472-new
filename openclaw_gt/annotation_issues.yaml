@@ -1,0 +1,64 @@
+# OpenClaw agentic GT -- annotation issues (modeling decisions; NOT vulnerabilities)
+issues:
+  - id: doc-derived
+    kind: evidence
+    note: >
+      This model is derived from the repo's design docs (docs/concepts, docs/gateway, docs/tools, qa/scenarios),
+      which are authoritative but not code. source_ref cites doc paths. A follow-up should confirm tool names,
+      hook names, and policy keys against src/ + packages/ and adjust evidence_status where code diverges.
+
+  - id: platform-granularity
+    kind: granularity
+    note: >
+      OpenClaw is a platform with many channels/runtimes. Modeled at the class level: 3 agents (primary fleet
+      agent, background subagent, ring-zero system agent); tools grouped as exec/file/browser/message/
+      subagent_spawn/agent_send/mcp/skills/session. Channels are invocation_surfaces, not separate agents.
+
+  - id: external-runtimes
+    kind: modeling
+    note: >
+      The agent loop can be the built-in runner or an external runtime (claude-cli/codex/copilot/muse). Modeled
+      as one agent with model_config.provider = the selected runtime; the tool surface is bridged through native
+      hooks regardless.
+
+  - id: sandbox-as-posture
+    kind: authority
+    note: >
+      exec/file/browser execution_environment depends on the sandbox backend (Docker default network:none, or
+      Crabbox, or UNSANDBOXED host). Captured on each binding + ctl.sandbox; the host-vs-sandbox choice is the
+      decisive posture to confirm at runtime.
+
+  - id: l1-l2-forward-refs
+    kind: cross-layer
+    note: openclaw L1/L2 GT not built; l1/channel/l2 ids are forward references.
+
+methodology_feedback:
+  - id: messaging-channel-entry
+    target: methodology Phase A (invocation surfaces)
+    finding: >
+      OpenClaw's primary untrusted entry is a MESSAGING CHANNEL, not an HTTP endpoint. The methodology's
+      invocation_surfaces should explicitly include non-HTTP channels (messaging, A2A, scheduler) and tie the
+      who-can-invoke gate (DM allowlist) to a control, as done here (ctl.dm_allowlist + edge.channel__primary
+      with decision_maker external_event).
+
+  - id: fleet-lateral-movement
+    target: schema / methodology
+    finding: >
+      Multi-agent fleets add a LATERAL dimension: agent-to-agent send (sink.agent_send -> peer's
+      ctx.cross_agent_message) and cross-agent session visibility. The schema captured this with
+      becomes_context_source_ids + a dedicated control (ctl.agent_to_agent). Methodology should name
+      "cross-agent reachability" as an explicit extraction target for fleet apps.
+
+  - id: programmable-tool-hook
+    target: schema controls
+    finding: >
+      before_tool_call is a programmable, blocking, code-implemented tool guard (not a fixed policy).
+      Modeled as ctl.before_tool_hook (tool_policy / before_tool / blocking / code). Fits cleanly; worth
+      citing as the canonical "host hook" control example.
+
+  - id: sandbox-posture-field
+    target: schema tool_bindings.execution_environment
+    finding: >
+      execution_environment captured the three sandbox postures (docker network:none / crabbox lease / host)
+      well. Suggest the methodology require recording whether a sandbox is ON by default vs opt-in, since the
+      same binding is code_execution either way but the reachable blast radius differs by posture.

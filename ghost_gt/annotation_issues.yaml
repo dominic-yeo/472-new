@@ -1,0 +1,148 @@
+schema_version: pengent-web-gt-v1
+environment_id: "ghost-oss"
+
+issues:
+  - id: "ghost-001"
+    location: "L1: multi-method routes collapsed to one node (method selectors)"
+    description: >-
+      Express dispatches one path across verbs, so /posts (GET+POST), /posts/:id (GET+PUT+DELETE),
+      /session (POST+DELETE), /db (GET+POST+DELETE), /authentication/setup (GET+POST), etc. are each ONE
+      L1 node with multiple io_variants; distinct business actions are separate L2 actions bound by a
+      method selector (sel_field=method).
+    evidence:
+      - type: "source"
+        ref: "ghost/core/server/web/api/endpoints/admin/routes.js"
+        supports: "Multi-method routes"
+    proposed_resolution: "No schema change; l1_bindings carry sel_field=method."
+
+  - id: "ghost-002"
+    location: "L2: three distinct auth planes with different credentials"
+    description: >-
+      Content API (key), Admin API (session cookie OR Admin API key JWT, then role), Members API
+      (magic-link session) are separate credential systems on the same host. Subjects ContentClient /
+      Staff|Administrator|Owner|Integration / Member capture this. A single endpoint's reachability
+      depends on which plane it lives in; cross-plane confusion (e.g. a Content key on an Admin route)
+      is a probing dimension.
+    evidence:
+      - type: "source"
+        ref: "admin/middleware.js (authAdminApi/publicAdminApi); members/app.js (createSessionFromMagicLink)"
+        supports: "Three auth planes"
+    proposed_resolution: "Record identity_statuses per plane at runtime."
+
+  - id: "ghost-003"
+    location: "L2: unauthenticated bootstrap surface (setup / reset / invitation / magic-link)"
+    description: >-
+      POST /authentication/setup (create owner, pre-setup only), POST /authentication/password_reset
+      (emails reset), POST /authentication/invitation (accept), and /members/api/send-magic-link are all
+      unauthenticated. They are user-enumeration, email-bomb, and (for setup) account-takeover-race
+      surfaces. Modeled with subject Anonymous and reach_conds noting the gates.
+    evidence:
+      - type: "source"
+        ref: "admin/routes.js:438-456 (authentication.* with no authAdminApi); members/app.js send-magic-link"
+        supports: "Unauthenticated bootstrap"
+    proposed_resolution: "Confirm pre- vs post-setup behaviour and rate-limiting at runtime."
+
+  - id: "ghost-004"
+    location: "L2: role-boundary (privilege escalation) surfaces"
+    description: >-
+      authorizeAdminApi enforces per-endpoint roles that the route table alone does not show. High-value
+      boundaries: PUT /users/owner (Owner only), PUT/DELETE /users/:id (edit/delete a higher-role user),
+      POST /invites (invite a role >= your own), POST /integrations (mint an Admin API key),
+      GET /members/:id/signin_urls (member impersonation). Modeled as authorization req(Can(...)); the
+      EXACT role per endpoint is confidence-flagged and must be confirmed against roles/permissions
+      fixtures at runtime.
+    evidence:
+      - type: "source"
+        ref: "admin/routes.js (users/owner, invites, integrations, members signin_urls); authorizeAdminApi"
+        supports: "Role-gated privileged actions"
+    proposed_resolution: "Probe each with Author/Editor/Admin/Owner tokens to fill the real role boundary."
+
+  - id: "ghost-005"
+    location: "L2: dangerous content/theme/file surfaces"
+    description: >-
+      GET /admin/db (full content export = exfiltration), DELETE /admin/db (destructive wipe),
+      POST /admin/db (bulk import = mass-assignment), POST /admin/themes/upload (arbitrary ZIP of
+      server-rendered templates), POST /admin/themes/install (server fetches a remote source =
+      SSRF-adjacent), POST /admin/images|media|files/upload (file validation), POST /admin/webhooks
+      (attacker-controlled target_url = SSRF-adjacent). All require admin auth but are high-impact.
+    evidence:
+      - type: "source"
+        ref: "admin/routes.js:388-400 db; 358-377 themes; 458-491 uploads; webhooks"
+        supports: "High-impact admin surfaces"
+    proposed_resolution: "Fuzz import/upload validation + theme ZIP handling on a grounded instance."
+
+  - id: "ghost-006"
+    location: "L1 scope: Admin API long tail + frontend/SPA excluded from L2"
+    description: >-
+      ~40 lower-value Admin resources (stats, automations, automated_emails, emails, offers, labels,
+      snippets, recommendations, newsletters, links, oembed, actions, email_previews, slack, tinybird,
+      featurebase, mentions, custom_theme_settings, apps/*, members/metafields/*) are enumerated as L1
+      api nodes WITHOUT io_variants (surface-complete, L2-deferred). The themed frontend (/, /:slug, rss,
+      sitemap, amp) and the Ember Admin SPA (/ghost/) are page/static nodes.
+    evidence:
+      - type: "source"
+        ref: "admin/routes.js (full table); web/parent/frontend.js; web/admin"
+        supports: "Scoped enumeration"
+    proposed_resolution: "Expand L2 over the tail if those resources become in-scope."
+
+  - id: "ghost-007"
+    location: "Runtime grounding pending"
+    description: >-
+      Statuses/identity_statuses/route_confirmed are left for runtime capture. Probing needs a running
+      Ghost with an owner created (POST /authentication/setup), a Content API key + Admin API key
+      (minted via an integration), and ideally lower-role staff users + a member to test the role
+      boundaries in ghost-004. The GT targets v6.76.0-rc.0; the official published image may be a
+      different patch (version-divergence caveat, cf. the uptrace target).
+    evidence:
+      - type: "source"
+        ref: "ghost/core/package.json version 6.76.0-rc.0"
+        supports: "Runtime prerequisites + version caveat"
+    proposed_resolution: "Run ghost:6 (dev/SQLite), complete setup, mint keys, then probe the planes + boundaries."
+
+  - id: "ghost-008"
+    location: "Runtime: staff device-verification (email 2FA) gates the admin SESSION plane"
+    description: >-
+      Probed against official ghost:6-alpine (dev/SQLite). With the default
+      security.staffDeviceVerification=TRUE, a freshly logged-in staff session is NOT accepted by the
+      Admin API: GET /ghost/api/admin/posts returns 403 "Unable to determine the authenticated user",
+      because Ghost requires an emailed device-verification code that cannot be completed without SMTP.
+      Setting security__staffDeviceVerification=false (the dev/test default) makes the session plane work:
+      anon 403 vs owner-session 200 across posts/users/members/settings/integrations, and owner POST
+      /posts -> 201. The Admin API KEY plane (integrations) bypasses 2FA but needs an existing key.
+      Grounding caveat: this means a realistic production Ghost cannot be API-probed on the session plane
+      without mail; the Content API key plane and the bootstrap plane are unaffected.
+    evidence:
+      - type: "runtime"
+        ref: "ghost_gt/runtime/probe_results/matrix.json (staff rows 403 with 2FA on, 200 with it off)"
+        supports: "2FA gates the session plane"
+      - type: "source"
+        ref: "ghost/core/server/auth/session/index.js:92 security:staffDeviceVerification; config.development.json:43=false"
+        supports: "Flag location + dev default"
+    proposed_resolution: "Stamped staff rows assume the flag off (or SMTP present). Keep this caveat on session-plane identity_statuses."
+
+  - id: "ghost-009"
+    location: "Runtime CONFIRMED: password-reset is a user-enumeration oracle"
+    description: >-
+      POST /ghost/api/admin/authentication/password_reset with a KNOWN email returns 500 (the reset
+      email send fails with no SMTP), while an UNKNOWN email returns 404 (user not found). The distinct
+      status per existence leaks whether an email is a registered staff user -- an enumeration oracle,
+      independent of mail configuration (the 404-vs-other split holds). Confirms part of ghost-003.
+    evidence:
+      - type: "runtime"
+        ref: "ghost_gt/runtime/probe_results/matrix.json phase=unauth (known 500 / unknown 404)"
+        supports: "Enumeration via status code"
+    proposed_resolution: "With SMTP configured the known case likely 20x; re-confirm the known-vs-unknown split then."
+
+  - id: "ghost-010"
+    location: "Runtime CONFIRMED: three auth planes behave as modeled"
+    description: >-
+      Grounded against ghost:6-alpine: publicAdminApi /admin/site -> 200 (public); Admin API anon -> 403
+      everywhere, staff session -> 200/201 (ghost-002 session plane); Content API no key -> 403, with the
+      minted Content API key -> 200 (ghost-002 content plane); setup is one-time (fresh 201, re-run 403 =
+      ghost-003); members /api/site -> 200 public, member self without session -> 204. 14 L1 nodes carry
+      route_confirmed + identity_statuses (anonymous | staff | contentclient).
+    evidence:
+      - type: "runtime"
+        ref: "ghost_gt/runtime/probe_results/{matrix.json,fixtures.json}"
+        supports: "Auth-plane confirmation"
+    proposed_resolution: "Extend with Author/Editor/Admin tokens to ground the ghost-004 role boundaries."

@@ -1,0 +1,5955 @@
+schema_version: pengent-web-gt-v1
+environment_id: writefreely-multi-user
+nodes:
+- key: http://localhost/api/auth/signup
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 201
+  - 409
+  params: []
+  content_types:
+  - application/json
+  inputs: &id001
+  - alias
+  - pass
+  - email
+  outputs:
+  - access_token
+  - username
+  input_spec:
+    format: json
+    fields: *id001
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - pass
+    - email
+    outputs:
+    - access_token
+    - username
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: desired username
+      - name: pass
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: password
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: optional email
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: access_token
+        path: data.access_token
+        type: string
+        flow: true
+        description: API token for the new user
+      - name: username
+        path: data.username
+        type: string
+        flow: true
+        description: created username
+    reason: apiSignup creates a user and returns a token
+    evidence: account.go:89 apiSignup
+  operation_semantic: signup_user
+  semantic_inputs:
+  - Username(user)
+  - Password(user)
+  - UserEmail(user)
+  semantic_outputs:
+  - AuthToken(session)
+  - Username(user)
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Chosen username/handle.
+  - raw_field: pass
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: New account password.
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Optional account email.
+  semantic_output_decisions:
+  - raw_field: access_token
+    resource: AuthToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Bearer token minted for the new account.
+  - raw_field: username
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - username
+    reason: Created account username.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 201
+    - 409
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public signup endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open registration enabled.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:88
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/auth/login
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 404
+  - 429
+  params: []
+  content_types:
+  - application/json
+  inputs: &id002
+  - alias
+  - pass
+  outputs:
+  - access_token
+  - username
+  input_spec:
+    format: json
+    fields: *id002
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - pass
+    outputs:
+    - access_token
+    - username
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: username or email
+      - name: pass
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: password
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: access_token
+        path: data.access_token
+        type: string
+        flow: true
+        description: API token
+      - name: username
+        path: data.username
+        type: string
+        flow: true
+        description: authenticated username
+    reason: login authenticates and returns a token
+    evidence: account.go:405 login
+  operation_semantic: login_user
+  semantic_inputs:
+  - Username(user)
+  - Password(user)
+  semantic_outputs:
+  - AuthToken(session)
+  - Username(user)
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Login identifier.
+  - raw_field: pass
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions:
+  - raw_field: access_token
+    resource: AuthToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Bearer token for the session.
+  - raw_field: username
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - username
+    reason: Authenticated username.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    - 404
+    - 429
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid credentials.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:89
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/auth/me
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 204
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id003 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id003
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: invalidate the caller's access token
+    evidence: account.go:299 handleAPILogout
+  operation_semantic: logout_user
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 204
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Token invalidation.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated via Authorization header.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:91
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/me
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id004 []
+  outputs:
+  - username
+  input_spec:
+    format: ''
+    fields: *id004
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - username
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: username
+        path: data.username
+        type: string
+        flow: true
+        description: ''
+      - name: email
+        path: data.email
+        type: string
+        flow: false
+        description: ''
+      - name: created
+        path: data.created
+        type: string
+        flow: false
+        description: ''
+    reason: viewMeAPI returns the authenticated user
+    evidence: account.go:702 viewMeAPI
+  operation_semantic: read_me
+  semantic_inputs: []
+  semantic_outputs:
+  - Username(user)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: username
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - username
+    reason: Caller's own username.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 200
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated self lookup.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:114
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/me/posts
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id005 []
+  outputs:
+  - id
+  input_spec:
+    format: ''
+    fields: *id005
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - id
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: post id
+      - name: slug
+        path: data.slug
+        type: string
+        flow: false
+        description: ''
+      - name: body
+        path: data.body
+        type: string
+        flow: false
+        description: ''
+    reason: viewMyPostsAPI lists the caller's posts
+    evidence: account.go viewMyPostsAPI
+  operation_semantic: list_my_posts
+  semantic_inputs: []
+  semantic_outputs:
+  - PostID(post)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Ids of the caller's own posts.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 200
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated post list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (cookie or token).
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:117
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/me/collections
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id006 []
+  outputs:
+  - alias
+  input_spec:
+    format: ''
+    fields: *id006
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - alias
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: alias
+        path: data.alias
+        type: string
+        flow: true
+        description: collection alias
+      - name: title
+        path: data.title
+        type: string
+        flow: false
+        description: ''
+    reason: viewMyCollectionsAPI lists the caller's blogs
+    evidence: collections.go viewMyCollectionsAPI
+  operation_semantic: list_my_collections
+  semantic_inputs: []
+  semantic_outputs:
+  - CollectionAlias(collection)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Aliases of the caller's own collections.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 200
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated collection list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (token).
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:118
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/me/password
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id007
+  - current
+  - new
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id007
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - current
+    - new
+    outputs: []
+    input: {}
+    request:
+      body_format: form
+      body_example: {}
+      fields:
+      - name: current
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: current password (FORM field 'current')
+      - name: new
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: new password (FORM field 'new')
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: updatePassphrase changes the caller's password (reads r.FormValue current/new)
+    evidence: account.go:1011 updatePassphrase r.FormValue
+  operation_semantic: change_password
+  semantic_inputs:
+  - Password(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: current
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Current password proves control of the account.
+  - raw_field: new
+    resource: NewPassword(user)
+    mergeable: false
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Replacement password (new content, not a reference).
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 200
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password change.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:119
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/alias
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 409
+  params: []
+  content_types:
+  - application/json
+  inputs: &id008
+  - alias
+  outputs:
+  - available
+  input_spec:
+    format: json
+    fields: *id008
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    outputs:
+    - available
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: candidate username
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: available
+        path: data.available
+        type: bool
+        flow: true
+        description: ''
+    reason: handleUsernameCheck reports availability
+    evidence: routes.go:126 handleUsernameCheck
+  operation_semantic: check_alias
+  semantic_inputs:
+  - Username(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Candidate username being probed.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    - 409
+    authenticated:
+    - 200
+    - 409
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Username availability (enumeration surface).
+    black_box_reachable: true
+    reachability_conditions:
+    - Open.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:126
+      supports: route + handler wrapper
+    notes: AllowAny-style enumeration oracle; confirm anon reachability at runtime.
+- key: http://localhost/api/markdown
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id009
+  - raw_body
+  outputs:
+  - body
+  input_spec:
+    format: json
+    fields: *id009
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - raw_body
+    outputs:
+    - body
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: markdown source
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: body
+        path: data.body
+        type: string
+        flow: true
+        description: rendered HTML
+    reason: handleRenderMarkdown renders markdown to HTML
+    evidence: routes.go:128 handleRenderMarkdown
+  operation_semantic: render_markdown
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: raw_body
+    resource: MarkdownSource(doc)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Transient markdown input, not a stored object.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    authenticated:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Stateless markdown preview.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:128
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 201
+  params: []
+  content_types:
+  - application/json
+  inputs: &id010
+  - alias
+  - title
+  outputs:
+  - alias
+  input_spec:
+    format: json
+    fields: *id010
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - title
+    outputs:
+    - alias
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: collection alias
+      - name: title
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: collection title
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: alias
+        path: data.alias
+        type: string
+        flow: true
+        description: ''
+      - name: title
+        path: data.title
+        type: string
+        flow: false
+        description: ''
+    reason: newCollection creates a blog owned by the caller
+    evidence: collections.go:446 newCollection
+  operation_semantic: create_collection
+  semantic_inputs:
+  - CollectionAlias(collection)
+  semantic_outputs:
+  - CollectionAlias(collection)
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Chosen blog alias.
+  - raw_field: title
+    resource: CollectionTitle(collection)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: New blog title (content attribute).
+  semantic_output_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Alias of the created collection.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 201
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Blog creation.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; under max-blogs quota.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:134
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}
+  kind: api
+  methods:
+  - GET
+  - POST
+  - DELETE
+  statuses:
+  - 200
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id011
+  - alias
+  - title
+  - description
+  outputs:
+  - alias
+  input_spec:
+    format: json
+    fields: *id011
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    outputs:
+    - alias
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: collection alias
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: alias
+        path: data.alias
+        type: string
+        flow: true
+        description: ''
+      - name: title
+        path: data.title
+        type: string
+        flow: false
+        description: ''
+      - name: description
+        path: data.description
+        type: string
+        flow: false
+        description: ''
+    reason: fetchCollection returns public blog metadata
+    evidence: collections.go:554 fetchCollection
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - title
+    - description
+    outputs:
+    - alias
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: collection alias
+      - name: title
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: new title
+      - name: description
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: new description
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: alias
+        path: data.alias
+        type: string
+        flow: true
+        description: ''
+    reason: existingCollection updates the blog
+    evidence: collections.go:1264 existingCollection
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: collection alias
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: existingCollection deletes the blog
+    evidence: collections.go:1264 existingCollection
+  operation_semantic: collection_crud
+  semantic_inputs:
+  - CollectionAlias(collection)
+  semantic_outputs:
+  - CollectionAlias(collection)
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Target blog alias.
+  - raw_field: title
+    resource: CollectionTitle(collection)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Updated title (content).
+  - raw_field: description
+    resource: CollectionDescription(collection)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Updated description (content).
+  semantic_output_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Blog alias.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    - 401
+    owner:
+    - 200
+    non_owner:
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Blog read is public; write requires ownership.
+    black_box_reachable: true
+    reachability_conditions:
+    - GET public (unless instance Private); POST/DELETE owner only.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:138-139
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/posts
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 201
+  params: []
+  content_types:
+  - application/json
+  inputs: &id012
+  - alias
+  - body
+  - title
+  outputs:
+  - id
+  - slug
+  input_spec:
+    format: json
+    fields: *id012
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    outputs:
+    - id
+    - slug
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: collection alias
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+      - name: slug
+        path: data.slug
+        type: string
+        flow: true
+        description: ''
+      - name: body
+        path: data.body
+        type: string
+        flow: false
+        description: ''
+    reason: fetchCollectionPosts lists a blog's posts
+    evidence: collections.go:604 fetchCollectionPosts
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - body
+    - title
+    outputs:
+    - id
+    - slug
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: collection alias
+      - name: body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post markdown body
+      - name: title
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: post title
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+      - name: slug
+        path: data.slug
+        type: string
+        flow: true
+        description: ''
+    reason: newPost creates a post in the collection
+    evidence: posts.go:565 newPost
+  operation_semantic: collection_posts
+  semantic_inputs:
+  - CollectionAlias(collection)
+  semantic_outputs:
+  - PostID(post)
+  - PostSlug(post)
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Target blog alias.
+  - raw_field: body
+    resource: PostBody(post)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: New post content.
+  - raw_field: title
+    resource: PostTitle(post)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: New post title.
+  semantic_output_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Created / listed post ids.
+  - raw_field: slug
+    resource: PostSlug(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - slug
+    reason: Post slug within the collection.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    authenticated:
+    - 200
+    owner:
+    - 201
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public post list; create requires ownership.
+    black_box_reachable: true
+    reachability_conditions:
+    - GET public; POST owner.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:140-141
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/posts/{post}
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id013
+  - alias
+  - post
+  - body
+  outputs:
+  - id
+  - slug
+  input_spec:
+    format: json
+    fields: *id013
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - post
+    outputs:
+    - id
+    - slug
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: post
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+      - name: slug
+        path: data.slug
+        type: string
+        flow: true
+        description: ''
+      - name: body
+        path: data.body
+        type: string
+        flow: false
+        description: ''
+    reason: fetchPost returns one collection post
+    evidence: posts.go:1142 fetchPost
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - post
+    - body
+    outputs:
+    - id
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: post
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: body
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: updated body
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+    reason: existingPost updates the post
+    evidence: posts.go:713 existingPost
+  operation_semantic: collection_post_crud
+  semantic_inputs:
+  - CollectionAlias(collection)
+  - PostID(post)
+  semantic_outputs:
+  - PostID(post)
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Owning blog alias.
+  - raw_field: post
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - post
+    reason: Target post id.
+  - raw_field: body
+    resource: PostBody(post)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Updated post content.
+  semantic_output_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Post id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    authenticated:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public read; update owner-only.
+    black_box_reachable: true
+    reachability_conditions:
+    - GET public; POST owner.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:142-143
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/collect
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id014
+  - alias
+  - id
+  - token
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id014
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - id
+    - token
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: destination collection
+      - name: id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post id to move
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: post edit token
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: addPost moves posts into the collection
+    evidence: posts.go:963 addPost
+  operation_semantic: collect_posts
+  semantic_inputs:
+  - CollectionAlias(collection)
+  - PostID(post)
+  - PostEditToken(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Destination blog.
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Post being collected.
+  - raw_field: token
+    resource: PostEditToken(post)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Edit token authorizing the move of an anonymous post.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Claim/move posts into a blog.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated owner.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:146
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/pin
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id015
+  - alias
+  - id
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id015
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: pinPost pins a post to the blog nav
+    evidence: posts.go:1072 pinPost
+  operation_semantic: pin_post
+  semantic_inputs:
+  - CollectionAlias(collection)
+  - PostID(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Blog whose nav is changed.
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Post to pin.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    owner:
+    - 200
+    non_owner:
+    - 403
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Pin a post.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:147
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/unpin
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id016
+  - alias
+  - id
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id016
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - alias
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: alias
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: pinPost (unpin) removes a pinned post
+    evidence: posts.go:1072 pinPost
+  operation_semantic: unpin_post
+  semantic_inputs:
+  - CollectionAlias(collection)
+  - PostID(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: alias
+    resource: CollectionAlias(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - alias
+    reason: Blog whose nav is changed.
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Post to unpin.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    owner:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Unpin a post.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:148
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/posts
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 201
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id017
+  - body
+  - title
+  outputs:
+  - id
+  - token
+  input_spec:
+    format: json
+    fields: *id017
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - body
+    - title
+    outputs:
+    - id
+    - token
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post markdown body
+      - name: title
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: post title
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+      - name: token
+        path: data.token
+        type: string
+        flow: true
+        description: edit token
+    reason: newPost creates an anonymous/draft post
+    evidence: posts.go:565 newPost
+  operation_semantic: create_draft_post
+  semantic_inputs: []
+  semantic_outputs:
+  - PostID(post)
+  - PostEditToken(post)
+  semantic_input_decisions:
+  - raw_field: body
+    resource: PostBody(post)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Post content.
+  - raw_field: title
+    resource: PostTitle(post)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Post title.
+  semantic_output_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Created post id.
+  - raw_field: token
+    resource: PostEditToken(post)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Edit token returned to the anonymous author.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 201
+    anonymous:
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Anonymous posting surface.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open (anonymous posting enabled by default).
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:159
+      supports: route + handler wrapper
+    notes: Anonymous posts return an edit token that later authorizes edit/delete/claim.
+- key: http://localhost/api/posts/claim
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id018
+  - id
+  - token
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id018
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - id
+    - token
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: anonymous post id
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post edit token
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: addPost claims anonymous posts to the caller
+    evidence: posts.go:963 addPost
+  operation_semantic: claim_posts
+  semantic_inputs:
+  - PostID(post)
+  - PostEditToken(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Post to claim.
+  - raw_field: token
+    resource: PostEditToken(post)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Edit token proving control of the anonymous post.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    authenticated:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Associate anonymous posts with an account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; holds the post edit token.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:161
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/posts/disperse
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id019
+  - id
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id019
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post id to unclaim
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: dispersePost removes posts from the caller's account
+    evidence: posts.go:1028 dispersePost
+  operation_semantic: disperse_posts
+  semantic_inputs:
+  - PostID(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Owned post to disperse.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    owner:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Unclaim posts.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated owner.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:162
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/posts/{post}
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PUT
+  - DELETE
+  statuses:
+  - 200
+  - 204
+  - 400
+  - 401
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id020
+  - post
+  - body
+  - token
+  outputs:
+  - id
+  input_spec:
+    format: json
+    fields: *id020
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - post
+    outputs:
+    - id
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: post
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+      - name: body
+        path: data.body
+        type: string
+        flow: false
+        description: ''
+    reason: fetchPost returns a single post
+    evidence: posts.go:1142 fetchPost
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - post
+    - body
+    - token
+    outputs:
+    - id
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: post
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: body
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: updated body
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: edit token (anon)
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: id
+        path: data.id
+        type: string
+        flow: true
+        description: ''
+    reason: existingPost updates the post
+    evidence: posts.go:713 existingPost
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - post
+    - token
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: post
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: token
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: edit token (anon)
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: deletePost deletes the post
+    evidence: posts.go:846 deletePost
+  operation_semantic: post_crud
+  semantic_inputs:
+  - PostID(post)
+  - PostEditToken(post)
+  semantic_outputs:
+  - PostID(post)
+  semantic_input_decisions:
+  - raw_field: post
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - post
+    reason: Target post id.
+  - raw_field: body
+    resource: PostBody(post)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Updated content.
+  - raw_field: token
+    resource: PostEditToken(post)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Edit token authorizing anonymous edit/delete.
+  semantic_output_decisions:
+  - raw_field: id
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Post id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    owner:
+    - 200
+    - 204
+    non_owner:
+    - 401
+    - 403
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public read; write via ownership or edit token.
+    black_box_reachable: true
+    reachability_conditions:
+    - GET public; POST/PUT/DELETE owner or edit-token holder.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:163-165
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/posts/{post}/{property}
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id021
+  - post
+  - property
+  outputs:
+  - value
+  input_spec:
+    format: plain
+    fields: *id021
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - post
+    - property
+    outputs:
+    - value
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: post
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: property
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: e.g. body, title
+    response:
+      format: scalar
+      scalar_type: string
+      value_name: value
+      value_type: string
+      value_flow: true
+      value_description: the requested post property
+      fields: []
+    reason: fetchPostProperty returns one post field
+    evidence: posts.go:1201 fetchPostProperty
+  operation_semantic: read_post_property
+  semantic_inputs:
+  - PostID(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: post
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - post
+    reason: Target post id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    authenticated:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public single-property read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:166
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/login
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id022 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id022
+  io_variants: []
+  operation_semantic: view_login
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:187
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/signup
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id023 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id023
+  io_variants: []
+  operation_semantic: view_landing
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:188
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/auth/login
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id024 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id024
+  io_variants: []
+  operation_semantic: web_login
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:169
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/auth/signup
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id025 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id025
+  io_variants: []
+  operation_semantic: web_signup
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:168
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/reset
+  kind: page
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id026 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id026
+  io_variants: []
+  operation_semantic: reset_password
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:186
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/invite/{code}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id027 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id027
+  io_variants: []
+  operation_semantic: view_invite
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:189
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/auth/read
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id028 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id028
+  io_variants: []
+  operation_semantic: unlock_private_collection
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:90
+      supports: route + handler wrapper
+    notes: Blog password unlock; form POST via WebErrors handler.
+- key: http://localhost/me/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id029 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id029
+  io_variants: []
+  operation_semantic: me_redirect
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:95
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/c/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id030 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id030
+  io_variants: []
+  operation_semantic: view_collections
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:97
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/c/{collection}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id031 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id031
+  io_variants: []
+  operation_semantic: edit_collection
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:98
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/c/{collection}/stats
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id032 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id032
+  io_variants: []
+  operation_semantic: view_collection_stats
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:99
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/c/{collection}/subscribers
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id033 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id033
+  io_variants: []
+  operation_semantic: view_subscribers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:100
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/delete
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id034 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id034
+  io_variants: []
+  operation_semantic: delete_account
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:101
+      supports: route + handler wrapper
+    notes: CSRF-protected account self-deletion.
+- key: http://localhost/me/posts/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id035 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id035
+  io_variants: []
+  operation_semantic: view_articles
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:103
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/posts/export.csv
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id036 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id036
+  io_variants: []
+  operation_semantic: export_posts_csv
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:104
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/posts/export.zip
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id037 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id037
+  io_variants: []
+  operation_semantic: export_posts_zip
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:105
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/posts/export.json
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id038 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id038
+  io_variants: []
+  operation_semantic: export_posts_json
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:106
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/export
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id039 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id039
+  io_variants: []
+  operation_semantic: view_export_options
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:107
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/export.json
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id040 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id040
+  io_variants: []
+  operation_semantic: export_full_json
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:108
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/import
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id041 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id041
+  io_variants: []
+  operation_semantic: view_import
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:109
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/settings
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id042 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id042
+  io_variants: []
+  operation_semantic: view_settings
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:110
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/invites
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id043 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id043
+  io_variants: []
+  operation_semantic: view_invites
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:111
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/logout
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id044 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id044
+  io_variants: []
+  operation_semantic: web_logout
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:112
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/me/new
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id045 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id045
+  io_variants: []
+  operation_semantic: view_pad_singleuser
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:197
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/new
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id046 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id046
+  io_variants: []
+  operation_semantic: view_pad
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:199
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/me/self
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id047 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id047
+  io_variants: []
+  operation_semantic: update_settings
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:120
+      supports: route + handler wrapper
+    notes: updateSettings; CSRF-exempt for JSON (csrfProtectForm).
+- key: http://localhost/api/me/invites
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id048 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id048
+  io_variants: []
+  operation_semantic: create_invite
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:121
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/me/import
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id049 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id049
+  io_variants: []
+  operation_semantic: import_posts
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:122
+      supports: route + handler wrapper
+    notes: Multipart upload import; contract deferred to runtime.
+- key: http://localhost/api/me/oauth/remove
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id050 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id050
+  io_variants: []
+  operation_semantic: remove_oauth
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:123
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{prefix}{collection}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id051 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id051
+  io_variants: []
+  operation_semantic: view_collection
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:209
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id052 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id052
+  io_variants: []
+  operation_semantic: view_collection
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:210
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/{slug}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id053 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id053
+  io_variants: []
+  operation_semantic: view_collection_post
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:248
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/{slug}/edit
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id054 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id054
+  io_variants: []
+  operation_semantic: edit_post
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:249
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/feed/
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id055 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id055
+  io_variants: []
+  operation_semantic: collection_feed
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:245
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/tag:{tag}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id056 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id056
+  io_variants: []
+  operation_semantic: view_collection_tag
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:241
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/page/{page}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id057 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id057
+  io_variants: []
+  operation_semantic: view_collection_page
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:236
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/lang:{lang}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id058 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id058
+  io_variants: []
+  operation_semantic: view_collection_lang
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:239
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/sitemap.xml
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id059 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id059
+  io_variants: []
+  operation_semantic: collection_sitemap
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:244
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/logout
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id060 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id060
+  io_variants: []
+  operation_semantic: collection_logout
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:235
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{post}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id061 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id061
+  io_variants: []
+  operation_semantic: view_post
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:214
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/email/subscribe
+  kind: api
+  methods:
+  - POST
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id062 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id062
+  io_variants: []
+  operation_semantic: email_subscribe
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:150-151
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/email/subscribers/export.csv
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id063 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id063
+  io_variants: []
+  operation_semantic: export_subscribers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:149
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/email/confirm/{subscriber}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id064 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id064
+  io_variants: []
+  operation_semantic: confirm_subscription
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:246
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/{collection}/email/unsubscribe/{subscriber}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id065 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id065
+  io_variants: []
+  operation_semantic: unsubscribe
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:247
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/.well-known/webfinger
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id066 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id066
+  io_variants: []
+  operation_semantic: webfinger
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:69
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/.well-known/host-meta
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id067 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id067
+  io_variants: []
+  operation_semantic: host_meta
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:67
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/.well-known/nodeinfo
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id068 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id068
+  io_variants: []
+  operation_semantic: nodeinfo_discover
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:73
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/nodeinfo
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id069 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id069
+  io_variants: []
+  operation_semantic: nodeinfo
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:74
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/@/{handle}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id070 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id070
+  io_variants: []
+  operation_semantic: view_mention
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:77
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/inbox
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id071 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id071
+  io_variants: []
+  operation_semantic: ap_inbox
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:153
+      supports: route + handler wrapper
+    notes: ActivityPub inbox; HTTP-signature verified. Federation attack surface.
+- key: http://localhost/api/collections/{alias}/outbox
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id072 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id072
+  io_variants: []
+  operation_semantic: ap_outbox
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:154
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/following
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id073 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id073
+  io_variants: []
+  operation_semantic: ap_following
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:155
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/followers
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id074 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id074
+  io_variants: []
+  operation_semantic: ap_followers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:156
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/posts/{post}/splitcontent
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id075 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id075
+  io_variants: []
+  operation_semantic: split_content
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:144
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{alias}/posts/{post}/{property}
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id076 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id076
+  io_variants: []
+  operation_semantic: read_collection_post_property
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:145
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/{host}
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id077 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id077
+  io_variants: []
+  operation_semantic: fetch_collection_by_host
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:137
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/api/collections/monetization-pointer
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id078 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id078
+  io_variants: []
+  operation_semantic: monetization_pointer
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:136
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/read
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id079 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id079
+  io_variants: []
+  operation_semantic: local_timeline
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:191
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/read/api/posts
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id080 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id080
+  io_variants: []
+  operation_semantic: local_timeline_api
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:255
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/read/p/{page}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id081 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id081
+  io_variants: []
+  operation_semantic: local_timeline_page
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:256
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/read/feed/
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id082 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id082
+  io_variants: []
+  operation_semantic: local_timeline_feed
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost/api
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:257
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/read/t/{tag}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id083 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id083
+  io_variants: []
+  operation_semantic: local_timeline_tag
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:259
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/read/a/{post}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id084 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id084
+  io_variants: []
+  operation_semantic: post_id_redirect
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:260
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/oauth/signup
+  kind: page
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id085 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id085
+  io_variants: []
+  operation_semantic: oauth_signup
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:80
+      supports: route + handler wrapper
+    notes: OAuth login/signup via Slack/WriteAs/GitLab/Gitea/generic; needs external IdP.
+- key: http://localhost/admin
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id086 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id086
+  io_variants: []
+  operation_semantic: admin_dashboard
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin dashboard.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin session.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:171
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/monitor
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id087 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id087
+  io_variants: []
+  operation_semantic: admin_monitor
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:172
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/settings
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id088 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id088
+  io_variants: []
+  operation_semantic: admin_settings
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:173
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/users
+  kind: page
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 404
+  params: []
+  content_types:
+  - text/html
+  inputs: &id089 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id089
+  io_variants: []
+  operation_semantic: admin_users
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses:
+    admin_cookie:
+    - 200
+    nonadmin_cookie:
+    - 404
+    anonymous:
+    - 404
+    api_token:
+    - 404
+  route_confirmed: true
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:174
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/user/{username}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id090 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id090
+  io_variants: []
+  operation_semantic: admin_view_user
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:175
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/user/{username}/delete
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id091 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id091
+  io_variants: []
+  operation_semantic: admin_delete_user
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:176
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/user/{username}/status
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id092 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id092
+  io_variants: []
+  operation_semantic: admin_toggle_user_status
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:177
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/user/{username}/passphrase
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id093 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id093
+  io_variants: []
+  operation_semantic: admin_reset_user_pass
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:178
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/pages
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id094 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id094
+  io_variants: []
+  operation_semantic: admin_pages
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:179
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/page/{slug}
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id095 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id095
+  io_variants: []
+  operation_semantic: admin_view_page
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:180
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/update/config
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id096 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id096
+  io_variants: []
+  operation_semantic: admin_update_config
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:181
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/update/{page}
+  kind: page
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id097 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id097
+  io_variants: []
+  operation_semantic: admin_update_site
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:182
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/admin/updates
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id098 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id098
+  io_variants: []
+  operation_semantic: admin_updates
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin.
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:183
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id099 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id099
+  io_variants: []
+  operation_semantic: home
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:215
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/robots.txt
+  kind: static
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id100 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id100
+  io_variants: []
+  operation_semantic: robots
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:471
+      supports: route + handler wrapper
+    notes: null
+- key: http://localhost/manifest.json
+  kind: static
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id101 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id101
+  io_variants: []
+  operation_semantic: manifest
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:471
+      supports: route + handler wrapper
+    notes: null
+edges:
+- src: http://localhost/login
+  dst: http://localhost/api/auth/login
+  methods:
+  - POST
+  triggers:
+  - form
+- src: http://localhost/new
+  dst: http://localhost/api/posts
+  methods:
+  - POST
+  triggers:
+  - xhr
+- src: http://localhost/me/c/
+  dst: http://localhost/api/collections
+  methods:
+  - POST
+  triggers:
+  - xhr
+excluded_items:
+- item: OAuth provider callbacks (/oauth/callback/{slack,writeas,gitlab,gitea,generic})
+  reason: Client-initiated SSO; completing the flow needs an external identity provider (EXTERNAL DEPENDENCY).
+    The local /oauth/signup entry point is kept as a page node.
+- item: gopher:// interface (handler.Gopher)
+  reason: Served on a separate gopher listener, not the HTTP attack surface; out of scope for web GT.
+- item: static asset tree (/css, /js, /img, ... via InitStaticRoutes PathPrefix('/'))
+  reason: File server for bundled assets; no business-data flow. robots.txt/manifest.json kept as static
+    nodes.

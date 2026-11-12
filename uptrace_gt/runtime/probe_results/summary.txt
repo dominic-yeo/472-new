@@ -1,0 +1,39 @@
+﻿Uptrace probe summary  (2026-11-09T23:19:33)  base=http://localhost:14318
+login_status=200 cookie=True disclosed_dsn=
+IDENTITY       METHOD  PATH                                           CODE  NOTE
+admin          GET     /internal/v1/users/current                     200   bearer token sanity (expect 200)
+anon           GET     /internal/v1/users/current                     200   anon (expect 401)
+admin          GET     /internal/v1/users/current                     200   admin (expect 200)
+anon           GET     /internal/v1/data-usage                        200   anon (expect 401)
+admin          GET     /internal/v1/data-usage                        200   admin (expect 200)
+anon           GET     /internal/v1/tracing/1/systems                 200   anon (expect 401)
+admin          GET     /internal/v1/tracing/1/systems                 200   admin (expect 200)
+anon           GET     /internal/v1/tracing/1/spans                   200   anon (expect 401)
+admin          GET     /internal/v1/tracing/1/spans                   200   admin (expect 200)
+anon           GET     /internal/v1/tracing/1/groups                  200   anon (expect 401)
+admin          GET     /internal/v1/tracing/1/groups                  200   admin (expect 200)
+anon           GET     /internal/v1/tracing/1/attributes              401   anon (expect 401)
+admin          GET     /internal/v1/tracing/1/attributes              400   admin (expect 200)
+anon           GET     /internal/v1/metrics/1                         401   anon (expect 401)
+admin          GET     /internal/v1/metrics/1                         400   admin (expect 200)
+anon           GET     /internal/v1/metrics/1/attributes              401   anon (expect 401)
+admin          GET     /internal/v1/metrics/1/attributes              200   admin (expect 200)
+admin          GET     /internal/v1/metrics/1/table?query=count()     400   metrics table query
+admin          GET     /internal/v1/projects/1                        200   admin reads project -> DSN?
+anon           GET     /internal/v1/projects/1                        401   anon (expect 401)
+admin          GET     /internal/v1/projects/999999                   404   nonexistent project (expect 404 not 403)
+admin          GET     /internal/v1/tracing/999999/spans              200   spans for nonexistent project (gate=existence)
+admin          GET     /internal/v1/traces/search?trace_id=0123456789abcdef0123456789abcdef 400   search trace (m.User only, no project)
+anon           GET     /internal/v1/traces/search?trace_id=0123456789abcdef0123456789abcdef 401   anon (expect 401)
+anon           GET     /api/v1/tracing/1/spans                        401   public path, anon (expect 401 = user-gated)
+admin          GET     /api/v1/tracing/1/spans                        400   public path, admin cookie/bearer (expect 200)
+dsn            GET     /api/v1/tracing/1/spans                        401   public path, DSN only (expect 401 = NOT dsn-gated)
+admin          POST    /internal/v1/metrics/1/dashboards              405   create dashboard
+admin          GET     /internal/v1/metrics/1/dashboards              200   list dashboards
+anon           POST    /internal/v1/metrics/1/dashboards              405   create as anon (expect 401)
+dsn            POST    /v1/traces                                     200   OTLP traces w/ DSN (expect 2xx)
+anon           POST    /v1/traces                                     401   OTLP traces NO dsn (expect 401/400)
+dsn            POST    /v1/logs                                       200   OTLP logs w/ DSN
+dsn            POST    /v1/metrics                                    200   OTLP metrics w/ DSN
+dsn            POST    /api/v1/vector-logs                            500   vector logs w/ DSN
+

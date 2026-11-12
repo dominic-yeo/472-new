@@ -1,0 +1,80 @@
+# Outline attack-surface runtime -- GT grounding stack.
+#   outlinewiki/outline (knowledge base) + Postgres + Redis + Mailpit (SMTP sink).
+# Mailpit catches the password-less sign-in email so the probe can complete a REAL
+# login (grab the magic link from Mailpit's API) and ground the authenticated matrix
+# -- addressing annotation ol-010.
+#
+#   docker compose -f outline_gt/runtime/compose.yaml up -d
+#   # Outline:  http://localhost:3000     Mailpit UI: http://localhost:8025
+#   pwsh outline_gt/runtime/probe.ps1
+#   docker compose -f outline_gt/runtime/compose.yaml down -v
+#
+# SECRET_KEY / UTILS_SECRET are fixed DEV values (32-byte hex) -- test-only, never reuse.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: outline
+      POSTGRES_PASSWORD: outline
+      POSTGRES_DB: outline
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U outline"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - outline_pg:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:8025:8025"   # web UI + REST API (/api/v1/messages)
+      - "127.0.0.1:1025:1025"   # SMTP
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+
+  outline:
+    image: outlinewiki/outline:1.12.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      NODE_ENV: production
+      SECRET_KEY: "6f1e2d3c4b5a69788796a5b4c3d2e1f00f1e2d3c4b5a69788796a5b4c3d2e1f0"
+      UTILS_SECRET: "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90"
+      DATABASE_URL: "postgres://outline:outline@postgres:5432/outline"
+      PGSSLMODE: "disable"
+      REDIS_URL: "redis://redis:6379"
+      URL: "http://localhost:3001"
+      PORT: "3000"
+      FORCE_HTTPS: "false"
+      ENABLE_UPDATES: "false"
+      FILE_STORAGE: "local"
+      FILE_STORAGE_LOCAL_ROOT_DIR: "/var/lib/outline/data"
+      FILE_STORAGE_UPLOAD_MAX_SIZE: "26214400"
+      # Email magic-link provider (the default when no SSO is configured) -> Mailpit
+      SMTP_HOST: "mailpit"
+      SMTP_PORT: "1025"
+      SMTP_FROM_EMAIL: "outline@example.com"
+      SMTP_SECURE: "false"
+      SMTP_TLS_CIPHERS: ""
+      DEFAULT_LANGUAGE: "en_US"
+    volumes:
+      - outline_data:/var/lib/outline/data
+
+volumes:
+  outline_pg:
+  outline_data:

@@ -1,0 +1,3380 @@
+schema_version: pengent-web-gt-v1
+environment_id: writefreely-multi-user
+nodes:
+- id: gt-action-001
+  name: Sign up
+  kind: normal
+  description: A visitor registers and receives an API token.
+  action_key: anon_signup
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: signup_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: username
+      resource: Username(user)
+    participants:
+    - id: session
+      type: Session
+      role: created
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - &id001
+        kind: subject
+        id: actor
+        type: User
+        relative_role: SELF
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies the new account password (brought credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A new user row is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Response returns an API access token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Chosen username (new content).
+  - direction: input
+    field: pass / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Optional new email.
+  - direction: output
+    field: access_token / AuthToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthToken(session:Session{created}))
+    ignored_reason: ''
+  - direction: output
+    field: username / Username(user)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Echo of the created name.
+  l1_bindings:
+  - l1_key: http://localhost/api/auth/signup
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: apiSignup creates a User and returns an access token.
+  l1_keys:
+  - http://localhost/api/auth/signup
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Exists(user:User{created})
+  - Know(actor:User[SELF],AuthToken(session:Session{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public signup.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open registration enabled.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/account.go:89 apiSignup
+      supports: create user + token
+    notes: null
+- id: gt-action-002
+  name: Log in
+  kind: normal
+  description: A visitor logs in and receives an API token.
+  action_key: anon_login
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: login_user
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: response
+      field: access_token
+      resource: AuthToken(session)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies the account password.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - Session
+      basis: auth_transition
+      reason: The caller becomes authenticated.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Response returns an API access token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Login identifier.
+  - direction: input
+    field: pass / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: access_token / AuthToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthToken(session:Session{created}))
+    ignored_reason: ''
+  - direction: output
+    field: username / Username(user)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Echoed identity.
+  l1_bindings:
+  - l1_key: http://localhost/api/auth/login
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: login authenticates and returns a token.
+  l1_keys:
+  - http://localhost/api/auth/login
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],AuthToken(session:Session{created}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid credentials.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/account.go:405 login
+      supports: authenticate + token
+    notes: null
+- id: gt-action-003
+  name: Log out (API)
+  kind: normal
+  description: A user invalidates their API access token.
+  action_key: user_logout
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: logout_user
+    crud: Delete
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: self
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: subject
+      field: ''
+      resource: AuthToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id002
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - Session
+    reason: A valid access token identifies the caller.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - Session
+      basis: auth_transition
+      reason: The access token is invalidated.
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost/api/auth/me
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: handleAPILogout deletes the caller's token.
+  l1_keys:
+  - http://localhost/api/auth/me
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces: []
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Token invalidation.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated via Authorization header.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/account.go:299 handleAPILogout
+      supports: invalidate token
+    notes: null
+- id: gt-action-004
+  name: Read own account
+  kind: normal
+  description: A user reads their own account info.
+  action_key: user_read_me
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: read_me
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: subject
+      field: ''
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: IsAuthenticated (token or cookie).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Username
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: self
+      basis: io_reference
+      reason: Returns the caller's own username.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: username / Username(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Username(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/me
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: viewMeAPI returns the authenticated user.
+  l1_keys:
+  - http://localhost/api/me
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],Username(user:User{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated self lookup.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/account.go:702 viewMeAPI
+      supports: self info
+    notes: null
+- id: gt-action-005
+  name: List own posts
+  kind: normal
+  description: A user lists their own posts.
+  action_key: user_list_my_posts
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: list_my_posts
+    crud: Read
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: PostID(post)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (cookie or token).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PostID
+          target:
+            kind: entity
+            id: post
+            type: Post
+            role: collection
+      basis: io_reference
+      reason: Returns ids of the caller's posts.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: id / PostID(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/me/posts
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: viewMyPostsAPI lists the caller's posts.
+  l1_keys:
+  - http://localhost/api/me/posts
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],PostID(post:Post{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated post list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/account.go viewMyPostsAPI
+      supports: own posts
+    notes: null
+- id: gt-action-006
+  name: List own blogs
+  kind: normal
+  description: A user lists their own blogs.
+  action_key: user_list_my_collections
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: list_my_collections
+    crud: Read
+  object:
+    kind: entity
+    id: collection
+    type: Collection
+    name: Collection
+    entity: Collection
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: CollectionAlias(collection)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated via token.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: CollectionAlias
+          target:
+            kind: entity
+            id: collection
+            type: Collection
+            role: collection
+      basis: io_reference
+      reason: Returns aliases of the caller's blogs.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: alias / CollectionAlias(collection)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/me/collections
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: viewMyCollectionsAPI lists the caller's collections.
+  l1_keys:
+  - http://localhost/api/me/collections
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated blog list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/collections.go viewMyCollectionsAPI
+      supports: own blogs
+    notes: null
+- id: gt-action-007
+  name: Change password
+  kind: normal
+  description: A user changes their own password.
+  action_key: user_change_password
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: change_password
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: self
+    attribute: ''
+    state_field: password
+    binding:
+      source: subject
+      field: ''
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Current password proves control of the account.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: self
+        - password
+        - updated
+      basis: state_transition
+      reason: Password hash replaced.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: self
+        - password
+        - previous
+      basis: state_transition
+      reason: Old password no longer valid.
+  io_accounting:
+  - direction: input
+    field: current_pass / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: input
+    field: new_pass / NewPassword(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Replacement secret.
+  l1_bindings:
+  - l1_key: http://localhost/api/me/password
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: updatePassphrase replaces the caller's password.
+  l1_keys:
+  - http://localhost/api/me/password
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - State(user:User{self},password,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password change.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; knows current password.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/account.go:1005 updatePassphrase
+      supports: password change
+    notes: null
+- id: gt-action-008
+  name: Check username availability
+  kind: normal
+  description: A visitor probes whether a username is available.
+  action_key: user_check_alias
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: check_alias
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: alias
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Probed candidate name.
+  - direction: output
+    field: available / Availability(user)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Boolean availability.
+  l1_bindings:
+  - l1_key: http://localhost/api/alias
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.7
+  reasoning: handleUsernameCheck reports whether a username is taken.
+  l1_keys:
+  - http://localhost/api/alias
+  consumes: []
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Availability oracle (enumeration surface).
+    black_box_reachable: true
+    reachability_conditions:
+    - Open; confirm anon reachability at runtime.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:126 handleUsernameCheck
+      supports: availability check
+    notes: Username-enumeration oracle; pair with runtime identity_statuses.
+- id: gt-action-009
+  name: Render markdown
+  kind: normal
+  description: A visitor previews markdown rendered to HTML.
+  action_key: user_render_markdown
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: render_markdown
+    crud: Read
+  object:
+    kind: entity
+    id: doc
+    type: Document
+    name: Document
+    entity: Document
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: raw_body
+      resource: MarkdownSource(doc)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: raw_body / MarkdownSource(doc)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Transient markdown.
+  - direction: output
+    field: body / RenderedHTML(doc)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Rendered HTML (no state).
+  l1_bindings:
+  - l1_key: http://localhost/api/markdown
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.75
+  reasoning: handleRenderMarkdown renders markdown without persisting.
+  l1_keys:
+  - http://localhost/api/markdown
+  consumes: []
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Stateless preview.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:128 handleRenderMarkdown
+      supports: markdown preview
+    notes: null
+- id: gt-action-010
+  name: Create blog
+  kind: normal
+  description: A user creates a new blog (collection).
+  action_key: user_create_collection
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: create_collection
+    crud: Create
+  object:
+    kind: entity
+    id: collection
+    type: Collection
+    name: Collection
+    entity: Collection
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: alias
+      resource: CollectionAlias(collection)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - &id003
+        kind: entity
+        id: collection
+        type: Collection
+        role: created
+    reason: Under the max-blogs quota.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id003
+      basis: action_semantics
+      reason: A new Collection is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: CollectionAlias
+          target: *id003
+      basis: io_reference
+      reason: Response returns the created alias.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Chosen alias.
+  - direction: input
+    field: title / CollectionTitle(collection)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Blog title (content).
+  - direction: output
+    field: alias / CollectionAlias(collection)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/collections
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: newCollection creates a Collection owned by the caller.
+  l1_keys:
+  - http://localhost/api/collections
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Create,collection:Collection{created})
+  produces:
+  - Exists(collection:Collection{created})
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Blog creation.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; quota not exceeded.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/collections.go:446 newCollection
+      supports: create blog
+    notes: null
+- id: gt-action-011
+  name: Read blog
+  kind: normal
+  description: A reader reads a blog's public metadata.
+  action_key: reader_read_collection
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Reader
+    auth_context: Session
+  operation:
+    business: read_collection
+    crud: Read
+  object:
+    kind: entity
+    id: collection
+    type: Collection
+    name: Collection
+    entity: Collection
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: alias
+      resource: CollectionAlias(collection)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: &id005
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionAlias
+        target: &id004
+          kind: entity
+          id: collection
+          type: Collection
+          role: target
+    reason: Request carries the blog alias.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id004
+    reason: Unknown aliases 404 (confirm at runtime).
+  effects:
+    gen:
+    - fact: *id005
+      basis: io_reference
+      reason: Returns blog metadata and alias.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: output
+    field: alias / CollectionAlias(collection)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: output
+    field: title / CollectionTitle(collection)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Display attribute.
+  - direction: output
+    field: description / CollectionDescription(collection)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Display.
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: fetchCollection returns public blog metadata.
+  l1_keys:
+  - http://localhost/api/collections/{alias}
+  consumes:
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+  - Exists(collection:Collection{target})
+  produces:
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public blog read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public unless instance is Private.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/collections.go:554 fetchCollection
+      supports: read blog
+    notes: null
+- id: gt-action-012
+  name: Update blog
+  kind: normal
+  description: A blog owner updates their blog settings.
+  action_key: owner_update_collection
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: update_collection
+    crud: Update
+  object:
+    kind: entity
+    id: collection
+    type: Collection
+    name: Collection
+    entity: Collection
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: alias
+      resource: CollectionAlias(collection)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id005
+    reason: Target blog alias.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id004
+    reason: Blog must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id004
+    reason: Blog owner only.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id004
+        - title
+        - updated
+      basis: state_transition
+      reason: Title replaced.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id004
+        - title
+        - previous
+      basis: state_transition
+      reason: Old title dropped.
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+    ignored_reason: ''
+  - direction: input
+    field: title / CollectionTitle(collection)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Updated title.
+  - direction: input
+    field: description / CollectionDescription(collection)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Updated desc.
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: existingCollection (POST) updates blog fields.
+  l1_keys:
+  - http://localhost/api/collections/{alias}
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+  - Exists(collection:Collection{target})
+  - Can(actor:User[SELF],Update,collection:Collection{target})
+  produces:
+  - State(collection:Collection{target},title,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Owner edit.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/collections.go:1264 existingCollection
+      supports: update blog
+    notes: null
+- id: gt-action-013
+  name: Delete blog
+  kind: normal
+  description: A blog owner deletes their blog.
+  action_key: owner_delete_collection
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: delete_collection
+    crud: Delete
+  object:
+    kind: entity
+    id: collection
+    type: Collection
+    name: Collection
+    entity: Collection
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: alias
+      resource: CollectionAlias(collection)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id005
+    reason: Target blog alias.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id004
+    reason: Blog must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - *id004
+    reason: Blog owner only.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id004
+      basis: state_transition
+      reason: Blog removed.
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: existingCollection (DELETE) removes the blog.
+  l1_keys:
+  - http://localhost/api/collections/{alias}
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{target}))
+  - Exists(collection:Collection{target})
+  - Can(actor:User[SELF],Delete,collection:Collection{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Owner delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/collections.go:1264 existingCollection
+      supports: delete blog
+    notes: null
+- id: gt-action-014
+  name: List blog posts
+  kind: normal
+  description: A reader lists the posts of a blog.
+  action_key: reader_list_collection_posts
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Reader
+    auth_context: Session
+  operation:
+    business: list_collection_posts
+    crud: Read
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: PostID(post)
+    participants:
+    - id: collection
+      type: Collection
+      role: context
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: &id007
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionAlias
+        target: &id006
+          kind: entity
+          id: collection
+          type: Collection
+          role: context
+    reason: Blog alias in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id006
+    reason: Blog must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PostID
+          target:
+            kind: entity
+            id: post
+            type: Post
+            role: collection
+      basis: io_reference
+      reason: Returns post ids of the blog.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+    ignored_reason: ''
+  - direction: output
+    field: id / PostID(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{collection}))
+    ignored_reason: ''
+  - direction: output
+    field: slug / PostSlug(post)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Per-blog slug; display.
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/posts
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: fetchCollectionPosts paginates a blog's posts.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/posts
+  consumes:
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+  - Exists(collection:Collection{context})
+  produces:
+  - Know(actor:User[SELF],PostID(post:Post{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public post list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public unless Private.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/collections.go:604 fetchCollectionPosts
+      supports: list posts
+    notes: null
+- id: gt-action-015
+  name: Publish post
+  kind: normal
+  description: A blog owner publishes a post to their blog.
+  action_key: user_create_collection_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: create_collection_post
+    crud: Create
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: id
+      resource: PostID(post)
+    participants:
+    - id: collection
+      type: Collection
+      role: context
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id007
+    reason: Target blog alias.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id006
+    reason: Blog must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - &id008
+        kind: entity
+        id: post
+        type: Post
+        role: created
+    reason: Blog owner may publish.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id008
+      basis: action_semantics
+      reason: A new post is created.
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id008
+        - *id006
+        - InCollection
+      basis: relation_transition
+      reason: Post attached to blog.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PostID
+          target: *id008
+      basis: io_reference
+      reason: Response returns the post id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+    ignored_reason: ''
+  - direction: input
+    field: body / PostBody(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New post content.
+  - direction: input
+    field: title / PostTitle(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New post title.
+  - direction: output
+    field: id / PostID(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{created}))
+    ignored_reason: ''
+  - direction: output
+    field: slug / PostSlug(post)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Assigned slug.
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/posts
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: newPost with a collection creates a published post.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/posts
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+  - Exists(collection:Collection{context})
+  - Can(actor:User[SELF],Create,post:Post{created})
+  produces:
+  - Exists(post:Post{created})
+  - Relation(post:Post{created},collection:Collection{context},InCollection)
+  - Know(actor:User[SELF],PostID(post:Post{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Publish to a blog.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:565 newPost
+      supports: create post in collection
+    notes: null
+- id: gt-action-016
+  name: Read blog post
+  kind: normal
+  description: A reader reads one post of a blog.
+  action_key: reader_read_collection_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Reader
+    auth_context: Session
+  operation:
+    business: read_collection_post
+    crud: Read
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: post
+      resource: PostID(post)
+    participants:
+    - id: collection
+      type: Collection
+      role: context
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id007
+    reason: Blog alias in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id006
+    reason: Blog must exist.
+  - type: knowledge
+    fact: &id010
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PostID
+        target: &id009
+          kind: entity
+          id: post
+          type: Post
+          role: target
+    reason: Post slug/id in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Post must exist.
+  effects:
+    gen:
+    - fact: *id010
+      basis: io_reference
+      reason: Returns the post and its id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+    ignored_reason: ''
+  - direction: input
+    field: post / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: output
+    field: id / PostID(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: output
+    field: body / PostBody(post)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Post content; display.
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/posts/{post}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: fetchPost returns a single collection post.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/posts/{post}
+  consumes:
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+  - Exists(collection:Collection{context})
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  produces:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public post read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public unless Private.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:1142 fetchPost
+      supports: read one post
+    notes: null
+- id: gt-action-017
+  name: Edit blog post
+  kind: normal
+  description: A blog owner edits one of their published posts.
+  action_key: owner_update_collection_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: update_collection_post
+    crud: Update
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: post
+      resource: PostID(post)
+    participants:
+    - id: collection
+      type: Collection
+      role: context
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id007
+    reason: Owning blog alias.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id006
+    reason: Blog must exist.
+  - type: knowledge
+    fact: *id010
+    reason: Target post id.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Post must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id009
+    reason: Post author / blog owner.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - body
+        - updated
+      basis: state_transition
+      reason: Body replaced.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - body
+        - previous
+      basis: state_transition
+      reason: Old body dropped.
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+    ignored_reason: ''
+  - direction: input
+    field: post / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: input
+    field: body / PostBody(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Updated content.
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/posts/{post}
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: existingPost updates a collection post.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/posts/{post}
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+  - Exists(collection:Collection{context})
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  - Can(actor:User[SELF],Update,post:Post{target})
+  produces:
+  - State(post:Post{target},body,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Owner edit of a published post.
+    black_box_reachable: true
+    reachability_conditions:
+    - Post author / blog owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:713 existingPost
+      supports: update post
+    notes: null
+- id: gt-action-018
+  name: Move posts into blog
+  kind: normal
+  description: A user moves posts into one of their blogs.
+  action_key: user_collect_posts_to_collection
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: collect_posts
+    crud: Create
+  object:
+    kind: relation
+    id: membership
+    type: CollectionMembership
+    name: CollectionMembership
+    entity: CollectionMembership
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: alias
+      resource: CollectionAlias(collection)
+    participants:
+    - id: collection
+      type: Collection
+      role: destination
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    - id: post
+      type: Post
+      role: member
+      binding:
+        source: request
+        field: id
+        resource: PostID(post)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: CollectionAlias
+        target: &id011
+          kind: entity
+          id: collection
+          type: Collection
+          role: destination
+    reason: Destination blog alias.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id011
+    reason: Destination blog must exist.
+  - type: knowledge
+    fact: &id016
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PostID
+        target: &id012
+          kind: entity
+          id: post
+          type: Post
+          role: member
+    reason: Post id to move.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id012
+    reason: Post must exist.
+  - type: knowledge
+    fact: &id017
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PostEditToken
+        target: *id012
+    reason: Edit token authorizing the move of an anon post.
+  effects:
+    gen:
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id012
+        - *id011
+        - InCollection
+      basis: relation_transition
+      reason: Post is placed in the destination blog.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{destination}))
+    ignored_reason: ''
+  - direction: input
+    field: id / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{member}))
+    ignored_reason: ''
+  - direction: input
+    field: token / PostEditToken(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostEditToken(post:Post{member}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/collect
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.75
+  reasoning: addPost moves posts into the target collection.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/collect
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{destination}))
+  - Exists(collection:Collection{destination})
+  - Know(actor:User[SELF],PostID(post:Post{member}))
+  - Exists(post:Post{member})
+  - Know(actor:User[SELF],PostEditToken(post:Post{member}))
+  produces:
+  - Relation(post:Post{member},collection:Collection{destination},InCollection)
+  object_type: relation
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Collect posts into a blog.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; holds the post edit token.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:963 addPost
+      supports: collect/move posts
+    notes: null
+- id: gt-action-019
+  name: Pin post
+  kind: normal
+  description: A blog owner pins a post to the blog navigation.
+  action_key: owner_pin_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: pin_post
+    crud: Update
+  object:
+    kind: state
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: pinned
+    binding:
+      source: request
+      field: id
+      resource: PostID(post)
+    participants:
+    - id: collection
+      type: Collection
+      role: context
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id007
+    reason: Blog alias whose nav changes.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id006
+    reason: Blog must exist.
+  - type: knowledge
+    fact: &id014
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PostID
+        target: &id013
+          kind: entity
+          id: post
+          type: Post
+          role: target
+    reason: Post id to pin.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id013
+    reason: Post must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id006
+    reason: Blog owner.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id013
+        - pinned
+        - 'true'
+      basis: state_transition
+      reason: Post pinned to nav.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id013
+        - pinned
+        - 'false'
+      basis: state_transition
+      reason: Was unpinned.
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+    ignored_reason: ''
+  - direction: input
+    field: id / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/pin
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.75
+  reasoning: pinPost pins a post.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/pin
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+  - Exists(collection:Collection{context})
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  - Can(actor:User[SELF],Update,collection:Collection{context})
+  produces:
+  - State(post:Post{target},pinned,true)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Pin to blog nav.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:1072 pinPost
+      supports: pin
+    notes: null
+- id: gt-action-020
+  name: Unpin post
+  kind: normal
+  description: A blog owner unpins a post from the blog navigation.
+  action_key: owner_unpin_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: APIToken
+  operation:
+    business: unpin_post
+    crud: Update
+  object:
+    kind: state
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: pinned
+    binding:
+      source: request
+      field: id
+      resource: PostID(post)
+    participants:
+    - id: collection
+      type: Collection
+      role: context
+      binding:
+        source: request
+        field: alias
+        resource: CollectionAlias(collection)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id007
+    reason: Blog alias whose nav changes.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id006
+    reason: Blog must exist.
+  - type: knowledge
+    fact: *id014
+    reason: Post id to unpin.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id013
+    reason: Post must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id006
+    reason: Blog owner.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id013
+        - pinned
+        - 'false'
+      basis: state_transition
+      reason: Post removed from nav.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id013
+        - pinned
+        - 'true'
+      basis: state_transition
+      reason: Was pinned.
+  io_accounting:
+  - direction: input
+    field: alias / CollectionAlias(collection)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+    ignored_reason: ''
+  - direction: input
+    field: id / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/collections/{alias}/unpin
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.75
+  reasoning: pinPost (unpin) removes a pinned post.
+  l1_keys:
+  - http://localhost/api/collections/{alias}/unpin
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],CollectionAlias(collection:Collection{context}))
+  - Exists(collection:Collection{context})
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  - Can(actor:User[SELF],Update,collection:Collection{context})
+  produces:
+  - State(post:Post{target},pinned,false)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Unpin from blog nav.
+    black_box_reachable: true
+    reachability_conditions:
+    - Blog owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:1072 pinPost
+      supports: unpin
+    notes: null
+- id: gt-action-021
+  name: Create anonymous post
+  kind: normal
+  description: A visitor creates an anonymous post and receives an edit token.
+  action_key: anon_create_draft_post
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: create_draft_post
+    crud: Create
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: id
+      resource: PostID(post)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - &id015
+          kind: entity
+          id: post
+          type: Post
+          role: created
+      basis: action_semantics
+      reason: A new anonymous/draft post is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PostID
+          target: *id015
+      basis: io_reference
+      reason: Response returns the post id.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PostEditToken
+          target: *id015
+      basis: io_reference
+      reason: Response returns an edit token for the author.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: body / PostBody(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Post content.
+  - direction: input
+    field: title / PostTitle(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Post title.
+  - direction: output
+    field: id / PostID(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{created}))
+    ignored_reason: ''
+  - direction: output
+    field: token / PostEditToken(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostEditToken(post:Post{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/posts
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: newPost without a collection creates an anonymous post + edit token.
+  l1_keys:
+  - http://localhost/api/posts
+  consumes: []
+  produces:
+  - Exists(post:Post{created})
+  - Know(actor:User[SELF],PostID(post:Post{created}))
+  - Know(actor:User[SELF],PostEditToken(post:Post{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Anonymous posting surface.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open (anonymous posting enabled by default).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:565 newPost
+      supports: create anonymous post
+    notes: The returned edit token is the capability that later authorizes edit/delete/claim.
+- id: gt-action-022
+  name: Claim anonymous posts
+  kind: normal
+  description: A user claims anonymous posts into their account using edit tokens.
+  action_key: user_claim_posts
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: claim_posts
+    crud: Create
+  object:
+    kind: relation
+    id: ownership
+    type: PostOwnership
+    name: PostOwnership
+    entity: PostOwnership
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: id
+      resource: PostID(post)
+    participants:
+    - id: post
+      type: Post
+      role: member
+      binding:
+        source: request
+        field: id
+        resource: PostID(post)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id016
+    reason: Post id to claim.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id012
+    reason: Post must exist.
+  - type: knowledge
+    fact: *id017
+    reason: Edit token proving control of the anonymous post.
+  effects:
+    gen:
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id012
+        - *id001
+        - OwnedBy
+      basis: relation_transition
+      reason: Post becomes owned by the caller.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{member}))
+    ignored_reason: ''
+  - direction: input
+    field: token / PostEditToken(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostEditToken(post:Post{member}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/posts/claim
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.75
+  reasoning: addPost (claim) ties anonymous posts to the account.
+  l1_keys:
+  - http://localhost/api/posts/claim
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],PostID(post:Post{member}))
+  - Exists(post:Post{member})
+  - Know(actor:User[SELF],PostEditToken(post:Post{member}))
+  produces:
+  - Relation(post:Post{member},actor:User[SELF],OwnedBy)
+  object_type: relation
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Associate anonymous posts with an account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; holds the post edit token.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:963 addPost
+      supports: claim posts
+    notes: null
+- id: gt-action-023
+  name: Unclaim posts
+  kind: normal
+  description: A user removes (unclaims) posts from their account.
+  action_key: user_disperse_posts
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: APIToken
+  operation:
+    business: disperse_posts
+    crud: Delete
+  object:
+    kind: relation
+    id: ownership
+    type: PostOwnership
+    name: PostOwnership
+    entity: PostOwnership
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: id
+      resource: PostID(post)
+    participants:
+    - id: post
+      type: Post
+      role: member
+      binding:
+        source: request
+        field: id
+        resource: PostID(post)
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id016
+    reason: Owned post id.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id012
+    reason: Post must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - kind: entity
+        id: post
+        type: Post
+        role: member
+    reason: Post owner.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id012
+        - *id001
+        - OwnedBy
+      basis: relation_transition
+      reason: Ownership link removed.
+  io_accounting:
+  - direction: input
+    field: id / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{member}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/posts/disperse
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.75
+  reasoning: dispersePost removes posts from the caller's account.
+  l1_keys:
+  - http://localhost/api/posts/disperse
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],PostID(post:Post{member}))
+  - Exists(post:Post{member})
+  - Can(actor:User[SELF],Update,post:Post{member})
+  produces: []
+  object_type: relation
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Unclaim posts from the account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated owner.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:1028 dispersePost
+      supports: unclaim posts
+    notes: null
+- id: gt-action-024
+  name: Read post
+  kind: normal
+  description: A reader reads a post directly by its id.
+  action_key: reader_read_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Reader
+    auth_context: Session
+  operation:
+    business: read_post
+    crud: Read
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: post
+      resource: PostID(post)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id010
+    reason: Post id in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Post must exist.
+  effects:
+    gen:
+    - fact: *id010
+      basis: io_reference
+      reason: Returns the post and its id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: post / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: output
+    field: id / PostID(post)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: output
+    field: body / PostBody(post)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Post content; display.
+  l1_bindings:
+  - l1_key: http://localhost/api/posts/{post}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: fetchPost returns a post by id.
+  l1_keys:
+  - http://localhost/api/posts/{post}
+  consumes:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  produces:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public post read by id.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public unless Private.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:1142 fetchPost
+      supports: read post by id
+    notes: null
+- id: gt-action-025
+  name: Edit post
+  kind: normal
+  description: An author edits a post via account ownership or the post edit token.
+  action_key: author_update_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Author
+    auth_context: APIToken
+  operation:
+    business: update_post
+    crud: Update
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: post
+      resource: PostID(post)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id010
+    reason: Post id in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Post must exist.
+  - type: knowledge
+    fact: &id018
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: PostEditToken
+        target: *id009
+    reason: Edit token (for an anonymous post).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id009
+    reason: Post owner or edit-token holder.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - body
+        - updated
+      basis: state_transition
+      reason: Body replaced.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - body
+        - previous
+      basis: state_transition
+      reason: Old body dropped.
+  io_accounting:
+  - direction: input
+    field: post / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: input
+    field: token / PostEditToken(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostEditToken(post:Post{target}))
+    ignored_reason: ''
+  - direction: input
+    field: body / PostBody(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Updated content.
+  l1_bindings:
+  - l1_key: http://localhost/api/posts/{post}
+    methods:
+    - POST
+    - PUT
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: existingPost updates a post, authorized by owner or edit token.
+  l1_keys:
+  - http://localhost/api/posts/{post}
+  consumes:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  - Know(actor:User[SELF],PostEditToken(post:Post{target}))
+  - Can(actor:User[SELF],Update,post:Post{target})
+  produces:
+  - State(post:Post{target},body,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Edit via ownership or edit token.
+    black_box_reachable: true
+    reachability_conditions:
+    - Post owner (session/token) or anon edit-token holder.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:713 existingPost
+      supports: update post
+    notes: null
+- id: gt-action-026
+  name: Delete post
+  kind: normal
+  description: An author deletes a post via account ownership or the post edit token.
+  action_key: author_delete_post
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Author
+    auth_context: APIToken
+  operation:
+    business: delete_post
+    crud: Delete
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: post
+      resource: PostID(post)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id010
+    reason: Post id in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Post must exist.
+  - type: knowledge
+    fact: *id018
+    reason: Edit token (for an anonymous post).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - *id009
+    reason: Post owner or edit-token holder.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id009
+      basis: state_transition
+      reason: Post removed.
+  io_accounting:
+  - direction: input
+    field: post / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: input
+    field: token / PostEditToken(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostEditToken(post:Post{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/posts/{post}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: deletePost removes a post, authorized by owner or edit token.
+  l1_keys:
+  - http://localhost/api/posts/{post}
+  consumes:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  - Know(actor:User[SELF],PostEditToken(post:Post{target}))
+  - Can(actor:User[SELF],Delete,post:Post{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete via ownership or edit token.
+    black_box_reachable: true
+    reachability_conditions:
+    - Post owner or anon edit-token holder.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:846 deletePost
+      supports: delete post
+    notes: null
+- id: gt-action-027
+  name: Read post property
+  kind: normal
+  description: A reader reads a single property of a post.
+  action_key: reader_read_post_property
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Reader
+    auth_context: Session
+  operation:
+    business: read_post_property
+    crud: Read
+  object:
+    kind: entity
+    id: post
+    type: Post
+    name: Post
+    entity: Post
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: post
+      resource: PostID(post)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id010
+    reason: Post id in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Post must exist.
+  effects:
+    gen:
+    - fact: *id010
+      basis: io_reference
+      reason: Returns the requested property of a known post.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: post / PostID(post)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],PostID(post:Post{target}))
+    ignored_reason: ''
+  - direction: input
+    field: property / PostProperty(post)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Which field is requested.
+  - direction: output
+    field: value / PostProperty(post)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Single field value; display.
+  l1_bindings:
+  - l1_key: http://localhost/api/posts/{post}/{property}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: fetchPostProperty returns one field of a post.
+  l1_keys:
+  - http://localhost/api/posts/{post}/{property}
+  consumes:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  - Exists(post:Post{target})
+  produces:
+  - Know(actor:User[SELF],PostID(post:Post{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public single-property read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public unless Private.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/posts.go:1201 fetchPostProperty
+      supports: read one property
+    notes: null
+- id: gt-action-028
+  name: Delete user (admin)
+  kind: normal
+  description: An administrator deletes a user account.
+  action_key: admin_delete_user
+  subject:
+    id: actor
+    identity: Administrator
+    role: Admin
+    auth_context: Session
+  operation:
+    business: admin_delete_user
+    crud: Delete
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: username
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Admin session.
+  - type: knowledge
+    fact: &id020
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Username
+        target: &id019
+          kind: entity
+          id: user
+          type: User
+          role: target
+    reason: Target username in path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id019
+    reason: User must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - *id019
+    reason: IsAdmin() required.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id019
+      basis: state_transition
+      reason: User account removed.
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/admin/user/{username}/delete
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: handleAdminDeleteUser removes a user account.
+  l1_keys:
+  - http://localhost/admin/user/{username}/delete
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],Username(user:User{target}))
+  - Exists(user:User{target})
+  - Can(actor:User[SELF],Delete,user:User{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin user management (browser form).
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin session.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:176 handleAdminDeleteUser
+      supports: admin delete user
+    notes: null
+- id: gt-action-029
+  name: Toggle user status (admin)
+  kind: normal
+  description: An administrator suspends or re-activates a user.
+  action_key: admin_toggle_user_status
+  subject:
+    id: actor
+    identity: Administrator
+    role: Admin
+    auth_context: Session
+  operation:
+    business: admin_toggle_user_status
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: status
+    binding:
+      source: request
+      field: username
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Admin session.
+  - type: knowledge
+    fact: *id020
+    reason: Target username.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id019
+    reason: User must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id019
+    reason: IsAdmin() required.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id019
+        - status
+        - toggled
+      basis: state_transition
+      reason: Suspended/active flipped.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id019
+        - status
+        - previous
+      basis: state_transition
+      reason: Prior status dropped.
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/admin/user/{username}/status
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: handleAdminToggleUserStatus flips a user's suspended flag.
+  l1_keys:
+  - http://localhost/admin/user/{username}/status
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],Username(user:User{target}))
+  - Exists(user:User{target})
+  - Can(actor:User[SELF],Update,user:User{target})
+  produces:
+  - State(user:User{target},status,toggled)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin suspends/activates a user.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin session.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:177 handleAdminToggleUserStatus
+      supports: admin status toggle
+    notes: null
+- id: gt-action-030
+  name: Reset user password (admin)
+  kind: normal
+  description: An administrator resets another user's password.
+  action_key: admin_reset_user_pass
+  subject:
+    id: actor
+    identity: Administrator
+    role: Admin
+    auth_context: Session
+  operation:
+    business: admin_reset_user_pass
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: password
+    binding:
+      source: request
+      field: username
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Admin session.
+  - type: knowledge
+    fact: *id020
+    reason: Target username.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id019
+    reason: User must exist.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - *id019
+    reason: IsAdmin() required.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id019
+        - password
+        - reset
+      basis: state_transition
+      reason: Password reset by admin.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id019
+        - password
+        - previous
+      basis: state_transition
+      reason: Old password dropped.
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  - direction: input
+    field: new_pass / NewPassword(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Admin-set password.
+  l1_bindings:
+  - l1_key: http://localhost/admin/user/{username}/passphrase
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: handleAdminResetUserPass sets a user's password.
+  l1_keys:
+  - http://localhost/admin/user/{username}/passphrase
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],Username(user:User{target}))
+  - Exists(user:User{target})
+  - Can(actor:User[SELF],Update,user:User{target})
+  produces:
+  - State(user:User{target},password,reset)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin account takeover primitive.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin session.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: writefreely/routes.go:178 handleAdminResetUserPass
+      supports: admin password reset
+    notes: null
+edges: []
+annotation_issues: []

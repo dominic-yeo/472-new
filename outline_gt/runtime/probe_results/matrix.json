@@ -1,0 +1,258 @@
+﻿[
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/auth.config",
+        "status":  200,
+        "note":  "PUBLIC (expect 200)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/auth.info",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/users.list",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/collections.list",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/documents.list",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/shares.list",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/apiKeys.list",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/integrations.list",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/installation.info",
+        "status":  401,
+        "note":  "anon (expect 401)"
+    },
+    {
+        "phase":  "transport",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/auth.info?token=deadbeef",
+        "status":  401,
+        "note":  "bogus ?token= parses-\u003e401"
+    },
+    {
+        "phase":  "signin",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/auth/email",
+        "status":  200,
+        "note":  "request magic link"
+    },
+    {
+        "phase":  "signin",
+        "identity":  "user",
+        "method":  "POST",
+        "path":  "/auth/email.callback",
+        "status":  200,
+        "note":  "two-step magic-link login"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/auth.info",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/users.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/collections.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/documents.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/shares.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/apiKeys.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/integrations.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/groups.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/oauthClients.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/events.list",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "share",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/collections.create",
+        "status":  200,
+        "note":  "create collection"
+    },
+    {
+        "phase":  "share",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/documents.create",
+        "status":  200,
+        "note":  "create document"
+    },
+    {
+        "phase":  "share",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/shares.create",
+        "status":  200,
+        "note":  "publish share"
+    },
+    {
+        "phase":  "share",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/documents.info",
+        "status":  200,
+        "note":  "ANON read via share (expect 200 w/ content)"
+    },
+    {
+        "phase":  "share",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/shares.info",
+        "status":  200,
+        "note":  "ANON share.info oracle (expect 200)"
+    },
+    {
+        "phase":  "share",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/documents.info",
+        "status":  401,
+        "note":  "ANON same doc by id (expect 401)"
+    },
+    {
+        "phase":  "transport",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/api/apiKeys.create",
+        "status":  200,
+        "note":  "mint API key"
+    },
+    {
+        "phase":  "transport",
+        "identity":  "apikey",
+        "method":  "POST",
+        "path":  "/api/auth.info",
+        "status":  200,
+        "note":  "header Bearer (expect 200)"
+    },
+    {
+        "phase":  "transport",
+        "identity":  "apikey",
+        "method":  "POST",
+        "path":  "/api/auth.info (body token)",
+        "status":  200,
+        "note":  "body token (expect 200)"
+    },
+    {
+        "phase":  "transport",
+        "identity":  "apikey",
+        "method":  "POST",
+        "path":  "/api/auth.info?token= (URL)",
+        "status":  200,
+        "note":  "?token= query == TOKEN-IN-URL (expect 200)"
+    }
+]

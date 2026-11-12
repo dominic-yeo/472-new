@@ -1,0 +1,53 @@
+# AnythingLLM agentic GT -- annotation issues (modeling decisions; NOT vulnerabilities)
+issues:
+  - id: user-agent-as-control
+    kind: modeling
+    note: >
+      The AIbitat graph registers a USER agent (interrupt: ALWAYS) as the human monitor. It is not
+      an LLM agent, so it is modeled as ctl.user_oversight (human_approval), not an agents record.
+      It applies only to interactive @agent sessions; ephemeral/API/scheduled runs have no USER.
+
+  - id: skill-grouping
+    kind: granularity
+    note: >
+      Multi-stage skills (sql-agent, filesystem, create-files, gmail, outlook, google-calendar) are
+      modeled as one binding each; their child sub-tools share identity/effect. Imported plugins,
+      agent flows, and MCP are each one binding representing the class.
+
+  - id: instance-credentials
+    kind: authority
+    note: >
+      execution_identity for gmail/outlook/gcal/sql/mcp/imported = instance-stored credentials
+      (system settings / setup_args), captured on each binding and in authority_context.delegated_identity.
+
+  - id: reachability-skill-gated
+    kind: reachability
+    note: >
+      Most skills are admin-enabled (default_agent_skills) and several are availability-gated
+      (isToolAvailable / OAuth connected). Marked conditionally_mounted; DEFAULT_SKILLS
+      (memory, docSummarizer, webScraping, webBrowsing) are black_box_reachable once @agent is enabled.
+
+  - id: l1-l2-forward-refs
+    kind: cross-layer
+    note: anything-llm L1/L2 GT not built; l1/l2 ids are forward references.
+
+methodology_feedback:
+  - id: human-monitor-pattern
+    target: schema / methodology
+    finding: >
+      AIbitat's USER interrupt=ALWAYS is a graph-level human-in-the-loop that is NOT a per-tool
+      approval. Modeled as a control with enforcement human_process + a dedicated execution_edge
+      (edge.user_oversight). Methodology should list "human-monitor agent node" as a control pattern
+      distinct from per-tool approval, and note it lapses for headless (API/scheduled) runs.
+
+  - id: multiuser-vs-single-user
+    target: methodology Phase C
+    finding: >
+      Reachability of some tools depends on single-user vs multi-user MODE (not just permission).
+      Worth an explicit methodology note: capture deployment-mode gates in reachability, not just RBAC.
+
+  - id: mcp-tools-only-again
+    target: methodology Phase B (MCP)
+    finding: >
+      Second app (after open-webui) whose MCP client exposes TOOLS only -- no resources/prompts/
+      sampling. The external_trigger/sampling edge remains unused; confirms it is the exception.

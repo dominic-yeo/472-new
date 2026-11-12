@@ -1,0 +1,23 @@
+# Keycloak attack-surface runtime -- GT grounding stack.
+#   quay.io/keycloak/keycloak in dev mode (start-dev, embedded dev H2 DB).
+# A bootstrap admin is seeded via KC_BOOTSTRAP_ADMIN_* so the probe can get an
+# admin token (password grant on master/admin-cli) and ground the admin plane.
+#
+#   docker compose -f keycloak_gt/runtime/compose.yaml up -d
+#   # Keycloak: http://localhost:8080  (admin console /admin, master realm)
+#   pwsh keycloak_gt/runtime/probe.ps1
+#   docker compose -f keycloak_gt/runtime/compose.yaml down -v
+#
+# Credentials are test-only.  Image pinned to the 26.x line to match the source (main/26.x).
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0
+    command: ["start-dev"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "gtadmin"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "Gt-Adm1n-Secret-9xQ"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "127.0.0.1:8080:8080"

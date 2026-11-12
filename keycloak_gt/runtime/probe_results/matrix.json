@@ -1,0 +1,178 @@
+﻿[
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/realms/master/.well-known/openid-configuration",
+        "status":  200,
+        "note":  "OIDC discovery (expect 200)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/realms/master/protocol/openid-connect/certs",
+        "status":  200,
+        "note":  "JWKS (expect 200)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/realms/master",
+        "status":  200,
+        "note":  "realm info (expect 200)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/realms/master/protocol/openid-connect/auth?client_id=account\u0026response_type=code\u0026redirect_uri=http://localhost:8080/x\u0026scope=openid",
+        "status":  400,
+        "note":  "authorize (expect 200 login / 302)"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/realms/master/protocol/openid-connect/token",
+        "status":  401,
+        "note":  "token bad client (expect 401)"
+    },
+    {
+        "phase":  "denial",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/admin/serverinfo",
+        "status":  401,
+        "note":  "no token (expect 401)"
+    },
+    {
+        "phase":  "denial",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/admin/realms",
+        "status":  401,
+        "note":  "no token (expect 401)"
+    },
+    {
+        "phase":  "denial",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/admin/realms/master",
+        "status":  401,
+        "note":  "no token (expect 401)"
+    },
+    {
+        "phase":  "denial",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/admin/realms/master/users",
+        "status":  401,
+        "note":  "no token (expect 401)"
+    },
+    {
+        "phase":  "denial",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/admin/realms/master/clients",
+        "status":  401,
+        "note":  "no token (expect 401)"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/realms/master/protocol/openid-connect/token",
+        "status":  200,
+        "note":  "admin-cli password grant (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/serverinfo",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/users",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/clients",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/roles",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/groups",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/identity-provider/instances",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/components",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/admin/realms/master/authentication/flows",
+        "status":  200,
+        "note":  "admin (expect 200)"
+    },
+    {
+        "phase":  "authed",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/realms/master/protocol/openid-connect/userinfo",
+        "status":  403,
+        "note":  "userinfo bearer (expect 200)"
+    }
+]

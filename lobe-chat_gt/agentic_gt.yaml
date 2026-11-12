@@ -1,0 +1,859 @@
+schema_version: agentic-attack-surface-v1
+environment_id: lobechat-oss
+meta:
+  app: lobe-chat
+  app_version: repo @ 472-new checkout
+  git_ref: see source_root
+  applicability:
+    verdict: qualifies
+    evidence: client tool-call loop (store/chat/slices/plugin/action.ts triggerToolCalls) over builtin/plugin/custom
+      tools; plugin calls proxied through the server gateway (services/chat.ts runPluginApi).
+  phase_status:
+    static_A_to_D: complete
+    runtime_E: pending (no live grounding yet)
+    link_F: partial (L1/L2 GT for lobe-chat not yet built; ids are forward refs)
+agents:
+- id: agent.lobechat.assistant
+  name: Assistant (agent session)
+  component: lobe-chat
+  agent_kind: interactive
+  purpose: Per-session assistant defined by an agent config (systemRole + enabled plugins/model); runs
+    a client tool-call loop, dispatching plugin calls through the server gateway.
+  invocation_surfaces:
+  - l1_id: l1.api.chat.completion
+    trigger: chat send -> model stream; tool_calls dispatched client-side
+    auth_context: user session (self-host single-user, or next-auth/Clerk multi-user)
+  - l1_id: l1.api.plugin.gateway
+    trigger: runPluginApi -> gateway proxy to plugin manifest url
+    auth_context: same user; plugin settings in headers
+  model_config:
+    provider: configurable (OpenAI/Anthropic/Ollama/... many)
+    model: per-agent model
+    config_source: agent/session config + user settings
+    writers:
+    - principal: user
+      l1_id: l1.api.agent.config
+    evidence_status: source_confirmed
+  instruction_sources:
+  - surface_id: ctx.system_role
+    instruction_role: system
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: user
+      l1_id: l1.api.agent.config
+    - principal: external_service
+      l1_id: l1.api.market.install
+  tool_binding_ids:
+  - tool.dalle
+  - tool.web_browsing
+  - tool.plugin_default
+  - tool.plugin_standalone
+  - tool.custom_plugin
+  context_source_ids:
+  - ctx.system_role
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.knowledge
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.plugin_manifest_desc
+  - ctx.file_attachments
+  memory_ids:
+  - mem.messages
+  - mem.knowledge_vector
+  - mem.agents
+  output_sink_ids:
+  - sink.chat_response
+  - sink.artifacts
+  - sink.plugin_gateway
+  - sink.dalle
+  control_ids:
+  - ctl.plugin_enablement
+  - ctl.gateway_proxy
+  - ctl.plugin_settings_auth
+  - ctl.abort
+  resource_limits:
+    max_iterations: tool-call loop continues while the model emits tool_calls; no explicit hard cap found
+      in web source
+    recursion: n/a
+    token_or_cost_budget: none in core
+    loop_detection: user abort / stream cancel
+    enforced_by: code
+  authority_context:
+    principal_source: user session (or local single-user)
+    tenant_scope: per-user agents/sessions/files
+    resource_scope: user's sessions + plugin settings secrets
+    delegated_identity: plugin calls carry the user's plugin-settings headers via the gateway
+    authz_enforcement: code (per-user data scoping); plugins auto-run without approval
+  related_l2_ids:
+  - l2.chat.agent_session
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: src/store/chat/slices/plugin/action.ts; src/services/chat.ts runPluginApi; src/tools/index.ts
+  evidence_status: source_confirmed
+  notes: Agent config (systemRole + plugins) can be installed from the plugin/agent MARKET -> external
+    authorship of the system prompt and tool set.
+tool_bindings:
+- id: tool.dalle
+  agent_id: agent.lobechat.assistant
+  l1_ids: []
+  tool_name: DALL-E image generation (builtin)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - generate images
+  execution_identity:
+    identity: server/provider key
+    credential_source: image provider config
+  argument_handling: {}
+  output_ids:
+  - sink.dalle
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/tools/dalle; builtinTools
+  notes: Only built-in tool in web source.
+- id: tool.web_browsing
+  agent_id: agent.lobechat.assistant
+  l1_ids: []
+  tool_name: web browsing (search + crawl page)
+  tool_source: plugin
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - search the web
+  - crawl/fetch a page's content
+  execution_identity:
+    identity: server fetch / search provider
+    credential_source: search provider config
+  argument_handling: {}
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  execution_environment:
+    sandbox: server/gateway
+    network_egress: unrestricted (crawl arbitrary URL = SSRF)
+    filesystem_scope: none
+    enforced_by: code
+  effect_class: external_send
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: web-browsing plugin enabled
+  evidence_status: source_confirmed
+  source_ref: lobe web-browsing plugin
+  notes: Model-composed URL crawled server-side -> SSRF + indirect injection via page content.
+- id: tool.plugin_default
+  agent_id: agent.lobechat.assistant
+  l1_ids:
+  - l1.api.plugin.gateway
+  tool_name: Lobe plugin (default/markdown type)
+  tool_source: api
+  server_or_provider: plugin manifest api url (via server gateway)
+  schema_ref: null
+  description_source:
+    source_ref: plugin manifest (remote) description/schema
+    writers:
+    - principal: external_service
+      l1_id: null
+    - principal: user
+      l1_id: l1.api.plugin.install
+  capabilities:
+  - call the plugin's declared API operations
+  execution_identity: &id001
+    identity: the user's plugin settings
+    credential_source: plugin settings headers (createHeadersWithPluginSettings)
+  argument_handling:
+    validation: JSON tool arguments parsed from model tool_calls
+    authorization: plugin enabled on the agent
+    normalization: parseToolCalls
+    enforced_by: code
+  output_ids:
+  - ctx.tool_results
+  - sink.plugin_gateway
+  execution_environment:
+    sandbox: remote plugin API via gateway proxy
+    network_egress: gateway fetches manifest url
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: plugin installed + enabled on the agent
+  evidence_status: source_confirmed
+  source_ref: services/chat.ts runPluginApi -> API_ENDPOINTS.gateway
+  notes: Server gateway fetches the plugin's manifest url -> SSRF-class; description from remote manifest
+    -> rug-pull.
+- id: tool.plugin_standalone
+  agent_id: agent.lobechat.assistant
+  l1_ids: []
+  tool_name: Lobe plugin (standalone/iframe UI)
+  tool_source: plugin
+  server_or_provider: null
+  schema_ref: null
+  description_source:
+    source_ref: plugin manifest (remote)
+    writers:
+    - principal: external_service
+      l1_id: null
+    - principal: user
+      l1_id: l1.api.plugin.install
+  capabilities:
+  - render a plugin UI in an iframe; postMessage bridge
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  - sink.artifacts
+  execution_environment: null
+  effect_class: mixed
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: standalone plugin installed
+  evidence_status: source_confirmed
+  source_ref: invokeStandaloneTypePlugin
+  notes: Renders third-party iframe content in the app origin boundary.
+- id: tool.custom_plugin
+  agent_id: agent.lobechat.assistant
+  l1_ids: []
+  tool_name: user custom plugin (manifest URL)
+  tool_source: api
+  server_or_provider: null
+  schema_ref: null
+  description_source:
+    source_ref: user-supplied remote manifest
+    writers:
+    - principal: user
+      l1_id: l1.api.custom_plugin.add
+    - principal: external_service
+      l1_id: null
+  capabilities:
+  - user-added plugin from an arbitrary manifest URL
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  - sink.plugin_gateway
+  execution_environment:
+    sandbox: remote
+    network_egress: gateway fetches user-supplied url
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: a custom plugin added
+  evidence_status: source_confirmed
+  source_ref: store/tool/slices/customPlugin/action.ts
+  notes: User supplies an arbitrary manifest URL -> model-facing description + gateway target both attacker-choosable.
+context_sources:
+- id: ctx.system_role
+  source_kind: system_prompt
+  source_ref: agent config systemRole (per session/agent)
+  writers:
+  - principal: user
+    l1_id: l1.api.agent.config
+  - principal: external_service
+    l1_id: l1.api.market.install
+  destination_agent_ids: &id002
+  - agent.lobechat.assistant
+  destination_channel: system
+  provenance: agent config (user or market)
+  trust_class: trusted_instruction
+  transformation: ''
+  persistence_scope: user
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: systemRole is user-set OR installed from the market -> market agents carry external system prompts.
+- id: ctx.user_message
+  source_kind: user_input
+  source_ref: chat input
+  writers:
+  - principal: user
+    l1_id: l1.api.chat.completion
+  destination_agent_ids: *id002
+  destination_channel: user
+  provenance: end user
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.chat_history
+  source_kind: chat_history
+  source_ref: messages/topics store
+  writers:
+  - principal: user
+    l1_id: l1.api.chat.completion
+  - principal: agent.lobechat.assistant
+    l1_id: null
+  destination_agent_ids: *id002
+  destination_channel: user
+  provenance: prior turns
+  trust_class: mixed
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.knowledge
+  source_kind: retrieval
+  source_ref: files/knowledge base RAG injection
+  writers:
+  - principal: user
+    l1_id: l1.api.file.upload
+  destination_agent_ids: *id002
+  destination_channel: system
+  provenance: uploaded files / knowledge
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: user
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Uploaded document chunks injected -> indirect injection.
+- id: ctx.tool_results
+  source_kind: tool_result
+  source_ref: plugin/tool responses re-fed to the model
+  writers:
+  - principal: agent.lobechat.assistant
+    l1_id: null
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id002
+  destination_channel: tool
+  provenance: plugin/tool output
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.web_content
+  source_kind: external
+  source_ref: web-browsing crawl/search results
+  writers:
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id002
+  destination_channel: tool
+  provenance: arbitrary web pages
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Crawled page content -> indirect injection + SSRF reflection.
+- id: ctx.plugin_manifest_desc
+  source_kind: external
+  source_ref: plugin/custom-plugin manifest descriptions + schemas presented to the model
+  writers:
+  - principal: external_service
+    l1_id: null
+  - principal: user
+    l1_id: l1.api.custom_plugin.add
+  destination_agent_ids: *id002
+  destination_channel: tool
+  provenance: remote plugin manifests
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: user
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Remote/user manifests are model-facing -> rug-pull / tool-description injection.
+- id: ctx.file_attachments
+  source_kind: document
+  source_ref: message file/image attachments
+  writers:
+  - principal: user
+    l1_id: l1.api.file.upload
+  destination_agent_ids: *id002
+  destination_channel: user
+  provenance: user uploads
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+memory_stores:
+- id: mem.messages
+  store_kind: conversation_history
+  owner_component: lobe-chat
+  readers:
+  - agent.lobechat.assistant
+  writers:
+  - principal: user
+    l1_id: l1.api.chat.completion
+  - principal: agent.lobechat.assistant
+    l1_id: null
+  scope: user
+  isolation_enforcement: per-user (client PGlite/IndexedDB or server DB with userId scoping)
+  write_provenance: user turns + assistant/tool outputs
+  read_path: messages replayed into context
+  retention_and_deletion: user-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: database/schemas messages/topics
+  notes: No dedicated agent-memory skill; persistence/poisoning rides on chat history + knowledge.
+- id: mem.knowledge_vector
+  store_kind: vector_store
+  owner_component: lobe-chat
+  readers:
+  - agent.lobechat.assistant
+  writers:
+  - principal: user
+    l1_id: l1.api.file.upload
+  scope: user
+  isolation_enforcement: per-user knowledge bases
+  write_provenance: uploaded files
+  read_path: semantic search -> context
+  retention_and_deletion: file lifecycle
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: files/knowledge RAG
+  notes: ''
+- id: mem.agents
+  store_kind: database
+  owner_component: lobe-chat
+  readers:
+  - agent.lobechat.assistant
+  writers:
+  - principal: user
+    l1_id: l1.api.agent.config
+  - principal: external_service
+    l1_id: l1.api.market.install
+  scope: user
+  isolation_enforcement: per-user agents
+  write_provenance: user config or market install
+  read_path: agent config supplies systemRole + plugin set
+  retention_and_deletion: user-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: store/agent; sessions
+  notes: Installing a market agent writes systemRole + enabled plugins = instruction+tool provisioning.
+output_sinks:
+- id: sink.chat_response
+  sink_kind: chat_response
+  producer_ids:
+  - agent.lobechat.assistant
+  audience: user (chat UI)
+  delivery: streamed markdown
+  transformation: ''
+  render_side_effects:
+    auto_fetch: chat UI renders markdown images/links
+    active_content: sanitized markdown
+    enforced_by: code
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids:
+  - l2.chat.agent_session
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: fetchSSE; message render
+  notes: Markdown image/link auto-load = exfil-on-render channel.
+- id: sink.artifacts
+  sink_kind: file
+  producer_ids:
+  - agent.lobechat.assistant
+  - tool.plugin_standalone
+  audience: user (iframe)
+  delivery: model-authored HTML/SVG/React rendered in an iframe
+  transformation: ''
+  render_side_effects:
+    auto_fetch: iframe may load remote resources
+    active_content: executes model-authored HTML/JS/React in an iframe sandbox
+    enforced_by: code (iframe sandbox)
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: artifacts render; standalone plugin iframe
+  notes: Client-side code execution of model output -> XSS/exfil class bounded by iframe sandbox.
+- id: sink.plugin_gateway
+  sink_kind: external_api
+  producer_ids:
+  - tool.plugin_default
+  - tool.custom_plugin
+  audience: external plugin APIs
+  delivery: server gateway POST to plugin manifest url with settings headers
+  transformation: createHeadersWithPluginSettings injects plugin secrets
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids:
+  - l2.chat.agent_session
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: services/chat.ts runPluginApi
+  notes: Model-composed args + user plugin secrets leave to third-party/user-chosen URLs via the gateway.
+- id: sink.dalle
+  sink_kind: external_api
+  producer_ids:
+  - tool.dalle
+  audience: image provider
+  delivery: image generation API
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: dalle tool
+  notes: ''
+execution_edges:
+- id: edge.user__assistant
+  source:
+    agent_id: null
+    step: request
+    external_trigger: chat UI
+  destination:
+    agent_id: agent.lobechat.assistant
+  decision_maker: user
+  condition: user sends a message
+  input_source_ids:
+  - ctx.user_message
+  - ctx.system_role
+  - ctx.knowledge
+  argument_sources: ''
+  payload: user message + agent config
+  output_ids: []
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids:
+  - l1.api.chat.completion
+  related_l2_steps:
+  - l2_id: l2.chat.agent_session
+    order: 1
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: store/chat message action
+  notes: ''
+- id: edge.assistant__tool
+  source:
+    agent_id: agent.lobechat.assistant
+    step: tool-call
+    external_trigger: null
+  destination:
+    tool_binding_id: (model-selected binding)
+  decision_maker: llm
+  condition: model returns tool_calls -> triggerToolCalls dispatch by plugin type
+  input_source_ids:
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.knowledge
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.plugin_manifest_desc
+  argument_sources: parseToolCalls (model-composed JSON args)
+  payload: tool id + args
+  output_ids:
+  - ctx.tool_results
+  control_ids:
+  - ctl.plugin_enablement
+  - ctl.gateway_proxy
+  - ctl.plugin_settings_auth
+  validation_or_approval: NONE by default (tool calls auto-run); plugin must be enabled
+  execution_mode: synchronous
+  loop_bound: continues while model emits tool_calls (no explicit cap)
+  failure_behavior: retry
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.chat.agent_session
+    order: 2
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: store/chat/slices/plugin/action.ts triggerToolCalls
+  notes: Auto-run, no human approval -> model-directed tool use executes without a gate.
+- id: edge.tool__assistant
+  source:
+    agent_id: agent.lobechat.assistant
+    step: tool-return
+    external_trigger: null
+  destination:
+    agent_id: agent.lobechat.assistant
+  decision_maker: deterministic_code
+  condition: tool result returns
+  input_source_ids: []
+  argument_sources: ''
+  payload: tool result
+  output_ids:
+  - ctx.tool_results
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: retry
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.chat.agent_session
+    order: 3
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: invoke*TypePlugin result handling
+  notes: ''
+- id: edge.assistant__gateway
+  source:
+    agent_id: agent.lobechat.assistant
+    step: plugin-api
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.plugin_default
+    external_surface: plugin manifest url (via gateway)
+  decision_maker: llm
+  condition: default/custom plugin call
+  input_source_ids: []
+  argument_sources: model-composed args
+  payload: plugin request payload + manifest
+  output_ids:
+  - sink.plugin_gateway
+  - ctx.tool_results
+  control_ids:
+  - ctl.gateway_proxy
+  - ctl.plugin_settings_auth
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: services/chat.ts runPluginApi
+  notes: Server gateway is the SSRF sink (fetches manifest url); no MCP edge (MCP absent in web source).
+- id: edge.assistant__artifacts
+  source:
+    agent_id: agent.lobechat.assistant
+    step: artifact
+    external_trigger: null
+  destination:
+    output_sink_id: sink.artifacts
+  decision_maker: llm
+  condition: model emits an artifact (html/react/svg)
+  input_source_ids: []
+  argument_sources: model-authored code
+  payload: artifact code
+  output_ids:
+  - sink.artifacts
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: fallback
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: artifacts render
+  notes: Model output executed/rendered client-side in an iframe.
+- id: edge.assistant__output
+  source:
+    agent_id: agent.lobechat.assistant
+    step: final
+    external_trigger: null
+  destination:
+    output_sink_id: sink.chat_response
+  decision_maker: deterministic_code
+  condition: model finishes
+  input_source_ids: []
+  argument_sources: ''
+  payload: final markdown
+  output_ids:
+  - sink.chat_response
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.chat.agent_session
+    order: 4
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: fetchSSE finalize
+  notes: ''
+controls:
+- id: ctl.plugin_enablement
+  control_kind: tool_policy
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.lobechat.assistant
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: store/tool plugin enable state per agent
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Only plugins enabled on the agent are exposed to the model.
+- id: ctl.gateway_proxy
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: modifying
+  implementation: code
+  failure_mode: abort
+  applies_to_agent_ids:
+  - agent.lobechat.assistant
+  applies_to_tool_binding_ids:
+  - tool.plugin_default
+  - tool.custom_plugin
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: services/chat.ts runPluginApi -> API_ENDPOINTS.gateway; server gateway route
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Server gateway mediates plugin calls and attaches auth; also the SSRF sink (fetches manifest
+    url).
+- id: ctl.plugin_settings_auth
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: modifying
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.lobechat.assistant
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: createHeadersWithPluginSettings (plugin secrets -> headers)
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Injects the user's plugin settings/secrets as request headers (execution identity).
+- id: ctl.abort
+  control_kind: monitoring
+  applies_at: after_model
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: abort
+  applies_to_agent_ids:
+  - agent.lobechat.assistant
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: stream AbortController / cancel
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: User can cancel the stream; no automatic per-tool approval or loop cap.

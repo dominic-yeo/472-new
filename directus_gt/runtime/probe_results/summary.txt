@@ -1,0 +1,38 @@
+﻿Directus probe summary (2026-11-10T18:40:07) base=http://localhost:8055 admin_login=True
+IDENTITY METHOD PATH                                       CODE  NOTE
+anon     GET    /server/health                             200   health (expect 200)
+anon     GET    /server/info                               200   server info (public fields)
+anon     GET    /auth                                      200   auth providers
+anon     POST   /server/setup                              403   setup (expect 403: already set up)
+anon     POST   /users/register                            403   self-register (expect 404/403 if disabled)
+anon     POST   /auth/login                                200   admin login
+anon     POST   /auth/login                                401   wrong password (expect 401)
+admin    GET    /users/me                                  200   admin (expect 200)
+admin    GET    /users                                     200   admin (expect 200)
+admin    GET    /roles                                     200   admin (expect 200)
+admin    GET    /policies                                  200   admin (expect 200)
+admin    GET    /permissions                               200   admin (expect 200)
+admin    GET    /settings                                  200   admin (expect 200)
+admin    GET    /files                                     200   admin (expect 200)
+admin    GET    /flows                                     200   admin (expect 200)
+admin    GET    /extensions                                200   admin (expect 200)
+admin    GET    /collections                               200   admin (expect 200)
+admin    GET    /schema/snapshot                           200   admin (expect 200)
+admin    GET    /server/specs/oas                          200   admin (expect 200)
+anon     GET    /users                                     403   anon (expect 401/403)
+anon     GET    /roles                                     403   anon (expect 401/403)
+anon     GET    /policies                                  403   anon (expect 401/403)
+anon     GET    /permissions                               403   anon (expect 401/403)
+anon     GET    /settings                                  403   anon (expect 401/403)
+anon     GET    /files                                     403   anon (expect 401/403)
+anon     GET    /collections                               403   anon (expect 401/403)
+anon     GET    /users/me                                  401   anon /users/me (expect 401)
+admin    POST   /collections                               200   admin create collection
+admin    POST   /fields/gtnotes                            200   admin add field
+admin    GET    /policies?filter[name][_eq]=$t_directus_public_policy 200   find public policy
+admin    POST   /items/gtnotes                             200   admin create item1
+anon     GET    /items/gtnotes                             403   anon list (200 if Public read granted)
+anon     GET    /items/gtnotes/1                           403   anon read item by pk
+anon     POST   /items/gtnotes                             403   anon create (expect 403)
+admin    GET    /items/directus_users                      403   system collection via /items (expect 403)
+

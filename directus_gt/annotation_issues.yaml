@@ -1,0 +1,158 @@
+schema_version: pengent-web-gt-v1
+environment_id: "directus-oss"
+
+issues:
+  - id: "di-001"
+    location: "Scope: the per-collection Content API is one generic controller"
+    description: >-
+      Directus has no per-collection route files. /items/:collection[/:pk] dispatches EVERY user-defined
+      collection through one handler + the policy engine, so the GT models it once (item_* actions). System
+      collections (directus_*) are served by dedicated controllers (users, roles, policies, permissions,
+      access, files, folders, flows, operations, presets, versions, comments, notifications, dashboards,
+      panels, translations, revisions, activity, settings) -- the security-critical ones are L2-covered, the
+      rest enumerated. Feature-flagged surfaces (AI, MCP, deployment, license, TUS) are excluded.
+    evidence:
+      - type: "source"
+        ref: "api/src/controllers/items.ts; api/src/app.ts"
+        supports: "Single generic item controller + mounts"
+    proposed_resolution: "On a real project, expand item_* per collection; the auth model is identical."
+
+  - id: "di-002"
+    location: "Auth: policy-based permissions; admin_access BYPASSES all checks"
+    description: >-
+      A token resolves to accountability -> role -> policies -> permissions. A policy with admin_access=true
+      is full superuser (every check bypassed). app_access gates Data-Studio use. No token => the public role.
+      Authorization is modeled as Can(...) with the collection+action named; the admin subject stands for an
+      admin_access policy holder.
+    evidence:
+      - type: "source"
+        ref: "api/src/middleware/authenticate.ts; permissions engine; policies.ts"
+        supports: "Policy flags incl admin_access"
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json (admin matrix all 200)"
+        supports: "admin_access bypass confirmed"
+    proposed_resolution: "Treat any path to admin_access=true as full compromise."
+
+  - id: "di-003"
+    location: "Row-level access = per-permission FILTER (IDOR surface)"
+    description: >-
+      Directus authorizes per collection+action, and restricts ROWS via each permission's filter. A read/
+      update/delete permission with an empty filter exposes/mutates EVERY item by pk. Ownership ("only my
+      rows") must be expressed as a filter (e.g. user_created = $CURRENT_USER); absent that, a granted action
+      is an IDOR over :pk. Same applies to /users/:pk (edit any user if no filter).
+    evidence:
+      - type: "source"
+        ref: "api/src/controllers/items.ts (no built-in owner check); permissions filters"
+        supports: "Per-action, filter-scoped rows"
+      - type: "runtime"
+        ref: "probe: anon read of item by pk returned 200 once a filterless public read was granted"
+        supports: "No row filter -> any item by pk"
+    proposed_resolution: "Probe with user_b: read/update another user's item by pk under a filterless grant."
+
+  - id: "di-004"
+    location: "Privilege-escalation ladder (policies/roles/access/users)"
+    description: >-
+      The top primitive is a policy with admin_access=true (POST /policies). It is reached by: attaching it to
+      a role (PATCH /roles/:pk), linking it to a user/role via directus_access (POST /access), or editing an
+      existing policy (PATCH /policies/:pk). Separately, directus_users create/update assigns 'role'. Any write
+      grant on directus_policies / directus_roles / directus_access / directus_users is an escalation lever.
+    evidence:
+      - type: "source"
+        ref: "policies.ts; roles.ts; access.ts; users.ts"
+        supports: "Policy/role/access mutation routes"
+    proposed_resolution: "Probe a non-admin app user against these writes to confirm the RBAC boundary."
+
+  - id: "di-005"
+    location: "Public-role over-exposure (the classic misconfiguration)"
+    description: >-
+      Out of the box the public role has NO permissions (confirmed: anon reads = 403). The common real-world
+      exposure is granting the public policy ($t:public_label) a read (or more) on a collection: anon /items/<c>
+      then returns data, and 'fields'/'deep' can traverse relations (incl. directus_users) to over-expose. The
+      same risk applies to granting Public read on directus_files / system collections.
+    evidence:
+      - type: "runtime"
+        ref: "probe: default anon /items/<c> = 403; after granting public read = 200 with data"
+        supports: "Default-deny; exposure is a configuration"
+    proposed_resolution: "Audit the public policy's permission rows; flag any read grant + deep populate."
+
+  - id: "di-006"
+    location: "SSRF: /files/import + flow 'request' operations"
+    description: >-
+      POST /files/import makes the server GET an attacker-chosen 'url' and store it (classic SSRF to cloud
+      metadata / internal services). Flow 'request' operations likewise fetch URLs. A flow with a 'webhook'
+      trigger is reachable at GET/POST /flows/trigger/:pk and can be PUBLIC (no auth), running its operation
+      chain server-side with the flow's configured accountability.
+    evidence:
+      - type: "source"
+        ref: "files.ts POST /import; flows.ts webhookFlowHandler; operations (request type)"
+        supports: "Server-side fetch of attacker input"
+    proposed_resolution: "On a grounded instance, point import url / a flow request at an internal collaborator."
+
+  - id: "di-007"
+    location: "Code / data-model primitives: flows exec, extensions install, schema apply"
+    description: >-
+      Flow 'exec' operations run sandboxed JS (FLOWS_EXEC_ALLOWED_* env governs modules). POST
+      /extensions/registry/install downloads + loads third-party extension code (supply-chain / RCE-adjacent).
+      POST /schema/apply (admin) rewrites the data model -- create/alter/drop collections and fields -- which is
+      both destructive and surface-widening. All are admin/high-privilege but globally impactful.
+    evidence:
+      - type: "source"
+        ref: "operations (exec); extensions.ts /registry/install; schema.ts /apply"
+        supports: "Code-load + schema-write surfaces"
+    proposed_resolution: "Review FLOWS_EXEC_ALLOWED_MODULES / EXTENSIONS_* hardening; restrict who holds admin."
+
+  - id: "di-008"
+    location: "Public share access + share oracle"
+    description: >-
+      POST /shares/auth issues an item-scoped access token from a share id (+ optional password) with NO login.
+      GET /shares/info/:pk is a public endpoint returning share metadata (existence, password-set, usage
+      counters). Share-id guessability + weak/absent password = unauthenticated access to the shared item;
+      /shares/info is an enumeration/oracle.
+    evidence:
+      - type: "source"
+        ref: "shares.ts POST /auth, GET /info/:pk"
+        supports: "Public share auth + info"
+    proposed_resolution: "Create a share, then brute the password / enumerate /shares/info at runtime."
+
+  - id: "di-009"
+    location: "Token transport: '?access_token=' query parameter"
+    description: >-
+      extract-token.ts accepts a token from the access_token QUERY parameter (as well as Bearer + cookie), and
+      tokens may be long-lived STATIC tokens (directus_users.token). Query-param tokens leak via URLs, server
+      logs, browser history and Referer headers.
+    evidence:
+      - type: "source"
+        ref: "api/src/middleware/extract-token.ts"
+        supports: "Query-param token transport"
+    proposed_resolution: "Prefer header/cookie; avoid static tokens in URLs; rotate static tokens."
+
+  - id: "di-010"
+    location: "Runtime CONFIRMED: denial convention + secure defaults"
+    description: >-
+      Probed against directus/directus:11 (11.17.4; source api 41.x, same 11 line). Findings:
+        (1) PERMISSION-DENIED = HTTP 403; missing/invalid auth = 401 (NOT 400).
+        (2) The PUBLIC role has NO permissions by default: anon GET on /users, /roles, /policies, /permissions,
+            /settings, /files, /collections all 403; /users/me 401.
+        (3) Public registration DISABLED by default (POST /users/register -> 403).
+        (4) Bootstrap window CLOSED once seeded (POST /server/setup -> 403); wrong admin password -> 401.
+        (5) System collections 403 via /items (admin GET /items/directus_users -> 403).
+        (6) PUBLIC EXPOSURE is a CONFIG: granting the public policy a filterless read made anon /items/<c> and
+            /items/<c>/:pk return 200 with data (di-003/di-005 path confirmed end-to-end).
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/{matrix.json,summary.txt}"
+        supports: "Denial=403/401, default-deny, exposure-on-grant"
+    proposed_resolution: "Map Can(...) failures to 403, auth failures to 401 in identity_statuses."
+
+  - id: "di-011"
+    location: "Runtime CONFIRMED: admin plane + auth transport"
+    description: >-
+      Admin (admin_access policy) matrix all 200: users/roles/policies/permissions/settings/files/flows/
+      extensions/collections + /schema/snapshot + /server/specs/oas. /auth, /server/info, /server/health are
+      public (200). 20 L1 nodes carry route_confirmed + identity_statuses (anonymous | admin). Bearer-token
+      transport confirmed working.
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json"
+        supports: "Admin matrix + public surface"
+    proposed_resolution: "Extend with a non-admin app user (user_b) for the RBAC + IDOR boundary (di-003/di-004)."

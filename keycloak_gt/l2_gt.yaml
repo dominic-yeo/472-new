@@ -1,0 +1,5231 @@
+schema_version: pengent-web-gt-v1
+environment_id: keycloak-oss
+nodes:
+- id: gt-action-001
+  name: Read OIDC discovery
+  kind: normal
+  description: Read OIDC discovery.
+  action_key: oidc_discovery
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: oidc_discovery
+    crud: Read
+  object:
+    kind: entity
+    id: discovery
+    type: Discovery
+    name: Discovery
+    entity: Discovery
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: Discovery(realm)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - &id001
+          kind: subject
+          id: actor
+          type: User
+          relative_role: SELF
+        - kind: reference
+          type: Discovery(realm)
+          target:
+            kind: entity
+            id: discovery
+            type: Discovery
+            role: response
+      basis: io_reference
+      reason: Returns discovery.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: discovery / Discovery(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Discovery(realm)(discovery:Discovery{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/.well-known/openid-configuration
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read OIDC discovery.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/.well-known/openid-configuration
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],Discovery(realm)(discovery:Discovery{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read OIDC discovery.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Enumerates every endpoint + supported features for the realm.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCWellKnownProvider.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-002
+  name: Read public realm info
+  kind: normal
+  description: Read public realm info.
+  action_key: realm_public_info
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: realm_public_info
+    crud: Read
+  object:
+    kind: entity
+    id: realminfo
+    type: RealmInfo
+    name: RealmInfo
+    entity: RealmInfo
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RealmName(realm)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RealmName(realm)
+          target:
+            kind: entity
+            id: realminfo
+            type: RealmInfo
+            role: response
+      basis: io_reference
+      reason: Returns realminfo.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: realminfo / RealmName(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RealmName(realm)(realminfo:RealmInfo{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read public realm info.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],RealmName(realm)(realminfo:RealmInfo{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read public realm info.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Realm existence oracle + signing public key.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/PublicRealmResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-003
+  name: Read JWKS
+  kind: normal
+  description: Read JWKS.
+  action_key: oidc_jwks
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: oidc_jwks
+    crud: Read
+  object:
+    kind: entity
+    id: jwks
+    type: JWKS
+    name: JWKS
+    entity: JWKS
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: JWKS(realm)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: JWKS(realm)
+          target:
+            kind: entity
+            id: jwks
+            type: JWKS
+            role: response
+      basis: io_reference
+      reason: Returns jwks.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: jwks / JWKS(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],JWKS(realm)(jwks:JWKS{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/certs
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read JWKS.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/certs
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],JWKS(realm)(jwks:JWKS{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read JWKS.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Token-verification public keys.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-004
+  name: Authorization request
+  kind: normal
+  description: A visitor begins an OAuth2/OIDC authorization request.
+  action_key: oidc_authorize
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: oidc_authorize
+    crud: Read
+  object:
+    kind: entity
+    id: authpage
+    type: LoginPage
+    name: LoginPage
+    entity: LoginPage
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: LoginPage(realm)
+    participants:
+    - id: client
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientID
+        target:
+          kind: entity
+          id: client
+          type: Client
+          role: target
+    reason: References a registered client_id + redirect_uri.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: LoginPage
+          target:
+            kind: entity
+            id: authpage
+            type: LoginPage
+            role: response
+      basis: io_reference
+      reason: Renders the login/consent page (then a code to redirect_uri).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: client_id / ClientID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientID(client:Client{target}))
+    ignored_reason: ''
+  - direction: input
+    field: redirect_uri / RedirectURI(client)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Validated against the client's registered redirect URIs.
+  - direction: output
+    field: authpage / LoginPage(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],LoginPage(authpage:LoginPage{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/auth
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.85
+  reasoning: auth endpoint starts code/implicit flow.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/auth
+  consumes:
+  - Know(actor:User[SELF],ClientID(client:Client{target}))
+  produces:
+  - Know(actor:User[SELF],LoginPage(authpage:LoginPage{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authorization endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. redirect_uri validation, request_uri (SSRF), prompt=none, PKCE live here.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/AuthorizationEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: Mis-set redirect_uri = code/token theft; request_uri fetch = SSRF.
+- id: gt-action-005
+  name: Token request
+  kind: normal
+  description: A client exchanges credentials/code/refresh for access + refresh tokens.
+  action_key: oidc_token
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: oidc_token
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: access_token
+    binding:
+      source: response
+      field: ''
+      resource: AccessToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact:
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - ClientCredentials
+    reason: Confidential client authenticates (secret/assertion/mTLS); public clients use PKCE.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: AuthCode
+        target:
+          kind: entity
+          id: session
+          type: Session
+          role: created
+    reason: Presents a code / password / refresh / subject_token per grant.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AccessToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Issues an access token (JWT).
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RefreshToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Issues a refresh token.
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: Bearer becomes authenticated for the audience.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: code / AuthCode(session)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],AuthCode(session:Session{created}))
+    ignored_reason: ''
+  - direction: input
+    field: client_secret / ClientSecret(client)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Client auth.
+  - direction: output
+    field: access_token / AccessToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AccessToken(session:Session{created}))
+    ignored_reason: ''
+  - direction: output
+    field: refresh_token / RefreshToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RefreshToken(session:Session{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/token
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.9
+  reasoning: token endpoint mints tokens for every grant.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/token
+  consumes:
+  - Authenticated(actor:User[SELF],ClientCredentials)
+  - Know(actor:User[SELF],AuthCode(session:Session{created}))
+  produces:
+  - Know(actor:User[SELF],AccessToken(session:Session{created}))
+  - Know(actor:User[SELF],RefreshToken(session:Session{created}))
+  - Authenticated(actor:User[SELF],AccessToken)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Token endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'All grants: code / refresh / password (brute-force) / client_credentials / token-exchange (delegation-escalation)
+      / device / ciba / uma-ticket.'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: token-exchange is the high-risk delegation/escalation grant.
+- id: gt-action-006
+  name: Read userinfo
+  kind: normal
+  description: Read userinfo.
+  action_key: oidc_userinfo
+  subject:
+    id: actor
+    identity: EndUser
+    role: RealmUser
+    auth_context: AccessToken
+  operation:
+    business: oidc_userinfo
+    crud: Read
+  object:
+    kind: entity
+    id: userinfo
+    type: UserInfo
+    name: UserInfo
+    entity: UserInfo
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id002
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - AccessToken
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: userinfo
+            type: UserInfo
+            role: response
+      basis: io_reference
+      reason: Returns userinfo.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: userinfo / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(userinfo:UserInfo{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/userinfo
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read userinfo.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/userinfo
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],UserID(user)(userinfo:UserInfo{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read userinfo.
+    black_box_reachable: true
+    reachability_conditions:
+    - Bearer access token with openid scope.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/UserInfoEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-007
+  name: End session
+  kind: normal
+  description: A user (or RP) terminates the SSO session.
+  action_key: oidc_logout
+  subject:
+    id: actor
+    identity: EndUser
+    role: RealmUser
+    auth_context: AccessToken
+  operation:
+    business: oidc_logout
+    crud: Delete
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: active
+    binding:
+      source: request
+      field: ''
+      resource: Session(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: AccessToken
+        target:
+          kind: entity
+          id: session
+          type: Session
+          role: self
+    reason: id_token_hint / session cookie identifies the session.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: The user session is terminated.
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: logout ends the session.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/logout
+  consumes:
+  - Know(actor:User[SELF],AccessToken(session:Session{self}))
+  produces: []
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: End-session endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. post_logout_redirect_uri validation; id_token_hint.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/LogoutEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-008
+  name: Revoke token
+  kind: normal
+  description: Revoke token.
+  action_key: oidc_revoke
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: oidc_revoke
+    crud: Delete
+  object:
+    kind: entity
+    id: token
+    type: Token
+    name: Token
+    entity: Token
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: AccessToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: AccessToken
+        target:
+          kind: entity
+          id: token
+          type: AccessToken
+          role: target
+    reason: Targets an existing accesstoken.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: token
+          type: Token
+          role: target
+      basis: action_semantics
+      reason: The token is removed.
+  io_accounting:
+  - direction: input
+    field: token / AccessToken(accesstoken)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],AccessToken(token:AccessToken{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/revoke
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Revoke token.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/revoke
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Know(actor:User[SELF],AccessToken(token:AccessToken{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Revoke token.
+    black_box_reachable: true
+    reachability_conditions:
+    - Client-authenticated. Revokes a token.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenRevocationEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-009
+  name: Introspect token
+  kind: normal
+  description: Introspect token.
+  action_key: oidc_introspect
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: oidc_introspect
+    crud: Read
+  object:
+    kind: entity
+    id: introspection
+    type: Introspection
+    name: Introspection
+    entity: Introspection
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: Introspection(token)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Introspection(token)
+          target:
+            kind: entity
+            id: introspection
+            type: Introspection
+            role: response
+      basis: io_reference
+      reason: Returns introspection.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: introspection / Introspection(token)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Introspection(token)(introspection:Introspection{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/token/introspect
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Introspect token.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/token/introspect
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],Introspection(token)(introspection:Introspection{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Introspect token.
+    black_box_reachable: true
+    reachability_conditions:
+    - Client-authenticated (confidential). Reveals token claims/validity (oracle if creds leak).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenIntrospectionEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-010
+  name: Back-channel logout
+  kind: normal
+  description: Back-channel logout.
+  action_key: oidc_backchannel_logout
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: oidc_backchannel_logout
+    crud: Delete
+  object:
+    kind: entity
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: Session(user)
+    participants:
+    - id: logout_token
+      type: LogoutToken
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: LogoutToken
+        target:
+          kind: entity
+          id: logout_token
+          type: LogoutToken
+          role: target
+    reason: Targets an existing logouttoken.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: session
+          type: Session
+          role: target
+      basis: action_semantics
+      reason: The session is removed.
+  io_accounting:
+  - direction: input
+    field: logout_token / LogoutToken(logouttoken)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],LogoutToken(logout_token:LogoutToken{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout/backchannel-logout
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Back-channel logout.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/logout/backchannel-logout
+  consumes:
+  - Know(actor:User[SELF],LogoutToken(logout_token:LogoutToken{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Back-channel logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Accepts a signed logout_token; signature-validation surface.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/LogoutEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-011
+  name: Pushed authorization request
+  kind: normal
+  description: Pushed authorization request.
+  action_key: oidc_par
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: oidc_par
+    crud: Create
+  object:
+    kind: entity
+    id: requesturi
+    type: RequestURI
+    name: RequestURI
+    entity: RequestURI
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: RequestURI(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: requesturi
+          type: RequestURI
+          role: created
+      basis: action_semantics
+      reason: A requesturi is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RequestURI(session)
+          target:
+            kind: entity
+            id: requesturi
+            type: RequestURI
+            role: created
+      basis: io_reference
+      reason: Returns the new requesturi.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: requesturi / RequestURI(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RequestURI(session)(requesturi:RequestURI{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/par/request
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Pushed authorization request.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/par/request
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Exists(requesturi:RequestURI{created})
+  - Know(actor:User[SELF],RequestURI(session)(requesturi:RequestURI{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Pushed authorization request.
+    black_box_reachable: true
+    reachability_conditions:
+    - Client-authenticated. Stores an authorization request server-side -> request_uri handle.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/ext/par
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-012
+  name: Device authorization
+  kind: normal
+  description: Device authorization.
+  action_key: oidc_device_auth
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: oidc_device_auth
+    crud: Create
+  object:
+    kind: entity
+    id: devicecode
+    type: DeviceCode
+    name: DeviceCode
+    entity: DeviceCode
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: DeviceCode(session)
+    participants:
+    - id: client_id
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientID
+        target:
+          kind: entity
+          id: client_id
+          type: Client
+          role: target
+    reason: Targets an existing client.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: devicecode
+          type: DeviceCode
+          role: created
+      basis: action_semantics
+      reason: A devicecode is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: DeviceCode(session)
+          target:
+            kind: entity
+            id: devicecode
+            type: DeviceCode
+            role: created
+      basis: io_reference
+      reason: Returns the new devicecode.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: client_id / ClientID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientID(client_id:Client{target}))
+    ignored_reason: ''
+  - direction: output
+    field: devicecode / DeviceCode(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DeviceCode(session)(devicecode:DeviceCode{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/oidc/device/auth
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Device authorization.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/oidc/device/auth
+  consumes:
+  - Know(actor:User[SELF],ClientID(client_id:Client{target}))
+  produces:
+  - Exists(devicecode:DeviceCode{created})
+  - Know(actor:User[SELF],DeviceCode(session)(devicecode:DeviceCode{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Device authorization.
+    black_box_reachable: true
+    reachability_conditions:
+    - Client-authenticated. Device/user-code flow.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/DeviceEndpoint.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-013
+  name: Submit login
+  kind: normal
+  description: A visitor submits credentials in the browser flow.
+  action_key: login_authenticate
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: login_authenticate
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: request
+      field: ''
+      resource: Session(user)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies username + password.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: On success the browser session authenticates.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Login name.
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/login-actions/authenticate
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.85
+  reasoning: processes the login form.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/login-actions/authenticate
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Authenticated(actor:User[SELF],AccessToken)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Browser login.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Username/password submission -> brute-force / credential-stuffing (attack-detection).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
+      supports: authenticate
+    notes: null
+- id: gt-action-014
+  name: Self-register
+  kind: normal
+  description: A visitor self-registers a new account.
+  action_key: login_register
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: login_register
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserEmail
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies registration fields (username/email/password).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A user account is created.
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: The registrant is signed in / continues the flow.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserEmail(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/login-actions/registration
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: creates a user when registration is enabled.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/login-actions/registration
+  consumes:
+  - Know(actor:User[SELF],UserEmail(user:User{self}))
+  produces:
+  - Exists(user:User{created})
+  - Authenticated(actor:User[SELF],AccessToken)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Self-registration.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC *iff* registrationAllowed. Account provisioning + enumeration.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
+      supports: processRegister
+    notes: null
+- id: gt-action-015
+  name: Request password reset
+  kind: normal
+  description: Request password reset.
+  action_key: login_reset_credentials
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: login_reset_credentials
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: reset_email
+    binding:
+      source: request
+      field: ''
+      resource: Username(user)
+    participants:
+    - id: username
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Username
+        target:
+          kind: entity
+          id: username
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: target
+        - reset_email
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Username(username:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/login-actions/reset-credentials
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Request password reset.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/login-actions/reset-credentials
+  consumes:
+  - Know(actor:User[SELF],Username(username:User{target}))
+  produces:
+  - State(user:User{target},reset_email,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Request password reset.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC *iff* resetPasswordAllowed. User-enumeration / reset-email trigger.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-016
+  name: Consume action token
+  kind: normal
+  description: A visitor follows a signed action-token link (verify email / reset password).
+  action_key: login_action_token
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: login_action_token
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: verified
+    binding:
+      source: request
+      field: ''
+      resource: ActionToken(session)
+    participants:
+    - id: token
+      type: ActionToken
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ActionToken
+        target:
+          kind: entity
+          id: token
+          type: ActionToken
+          role: self
+    reason: Caller presents a signed action token (from an email link).
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: target
+        - verified
+        - applied
+      basis: action_semantics
+      reason: The token's action (verify-email / reset / execute-actions) is applied.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: key / ActionToken(session)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ActionToken(token:ActionToken{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/login-actions/action-token
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: consumes a one-time signed action token.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/login-actions/action-token
+  consumes:
+  - Know(actor:User[SELF],ActionToken(token:ActionToken{self}))
+  produces:
+  - State(user:User{target},verified,applied)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Action-token handler.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC with a valid signed token. Token forgery / replay = account takeover.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
+      supports: executeActionToken
+    notes: null
+- id: gt-action-017
+  name: Start IdP login
+  kind: normal
+  description: Start IdP login.
+  action_key: broker_login
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: broker_login
+    crud: Read
+  object:
+    kind: entity
+    id: redirect
+    type: Redirect
+    name: Redirect
+    entity: Redirect
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: Redirect(idp)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Redirect(idp)
+          target:
+            kind: entity
+            id: redirect
+            type: Redirect
+            role: response
+      basis: io_reference
+      reason: Returns redirect.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: redirect / Redirect(idp)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Redirect(idp)(redirect:Redirect{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/broker/{provider}/login
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Start IdP login.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/broker/{provider}/login
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],Redirect(idp)(redirect:Redirect{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Start IdP login.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Redirects to the configured external IdP.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-018
+  name: IdP callback
+  kind: normal
+  description: The external IdP redirects back; Keycloak validates the assertion and brokers a session.
+  action_key: broker_endpoint
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: broker_endpoint
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: brokered
+    binding:
+      source: response
+      field: ''
+      resource: Session(user)
+    participants:
+    - id: assertion
+      type: IdPAssertion
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: IdPAssertion
+        target:
+          kind: entity
+          id: assertion
+          type: IdPAssertion
+          role: self
+    reason: Consumes the external IdP's code / SAMLResponse.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: A valid, signature-checked assertion links/creates a user and starts a session.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: SAMLResponse / IdPAssertion(assertion)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],IdPAssertion(assertion:IdPAssertion{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/broker/{provider}/endpoint
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: consumes the external assertion.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/broker/{provider}/endpoint
+  consumes:
+  - Know(actor:User[SELF],IdPAssertion(assertion:IdPAssertion{self}))
+  produces:
+  - Authenticated(actor:User[SELF],AccessToken)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Broker callback.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Attacker-influenced IdP responses -> signature/assertion validation + account-linking.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java
+      supports: getEndpoint
+    notes: SAMLResponse handling = XML-signature-wrapping / assertion-injection surface.
+- id: gt-action-019
+  name: Dynamic client registration
+  kind: normal
+  description: A caller registers a new OAuth client (anonymously if the realm permits).
+  action_key: client_register_oidc
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: client_register_oidc
+    crud: Create
+  object:
+    kind: entity
+    id: client
+    type: Client
+    name: Client
+    entity: Client
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ClientID(client)
+    participants:
+    - id: iat
+      type: InitialAccessToken
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: InitialAccessToken
+        target:
+          kind: entity
+          id: iat
+          type: InitialAccessToken
+          role: self
+    reason: An initial-access token, OR anonymous if the realm's client-registration-policy allows it.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: client
+          type: Client
+          role: created
+      basis: action_semantics
+      reason: A client is registered.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ClientSecret
+          target:
+            kind: entity
+            id: client
+            type: Client
+            role: created
+      basis: io_reference
+      reason: Returns client_id + secret + registration-access-token.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: client_secret / ClientSecret(client)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ClientSecret(client:Client{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/clients-registrations/openid-connect
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: RFC 7591 dynamic client registration.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/clients-registrations/openid-connect
+  consumes:
+  - Know(actor:User[SELF],InitialAccessToken(iat:InitialAccessToken{self}))
+  produces:
+  - Exists(client:Client{created})
+  - Know(actor:User[SELF],ClientSecret(client:Client{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dynamic client registration.
+    black_box_reachable: true
+    reachability_conditions:
+    - Initial-access token OR anonymous *iff* allowed. Open DCR = attacker-registered clients/redirect_uris.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/clientregistration/ClientRegistrationService.java
+      supports: JAX-RS resource + handler
+    notes: Anonymous DCR is a classic misconfiguration.
+- id: gt-action-020
+  name: Read a registered client
+  kind: normal
+  description: Read a registered client.
+  action_key: client_registration_manage
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: client_registration_manage
+    crud: Read
+  object:
+    kind: entity
+    id: client
+    type: Client
+    name: Client
+    entity: Client
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ClientID(client)
+    participants:
+    - id: clientId
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientID
+        target:
+          kind: entity
+          id: clientId
+          type: Client
+          role: target
+    reason: References the target by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ClientID(client)
+          target:
+            kind: entity
+            id: client
+            type: Client
+            role: response
+      basis: io_reference
+      reason: Returns client.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: clientId / ClientID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientID(clientId:Client{target}))
+    ignored_reason: ''
+  - direction: output
+    field: client / ClientID(client)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ClientID(client)(client:Client{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/clients-registrations/openid-connect/{clientId}
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read a registered client.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/clients-registrations/openid-connect/{clientId}
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  - Know(actor:User[SELF],ClientID(clientId:Client{target}))
+  produces:
+  - Know(actor:User[SELF],ClientID(client)(client:Client{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read a registered client.
+    black_box_reachable: true
+    reachability_conditions:
+    - Requires the client's registration-access-token (bearer).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/clientregistration/ClientRegistrationService.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-021
+  name: SAML SSO/SLO
+  kind: normal
+  description: A visitor submits a SAML message to the IdP endpoint.
+  action_key: saml_endpoint
+  subject:
+    id: actor
+    identity: Visitor
+    role: Public
+    auth_context: None
+  operation:
+    business: saml_endpoint
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: saml
+    binding:
+      source: request
+      field: ''
+      resource: Session(user)
+    participants:
+    - id: msg
+      type: SAMLMessage
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: SAMLMessage
+        target:
+          kind: entity
+          id: msg
+          type: SAMLMessage
+          role: self
+    reason: Caller submits a SAMLRequest/Response (XML).
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: A valid signed SAML message drives SSO/SLO.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: SAMLResponse / SAMLMessage(msg)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],SAMLMessage(msg:SAMLMessage{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/protocol/saml
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: SAML IdP endpoint parses XML messages.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/protocol/saml
+  consumes:
+  - Know(actor:User[SELF],SAMLMessage(msg:SAMLMessage{self}))
+  produces:
+  - Authenticated(actor:User[SELF],AccessToken)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: SAML IdP endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - PUBLIC. Parses attacker XML -> signature-wrapping / XXE / assertion-injection.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/protocol/saml/SamlService.java
+      supports: JAX-RS resource + handler
+    notes: Primary SAML attack surface.
+- id: gt-action-022
+  name: Read own account
+  kind: normal
+  description: Read own account.
+  action_key: account_profile
+  subject:
+    id: actor
+    identity: EndUser
+    role: RealmUser
+    auth_context: AccessToken
+  operation:
+    business: account_profile
+    crud: Read
+  object:
+    kind: entity
+    id: account
+    type: Account
+    name: Account
+    entity: Account
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: account
+            type: Account
+            role: response
+      basis: io_reference
+      reason: Returns account.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: account / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(account:Account{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/account
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read own account.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/account
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],UserID(user)(account:Account{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read own account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Bearer 'account' token; self only.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-023
+  name: List own credentials
+  kind: normal
+  description: List own credentials.
+  action_key: account_credentials
+  subject:
+    id: actor
+    identity: EndUser
+    role: RealmUser
+    auth_context: AccessToken
+  operation:
+    business: account_credentials
+    crud: Read
+  object:
+    kind: entity
+    id: credential
+    type: Credential
+    name: Credential
+    entity: Credential
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: CredentialID(credential)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: CredentialID(credential)
+          target:
+            kind: entity
+            id: credential
+            type: Credential
+            role: response
+      basis: io_reference
+      reason: Returns credential.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: credential / CredentialID(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CredentialID(credential)(credential:Credential{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/account/credentials
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List own credentials.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/account/credentials
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],CredentialID(credential)(credential:Credential{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List own credentials.
+    black_box_reachable: true
+    reachability_conditions:
+    - Bearer 'account' token; self.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountCredentialResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-024
+  name: List own sessions
+  kind: normal
+  description: List own sessions.
+  action_key: account_sessions
+  subject:
+    id: actor
+    identity: EndUser
+    role: RealmUser
+    auth_context: AccessToken
+  operation:
+    business: account_sessions
+    crud: Read
+  object:
+    kind: entity
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: SessionID(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SessionID(session)
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: response
+      basis: io_reference
+      reason: Returns session.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: session / SessionID(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionID(session)(session:Session{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/account/sessions
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List own sessions.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/account/sessions
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Know(actor:User[SELF],SessionID(session)(session:Session{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List own sessions.
+    black_box_reachable: true
+    reachability_conditions:
+    - Bearer 'account' token; self. DELETE = remote logout.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/SessionResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-025
+  name: Link a social account
+  kind: normal
+  description: Link a social account.
+  action_key: account_linked_accounts
+  subject:
+    id: actor
+    identity: EndUser
+    role: RealmUser
+    auth_context: AccessToken
+  operation:
+    business: account_linked_accounts
+    crud: Create
+  object:
+    kind: entity
+    id: linkedaccount
+    type: LinkedAccount
+    name: LinkedAccount
+    entity: LinkedAccount
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: LinkedAccount(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: linkedaccount
+          type: LinkedAccount
+          role: created
+      basis: action_semantics
+      reason: A linkedaccount is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: LinkedAccount(user)
+          target:
+            kind: entity
+            id: linkedaccount
+            type: LinkedAccount
+            role: created
+      basis: io_reference
+      reason: Returns the new linkedaccount.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: linkedaccount / LinkedAccount(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],LinkedAccount(user)(linkedaccount:LinkedAccount{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/account/linked-accounts/{providerAlias}
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Link a social account.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/account/linked-accounts/{providerAlias}
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Exists(linkedaccount:LinkedAccount{created})
+  - Know(actor:User[SELF],LinkedAccount(user)(linkedaccount:LinkedAccount{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Link a social account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Bearer 'account' token; self. Link redirect+state = account-takeover-adjacent.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/LinkedAccountsResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-026
+  name: Register a protected resource
+  kind: normal
+  description: Register a protected resource.
+  action_key: uma_resource_set
+  subject:
+    id: actor
+    identity: ClientApp
+    role: OAuthClient
+    auth_context: ClientCredentials
+  operation:
+    business: uma_resource_set
+    crud: Create
+  object:
+    kind: entity
+    id: umaresource
+    type: UmaResource
+    name: UmaResource
+    entity: UmaResource
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: UmaResourceID(resource)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: 'Authenticated: bearer access token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: umaresource
+          type: UmaResource
+          role: created
+      basis: action_semantics
+      reason: A umaresource is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UmaResourceID(resource)
+          target:
+            kind: entity
+            id: umaresource
+            type: UmaResource
+            role: created
+      basis: io_reference
+      reason: Returns the new umaresource.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: umaresource / UmaResourceID(resource)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UmaResourceID(resource)(umaresource:UmaResource{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/realms/{realm}/authz/protection/resource_set
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Register a protected resource.
+  l1_keys:
+  - http://localhost:8080/realms/{realm}/authz/protection/resource_set
+  consumes:
+  - Authenticated(actor:User[SELF],AccessToken)
+  produces:
+  - Exists(umaresource:UmaResource{created})
+  - Know(actor:User[SELF],UmaResourceID(resource)(umaresource:UmaResource{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Register a protected resource.
+    black_box_reachable: true
+    reachability_conditions:
+    - Requires a PAT (resource-server token). Resource-server self-service.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/authorization/protection/resource/ResourceService.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-027
+  name: Read server info
+  kind: normal
+  description: Read server info.
+  action_key: admin_serverinfo
+  subject:
+    id: actor
+    identity: MasterAdmin
+    role: master-admin
+    auth_context: AdminToken
+  operation:
+    business: admin_serverinfo
+    crud: Read
+  object:
+    kind: entity
+    id: serverinfo
+    type: ServerInfo
+    name: ServerInfo
+    entity: ServerInfo
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ServerInfo(server)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id003
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - AdminToken
+    reason: 'Authenticated: admin bearer token.'
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ServerInfo(server)
+          target:
+            kind: entity
+            id: serverinfo
+            type: ServerInfo
+            role: response
+      basis: io_reference
+      reason: Returns serverinfo.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: serverinfo / ServerInfo(server)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ServerInfo(server)(serverinfo:ServerInfo{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/serverinfo
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read server info.
+  l1_keys:
+  - http://localhost:8080/admin/serverinfo
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  produces:
+  - Know(actor:User[SELF],ServerInfo(server)(serverinfo:ServerInfo{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read server info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Any authenticated admin. Version/providers/SPI (recon).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/info/ServerInfoAdminResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-028
+  name: List/create realms
+  kind: normal
+  description: List/create realms.
+  action_key: admin_realms
+  subject:
+    id: actor
+    identity: MasterAdmin
+    role: master-admin
+    auth_context: AdminToken
+  operation:
+    business: admin_realms
+    crud: Read
+  object:
+    kind: entity
+    id: realm
+    type: Realm
+    name: Realm
+    entity: Realm
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RealmName(realm)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: realm
+        type: Realm
+        role: scope
+    reason: Requires a master-realm admin (realms the token can view).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RealmName(realm)
+          target:
+            kind: entity
+            id: realm
+            type: Realm
+            role: response
+      basis: io_reference
+      reason: Returns realm.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: realm / RealmName(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RealmName(realm)(realm:Realm{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List/create realms.
+  l1_keys:
+  - http://localhost:8080/admin/realms
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,realm:Realm{scope})
+  produces:
+  - Know(actor:User[SELF],RealmName(realm)(realm:Realm{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List/create realms.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'GET: viewable realms. POST create-realm: master-admin (create-realm role) -> new trust domain.'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmsAdminResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-029
+  name: Read realm config
+  kind: normal
+  description: Read realm config.
+  action_key: admin_realm
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_realm
+    crud: Read
+  object:
+    kind: entity
+    id: realm
+    type: Realm
+    name: Realm
+    entity: Realm
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RealmName(realm)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RealmName
+        target:
+          kind: entity
+          id: realm
+          type: Realm
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: realm
+        type: Realm
+        role: scope
+    reason: Requires realm-management view-realm.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RealmName(realm)
+          target:
+            kind: entity
+            id: realm
+            type: Realm
+            role: response
+      basis: io_reference
+      reason: Returns realm.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: realm / RealmName(realm)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RealmName(realm:Realm{target}))
+    ignored_reason: ''
+  - direction: output
+    field: realm / RealmName(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RealmName(realm)(realm:Realm{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read realm config.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],RealmName(realm:Realm{target}))
+  - Can(actor:User[SELF],Read,realm:Realm{scope})
+  produces:
+  - Know(actor:User[SELF],RealmName(realm)(realm:Realm{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read realm config.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'view-realm (GET) / manage-realm (PUT security toggles: registrationAllowed, sslRequired, bruteForce...).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-030
+  name: Test SMTP connection (SSRF)
+  kind: normal
+  description: 'An admin makes the server connect to an arbitrary SMTP host (SSRF sink #1).'
+  action_key: admin_test_smtp
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_test_smtp
+    crud: Read
+  object:
+    kind: entity
+    id: probe
+    type: ConnectionProbe
+    name: ConnectionProbe
+    entity: ConnectionProbe
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ConnectionProbe(server)
+    participants:
+    - id: realm
+      type: Realm
+      role: scope
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: Admin bearer token.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: realm
+        type: Realm
+        role: scope
+    reason: Requires realm-management manage-realm.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ConnectionProbe
+          target:
+            kind: entity
+            id: probe
+            type: ConnectionProbe
+            role: response
+      basis: io_reference
+      reason: Returns connection success/failure.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: host / RemoteHost(fetch)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: SMTP host the server connects to (SSRF).
+  - direction: output
+    field: probe / ConnectionProbe(server)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ConnectionProbe(probe:ConnectionProbe{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/testSMTPConnection
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: server connects to an admin-supplied SMTP host.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/testSMTPConnection
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,realm:Realm{scope})
+  produces:
+  - Know(actor:User[SELF],ConnectionProbe(probe:ConnectionProbe{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: SMTP test (SSRF).
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-realm. Server opens a connection to an attacker-chosen host:port (SSRF / port-scan / credential-capture).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
+      supports: testSMTPConnection
+    notes: SSRF.
+- id: gt-action-031
+  name: List/create users
+  kind: normal
+  description: List/create users.
+  action_key: admin_users
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_users
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Requires realm-management view-users.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: response
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List/create users.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,user:User{scope})
+  produces:
+  - Know(actor:User[SELF],UserID(user)(user:User{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List/create users.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-users (GET) / manage-users (POST). Directory read + provisioning.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UsersResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-032
+  name: Read a user
+  kind: normal
+  description: Read a user.
+  action_key: admin_user
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: id
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: id
+          type: User
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Requires view-users.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: response
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(id:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read a user.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],UserID(id:User{target}))
+  - Can(actor:User[SELF],Read,user:User{scope})
+  produces:
+  - Know(actor:User[SELF],UserID(user)(user:User{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read a user.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-users (GET) / manage-users (PUT,DELETE).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-033
+  name: Set a user's password
+  kind: normal
+  description: Set a user's password.
+  action_key: admin_user_reset_password
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user_reset_password
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: password
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: id
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id004
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Requires manage-users.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: id
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id004
+        - password
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(id:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}/reset-password
+    methods:
+    - PUT
+    selector:
+      field: method
+      values:
+      - PUT
+  confidence: 0.8
+  reasoning: Set a user's password.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}/reset-password
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(id:User{target}))
+  produces:
+  - State(user:User{target},password,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Set a user's password.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-users. Setting any user's password = account takeover.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
+      supports: JAX-RS resource + handler
+    notes: Direct account-takeover primitive.
+- id: gt-action-034
+  name: Impersonate a user
+  kind: normal
+  description: An admin with the impersonation role takes over a user's session.
+  action_key: admin_user_impersonate
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user_impersonate
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: impersonated
+    binding:
+      source: response
+      field: ''
+      resource: Session(user)
+    participants:
+    - id: user
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: Admin bearer token.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: target
+    reason: References the target user.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Requires realm-management 'impersonation' role.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AccessToken
+      basis: auth_transition
+      reason: A live session AS the target user is issued.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}/impersonation
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.85
+  reasoning: impersonation returns a session as the target.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}/impersonation
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],UserID(user:User{target}))
+  - Can(actor:User[SELF],Create,user:User{scope})
+  produces:
+  - Authenticated(actor:User[SELF],AccessToken)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Impersonation (ESCALATION).
+    black_box_reachable: true
+    reachability_conditions:
+    - realm-management 'impersonation' role. Become any user (lateral/vertical move).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
+      supports: impersonate
+    notes: Key escalation lever.
+- id: gt-action-035
+  name: Grant roles to a user
+  kind: normal
+  description: Grant roles to a user.
+  action_key: admin_user_role_mappings
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user_role_mappings
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: realmRoles
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: id
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id005
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Requires manage-users + a manageable role.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: id
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id005
+        - realmRoles
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(id:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}/role-mappings/realm
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Grant roles to a user.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}/role-mappings/realm
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(id:User{target}))
+  produces:
+  - State(user:User{target},realmRoles,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grant roles to a user.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-users (+ role in the admin's manageable set). Granting admin/realm-management roles escalates.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleMapperResource.java
+      supports: JAX-RS resource + handler
+    notes: Role-grant escalation lever.
+- id: gt-action-036
+  name: Send action-email
+  kind: normal
+  description: Send action-email.
+  action_key: admin_user_execute_actions
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user_execute_actions
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: required_actions
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: id
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id006
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Requires manage-users.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: id
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id006
+        - required_actions
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(id:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}/execute-actions-email
+    methods:
+    - PUT
+    selector:
+      field: method
+      values:
+      - PUT
+  confidence: 0.8
+  reasoning: Send action-email.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}/execute-actions-email
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(id:User{target}))
+  produces:
+  - State(user:User{target},required_actions,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Send action-email.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-users. redirect_uri/client_id validated against the client; weak client = link hijack.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-037
+  name: Force-logout a user
+  kind: normal
+  description: Force-logout a user.
+  action_key: admin_user_logout
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user_logout
+    crud: Delete
+  object:
+    kind: entity
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: Session(user)
+    participants:
+    - id: id
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id007
+        kind: entity
+        id: session
+        type: Session
+        role: target
+    reason: Requires manage-users.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: id
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id007
+      basis: action_semantics
+      reason: The session is removed.
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(id:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}/logout
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Force-logout a user.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}/logout
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Delete,session:Session{target})
+  - Know(actor:User[SELF],UserID(id:User{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Force-logout a user.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-users. Session DoS of the target.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-038
+  name: List a user's credentials
+  kind: normal
+  description: List a user's credentials.
+  action_key: admin_user_credentials
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_user_credentials
+    crud: Read
+  object:
+    kind: entity
+    id: credential
+    type: Credential
+    name: Credential
+    entity: Credential
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: CredentialID(credential)
+    participants:
+    - id: id
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: id
+          type: User
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: credential
+        type: Credential
+        role: scope
+    reason: Requires view-users.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: CredentialID(credential)
+          target:
+            kind: entity
+            id: credential
+            type: Credential
+            role: response
+      basis: io_reference
+      reason: Returns credential.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(id:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: credential / CredentialID(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],CredentialID(credential)(credential:Credential{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/users/{id}/credentials
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List a user's credentials.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/users/{id}/credentials
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],UserID(id:User{target}))
+  - Can(actor:User[SELF],Read,credential:Credential{scope})
+  produces:
+  - Know(actor:User[SELF],CredentialID(credential)(credential:Credential{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List a user's credentials.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-users. Credential metadata (not secrets).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-039
+  name: List/create clients
+  kind: normal
+  description: List/create clients.
+  action_key: admin_clients
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_clients
+    crud: Read
+  object:
+    kind: entity
+    id: client
+    type: Client
+    name: Client
+    entity: Client
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ClientID(client)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: client
+        type: Client
+        role: scope
+    reason: Requires realm-management view-clients.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ClientID(client)
+          target:
+            kind: entity
+            id: client
+            type: Client
+            role: response
+      basis: io_reference
+      reason: Returns client.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: client / ClientID(client)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ClientID(client)(client:Client{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/clients
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List/create clients.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/clients
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,client:Client{scope})
+  produces:
+  - Know(actor:User[SELF],ClientID(client)(client:Client{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List/create clients.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-clients (GET) / manage-clients (POST). serviceAccountsEnabled + roles = escalation primitive.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientsResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-040
+  name: Read a client
+  kind: normal
+  description: Read a client.
+  action_key: admin_client
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_client
+    crud: Read
+  object:
+    kind: entity
+    id: client
+    type: Client
+    name: Client
+    entity: Client
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ClientUUID(client)
+    participants:
+    - id: id
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientUUID
+        target:
+          kind: entity
+          id: id
+          type: Client
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: client
+        type: Client
+        role: scope
+    reason: Requires view-clients.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ClientUUID(client)
+          target:
+            kind: entity
+            id: client
+            type: Client
+            role: response
+      basis: io_reference
+      reason: Returns client.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / ClientUUID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientUUID(id:Client{target}))
+    ignored_reason: ''
+  - direction: output
+    field: client / ClientUUID(client)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ClientUUID(client)(client:Client{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/clients/{id}
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read a client.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/clients/{id}
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],ClientUUID(id:Client{target}))
+  - Can(actor:User[SELF],Read,client:Client{scope})
+  produces:
+  - Know(actor:User[SELF],ClientUUID(client)(client:Client{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read a client.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-clients (GET) / manage-clients (PUT,DELETE). redirectUris/mappers change token delivery.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-041
+  name: Read/rotate client secret
+  kind: normal
+  description: An admin reads (or rotates) a client's secret -- i.e. can impersonate the client.
+  action_key: admin_client_secret
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_client_secret
+    crud: Read
+  object:
+    kind: entity
+    id: secret
+    type: ClientSecret
+    name: ClientSecret
+    entity: ClientSecret
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ClientSecret(client)
+    participants:
+    - id: client
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: Admin bearer token.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientUUID
+        target:
+          kind: entity
+          id: client
+          type: Client
+          role: target
+    reason: References the client.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: client
+        type: Client
+        role: scope
+    reason: Requires realm-management view-clients (rotate needs manage-clients).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ClientSecret
+          target:
+            kind: entity
+            id: secret
+            type: ClientSecret
+            role: response
+      basis: io_reference
+      reason: Returns the client secret.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / ClientUUID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientUUID(client:Client{target}))
+    ignored_reason: ''
+  - direction: output
+    field: secret / ClientSecret(client)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ClientSecret(secret:ClientSecret{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/clients/{id}/client-secret
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.85
+  reasoning: returns/rotates the client secret.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/clients/{id}/client-secret
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],ClientUUID(client:Client{target}))
+  - Can(actor:User[SELF],Read,client:Client{scope})
+  produces:
+  - Know(actor:User[SELF],ClientSecret(secret:ClientSecret{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Client secret (CREDENTIAL).
+    black_box_reachable: true
+    reachability_conditions:
+    - view-clients reads the secret -> impersonate that confidential client (client_credentials / token-exchange).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
+      supports: client-secret
+    notes: Credential disclosure = client impersonation.
+- id: gt-action-042
+  name: Read client service account
+  kind: normal
+  description: Read client service account.
+  action_key: admin_client_service_account
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_client_service_account
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: id
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientUUID
+        target:
+          kind: entity
+          id: id
+          type: Client
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Requires view-clients.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: response
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / ClientUUID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientUUID(id:Client{target}))
+    ignored_reason: ''
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/clients/{id}/service-account-user
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read client service account.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/clients/{id}/service-account-user
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],ClientUUID(id:Client{target}))
+  - Can(actor:User[SELF],Read,user:User{scope})
+  produces:
+  - Know(actor:User[SELF],UserID(user)(user:User{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read client service account.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-clients. Service-account user holds client_credentials roles -> escalation target.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-043
+  name: Upload/generate client keystore
+  kind: normal
+  description: Upload/generate client keystore.
+  action_key: admin_client_certificates
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_client_certificates
+    crud: Update
+  object:
+    kind: state
+    id: client
+    type: Client
+    name: Client
+    entity: Client
+    role: target
+    attribute: ''
+    state_field: keystore
+    binding:
+      source: request
+      field: ''
+      resource: ClientUUID(client)
+    participants:
+    - id: id
+      type: Client
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id008
+        kind: entity
+        id: client
+        type: Client
+        role: target
+    reason: Requires manage-clients.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ClientUUID
+        target:
+          kind: entity
+          id: id
+          type: Client
+          role: target
+    reason: Targets an existing client.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id008
+        - keystore
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / ClientUUID(client)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ClientUUID(id:Client{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/clients/{id}/certificates/{attr}
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Upload/generate client keystore.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/clients/{id}/certificates/{attr}
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Update,client:Client{target})
+  - Know(actor:User[SELF],ClientUUID(id:Client{target}))
+  produces:
+  - State(client:Client{target},keystore,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Upload/generate client keystore.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-clients. Generate/upload the client's signing key (JWT client auth) -> client impersonation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientAttributeCertificateResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-044
+  name: List/create realm roles
+  kind: normal
+  description: List/create realm roles.
+  action_key: admin_roles
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_roles
+    crud: Read
+  object:
+    kind: entity
+    id: role
+    type: Role
+    name: Role
+    entity: Role
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoleName(role)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: role
+        type: Role
+        role: scope
+    reason: Requires view-realm / manage-realm.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoleName(role)
+          target:
+            kind: entity
+            id: role
+            type: Role
+            role: response
+      basis: io_reference
+      reason: Returns role.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: role / RoleName(role)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoleName(role)(role:Role{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/roles
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List/create realm roles.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/roles
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,role:Role{scope})
+  produces:
+  - Know(actor:User[SELF],RoleName(role)(role:Role{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List/create realm roles.
+    black_box_reachable: true
+    reachability_conditions:
+    - Roles are the authorization currency; composites bundle privileges.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleContainerResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-045
+  name: List/create groups
+  kind: normal
+  description: List/create groups.
+  action_key: admin_groups
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_groups
+    crud: Read
+  object:
+    kind: entity
+    id: group
+    type: Group
+    name: Group
+    entity: Group
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: GroupID(group)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: group
+        type: Group
+        role: scope
+    reason: Requires view-users / manage-users.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: GroupID(group)
+          target:
+            kind: entity
+            id: group
+            type: Group
+            role: response
+      basis: io_reference
+      reason: Returns group.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: group / GroupID(group)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],GroupID(group)(group:Group{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/groups
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List/create groups.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/groups
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,group:Group{scope})
+  produces:
+  - Know(actor:User[SELF],GroupID(group)(group:Group{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List/create groups.
+    black_box_reachable: true
+    reachability_conditions:
+    - Group role-mappings grant privileges to all members.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/GroupsResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-046
+  name: Import IdP metadata (SSRF)
+  kind: normal
+  description: 'An admin makes the server fetch an IdP metadata URL (SSRF sink #2).'
+  action_key: admin_idp_import_config
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_idp_import_config
+    crud: Create
+  object:
+    kind: entity
+    id: idpconfig
+    type: IdPConfig
+    name: IdPConfig
+    entity: IdPConfig
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: IdPConfig(realm)
+    participants:
+    - id: realm
+      type: Realm
+      role: scope
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: Admin bearer token.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: realm
+        type: Realm
+        role: scope
+    reason: Requires manage-identity-providers.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: IdPConfig
+          target:
+            kind: entity
+            id: idpconfig
+            type: IdPConfig
+            role: response
+      basis: io_reference
+      reason: Returns the parsed IdP config.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: fromUrl / RemoteURL(fetch)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Metadata URL fetched server-side (SSRF).
+  - direction: output
+    field: config / IdPConfig(realm)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],IdPConfig(idpconfig:IdPConfig{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/identity-provider/import-config
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: server fetches an IdP metadata URL.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/identity-provider/import-config
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Create,realm:Realm{scope})
+  produces:
+  - Know(actor:User[SELF],IdPConfig(idpconfig:IdPConfig{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: IdP metadata import (SSRF).
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-identity-providers. Server GETs 'fromUrl' -> SSRF to internal services.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/IdentityProvidersResource.java
+      supports: importFrom
+    notes: SSRF.
+- id: gt-action-047
+  name: Create an identity provider
+  kind: normal
+  description: Create an identity provider.
+  action_key: admin_idp_instances
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_idp_instances
+    crud: Create
+  object:
+    kind: entity
+    id: idp
+    type: IdP
+    name: IdP
+    entity: IdP
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: IdPAlias(idp)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: idp
+        type: IdP
+        role: target
+    reason: Requires manage-identity-providers.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: idp
+          type: IdP
+          role: created
+      basis: action_semantics
+      reason: A idp is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: IdPAlias(idp)
+          target:
+            kind: entity
+            id: idp
+            type: IdP
+            role: created
+      basis: io_reference
+      reason: Returns the new idp.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: idp / IdPAlias(idp)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],IdPAlias(idp)(idp:IdP{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/identity-provider/instances
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Create an identity provider.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/identity-provider/instances
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Create,idp:IdP{target})
+  produces:
+  - Exists(idp:IdP{created})
+  - Know(actor:User[SELF],IdPAlias(idp)(idp:IdP{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create an identity provider.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-identity-providers. A rogue IdP (with config URLs) = SSRF + trust injection.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/IdentityProvidersResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-048
+  name: List/create components
+  kind: normal
+  description: List/create components.
+  action_key: admin_components
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_components
+    crud: Read
+  object:
+    kind: entity
+    id: component
+    type: Component
+    name: Component
+    entity: Component
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: ComponentID(component)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: component
+        type: Component
+        role: scope
+    reason: Requires realm-management manage-realm.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ComponentID(component)
+          target:
+            kind: entity
+            id: component
+            type: Component
+            role: response
+      basis: io_reference
+      reason: Returns component.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: component / ComponentID(component)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ComponentID(component)(component:Component{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/components
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: List/create components.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/components
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Read,component:Component{scope})
+  produces:
+  - Know(actor:User[SELF],ComponentID(component)(component:Component{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List/create components.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-realm. LDAP federation components hold bind creds + a connection URL (SSRF/credential surface).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ComponentResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-049
+  name: Create authentication flow
+  kind: normal
+  description: Create authentication flow.
+  action_key: admin_auth_flows
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_auth_flows
+    crud: Create
+  object:
+    kind: entity
+    id: authflow
+    type: AuthFlow
+    name: AuthFlow
+    entity: AuthFlow
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: AuthFlowID(flow)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: authflow
+        type: AuthFlow
+        role: target
+    reason: Requires manage-realm.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: authflow
+          type: AuthFlow
+          role: created
+      basis: action_semantics
+      reason: A authflow is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthFlowID(flow)
+          target:
+            kind: entity
+            id: authflow
+            type: AuthFlow
+            role: created
+      basis: io_reference
+      reason: Returns the new authflow.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: authflow / AuthFlowID(flow)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthFlowID(flow)(authflow:AuthFlow{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/authentication/flows
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Create authentication flow.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/authentication/flows
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Can(actor:User[SELF],Create,authflow:AuthFlow{target})
+  produces:
+  - Exists(authflow:AuthFlow{created})
+  - Know(actor:User[SELF],AuthFlowID(flow)(authflow:AuthFlow{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create authentication flow.
+    black_box_reachable: true
+    reachability_conditions:
+    - manage-realm. Reordering/replacing executions can WEAKEN authentication (drop password/OTP).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AuthenticationManagementResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+- id: gt-action-050
+  name: Read brute-force status
+  kind: normal
+  description: Read brute-force status.
+  action_key: admin_attack_detection
+  subject:
+    id: actor
+    identity: RealmAdmin
+    role: realm-management
+    auth_context: AdminToken
+  operation:
+    business: admin_attack_detection
+    crud: Read
+  object:
+    kind: entity
+    id: bruteforcestatus
+    type: BruteForceStatus
+    name: BruteForceStatus
+    entity: BruteForceStatus
+    role: response
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: BruteForceStatus(user)
+    participants:
+    - id: userId
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id003
+    reason: 'Authenticated: admin bearer token.'
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: userId
+          type: User
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: bruteforcestatus
+        type: BruteForceStatus
+        role: scope
+    reason: Requires view-realm.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: BruteForceStatus(user)
+          target:
+            kind: entity
+            id: bruteforcestatus
+            type: BruteForceStatus
+            role: response
+      basis: io_reference
+      reason: Returns bruteforcestatus.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: userId / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(userId:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: bruteforcestatus / BruteForceStatus(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],BruteForceStatus(user)(bruteforcestatus:BruteForceStatus{response}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:8080/admin/realms/{realm}/attack-detection/brute-force/users/{userId}
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read brute-force status.
+  l1_keys:
+  - http://localhost:8080/admin/realms/{realm}/attack-detection/brute-force/users/{userId}
+  consumes:
+  - Authenticated(actor:User[SELF],AdminToken)
+  - Know(actor:User[SELF],UserID(userId:User{target}))
+  - Can(actor:User[SELF],Read,bruteforcestatus:BruteForceStatus{scope})
+  produces:
+  - Know(actor:User[SELF],BruteForceStatus(user)(bruteforcestatus:BruteForceStatus{response}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read brute-force status.
+    black_box_reachable: true
+    reachability_conditions:
+    - view-realm (GET) / manage-users (DELETE clears lockout -> re-enables brute-force).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AttackDetectionResource.java
+      supports: JAX-RS resource + handler
+    notes: null
+edges: []
+annotation_issues: []

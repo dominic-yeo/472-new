@@ -1,0 +1,28 @@
+﻿Ghost probe summary (2026-11-10T14:48:36) base=http://localhost:2368
+setup_status=201 owner_cookie=True content_key=True
+IDENTITY   METHOD PATH                                               CODE  NOTE
+anon       GET    /ghost/api/admin/site/                             200   publicAdminApi (expect 200)
+anon       GET    /ghost/api/admin/authentication/setup/             200   isSetup
+anon       POST   /ghost/api/admin/authentication/setup/             201   create owner (expect 201)
+anon       POST   /ghost/api/admin/session/                          201   login -> admin session cookie (expect 201)
+anon       GET    /ghost/api/admin/posts/                            403   anon (expect 401/403)
+owner      GET    /ghost/api/admin/posts/                            200   owner cookie (expect 200)
+anon       GET    /ghost/api/admin/users/                            403   anon (expect 401/403)
+owner      GET    /ghost/api/admin/users/                            200   owner cookie (expect 200)
+anon       GET    /ghost/api/admin/members/                          403   anon (expect 401/403)
+owner      GET    /ghost/api/admin/members/                          200   owner cookie (expect 200)
+anon       GET    /ghost/api/admin/settings/                         403   anon (expect 401/403)
+owner      GET    /ghost/api/admin/settings/                         200   owner cookie (expect 200)
+anon       GET    /ghost/api/admin/integrations/?include=api_keys    403   anon (expect 401/403)
+owner      GET    /ghost/api/admin/integrations/?include=api_keys    200   owner cookie (expect 200)
+owner      POST   /ghost/api/admin/posts/                            201   owner create post (expect 201)
+anon       POST   /ghost/api/admin/authentication/setup/             403   re-setup after owner exists (expect 403)
+anon       GET    /ghost/api/content/posts/                          403   content posts NO key (expect 401/403)
+contentkey GET    /ghost/api/content/posts/                          200   content posts WITH key (expect 200)
+contentkey GET    /ghost/api/content/settings/                       200   content settings WITH key
+anon       POST   /ghost/api/admin/authentication/password_reset/    500   reset request, real email (enumeration)
+anon       POST   /ghost/api/admin/authentication/password_reset/    404   reset request, unknown email (enum oracle?)
+anon       GET    /members/api/site/                                 200   members public site (expect 200)
+anon       POST   /members/api/send-magic-link/                      400   magic-link request (expect 2xx/201)
+anon       GET    /members/api/member/                               204   member self NO session (expect 204/401)
+

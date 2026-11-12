@@ -1,0 +1,218 @@
+﻿[
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "settings.public",
+        "status":  200,
+        "note":  "public settings (expect 200)",
+        "body":  "{\"settings\":[{\"_id\":\"AI_Intelligent_Search_Answer_Enabled\",\"enterprise\":true,\"invalidValue\":false,\"modules\":[\"chat.rocket.rc-ai\"],\"value\":false},{\"_id\":\"AI_Intelligent_Search_Enabled\",\"enterprise\":true,\"invalidValue\":fal"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "me",
+        "status":  401,
+        "note":  "me without auth (expect 401)",
+        "body":  "{\"success\":false,\"error\":\"You must be logged in to do this.\",\"status\":\"error\",\"message\":\"You must be logged in to do this.\"}"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "channels.list",
+        "status":  401,
+        "note":  "channels.list anon (expect 401)",
+        "body":  "{\"success\":false,\"error\":\"You must be logged in to do this.\",\"status\":\"error\",\"message\":\"You must be logged in to do this.\"}"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "login",
+        "status":  200,
+        "note":  "login admin",
+        "body":  "{\"status\":\"success\",\"data\":{\"userId\":\"6af2cedfbcca0ed8633086c4\",\"authToken\":\"131oHU4vGyHl1TbTAGyZo77yI9Md4I5JG3O_0FCYHpT\",\"me\":{\"_id\":\"6af2cedfbcca0ed8633086c4\",\"avatarOrigin\":\"none\",\"name\":\"Administrator\",\"username\":\"gt"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "login",
+        "status":  401,
+        "note":  "wrong password (expect 401)",
+        "body":  "{\"success\":false,\"error\":\"Unauthorized\",\"status\":\"error\",\"message\":\"Unauthorized\"}"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "me",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"_id\":\"6af2cedfbcca0ed8633086c4\",\"avatarOrigin\":\"none\",\"name\":\"Administrator\",\"username\":\"gtadmin\",\"status\":\"offline\",\"statusDefault\":\"online\",\"utcOffset\":0,\"active\":true,\"emails\":[{\"address\":\"gtadmin@example.com\",\"veri"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "users.list",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"users\":[{\"_id\":\"6af2cedfbcca0ed8633086c4\",\"name\":\"Administrator\",\"username\":\"gtadmin\",\"status\":\"offline\",\"active\":true,\"type\":\"user\",\"emails\":[{\"address\":\"gtadmin@example.com\",\"verified\":false}],\"roles\":[\"admin\"],\"last"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "channels.list",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"channels\":[{\"_id\":\"GENERAL\",\"_updatedAt\":\"2026-11-10T07:59:27.856Z\",\"default\":true,\"msgs\":0,\"name\":\"general\",\"t\":\"c\",\"ts\":\"2026-11-10T07:59:27.856Z\",\"u\":{\"_id\":\"rocket.cat\",\"username\":\"rocket.cat\",\"name\":\"Rocket.Cat\"},"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "settings",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"settings\":[{\"_id\":\"AI_Intelligent_Search_API_Key\",\"enterprise\":true,\"invalidValue\":\"\",\"modules\":[\"chat.rocket.rc-ai\"],\"value\":\"\"},{\"_id\":\"AI_Intelligent_Search_API_Key_Secret\",\"enterprise\":true,\"invalidValue\":\"\",\"modul"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "rooms.adminRooms",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"rooms\":[{\"_id\":\"GENERAL\",\"default\":true,\"msgs\":0,\"name\":\"general\",\"t\":\"c\",\"ts\":\"2026-11-10T07:59:27.856Z\",\"u\":{\"_id\":\"rocket.cat\",\"username\":\"rocket.cat\",\"name\":\"Rocket.Cat\"},\"usernames\":[],\"usersCount\":0}],\"count\":1,\""
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "statistics",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"_id\":\"6af2cedfbcca0ed8633086c2\",\"wizard\":{\"organizationType\":\"\",\"industry\":\"\",\"size\":\"\",\"country\":\"\",\"language\":\"\",\"serverType\":\"\",\"registerServer\":false},\"uniqueId\":\"64c11faa-6dc5-4c19-837b-f1d30d4e9cf3\",\"installedAt\""
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "permissions.listAll",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"update\":[{\"_id\":\"access-permissions\",\"_updatedAt\":\"2026-11-10T07:59:22.138Z\",\"roles\":[\"admin\"]},{\"_id\":\"access-marketplace\",\"_updatedAt\":\"2026-11-10T07:59:22.141Z\",\"roles\":[\"admin\",\"user\"]},{\"_id\":\"access-setting-permi"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "integrations.list",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"integrations\":[],\"offset\":0,\"items\":0,\"count\":0,\"total\":0,\"success\":true}"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "channels.create",
+        "status":  200,
+        "note":  "admin create channel (expect 200)",
+        "body":  "{\"channel\":{\"_id\":\"6af2cf08bcca0ed8633086cb\",\"fname\":\"gtchan13579\",\"_updatedAt\":\"2026-11-10T08:00:08.755Z\",\"name\":\"gtchan13579\",\"t\":\"c\",\"msgs\":0,\"usersCount\":1,\"u\":{\"_id\":\"6af2cedfbcca0ed8633086c4\",\"username\":\"gtadmin\",\""
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "users.create",
+        "status":  200,
+        "note":  "create regular user",
+        "body":  "{\"user\":{\"_id\":\"hqgRKkTpogfDoCKkM\",\"createdAt\":\"2026-11-10T08:00:08.867Z\",\"username\":\"gtuserb18730\",\"emails\":[{\"address\":\"gtuserb18730@example.com\",\"verified\":false}],\"name\":\"GT UserB\",\"type\":\"user\",\"roles\":[\"user\"],\"sta"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "login",
+        "status":  200,
+        "note":  "login userb",
+        "body":  "{\"status\":\"success\",\"data\":{\"userId\":\"hqgRKkTpogfDoCKkM\",\"authToken\":\"tauNPqkDDM6PM58B4LBioP8kcxjh86ne69-4DRx-Wlj\",\"me\":{\"_id\":\"hqgRKkTpogfDoCKkM\",\"services\":{\"email2fa\":{\"enabled\":true},\"password\":{\"exists\":true}},\"user"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "me",
+        "status":  200,
+        "note":  "userb me (expect 200)",
+        "body":  "{\"_id\":\"hqgRKkTpogfDoCKkM\",\"services\":{\"email2fa\":{\"enabled\":true},\"password\":{\"exists\":true}},\"username\":\"gtuserb18730\",\"emails\":[{\"address\":\"gtuserb18730@example.com\",\"verified\":false}],\"name\":\"GT UserB\",\"roles\":[\"user"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "users.list",
+        "status":  200,
+        "note":  "userb users.list (expect 403: no perm)",
+        "body":  "{\"users\":[{\"_id\":\"6af2cedfbcca0ed8633086c4\",\"name\":\"Administrator\",\"username\":\"gtadmin\",\"status\":\"offline\",\"active\":true,\"type\":\"user\",\"nameInsensitive\":\"administrator\"},{\"_id\":\"hqgRKkTpogfDoCKkM\",\"username\":\"gtuserb1873"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "settings",
+        "status":  200,
+        "note":  "userb settings (expect 403)",
+        "body":  "{\"settings\":[{\"_id\":\"AI_Intelligent_Search_Answer_Enabled\",\"enterprise\":true,\"invalidValue\":false,\"modules\":[\"chat.rocket.rc-ai\"],\"value\":false},{\"_id\":\"AI_Intelligent_Search_Enabled\",\"enterprise\":true,\"invalidValue\":fal"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "rooms.adminRooms",
+        "status":  400,
+        "note":  "userb adminRooms (expect 403)",
+        "body":  "{\"success\":false,\"error\":\"error-not-authorized\"}"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "statistics",
+        "status":  400,
+        "note":  "userb statistics (expect 403)",
+        "body":  "{\"success\":false,\"error\":\"error-not-allowed\"}"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "roles.addUserToRole",
+        "status":  400,
+        "note":  "userb self-elevate to admin (expect 403)",
+        "body":  "{\"success\":false,\"errorType\":\"invalid-params\",\"error\":\"must NOT have additional properties\"}"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "channels.create",
+        "status":  200,
+        "note":  "userb create channel (expect 200: create-c default)",
+        "body":  "{\"channel\":{\"_id\":\"6af2cf09bcca0ed8633086d1\",\"fname\":\"ubchan40858\",\"_updatedAt\":\"2026-11-10T08:00:09.486Z\",\"name\":\"ubchan40858\",\"t\":\"c\",\"msgs\":0,\"usersCount\":1,\"u\":{\"_id\":\"hqgRKkTpogfDoCKkM\",\"username\":\"gtuserb18730\",\"na"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "users.register",
+        "status":  200,
+        "note":  "self-register (config-dependent)",
+        "body":  "{\"user\":{\"_id\":\"mKQQcL297mkb2Q4FP\",\"name\":\"Reg\",\"type\":\"user\",\"status\":\"offline\",\"active\":true,\"username\":\"reg63464\",\"__rooms\":[\"GENERAL\"]},\"success\":true}"
+    }
+]

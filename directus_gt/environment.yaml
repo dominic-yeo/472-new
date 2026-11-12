@@ -1,0 +1,81 @@
+schema_version: pengent-web-gt-v1
+environment_id: "directus-oss"
+
+target:
+  application: "Directus (OSS, headless data platform / CMS)"
+  version: "api 41.0.1 (api/package.json) == Directus 11.x line"
+  kind: "Node.js + Express + TypeScript; wraps a SQL database as a dynamic REST + GraphQL API with a Vue Data Studio"
+  source_tree: "directus/ (directus/directus monorepo); API at api/src"
+  authoritative_routes: "api/src/controllers/*.ts (one express Router per resource); mounted in api/src/app.ts"
+  handler_semantics: >-
+    Controllers mount at the ROOT (app.use('/items', ...), '/users', '/auth', ...). Auth in
+    api/src/middleware/{extract-token,authenticate}.ts; permission engine in api/src/permissions + services.
+
+deployment:
+  origin: "http://localhost:8055"
+  requires: "Official image directus/directus (SQLite ok). See runtime/compose.yaml + probe.ps1."
+  scale: >-
+    108 L1 api nodes. The entire per-collection Content API is served by ONE controller
+    (/items/:collection[/:pk]) + the policy engine, modeled once; system collections have dedicated
+    controllers (users/roles/policies/permissions/access/files/flows/...), all modeled.
+
+auth_model:
+  transports: >-
+    A token is taken from (in order) the '?access_token=' QUERY parameter, the 'Authorization: Bearer'
+    header, or the session cookie (middleware/extract-token.ts). The query-param transport means tokens can
+    leak via URLs / logs / referrers. A token may be a login access JWT, a rotating session, or a long-lived
+    STATIC token (directus_users.token).
+  authorization: >-
+    The token resolves to an accountability -> role -> policies -> permissions (middleware/authenticate.ts).
+    Permissions are policy-based: a role holds policies; a policy holds permission rows + flags
+    (admin_access, app_access, enforce_tfa, ip_access). A policy with admin_access=true BYPASSES every
+    permission check (full superuser). No token => the PUBLIC role. Share tokens (POST /shares/auth) grant
+    accountability scoped to one shared item. Modeled as Can(...) with the collection/action in reach_conds.
+
+identities_needed:
+  - "anonymous (no token -> public role)"
+  - "user (app user; access token or static token)"
+  - "user_b (second app user, for item/user IDOR + row-filter tests)"
+  - "admin (policy with admin_access=true) -> seeded gtadmin@example.com"
+  - "share_guest (holder of a share link / share token)"
+
+notable_findings_source_derived:
+  - "Bootstrap: POST /server/setup creates the first admin while setup is not completed (first-boot takeover)."
+  - "Privilege escalation ladder: policies.admin_access=true (superuser) -> attach via /roles/:pk (role<->policy),
+     /access (user/role<->policy), or set at /policies. directus_users create/update assigns roles."
+  - "Row-level access is per-permission FILTER: a read/update/delete permission with no filter exposes every
+     item by pk (IDOR). Authorization is per-collection+action; ownership must be added via a filter."
+  - "SSRF: POST /files/import (server fetches an arbitrary 'url'); flow 'request' operations fetch URLs; flows
+     can be PUBLIC webhooks (GET/POST /flows/trigger/:pk) that run server-side operation chains."
+  - "Code-ish: flow 'exec' operations run sandboxed JS; POST /extensions/registry/install loads 3rd-party code;
+     POST /schema/apply rewrites the data model (create/drop collections+fields)."
+  - "Public share access: POST /shares/auth issues an item-scoped token from a share id (+ optional password);
+     GET /shares/info/:pk is a public existence/password oracle."
+  - "Token-in-URL: '?access_token=' is an accepted transport (leak surface)."
+
+runtime_grounding:
+  status: "PARTIAL -- 20 L1 nodes route_confirmed against directus/directus:11 (11.17.4; source api 41.x, same 11.x line)."
+  stack: "runtime/compose.yaml: directus/directus:11 on SQLite, http://localhost:8055, admin seeded (gtadmin@example.com)."
+  identities_used: "anonymous (no token) | admin (gtadmin access token)."
+  probe: "runtime/probe.ps1 -> runtime/probe_results/{matrix.json,fixtures.json,summary.txt}"
+  confirmed:
+    - "DENIAL CONVENTION: permission-denied = HTTP 403 (Forbidden); missing/invalid auth = 401. (Not 400.)"
+    - "SECURE DEFAULTS: the PUBLIC role has NO permissions out of the box -- anon GET on /users, /roles,
+       /policies, /permissions, /settings, /files, /collections all returned 403; /users/me 401."
+    - "Public self-registration DISABLED by default (POST /users/register -> 403)."
+    - "Bootstrap window CLOSED once seeded (POST /server/setup -> 403)."
+    - "Admin (admin_access policy) matrix all 200: users/roles/policies/permissions/settings/files/flows/
+       extensions/collections + /schema/snapshot + /server/specs/oas. Wrong password -> 401."
+    - "System collections are 403 via /items (admin GET /items/directus_users -> 403); use the dedicated controllers."
+    - "PUBLIC EXPOSURE path CONFIRMED: after granting the public policy ($t:public_label) a read permission on a
+       test collection, anon GET /items/<coll> and /items/<coll>/:pk returned 200 with data -- i.e. the exposure
+       is a configuration (over-granted public policy), not a default."
+  caveats:
+    - "Image directus:11 == 11.17.4; GT source is api 41.0.1 (same Directus 11 line) -- auth/route model matches.
+       The newer :latest (12.6.1) differs and was NOT used."
+    - "IDOR via missing row-filters (st per di-003) and share brute-force still want a user_b / share probe."
+
+status: >-
+  Source-derived GT at directus/ api 41.0.1 (Directus 11). validate_gt.py OK: 110 L1 nodes (108 api, 2 page),
+  68 L2 actions, all 54 candidate L1 nodes covered. Runtime: PARTIALLY grounded (20 nodes route_confirmed;
+  anon + admin planes) against directus/directus:11 -- see runtime_grounding + annotation_issues di-010/011.

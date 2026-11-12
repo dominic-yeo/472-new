@@ -1,0 +1,4387 @@
+schema_version: pengent-web-gt-v1
+environment_id: uptrace-oss
+nodes:
+- key: http://localhost:14318/internal/v1/users/login
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id001
+  - email
+  - password
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id001
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: user email
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: user password
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Login verifies bcrypt password and sets the JWT 'token' cookie
+    evidence: org/user_handler.go:Login
+  operation_semantic: login_user
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  semantic_outputs:
+  - AuthToken(session)
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Login identifier.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions:
+  - raw_field: token
+    resource: AuthToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: JWT session token set as the 'token' cookie.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - User exists in config/db.
+    evidence:
+    - type: source
+      ref: org/user_handler.go:Login
+      supports: route + middleware
+    notes: Token travels in a Set-Cookie (name 'token'), not the JSON body.
+- key: http://localhost:14318/internal/v1/users/logout
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id002 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id002
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Clears the 'token' cookie
+    evidence: org/user_handler.go:Logout
+  operation_semantic: logout_user
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Open.
+    evidence:
+    - type: source
+      ref: org/user_handler.go:Logout
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/users/current
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id003 []
+  outputs:
+  - user
+  - projects
+  input_spec:
+    format: ''
+    fields: *id003
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - user
+    - projects
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: user
+        path: data.user
+        type: string
+        flow: true
+        description: current user
+      - name: projects
+        path: data.projects
+        type: string
+        flow: true
+        description: projects visible to the user
+    reason: Returns the authenticated user and all projects
+    evidence: org/user_handler.go:Current
+  operation_semantic: read_current_user
+  semantic_inputs: []
+  semantic_outputs:
+  - UserEmail(user)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: user
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - user
+    reason: The caller's own user record.
+  - raw_field: projects
+    resource: ProjectID(project)
+    mergeable: false
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - projects
+    reason: All projects (OSS single-tenant lists every project).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated self + project list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (cookie/bearer).
+    evidence:
+    - type: source
+      ref: org/user_handler.go:registerUserHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/projects/:project_id
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  - 404
+  params: []
+  content_types:
+  - application/json
+  inputs: &id004
+  - project_id
+  outputs:
+  - project
+  - dsn
+  input_spec:
+    format: plain
+    fields: *id004
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    outputs:
+    - project
+    - dsn
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - &id008
+        name: project_id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: project id (must exist)
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: project
+        path: data.project
+        type: string
+        flow: true
+        description: ''
+      - name: dsn
+        path: data.dsn
+        type: string
+        flow: true
+        description: project DSN (ingest credential)
+    reason: Returns the project and its DSN
+    evidence: org/project_handler.go:Show
+  operation_semantic: read_project
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - ProjectDSN(project)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Ingest DSN embedding the project token -- credential disclosure surface.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Project detail incl. DSN.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project_id exists (no per-user ACL in OSS).
+    evidence:
+    - type: source
+      ref: org/project_handler.go:Show
+      supports: route + middleware
+    notes: DSN embeds the project token; any logged-in user can read ANY project's DSN (no ACL).
+- key: http://localhost:14318/internal/v1/data-usage
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id005 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id005
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: spans
+        path: data.spans
+        type: string
+        flow: false
+        description: ''
+      - name: bytes
+        path: data.bytes
+        type: string
+        flow: false
+        description: ''
+      - name: timeseries
+        path: data.timeseries
+        type: string
+        flow: false
+        description: ''
+    reason: Returns span/byte/timeseries usage for the last month
+    evidence: org/usage_handler.go:Show
+  operation_semantic: read_data_usage
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Account usage stats.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    evidence:
+    - type: source
+      ref: org/usage_handler.go:Show
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/traces/search
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 400
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id006
+  - trace_id
+  outputs:
+  - trace_id
+  - project_id
+  - span_id
+  input_spec:
+    format: plain
+    fields: *id006
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - trace_id
+    outputs:
+    - trace_id
+    - project_id
+    - span_id
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: trace_id
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: trace id to locate
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: trace_id
+        path: data.trace_id
+        type: string
+        flow: true
+        description: ''
+      - name: project_id
+        path: data.project_id
+        type: string
+        flow: true
+        description: ''
+      - name: span_id
+        path: data.span_id
+        type: string
+        flow: true
+        description: ''
+    reason: Resolves a trace id to its project/span (cross-project lookup under m.User only)
+    evidence: tracing/trace_handler.go:FindTrace
+  operation_semantic: search_trace
+  semantic_inputs:
+  - TraceID(trace)
+  semantic_outputs:
+  - ProjectID(project)
+  semantic_input_decisions:
+  - raw_field: trace_id
+    resource: TraceID(trace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - trace_id
+    reason: Trace id being located.
+  semantic_output_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Project owning the trace.
+  - raw_field: span_id
+    resource: SpanID(span)
+    mergeable: false
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - span_id
+    reason: Root span id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 401
+    authenticated:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Trace lookup by id (m.User only, no project gate).
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated. NOTE: not project-scoped -> any user resolves any trace id.'
+    evidence:
+    - type: source
+      ref: tracing/trace_handler.go:registerTraceHandler
+      supports: route + middleware
+    notes: 'Gated by m.User only (NOT UserAndProject): a cross-project trace-id oracle.'
+- key: http://localhost:14318/internal/v1/tracing/:project_id/systems
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id007
+  - project_id
+  - query
+  - time_gte
+  - time_lt
+  - system
+  outputs:
+  - systems
+  input_spec:
+    format: plain
+    fields: *id007
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    - time_gte
+    - time_lt
+    - system
+    outputs:
+    - systems
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - &id010
+        name: query
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: TQL query
+      - &id011
+        name: time_gte
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: start time
+      - &id012
+        name: time_lt
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: end time
+      - &id013
+        name: system
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: span system filter
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: systems
+        path: data.systems
+        type: string
+        flow: true
+        description: span systems
+    reason: Lists span systems for the project
+    evidence: tracing/system_handler.go:ListSystems
+  operation_semantic: list_span_systems
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - SpanSystem(project)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: systems
+    resource: SpanSystem(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - systems
+    reason: Distinct span systems.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Span systems.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/system_handler.go:ListSystems
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/spans
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id009
+  - project_id
+  - query
+  - time_gte
+  - time_lt
+  - system
+  outputs:
+  - spans
+  input_spec:
+    format: plain
+    fields: *id009
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    - time_gte
+    - time_lt
+    - system
+    outputs:
+    - spans
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id010
+      - *id011
+      - *id012
+      - *id013
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: spans
+        path: data.spans
+        type: string
+        flow: true
+        description: ''
+      - name: hasMore
+        path: data.hasMore
+        type: string
+        flow: false
+        description: ''
+    reason: Lists spans matching the filter
+    evidence: tracing/span_handler.go:ListSpans
+  operation_semantic: list_spans
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - SpanID(span)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: spans
+    resource: SpanID(span)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - spans
+    reason: Span ids in the result page.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Span list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/span_handler.go:ListSpans
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/groups
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id014
+  - project_id
+  - query
+  - time_gte
+  - time_lt
+  - system
+  outputs:
+  - groups
+  input_spec:
+    format: plain
+    fields: *id014
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    - time_gte
+    - time_lt
+    - system
+    outputs:
+    - groups
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id010
+      - *id011
+      - *id012
+      - *id013
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: groups
+        path: data.groups
+        type: string
+        flow: true
+        description: ''
+    reason: Lists span groups
+    evidence: tracing/span_handler.go:ListGroups
+  operation_semantic: list_span_groups
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - GroupID(group)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: groups
+    resource: GroupID(group)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - groups
+    reason: Span group ids.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Span groups.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/span_handler.go:ListGroups
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/groups/:group_id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id015
+  - project_id
+  - group_id
+  outputs:
+  - stats
+  input_spec:
+    format: plain
+    fields: *id015
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - group_id
+    outputs:
+    - stats
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - name: group_id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: group id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: stats
+        path: data.stats
+        type: string
+        flow: true
+        description: ''
+    reason: Group summary
+    evidence: tracing/group_handler.go:ShowSummary
+  operation_semantic: read_span_group
+  semantic_inputs:
+  - ProjectID(project)
+  - GroupID(group)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: group_id
+    resource: GroupID(group)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - group_id
+    reason: Group being summarized.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Group summary.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/group_handler.go:ShowSummary
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id016
+  - project_id
+  - trace_id
+  outputs:
+  - spans
+  - root
+  input_spec:
+    format: plain
+    fields: *id016
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - trace_id
+    outputs:
+    - spans
+    - root
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - name: trace_id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: trace id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: spans
+        path: data.spans
+        type: string
+        flow: true
+        description: ''
+      - name: root
+        path: data.root
+        type: string
+        flow: true
+        description: ''
+    reason: Shows a full trace
+    evidence: tracing/trace_handler.go:ShowTrace
+  operation_semantic: read_trace
+  semantic_inputs:
+  - ProjectID(project)
+  - TraceID(trace)
+  semantic_outputs:
+  - SpanID(span)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: trace_id
+    resource: TraceID(trace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - trace_id
+    reason: Trace being shown.
+  semantic_output_decisions:
+  - raw_field: spans
+    resource: SpanID(span)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - spans
+    reason: Spans of the trace.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Trace detail.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/trace_handler.go:ShowTrace
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/attributes
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id017
+  - project_id
+  - query
+  - time_gte
+  - time_lt
+  - system
+  outputs:
+  - keys
+  input_spec:
+    format: plain
+    fields: *id017
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    - time_gte
+    - time_lt
+    - system
+    outputs:
+    - keys
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id010
+      - *id011
+      - *id012
+      - *id013
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: keys
+        path: data.keys
+        type: string
+        flow: true
+        description: attribute keys
+    reason: Lists span attribute keys
+    evidence: tracing/attr_handler.go:AttrKeys
+  operation_semantic: list_span_attr_keys
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - AttrKey(attr)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: keys
+    resource: AttrKey(attr)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - keys
+    reason: Span attribute keys.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Attribute keys.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/attr_handler.go:AttrKeys
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/attributes/:attr
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id018 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id018
+  io_variants: []
+  operation_semantic: list_span_attr_values
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: tracing/attr_handler.go:AttrValues
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/percentiles
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id019 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id019
+  io_variants: []
+  operation_semantic: span_percentiles
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: tracing/span_handler.go:Percentiles
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/group-stats
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id020 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id020
+  io_variants: []
+  operation_semantic: span_group_stats
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: tracing/span_handler.go:GroupStats
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/timeseries
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id021 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id021
+  io_variants: []
+  operation_semantic: span_timeseries
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: tracing/span_handler.go:Timeseries
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id/:span_id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id022 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id022
+  io_variants: []
+  operation_semantic: read_span
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: tracing/trace_handler.go:ShowSpan
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id023
+  - project_id
+  - query
+  outputs:
+  - metrics
+  input_spec:
+    format: plain
+    fields: *id023
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    outputs:
+    - metrics
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - name: query
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: metric name filter
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: metrics
+        path: data.metrics
+        type: string
+        flow: true
+        description: ''
+    reason: Lists metrics
+    evidence: metrics/metric_handler.go:List
+  operation_semantic: list_metrics
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - MetricName(metric)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: metrics
+    resource: MetricName(metric)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - metrics
+    reason: Metric names.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Metric list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: metrics/metric_handler.go:List
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/table
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id024
+  - project_id
+  - query
+  outputs:
+  - items
+  input_spec:
+    format: plain
+    fields: *id024
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    outputs:
+    - items
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - name: query
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: MQL query
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: items
+        path: data.items
+        type: string
+        flow: true
+        description: ''
+    reason: Runs a metrics table query
+    evidence: metrics/query_handler.go:Table
+  operation_semantic: query_metrics_table
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Metrics table query.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: metrics/query_handler.go:Table
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/attributes
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id025
+  - project_id
+  - metric
+  outputs:
+  - keys
+  input_spec:
+    format: plain
+    fields: *id025
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - metric
+    outputs:
+    - keys
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - name: metric
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: metric filter
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: keys
+        path: data.keys
+        type: string
+        flow: true
+        description: ''
+    reason: Lists metric attribute keys
+    evidence: metrics/attr_handler.go:AttrKeys
+  operation_semantic: list_metric_attr_keys
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - AttrKey(attr)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: keys
+    resource: AttrKey(attr)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - keys
+    reason: Metric attribute keys.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Metric attribute keys.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: metrics/attr_handler.go:AttrKeys
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/describe
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id026 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id026
+  io_variants: []
+  operation_semantic: describe_metrics
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/metric_handler.go:Describe
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/stats
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id027 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id027
+  io_variants: []
+  operation_semantic: metrics_stats
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/metric_handler.go:Stats
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/attributes/:attr
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id028 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id028
+  io_variants: []
+  operation_semantic: list_metric_attr_values
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/attr_handler.go:AttrValues
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/timeseries
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id029 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id029
+  io_variants: []
+  operation_semantic: query_metrics_timeseries
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/query_handler.go:Timeseries
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/gauge
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id030 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id030
+  io_variants: []
+  operation_semantic: query_metrics_gauge
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/query_handler.go:Gauge
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/heatmap
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id031 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id031
+  io_variants: []
+  operation_semantic: query_metrics_heatmap
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/query_handler.go:Heatmap
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id032
+  - project_id
+  - name
+  outputs:
+  - dashboard
+  - dashboards
+  input_spec:
+    format: json
+    fields: *id032
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - name
+    outputs:
+    - dashboard
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - *id008
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: dashboard name
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: dashboard
+        path: data.dashboard
+        type: string
+        flow: true
+        description: ''
+    reason: Creates a dashboard
+    evidence: metrics/dash_handler.go:Create
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    outputs:
+    - dashboards
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: dashboards
+        path: data.dashboards
+        type: string
+        flow: true
+        description: ''
+    reason: Lists dashboards
+    evidence: metrics/dash_handler.go:List
+  operation_semantic: create_dashboard
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - DashID(dashboard)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: name
+    resource: DashName(dashboard)
+    mergeable: false
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: New dashboard name.
+  semantic_output_decisions:
+  - raw_field: dashboard
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dashboard
+    reason: Created dashboard id.
+  - raw_field: dashboards
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dashboards
+    reason: Dashboard ids in the project.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:Create
+      supports: route + middleware
+    - type: source
+      ref: metrics/dash_handler.go:List
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/yaml
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id033
+  - project_id
+  - yaml
+  outputs:
+  - dashboard
+  input_spec:
+    format: plain
+    fields: *id033
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - yaml
+    outputs:
+    - dashboard
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - *id008
+      - name: yaml
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: dashboard YAML
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: dashboard
+        path: data.dashboard
+        type: string
+        flow: true
+        description: ''
+    reason: Creates a dashboard from YAML
+    evidence: metrics/dash_handler.go:CreateFromYAML
+  operation_semantic: create_dashboard_yaml
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - DashID(dashboard)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: dashboard
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dashboard
+    reason: Created dashboard id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard create from YAML (template injection surface).
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists.
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:CreateFromYAML
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id034
+  - project_id
+  - dash_id
+  - name
+  outputs:
+  - dashboard
+  - grid
+  input_spec:
+    format: json
+    fields: *id034
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    outputs:
+    - dashboard
+    - grid
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - &id035
+        name: dash_id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: dashboard id (must belong to project)
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: dashboard
+        path: data.dashboard
+        type: string
+        flow: true
+        description: ''
+      - name: grid
+        path: data.grid
+        type: string
+        flow: true
+        description: ''
+    reason: Shows a dashboard
+    evidence: metrics/dash_handler.go:Show
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    outputs:
+    - dashboard
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: dashboard
+        path: data.dashboard
+        type: string
+        flow: true
+        description: ''
+    reason: Clones a dashboard
+    evidence: metrics/dash_handler.go:Clone
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    - name
+    outputs:
+    - dashboard
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: new name
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: dashboard
+        path: data.dashboard
+        type: string
+        flow: true
+        description: ''
+    reason: Updates a dashboard
+    evidence: metrics/dash_handler.go:Update
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Deletes a dashboard
+    evidence: metrics/dash_handler.go:Delete
+  operation_semantic: update_dashboard
+  semantic_inputs:
+  - ProjectID(project)
+  - DashID(dashboard)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: dash_id
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dash_id
+    reason: Target dashboard; m.Dashboard checks it belongs to the project.
+  - raw_field: name
+    resource: DashName(dashboard)
+    mergeable: false
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: Updated name.
+  semantic_output_decisions:
+  - raw_field: dashboard
+    resource: DashID(dashboard)
+    mergeable: false
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dashboard
+    reason: Cloned dashboard id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard detail.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists; dash in project.
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:Show
+      supports: route + middleware
+    - type: source
+      ref: metrics/dash_handler.go:Clone
+      supports: route + middleware
+    - type: source
+      ref: metrics/dash_handler.go:Update
+      supports: route + middleware
+    - type: source
+      ref: metrics/dash_handler.go:Delete
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/pinned
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id036
+  - project_id
+  - dash_id
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id036
+  io_variants:
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Pins a dashboard
+    evidence: metrics/dash_handler.go:Pin
+  operation_semantic: pin_dashboard
+  semantic_inputs:
+  - ProjectID(project)
+  - DashID(dashboard)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: dash_id
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dash_id
+    reason: Target dashboard; m.Dashboard checks it belongs to the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard pin.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists; dash in project.
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:Pin
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/yaml
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id037 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id037
+  io_variants: []
+  operation_semantic: update_dashboard_yaml
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:ShowYAML
+      supports: route + middleware
+    - type: source
+      ref: metrics/dash_handler.go:UpdateYAML
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/table
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id038 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id038
+  io_variants: []
+  operation_semantic: update_dashboard_table
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:UpdateTable
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid
+  kind: api
+  methods:
+  - PUT
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id039
+  - project_id
+  - dash_id
+  - type
+  outputs:
+  - gridItem
+  input_spec:
+    format: json
+    fields: *id039
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    - type
+    outputs:
+    - gridItem
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+      - name: type
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: grid item type
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: gridItem
+        path: data.gridItem
+        type: string
+        flow: true
+        description: ''
+    reason: Creates a grid item
+    evidence: metrics/grid_item_handler.go:Create
+  operation_semantic: update_dashboard_grid
+  semantic_inputs:
+  - ProjectID(project)
+  - DashID(dashboard)
+  semantic_outputs:
+  - GridItemID(grid_item)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: dash_id
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dash_id
+    reason: Target dashboard; m.Dashboard checks it belongs to the project.
+  semantic_output_decisions:
+  - raw_field: gridItem
+    resource: GridItemID(grid_item)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - gridItem
+    reason: Created grid item id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid item create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists; dash in project.
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:UpdateGrid
+      supports: route + middleware
+    - type: source
+      ref: metrics/grid_item_handler.go:Create
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/reset
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id040 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id040
+  io_variants: []
+  operation_semantic: reset_dashboard
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:Reset
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/unpinned
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id041 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id041
+  io_variants: []
+  operation_semantic: unpin_dashboard
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/dash_handler.go:Unpin
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/:row_id
+  kind: api
+  methods:
+  - DELETE
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id042
+  - project_id
+  - dash_id
+  - row_id
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id042
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    - row_id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+      - name: row_id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: grid item/row id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Deletes a grid item
+    evidence: metrics/grid_item_handler.go:Delete
+  operation_semantic: delete_grid_item
+  semantic_inputs:
+  - ProjectID(project)
+  - DashID(dashboard)
+  - GridItemID(grid_item)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: dash_id
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dash_id
+    reason: Target dashboard; m.Dashboard checks it belongs to the project.
+  - raw_field: row_id
+    resource: GridItemID(grid_item)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - row_id
+    reason: Grid item being deleted.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid item delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists; dash in project.
+    evidence:
+    - type: source
+      ref: metrics/grid_item_handler.go:Delete
+      supports: route + middleware
+    - type: source
+      ref: metrics/grid_item_handler.go:Update
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id043
+  - project_id
+  - dash_id
+  - title
+  outputs:
+  - gridRow
+  input_spec:
+    format: json
+    fields: *id043
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    - title
+    outputs:
+    - gridRow
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+      - name: title
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: row title
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: gridRow
+        path: data.gridRow
+        type: string
+        flow: true
+        description: ''
+    reason: Creates a grid row
+    evidence: metrics/grid_row_handler.go:Create
+  operation_semantic: create_grid_row
+  semantic_inputs:
+  - ProjectID(project)
+  - DashID(dashboard)
+  semantic_outputs:
+  - GridRowID(grid_row)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: dash_id
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dash_id
+    reason: Target dashboard; m.Dashboard checks it belongs to the project.
+  semantic_output_decisions:
+  - raw_field: gridRow
+    resource: GridRowID(grid_row)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - gridRow
+    reason: Created grid row id.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid row create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists; dash in project.
+    evidence:
+    - type: source
+      ref: metrics/grid_row_handler.go:Create
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id
+  kind: api
+  methods:
+  - DELETE
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id044
+  - project_id
+  - dash_id
+  - row_id
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id044
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - dash_id
+    - row_id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id035
+      - name: row_id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: grid row id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Deletes a grid row
+    evidence: metrics/grid_row_handler.go:Delete
+  operation_semantic: delete_grid_row
+  semantic_inputs:
+  - ProjectID(project)
+  - DashID(dashboard)
+  - GridRowID(grid_row)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  - raw_field: dash_id
+    resource: DashID(dashboard)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - dash_id
+    reason: Target dashboard; m.Dashboard checks it belongs to the project.
+  - raw_field: row_id
+    resource: GridRowID(grid_row)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - row_id
+    reason: Grid row being deleted.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid row delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; project exists; dash in project.
+    evidence:
+    - type: source
+      ref: metrics/grid_row_handler.go:Delete
+      supports: route + middleware
+    - type: source
+      ref: metrics/grid_row_handler.go:Show
+      supports: route + middleware
+    - type: source
+      ref: metrics/grid_row_handler.go:Update
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/layout
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id045 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id045
+  io_variants: []
+  operation_semantic: update_grid_layout
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/grid_item_handler.go:UpdateLayout
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id/up
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id046 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id046
+  io_variants: []
+  operation_semantic: move_grid_row_up
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/grid_row_handler.go:MoveUp
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id/down
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id047 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id047
+  io_variants: []
+  operation_semantic: move_grid_row_down
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: metrics/grid_row_handler.go:MoveDown
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/tracing/:project_id/spans
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 400
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id048
+  - project_id
+  - query
+  - time_gte
+  - time_lt
+  - system
+  outputs:
+  - spans
+  input_spec:
+    format: plain
+    fields: *id048
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    - time_gte
+    - time_lt
+    - system
+    outputs:
+    - spans
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id010
+      - *id011
+      - *id012
+      - *id013
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: spans
+        path: data.spans
+        type: string
+        flow: true
+        description: ''
+    reason: Public span query
+    evidence: tracing/public_handler.go:Spans
+  operation_semantic: public_list_spans
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs:
+  - SpanID(span)
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions:
+  - raw_field: spans
+    resource: SpanID(span)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - spans
+    reason: Span rows.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 401
+    dsn:
+    - 401
+    authenticated:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public API span query.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (same m.UserAndProject gate despite /api/v1 path).
+    evidence:
+    - type: source
+      ref: tracing/public_handler.go:registerPublicHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/tracing/:project_id/groups
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id049
+  - project_id
+  - query
+  - time_gte
+  - time_lt
+  - system
+  outputs:
+  - groups
+  input_spec:
+    format: plain
+    fields: *id049
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - project_id
+    - query
+    - time_gte
+    - time_lt
+    - system
+    outputs:
+    - groups
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - *id008
+      - *id010
+      - *id011
+      - *id012
+      - *id013
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: groups
+        path: data.groups
+        type: string
+        flow: true
+        description: ''
+    reason: Public group query
+    evidence: tracing/public_handler.go:Groups
+  operation_semantic: public_list_groups
+  semantic_inputs:
+  - ProjectID(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: project_id
+    resource: ProjectID(project)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - project_id
+    reason: Target project; middleware loads it by id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public API group query.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    evidence:
+    - type: source
+      ref: tracing/public_handler.go:registerPublicHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/v1/traces
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id050
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id050
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: uptrace-dsn / Bearer
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: OTLP ExportTraceServiceRequest
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: OTLP HTTP trace ingestion
+    evidence: tracing/init.go:initOTLP
+  operation_semantic: ingest_otlp_traces
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN selects + authorizes the destination project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    dsn:
+    - 200
+    anonymous:
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: OTLP trace ingest.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: tracing/init.go:initOTLP
+      supports: route + middleware
+    notes: protobuf/json OTLP body; project resolved from DSN, not user session.
+- key: http://localhost:14318/v1/logs
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id051
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id051
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: uptrace-dsn / Bearer
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: OTLP ExportLogsServiceRequest
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: OTLP HTTP log ingestion
+    evidence: tracing/init.go:initOTLP
+  operation_semantic: ingest_otlp_logs
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN authorizes the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    dsn:
+    - 200
+    anonymous:
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: OTLP log ingest.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: tracing/init.go:initOTLP
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/v1/metrics
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id052
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id052
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: uptrace-dsn / Bearer
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: OTLP ExportMetricsServiceRequest
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: OTLP HTTP metric ingestion
+    evidence: metrics/init.go:initOTLP
+  operation_semantic: ingest_otlp_metrics
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN authorizes the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    dsn:
+    - 200
+    anonymous:
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: OTLP metric ingest.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: metrics/init.go:initOTLP
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/vector-logs
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id053
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id053
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: uptrace-dsn / Bearer / ?dsn=
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ndjson log events
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Vector log ingestion
+    evidence: tracing/vector_handler.go:Create
+  operation_semantic: ingest_vector_logs
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN authorizes the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Vector log ingest.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: tracing/vector_handler.go:registerVectorHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/prometheus/write
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id054
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id054
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: DSN
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Prometheus remote-write protobuf
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Prometheus remote-write
+    evidence: metrics/prom_remote_storage.go:Write
+  operation_semantic: ingest_prometheus_write
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN authorizes the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Prometheus remote write.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: metrics/prom_remote_storage.go:registerPrometheusHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/prometheus/read
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id055
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id055
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: DSN
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Prometheus remote-read protobuf
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: Prometheus remote-read
+    evidence: metrics/prom_remote_storage.go:Read
+  operation_semantic: query_prometheus_read
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN authorizes the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Prometheus remote read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: metrics/prom_remote_storage.go:registerPrometheusHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/cloudwatch/metrics
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id056
+  - dsn
+  - raw_body
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id056
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - dsn
+    - raw_body
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: dsn
+        location: header
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: DSN
+      - name: raw_body
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Kinesis/CloudWatch metric stream
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: CloudWatch (Kinesis) metric ingestion
+    evidence: metrics/cloudwatch_handler.go:Metrics
+  operation_semantic: ingest_cloudwatch_metrics
+  semantic_inputs:
+  - ProjectDSN(project)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: dsn
+    resource: ProjectDSN(project)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: DSN authorizes the project.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: CloudWatch metric ingest.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: metrics/cloudwatch_handler.go:registerKinesisHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/api/v1/vector/logs
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id057 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id057
+  io_variants: []
+  operation_semantic: ingest_vector_logs_alias
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:14318
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    evidence:
+    - type: source
+      ref: tracing/vector_handler.go:registerVectorHandler
+      supports: route + middleware
+    notes: null
+- key: http://localhost:14318/debug/pprof/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id058 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id058
+  io_variants: []
+  operation_semantic: pprof_index
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - conf.Debug=true ONLY.
+    evidence:
+    - type: source
+      ref: bunapp/router.go:initRouter
+      supports: route
+    notes: Mounted only when Debug=true; not present in production config.
+- key: http://localhost:14318/debug/pprof/:name
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id059 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id059
+  io_variants: []
+  operation_semantic: pprof_named
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - conf.Debug=true ONLY.
+    evidence:
+    - type: source
+      ref: bunapp/router.go:initRouter
+      supports: route
+    notes: null
+- key: http://localhost:14318/
+  kind: static
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id060 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id060
+  io_variants: []
+  operation_semantic: spa_shell
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: bunapp (Vue SPA FS)
+      supports: route
+    notes: SPA shell + client bundle; JSON APIs above are the real surface.
+edges:
+- src: http://localhost:14318/
+  dst: http://localhost:14318/internal/v1/users/login
+  methods:
+  - POST
+  triggers:
+  - xhr
+- src: http://localhost:14318/
+  dst: http://localhost:14318/internal/v1/users/current
+  methods:
+  - GET
+  triggers:
+  - xhr
+excluded_items:
+- item: OTLP/gRPC services on :14317 (TraceService/LogsService/MetricsService via grpc.Server)
+  reason: gRPC transport, not the HTTP attack surface; the HTTP OTLP mirrors (/v1/traces,/v1/logs,/v1/metrics)
+    ARE modeled.
+- item: /debug/pprof/* (only mounted when conf.Debug=true)
+  reason: Debug-only profiler endpoints; not present in a production config. Enumerated here as a note,
+    not a candidate.
+- item: Vue SPA static assets + index.html fallback (embedded FS)
+  reason: Client bundle / SPA shell; no server business-data flow. The JSON APIs it calls are the real
+    surface.
+- item: SSO/OIDC + Cloudflare Access providers (config-gated user_providers)
+  reason: External IdP dependency; reachability depends on auth.oidc / auth.cloudflare config blocks being
+    set.

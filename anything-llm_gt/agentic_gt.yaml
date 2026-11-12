@@ -1,0 +1,1613 @@
+schema_version: agentic-attack-surface-v1
+environment_id: anythingllm-oss
+meta:
+  app: anything-llm
+  app_version: repo @ 472-new checkout
+  git_ref: see source_root
+  applicability:
+    verdict: qualifies
+    evidence: AIbitat agent graph (server/utils/agents/aibitat/index.js) running a provider tool-call
+      loop over skills/imported-plugins/flows/MCP; AgentHandler entry via @agent.
+  phase_status:
+    static_A_to_D: complete
+    runtime_E: pending (no live grounding yet)
+    link_F: partial (L1/L2 GT for anything-llm not yet built; ids are forward refs)
+agents:
+- id: agent.anythingllm.workspace
+  name: Workspace agent (@agent)
+  component: anything-llm
+  agent_kind: interactive
+  purpose: Primary agent for a workspace; runs the AIbitat tool-call loop over enabled skills, imported
+    plugins, agent flows, and MCP servers.
+  invocation_surfaces:
+  - l1_id: l1.ws.agent_invocation
+    trigger: '`@agent` prefix in a workspace chat (websocket agent session)'
+    auth_context: workspace membership; multi-user role (admin|manager|default)
+  - l1_id: l1.api.workspace_agent
+    trigger: developer API agent invocation / ephemeral agent
+    auth_context: API key
+  model_config:
+    provider: workspace agent provider (OpenAI/Anthropic/Ollama/Gemini/... tooled or untooled)
+    model: workspace agent model
+    config_source: workspace + system settings (admin)
+    writers:
+    - principal: admin
+      l1_id: l1.api.system_settings
+    - principal: workspace_manager
+      l1_id: l1.api.workspace.update
+    evidence_status: source_confirmed
+  instruction_sources:
+  - surface_id: ctx.system_prompt
+    instruction_role: system
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: workspace_manager
+      l1_id: l1.api.workspace.update
+  - surface_id: ctx.clarifying_note
+    instruction_role: system
+    precedence: appended
+    config_version: runtime
+    writers:
+    - principal: admin
+      l1_id: l1.api.system_settings
+  tool_binding_ids:
+  - tool.ws.memory
+  - tool.ws.rag_docs
+  - tool.ws.web_browsing
+  - tool.ws.web_scraping
+  - tool.ws.sql_agent
+  - tool.ws.filesystem
+  - tool.ws.create_files
+  - tool.ws.gmail
+  - tool.ws.outlook
+  - tool.ws.gcal
+  - tool.ws.generate_image
+  - tool.ws.rechart
+  - tool.ws.request_user_input
+  - tool.ws.scheduled_job
+  - tool.ws.imported_plugin
+  - tool.ws.agent_flow
+  - tool.ws.mcp
+  context_source_ids:
+  - ctx.system_prompt
+  - ctx.clarifying_note
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.rag_context
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.memory_recall
+  - ctx.tool_descriptions
+  - ctx.clarifying_input
+  - ctx.flow_variables
+  memory_ids:
+  - mem.workspace_chats
+  - mem.embeddings
+  - mem.agent_memory
+  - mem.scheduled_jobs
+  - mem.filesystem
+  output_sink_ids:
+  - sink.chat_response
+  - sink.email
+  - sink.calendar
+  - sink.files
+  - sink.image
+  - sink.sql_write
+  - sink.external_call
+  - sink.scheduled_job
+  control_ids:
+  - ctl.user_oversight
+  - ctl.imported_tool_approval
+  - ctl.max_tool_calls
+  - ctl.skill_enablement
+  - ctl.multiuser_skill_gate
+  - ctl.model_router_cooldown
+  - ctl.abort
+  resource_limits:
+    max_iterations: AGENT_MAX_TOOL_CALLS (default cap) + maxRounds per response
+    recursion: flows/sub-stages are bounded; no open agent self-spawn
+    token_or_cost_budget: none in core
+    loop_detection: maxRounds boundary + abort
+    enforced_by: code
+  authority_context:
+    principal_source: workspace user (session) or API key
+    tenant_scope: workspace-scoped RAG/chats
+    resource_scope: workspace documents + INSTANCE-level connected accounts
+    delegated_identity: external skills use INSTANCE stored credentials, NOT the user's
+    authz_enforcement: code (role + workspace membership); connected-account scope NOT per-user
+  related_l2_ids:
+  - l2.workspace.agent_chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: utils/agents/index.js AgentHandler; utils/agents/defaults.js WORKSPACE_AGENT; aibitat/index.js
+  evidence_status: source_confirmed
+  notes: Skill set = DEFAULT_SKILLS (memory, docSummarizer, webScraping, webBrowsing) + admin-enabled
+    skills + imported plugins + flows + MCP. ToolReranker may trim the exposed set.
+- id: agent.anythingllm.ephemeral
+  name: Ephemeral agent
+  component: anything-llm
+  agent_kind: specialist
+  purpose: Headless agent session used by the developer API, agent flows, and scheduled jobs; same loop
+    without a live websocket user.
+  invocation_surfaces:
+  - l1_id: l1.api.ephemeral_agent
+    trigger: API / flow / scheduled-job runner
+    auth_context: API key or system (scheduled)
+  model_config:
+    provider: inherits workspace
+    model: workspace model
+    config_source: workspace/system
+    writers: []
+    evidence_status: source_confirmed
+  instruction_sources:
+  - surface_id: ctx.system_prompt
+    instruction_role: system
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: workspace_manager
+      l1_id: l1.api.workspace.update
+  tool_binding_ids:
+  - tool.ws.rag_docs
+  - tool.ws.web_browsing
+  - tool.ws.web_scraping
+  - tool.ws.sql_agent
+  - tool.ws.imported_plugin
+  - tool.ws.mcp
+  context_source_ids:
+  - ctx.system_prompt
+  - ctx.rag_context
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.flow_variables
+  memory_ids:
+  - mem.workspace_chats
+  - mem.embeddings
+  output_sink_ids:
+  - sink.external_call
+  - sink.files
+  - sink.email
+  control_ids:
+  - ctl.max_tool_calls
+  - ctl.skill_enablement
+  resource_limits:
+    max_iterations: AGENT_MAX_TOOL_CALLS
+    recursion: bounded
+    token_or_cost_budget: none
+    loop_detection: maxRounds
+    enforced_by: code
+  authority_context:
+    principal_source: API key / scheduler
+    tenant_scope: workspace
+    resource_scope: workspace + instance accounts
+    delegated_identity: instance credentials; no live human oversight (USER interrupt absent)
+    authz_enforcement: code
+  related_l2_ids:
+  - l2.workspace.agent_chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: utils/agents/ephemeral.js; utils/agentFlows; create-scheduled-job
+  evidence_status: source_confirmed
+  notes: No USER human-monitor in the loop -> ctl.user_oversight does not apply; higher autonomy.
+tool_bindings:
+- id: tool.ws.memory
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: memory (agent memory skill)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - store/recall workspace agent memories
+  execution_identity: &id001
+    identity: workspace context
+    credential_source: workspace config
+  argument_handling: {}
+  output_ids:
+  - mem.agent_memory
+  - ctx.memory_recall
+  execution_environment: null
+  effect_class: write
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/memory.js
+  notes: Default-enabled; agent-written memory re-injected into context (poisoning loop).
+- id: tool.ws.rag_docs
+  agent_id: agent.anythingllm.workspace
+  l1_ids:
+  - l1.api.workspace.vector_search
+  tool_name: doc summarizer / workspace RAG
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - search/summarize workspace documents
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.rag_context
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: read
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/summarize.js; workspace vector search
+  notes: ''
+- id: tool.ws.web_browsing
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: web-browsing (search)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - web search via configured provider
+  execution_identity:
+    identity: server
+    credential_source: search provider API key (system settings)
+  argument_handling: {}
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  execution_environment:
+    sandbox: in-process
+    network_egress: search provider
+    filesystem_scope: none
+    enforced_by: code
+  effect_class: external_send
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/web-browsing.js
+  notes: Default-enabled.
+- id: tool.ws.web_scraping
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: web-scraping (fetch URL)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - fetch/scrape an arbitrary URL
+  execution_identity:
+    identity: server HTTP client
+    credential_source: none
+  argument_handling: {}
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  execution_environment:
+    sandbox: in-process (CollectorApi)
+    network_egress: unrestricted (arbitrary URL = SSRF)
+    filesystem_scope: none
+    enforced_by: code
+  effect_class: external_send
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/web-scraping.js
+  notes: Default-enabled; model-composed URL, no host allowlist -> SSRF surface.
+- id: tool.ws.sql_agent
+  agent_id: agent.anythingllm.workspace
+  l1_ids:
+  - l1.api.sql_connection
+  tool_name: sql-agent
+  tool_source: native
+  server_or_provider: configured SQL connectors (Postgres/MySQL/MSSQL)
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - list DBs/tables, read schema, run SQL against configured connectors
+  execution_identity:
+    identity: configured DB connection
+    credential_source: SQL connector config (stored)
+  argument_handling:
+    validation: JSON-schema params per skill (draft-07)
+    authorization: skill enablement + role
+    normalization: provider tool-call parsing (tooled/untooled helpers)
+    enforced_by: code
+  output_ids:
+  - ctx.tool_results
+  - sink.sql_write
+  execution_environment:
+    sandbox: remote DB
+    network_egress: DB host
+    filesystem_scope: n/a
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.user_oversight
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/sql-agent/*
+  notes: Model-composed SQL against instance DB creds; DML possible -> write/exfil.
+- id: tool.ws.filesystem
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: filesystem-agent
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - read/write/edit/move/copy/search files in the agent storage dir
+  execution_identity:
+    identity: server process
+    credential_source: none
+  argument_handling: {}
+  output_ids:
+  - mem.filesystem
+  - ctx.tool_results
+  execution_environment:
+    sandbox: server FS (agent storage dir)
+    network_egress: none
+    filesystem_scope: agent storage directory
+    enforced_by: code
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.user_oversight
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: filesystem skill enabled + isToolAvailable()
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/filesystem/*; isToolAvailable env gate
+  notes: ''
+- id: tool.ws.create_files
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: create-files-agent
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - generate docx/pdf/pptx/xlsx/text files (pptx uses an LLM section-agent)
+  execution_identity:
+    identity: server process
+    credential_source: none
+  argument_handling: {}
+  output_ids:
+  - sink.files
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: write
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: create-files skill enabled + isToolAvailable()
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/create-files/*
+  notes: pptx section-agent is a nested LLM call (sub-generation).
+- id: tool.ws.gmail
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: gmail-agent
+  tool_source: native
+  server_or_provider: Gmail API
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - search/read/draft/send email; manage threads/labels
+  execution_identity: &id002
+    identity: instance connected-account
+    credential_source: system settings / skill setup_args (stored)
+  argument_handling: {}
+  output_ids:
+  - sink.email
+  - ctx.tool_results
+  execution_environment:
+    sandbox: remote
+    network_egress: Google APIs
+    filesystem_scope: n/a
+    enforced_by: external_service
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.user_oversight
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: gmail skill enabled + OAuth connected
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/gmail/*; GmailBridge
+  notes: Send-email acts under INSTANCE OAuth identity -> confused deputy for any @agent user.
+- id: tool.ws.outlook
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: outlook-agent
+  tool_source: native
+  server_or_provider: Microsoft Graph
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - search/read/draft/send Outlook email
+  execution_identity: *id002
+  argument_handling: {}
+  output_ids:
+  - sink.email
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.user_oversight
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: outlook skill enabled + OAuth connected
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/outlook/*
+  notes: ''
+- id: tool.ws.gcal
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: google-calendar-agent
+  tool_source: native
+  server_or_provider: Google Calendar API
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - list/create/update/delete calendar events
+  execution_identity: *id002
+  argument_handling: {}
+  output_ids:
+  - sink.calendar
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: write
+  approval_required: unknown
+  control_ids:
+  - ctl.user_oversight
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: gcal skill enabled + OAuth connected
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/google-calendar/*
+  notes: ''
+- id: tool.ws.generate_image
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: generate-image
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - image generation via provider
+  execution_identity: *id002
+  argument_handling: {}
+  output_ids:
+  - sink.image
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: skill enabled
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/generate-image.js
+  notes: ''
+- id: tool.ws.rechart
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: rechart
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - render chart config returned to UI
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: none
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/rechart.js
+  notes: ''
+- id: tool.ws.request_user_input
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: request-user-input
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - ask the user clarifying questions (survey card)
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.clarifying_input
+  execution_environment: null
+  effect_class: none
+  approval_required: true
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: agent_clarifying_questions_enabled
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/request-user-input.js
+  notes: HITL input primitive.
+- id: tool.ws.scheduled_job
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: create-scheduled-job
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - create a cron-scheduled agent job
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - mem.scheduled_jobs
+  execution_environment: null
+  effect_class: write
+  approval_required: unknown
+  control_ids:
+  - ctl.multiuser_skill_gate
+  - ctl.user_oversight
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: single-user mode only (SINGLE_USER_ONLY_SKILLS)
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/create-scheduled-job/*
+  notes: Persistent scheduled re-invocation; blocked in multi-user mode.
+- id: tool.ws.imported_plugin
+  agent_id: agent.anythingllm.workspace
+  l1_ids:
+  - l1.api.agent_skill.import
+  tool_name: imported community plugin
+  tool_source: plugin
+  server_or_provider: null
+  schema_ref: null
+  description_source:
+    source_ref: plugin.json description (imported)
+    writers:
+    - principal: admin
+      l1_id: l1.api.agent_skill.import
+    - principal: external_service
+      l1_id: null
+  capabilities:
+  - admin-imported community skill (custom handler.js)
+  execution_identity:
+    identity: plugin (docker runtime)
+    credential_source: skill setup_args (stored secrets)
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  - sink.external_call
+  execution_environment:
+    sandbox: docker runtime
+    network_egress: per plugin
+    filesystem_scope: plugin workspace
+    enforced_by: platform_config
+  effect_class: code_execution
+  approval_required: unknown
+  control_ids:
+  - ctl.imported_tool_approval
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: community skill imported + enabled
+  evidence_status: source_confirmed
+  source_ref: 'utils/agents/imported.js (runtime: ''docker''; handler.js)'
+  notes: Runs imported custom code; description is model-facing + import-controlled -> rug-pull + RCE
+    class. requestToolApproval available for HITL.
+- id: tool.ws.agent_flow
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: agent flow
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source:
+    source_ref: flow definition name/description
+    writers:
+    - principal: admin
+      l1_id: l1.api.agent_flows.save
+  capabilities:
+  - run an admin-authored no-code Agent Flow (API calls, LLM blocks, variables)
+  execution_identity:
+    identity: flow-defined
+    credential_source: flow config
+  argument_handling: {}
+  output_ids:
+  - ctx.flow_variables
+  - ctx.tool_results
+  - sink.external_call
+  execution_environment: null
+  effect_class: mixed
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: flow created + active
+  evidence_status: source_confirmed
+  source_ref: utils/agentFlows; AgentFlows.activeFlowPlugins
+  notes: ''
+- id: tool.ws.mcp
+  agent_id: agent.anythingllm.workspace
+  l1_ids: []
+  tool_name: MCP server tools
+  tool_source: mcp
+  server_or_provider: configured MCP server(s)
+  schema_ref: null
+  description_source:
+    source_ref: MCP listTools result (remote)
+    writers:
+    - principal: external_service
+      l1_id: null
+    - principal: admin
+      l1_id: l1.api.mcp_servers.config
+  capabilities:
+  - call tools from configured MCP servers
+  execution_identity:
+    identity: MCP identity (withMCPIdentity)
+    credential_source: MCP server config
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  - sink.external_call
+  execution_environment:
+    sandbox: remote MCP server
+    network_egress: per server
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: MCP server configured + tool not suppressed
+  evidence_status: source_confirmed
+  source_ref: utils/MCP/index.js MCPCompatibilityLayer (listTools/callTool)
+  notes: MCP compat layer exposes TOOLS only (callTool) -> no resources/prompts/sampling channel.
+context_sources:
+- id: ctx.system_prompt
+  source_kind: system_prompt
+  source_ref: Provider.systemPrompt(workspace) -> workspace.openAiPrompt
+  writers:
+  - principal: workspace_manager
+    l1_id: l1.api.workspace.update
+  - principal: admin
+    l1_id: l1.api.system_settings
+  destination_agent_ids: &id004
+  - agent.anythingllm.workspace
+  - agent.anythingllm.ephemeral
+  destination_channel: system
+  provenance: workspace config
+  trust_class: trusted_instruction
+  transformation: ''
+  persistence_scope: tenant
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Workspace system prompt is editable by workspace managers -> user-tier control of a trusted channel.
+- id: ctx.clarifying_note
+  source_kind: system_prompt
+  source_ref: defaults.js appended clarifying-questions instruction
+  writers:
+  - principal: source_code
+    l1_id: null
+  destination_agent_ids: &id003
+  - agent.anythingllm.workspace
+  destination_channel: system
+  provenance: app
+  trust_class: trusted_instruction
+  transformation: ''
+  persistence_scope: global
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.user_message
+  source_kind: user_input
+  source_ref: workspace chat message
+  writers:
+  - principal: workspace_user
+    l1_id: l1.ws.agent_invocation
+  destination_agent_ids: *id003
+  destination_channel: user
+  provenance: end user
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.chat_history
+  source_kind: chat_history
+  source_ref: aibitat/plugins/chat-history.js -> workspace_chats
+  writers:
+  - principal: workspace_user
+    l1_id: l1.ws.agent_invocation
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  destination_agent_ids: *id003
+  destination_channel: user
+  provenance: prior turns
+  trust_class: mixed
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.rag_context
+  source_kind: retrieval
+  source_ref: workspace vector similaritySearch + pinned docs injected into systemPrompt context
+  writers:
+  - principal: workspace_user
+    l1_id: l1.api.document.upload
+  - principal: workspace_manager
+    l1_id: l1.api.workspace.embed
+  destination_agent_ids: *id004
+  destination_channel: system
+  provenance: workspace documents
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: tenant
+  related_l2_ids:
+  - l2.workspace.agent_chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Uploaded document text injected -> indirect prompt injection; workspace-shared docs cross users.
+- id: ctx.tool_results
+  source_kind: tool_result
+  source_ref: aibitat function handler returns
+  writers:
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id004
+  destination_channel: tool
+  provenance: skill/plugin/MCP output
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.web_content
+  source_kind: external
+  source_ref: web-scraping/web-browsing results
+  writers:
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id004
+  destination_channel: tool
+  provenance: arbitrary web
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Attacker web content via scraping -> indirect injection + SSRF reflection.
+- id: ctx.memory_recall
+  source_kind: retrieval
+  source_ref: aibitat/plugins/memory.js rerank
+  writers:
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  - principal: workspace_user
+    l1_id: l1.ws.agent_invocation
+  destination_agent_ids: *id003
+  destination_channel: system
+  provenance: prior agent memories
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: tenant
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Agent-written memory re-injected -> poisoning persistence.
+- id: ctx.tool_descriptions
+  source_kind: external
+  source_ref: skill/imported/MCP tool descriptions presented to the LLM
+  writers:
+  - principal: admin
+    l1_id: l1.api.agent_skill.import
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id004
+  destination_channel: tool
+  provenance: skill authors / remote specs
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: global
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Imported-plugin + MCP descriptions are model-facing -> rug-pull / description injection.
+- id: ctx.clarifying_input
+  source_kind: user_input
+  source_ref: request-user-input survey result
+  writers:
+  - principal: workspace_user
+    l1_id: l1.ws.clarify_response
+  destination_agent_ids: *id003
+  destination_channel: user
+  provenance: user survey answers
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.flow_variables
+  source_kind: delegated_summary
+  source_ref: agent flow variables/blocks
+  writers:
+  - principal: admin
+    l1_id: l1.api.agent_flows.save
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id004
+  destination_channel: developer
+  provenance: flow definition + block outputs
+  trust_class: mixed
+  transformation: ''
+  persistence_scope: workflow
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: a flow is active
+  evidence_status: source_confirmed
+  notes: ''
+memory_stores:
+- id: mem.workspace_chats
+  store_kind: conversation_history
+  owner_component: anything-llm
+  readers:
+  - agent.anythingllm.workspace
+  - agent.anythingllm.ephemeral
+  writers:
+  - principal: workspace_user
+    l1_id: l1.ws.agent_invocation
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  scope: tenant
+  isolation_enforcement: workspace_id + user scoping in repository queries
+  write_provenance: user turns + agent responses (chat-history plugin)
+  read_path: prior workspace_chats replayed into context
+  retention_and_deletion: workspace-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: models/workspaceChats; chat-history.js
+  notes: ''
+- id: mem.embeddings
+  store_kind: vector_store
+  owner_component: anything-llm
+  readers:
+  - agent.anythingllm.workspace
+  - agent.anythingllm.ephemeral
+  writers:
+  - principal: workspace_user
+    l1_id: l1.api.document.upload
+  - principal: workspace_manager
+    l1_id: l1.api.workspace.embed
+  scope: tenant
+  isolation_enforcement: per-workspace vector namespace; shared docs by workspace
+  write_provenance: uploaded/embedded documents
+  read_path: similaritySearch -> context injection
+  retention_and_deletion: document lifecycle
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: vectorDb providers; EmbedChunks
+  notes: Workspace-shared document store = cross-user injection/read surface within a workspace.
+- id: mem.agent_memory
+  store_kind: agent_notes
+  owner_component: anything-llm
+  readers:
+  - agent.anythingllm.workspace
+  writers:
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  - principal: workspace_user
+    l1_id: l1.ws.agent_invocation
+  scope: tenant
+  isolation_enforcement: workspace-scoped memory
+  write_provenance: the agent's memory skill (turn-derived) + user
+  read_path: reranked memories injected into context
+  retention_and_deletion: workspace-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: aibitat/plugins/memory.js
+  notes: Memory-poisoning sink; re-read each turn.
+- id: mem.scheduled_jobs
+  store_kind: database
+  owner_component: anything-llm
+  readers:
+  - agent.anythingllm.ephemeral
+  writers:
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  - principal: workspace_user
+    l1_id: l1.api.scheduled_job.create
+  scope: tenant
+  isolation_enforcement: single-user mode only
+  write_provenance: scheduled-job skill
+  read_path: scheduler triggers ephemeral agent runs
+  retention_and_deletion: user-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: single-user mode
+  source_ref: create-scheduled-job; models/agentSchedule
+  notes: Durable re-invocation / foothold.
+- id: mem.filesystem
+  store_kind: database
+  owner_component: anything-llm
+  readers:
+  - agent.anythingllm.workspace
+  writers:
+  - principal: agent.anythingllm.workspace
+    l1_id: null
+  scope: tenant
+  isolation_enforcement: agent storage directory
+  write_provenance: filesystem-agent
+  read_path: filesystem read tools
+  retention_and_deletion: storage lifecycle
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: filesystem skill available
+  source_ref: aibitat/plugins/filesystem/*
+  notes: ''
+output_sinks:
+- id: sink.chat_response
+  sink_kind: chat_response
+  producer_ids:
+  - agent.anythingllm.workspace
+  - agent.anythingllm.ephemeral
+  audience: workspace user (chat UI)
+  delivery: streamed markdown over websocket
+  transformation: ''
+  render_side_effects:
+    auto_fetch: chat UI renders markdown incl. images/links
+    active_content: sanitized client-side
+    enforced_by: code
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids:
+  - l2.workspace.agent_chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat websocket plugin; chat-history finalize
+  notes: Model-authored markdown image/link = exfil-on-render channel.
+- id: sink.email
+  sink_kind: email
+  producer_ids:
+  - tool.ws.gmail
+  - tool.ws.outlook
+  audience: arbitrary recipients
+  delivery: Gmail / MS Graph send under instance OAuth
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: gmail/outlook send plugins
+  notes: Model-composed email sent from the instance's connected mailbox.
+- id: sink.calendar
+  sink_kind: external_api
+  producer_ids:
+  - tool.ws.gcal
+  audience: Google Calendar
+  delivery: Calendar API write
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: google-calendar plugin
+  notes: ''
+- id: sink.files
+  sink_kind: file
+  producer_ids:
+  - tool.ws.create_files
+  - tool.ws.filesystem
+  audience: agent storage / download
+  delivery: file write to storage dir
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids:
+  - ctx.tool_results
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: create-files; filesystem write
+  notes: Written files can be re-read by filesystem tools (feedback loop).
+- id: sink.image
+  sink_kind: external_api
+  producer_ids:
+  - tool.ws.generate_image
+  audience: image provider
+  delivery: provider API
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: generate-image plugin
+  notes: ''
+- id: sink.sql_write
+  sink_kind: database_record
+  producer_ids:
+  - tool.ws.sql_agent
+  audience: configured DB
+  delivery: SQL executed against connector (DML if permitted)
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: sql-agent query
+  notes: Model-composed SQL under instance DB creds.
+- id: sink.external_call
+  sink_kind: external_api
+  producer_ids:
+  - tool.ws.imported_plugin
+  - tool.ws.mcp
+  - tool.ws.agent_flow
+  audience: external services / MCP / flow endpoints
+  delivery: HTTP/MCP/docker-plugin calls with model args
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: imported.js; MCP; agentFlows
+  notes: Model-composed args leave under stored credentials / docker plugin.
+- id: sink.scheduled_job
+  sink_kind: database_record
+  producer_ids:
+  - tool.ws.scheduled_job
+  audience: scheduler
+  delivery: persisted cron job
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids:
+  - ctx.flow_variables
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: single-user mode
+  evidence_status: source_confirmed
+  source_ref: create-scheduled-job
+  notes: ''
+execution_edges:
+- id: edge.user__workspace
+  source:
+    agent_id: null
+    step: request
+    external_trigger: websocket @agent / API
+  destination:
+    agent_id: agent.anythingllm.workspace
+  decision_maker: user
+  condition: user sends `@agent ...` in a workspace chat
+  input_source_ids:
+  - ctx.user_message
+  - ctx.system_prompt
+  - ctx.rag_context
+  argument_sources: ''
+  payload: user message + workspace context
+  output_ids: []
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids:
+  - l1.ws.agent_invocation
+  related_l2_steps:
+  - l2_id: l2.workspace.agent_chat
+    order: 1
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: utils/agents/index.js isAgentInvocation
+  notes: ''
+- id: edge.workspace__tool
+  source:
+    agent_id: agent.anythingllm.workspace
+    step: tool-call
+    external_trigger: null
+  destination:
+    tool_binding_id: (model-selected binding)
+  decision_maker: llm
+  condition: model emits a tool call
+  input_source_ids:
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.rag_context
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.memory_recall
+  - ctx.tool_descriptions
+  argument_sources: provider tool-call parsing (tooled) or regex extraction (untooled)
+  payload: function name + args
+  output_ids:
+  - ctx.tool_results
+  control_ids:
+  - ctl.max_tool_calls
+  - ctl.user_oversight
+  - ctl.skill_enablement
+  validation_or_approval: ToolReranker selects subset; USER interrupt / imported approval before side
+    effects
+  execution_mode: synchronous
+  loop_bound: AGENT_MAX_TOOL_CALLS / maxRounds
+  failure_behavior: retry
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.workspace.agent_chat
+    order: 2
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/index.js handleExecution
+  notes: Tool selection + arg composition model-directed -> primary injection->action edge.
+- id: edge.tool__workspace
+  source:
+    agent_id: agent.anythingllm.workspace
+    step: tool-return
+    external_trigger: null
+  destination:
+    agent_id: agent.anythingllm.workspace
+  decision_maker: deterministic_code
+  condition: tool returns
+  input_source_ids: []
+  argument_sources: ''
+  payload: tool result (+citations/attachments)
+  output_ids:
+  - ctx.tool_results
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: retry
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.workspace.agent_chat
+    order: 3
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat/index.js result handling
+  notes: ''
+- id: edge.user_oversight
+  source:
+    agent_id: agent.anythingllm.workspace
+    step: oversight
+    external_trigger: null
+  destination:
+    agent_id: agent.anythingllm.workspace
+  decision_maker: human_reviewer
+  condition: USER agent interrupt=ALWAYS (human monitor in the graph)
+  input_source_ids: []
+  argument_sources: ''
+  payload: approve/guide
+  output_ids: []
+  control_ids:
+  - ctl.user_oversight
+  validation_or_approval: ''
+  execution_mode: callback
+  loop_bound: null
+  failure_behavior: fail_closed
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: defaults.js USER_AGENT interrupt ALWAYS
+  notes: Present only for interactive @agent sessions, NOT ephemeral/API/scheduled runs.
+- id: edge.workspace__imported
+  source:
+    agent_id: agent.anythingllm.workspace
+    step: imported
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.ws.imported_plugin
+    external_surface: docker plugin runtime
+  decision_maker: llm
+  condition: model calls an imported community skill
+  input_source_ids: []
+  argument_sources: model-composed args
+  payload: plugin args
+  output_ids:
+  - sink.external_call
+  - ctx.tool_results
+  control_ids:
+  - ctl.imported_tool_approval
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: fail_closed
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: utils/agents/imported.js
+  notes: Executes imported custom handler.js in a docker runtime.
+- id: edge.workspace__external
+  source:
+    agent_id: agent.anythingllm.workspace
+    step: external
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.ws.mcp
+    external_surface: MCP / connected accounts
+  decision_maker: llm
+  condition: model calls MCP / gmail / sql / flow
+  input_source_ids: []
+  argument_sources: model-composed args
+  payload: operation + args
+  output_ids:
+  - sink.external_call
+  - ctx.tool_results
+  control_ids:
+  - ctl.user_oversight
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: fail_closed
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: MCP/index.js; gmail/sql plugins
+  notes: Acts under INSTANCE credentials; no MCP sampling edge (compat layer = tools only).
+- id: edge.scheduled__ephemeral
+  source:
+    agent_id: null
+    step: cron
+    external_trigger: agent schedule
+  destination:
+    agent_id: agent.anythingllm.ephemeral
+  decision_maker: scheduler
+  condition: scheduled job fires
+  input_source_ids: []
+  argument_sources: ''
+  payload: job prompt/context
+  output_ids:
+  - sink.external_call
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: queued
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: single-user mode; a job exists
+  evidence_status: source_confirmed
+  source_ref: create-scheduled-job runner
+  notes: Autonomous re-invocation without human oversight.
+- id: edge.workspace__output
+  source:
+    agent_id: agent.anythingllm.workspace
+    step: final
+    external_trigger: null
+  destination:
+    output_sink_id: sink.chat_response
+  decision_maker: deterministic_code
+  condition: agent produces final answer
+  input_source_ids: []
+  argument_sources: ''
+  payload: final markdown response
+  output_ids:
+  - sink.chat_response
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.workspace.agent_chat
+    order: 4
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: aibitat websocket finalize
+  notes: ''
+controls:
+- id: ctl.user_oversight
+  control_kind: human_approval
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: human_process
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.anythingllm.workspace
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: 'defaults.js USER_AGENT (interrupt: ALWAYS) in the aibitat graph'
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Human monitor can interrupt/approve agent turns in interactive sessions. Does NOT apply to ephemeral/API/scheduled
+    runs -> those are unsupervised.
+- id: ctl.imported_tool_approval
+  control_kind: human_approval
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids: &id005
+  - agent.anythingllm.workspace
+  - agent.anythingllm.ephemeral
+  applies_to_tool_binding_ids:
+  - tool.ws.imported_plugin
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: utils/agents/imported.js createToolApprovalFn / requestToolApproval
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Imported plugins can request explicit tool approval before running.
+- id: ctl.max_tool_calls
+  control_kind: rate_limit
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: abort
+  applies_to_agent_ids: *id005
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: aibitat/index.js defaultMaxToolCalls (AGENT_MAX_TOOL_CALLS) + maxRounds
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Caps tool-call chaining per response -> bounds runaway loops/cost.
+- id: ctl.skill_enablement
+  control_kind: tool_policy
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: platform_config
+  failure_mode: fail_closed
+  applies_to_agent_ids: *id005
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: defaults.js agentSkillsFromSystemSettings (default_agent_skills / disabled_agent_skills)
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Admin decides which skills are mounted; disabled skills never reach the LLM.
+- id: ctl.multiuser_skill_gate
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids: *id005
+  applies_to_tool_binding_ids:
+  - tool.ws.scheduled_job
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: defaults.js SINGLE_USER_ONLY_SKILLS (create-scheduled-job blocked in multi-user)
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Certain skills are suppressed in multi-user mode.
+- id: ctl.model_router_cooldown
+  control_kind: rate_limit
+  applies_at: before_model
+  enforcement_mode: modifying
+  implementation: code
+  failure_mode: fallback
+  applies_to_agent_ids: *id005
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: aibitat/plugins/model-router-cooldown.js
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Provider cooldown/fallback on rate limits.
+- id: ctl.abort
+  control_kind: monitoring
+  applies_at: after_model
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: abort
+  applies_to_agent_ids: *id005
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: aibitat/index.js AbortController / _aborted (stop, socket close, bail)
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Checked at loop boundaries; stops further LLM/tool turns.

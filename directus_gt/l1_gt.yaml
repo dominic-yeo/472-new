@@ -1,0 +1,8717 @@
+schema_version: pengent-web-gt-v1
+environment_id: directus-oss
+nodes:
+- key: http://localhost:8055/auth/login
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id001
+  - email
+  - password
+  - otp
+  - mode
+  outputs:
+  - access_token
+  - refresh_token
+  - expires
+  input_spec:
+    format: json
+    fields: *id001
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    - otp
+    - mode
+    outputs:
+    - access_token
+    - refresh_token
+    - expires
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: otp
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: 2FA code if enabled
+      - name: mode
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: json|cookie|session
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: access_token
+        path: access_token
+        type: string
+        flow: true
+        description: access JWT
+      - name: refresh_token
+        path: refresh_token
+        type: string
+        flow: true
+        description: refresh token
+      - name: expires
+        path: expires
+        type: string
+        flow: true
+        description: ''
+    reason: local login; returns access+refresh tokens
+    evidence: auth.ts createLocalAuthRouter
+  operation_semantic: user_login
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  semantic_outputs:
+  - AccessToken(session)
+  - RefreshToken(session)
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: User email.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions:
+  - raw_field: access_token
+    resource: AccessToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Session access token.
+  - raw_field: refresh_token
+    resource: RefreshToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Refresh token (long-lived).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    - 401
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Brute-force / credential-stuffing (default-auth rate limiting applies). 2FA via 'otp'.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: Default local provider at /auth/login; SSO providers at /auth/login/:provider.
+- key: http://localhost:8055/auth/refresh
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id002
+  - refresh_token
+  - mode
+  outputs:
+  - access_token
+  - refresh_token
+  - expires
+  input_spec:
+    format: json
+    fields: *id002
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - refresh_token
+    - mode
+    outputs:
+    - access_token
+    - refresh_token
+    - expires
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: refresh_token
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: refresh token (or cookie)
+      - name: mode
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: access_token
+        path: access_token
+        type: string
+        flow: true
+        description: ''
+      - name: refresh_token
+        path: refresh_token
+        type: string
+        flow: true
+        description: ''
+      - name: expires
+        path: expires
+        type: string
+        flow: true
+        description: ''
+    reason: exchange a refresh token for a new access token
+    evidence: auth.ts /refresh
+  operation_semantic: refresh_token
+  semantic_inputs: []
+  semantic_outputs:
+  - AccessToken(session)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: access_token
+    resource: AccessToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Session access token.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Token refresh.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public; consumes a refresh token (replay / rotation surface).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/auth/password/request
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id003
+  - email
+  - reset_url
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id003
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - reset_url
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: reset_url
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: reset link base (allowlisted)
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: request a password-reset email
+    evidence: auth.ts /password/request
+  operation_semantic: password_request
+  semantic_inputs:
+  - UserEmail(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: User email.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password reset request.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Email-enumeration oracle; 'reset_url' is validated against PASSWORD_RESET_URL_ALLOW_LIST.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: reset_url open-redirect/token-leak surface if allow-list is mis-set.
+- key: http://localhost:8055/auth/password/reset
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id004
+  - token
+  - password
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id004
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - token
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: reset JWT
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: complete a password reset
+    evidence: auth.ts /password/reset
+  operation_semantic: password_reset
+  semantic_inputs:
+  - ResetToken(user)
+  - Password(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: token
+    resource: ResetToken(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Password-reset token.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password reset.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF a valid reset token is held -> account takeover.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/auth/logout
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id005
+  - refresh_token
+  - mode
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id005
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - refresh_token
+    - mode
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: refresh_token
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: mode
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: invalidate the refresh token/session
+    evidence: auth.ts /logout
+  operation_semantic: logout
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Holder of a refresh token/session.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/auth
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id006 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id006
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: configured auth providers
+    reason: list configured SSO providers + default-disabled flag
+    evidence: auth.ts GET /
+  operation_semantic: list_auth_providers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Auth provider list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Fingerprints configured identity providers.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/auth/login/:provider
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id007 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id007
+  io_variants: []
+  operation_semantic: sso_login
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Public SSO (oauth2/openid/ldap/saml) login + callback; provider-dependent.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/auth.ts
+      supports: route + controller
+    notes: 'Per-provider router: /login, /callback. Open-redirect + account-linking surface.'
+- key: http://localhost:8055/server/setup
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id008
+  - admin
+  - license_key
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id008
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - admin
+    - license_key
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: admin
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: '{email,password,...}'
+      - name: license_key
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: create the FIRST admin if setup is not completed (bootstrap)
+    evidence: server.ts /setup
+  operation_semantic: server_setup
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: User email.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Bootstrap admin creation.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public but only succeeds while setup is NOT completed (no admin) -> first-boot takeover window.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: 'Directus bootstrap: seizes an admin on an un-provisioned instance.'
+- key: http://localhost:8055/server/specs/oas
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id009 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id009
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: OpenAPI 3 spec of the live API+schema
+    reason: generate the OpenAPI spec for this instance
+    evidence: server.ts /specs/oas
+  operation_semantic: server_specs_oas
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: OpenAPI disclosure.
+    black_box_reachable: true
+    reachability_conditions:
+    - Accountability-scoped (OPENAPI_ENABLED); reveals collections/fields the caller can see (recon).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/server/info
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id010 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id010
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: project + server info
+    reason: server/project info
+    evidence: server.ts /info
+  operation_semantic: server_info
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Server info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (limited fields) / authenticated (more). Version + config fingerprinting.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/server/health
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id011 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id011
+  io_variants: []
+  operation_semantic: server_health
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Public / authenticated (feature-flagged).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/server/specs/graphql/:scope
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id012 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id012
+  io_variants: []
+  operation_semantic: server_specs_graphql
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Public / authenticated (feature-flagged).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/server/ping
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id013 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id013
+  io_variants: []
+  operation_semantic: server_ping
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Public / authenticated (feature-flagged).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/server.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/items/:collection
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id014
+  - collection
+  - filter
+  - fields
+  - deep
+  - sort
+  - limit
+  - data
+  - keys
+  outputs:
+  - data
+  - meta
+  input_spec:
+    format: json
+    fields: *id014
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - filter
+    - fields
+    - deep
+    - sort
+    - limit
+    outputs:
+    - data
+    - meta
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: filter
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: fields
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: field selection incl relation traversal
+      - name: deep
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: sort
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: limit
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: items
+      - name: meta
+        path: meta
+        type: string
+        flow: true
+        description: ''
+    reason: read a collection (permission-filtered)
+    evidence: items.ts readHandler
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: item fields
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create item(s) (create permission)
+    evidence: items.ts POST
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - keys
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: keys
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: bulk keys
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update item(s) by keys/query (update permission)
+    evidence: items.ts PATCH
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - keys
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: keys
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: delete item(s) (delete permission)
+    evidence: items.ts DELETE
+  operation_semantic: item_collection
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs:
+  - ItemID(item)
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions:
+  - raw_field: data
+    resource: ItemID(item)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: Items.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dynamic collection CRUD.
+    black_box_reachable: true
+    reachability_conditions:
+    - Caller's policy permission for <collection>.{create,read,update,delete}. Public role if no token.
+      'fields'/'deep' traverse relations and can over-expose related data; filters are a powerful query
+      surface. System collections (directus_*) are 403 here (use the dedicated controllers).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: Primary data surface. Permission-filtered per policy; over-permissive Public read + deep field
+      traversal = data exposure; batch update/delete by query are high-blast-radius.
+- key: http://localhost:8055/items/:collection/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id015
+  - collection
+  - pk
+  - fields
+  - data
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id015
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - pk
+    - fields
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: fields
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: read one item (read permission)
+    evidence: items.ts GET /:pk
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - pk
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update one item (update permission)
+    evidence: items.ts PATCH /:pk
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - pk
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: delete one item (delete permission)
+    evidence: items.ts DELETE /:pk
+  operation_semantic: item_one
+  semantic_inputs:
+  - CollectionName(collection)
+  - ItemID(item)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  - raw_field: pk
+    resource: ItemID(item)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Item primary key.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Per-item CRUD.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy permission for the collection+action. Item-level access is enforced by permission filters;
+      a permission without a row filter exposes every item by pk (IDOR surface to validate per policy).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/items.ts
+      supports: route + controller
+    notes: Row-level authorization depends on each permission's filter -- a missing filter = IDOR.
+- key: http://localhost:8055/users
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id016
+  - fields
+  - filter
+  - email
+  - password
+  - role
+  - keys
+  - data
+  outputs:
+  - data
+  - meta
+  input_spec:
+    format: json
+    fields: *id016
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - fields
+    - filter
+    outputs:
+    - data
+    - meta
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: fields
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: filter
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: user records
+      - name: meta
+        path: meta
+        type: string
+        flow: true
+        description: ''
+    reason: list users (directus_users read permission)
+    evidence: users.ts readHandler
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    - role
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: role
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: assigned role id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create user(s) (create permission on directus_users)
+    evidence: users.ts POST
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - keys
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: keys
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: fields incl role/password
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: bulk-update users
+    evidence: users.ts PATCH
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - keys
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: keys
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: bulk-delete users
+    evidence: users.ts DELETE
+  operation_semantic: users
+  semantic_inputs:
+  - UserEmail(user)
+  - RoleID(role)
+  semantic_outputs:
+  - UserID(user)
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: User email.
+  - raw_field: role
+    resource: RoleID(role)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - role
+    reason: Assigned role.
+  semantic_output_decisions:
+  - raw_field: data
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: User records.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: User directory + management.
+    black_box_reachable: true
+    reachability_conditions:
+    - Policy permission for directus_users.{read,create,update,delete}. 'role' in create/update assigns
+      privileges -> escalation if an admin-access role is set. PII exposure if read is over-granted.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: Role assignment here is the escalation primitive; password can be set on update.
+- key: http://localhost:8055/users/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id017
+  - pk
+  - data
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id017
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: read one user
+    evidence: users.ts GET /:pk
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: incl role/password
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update one user
+    evidence: users.ts PATCH /:pk
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: delete one user
+    evidence: users.ts DELETE /:pk
+  operation_semantic: user_one
+  semantic_inputs:
+  - UserID(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target user.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Per-user management.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users.{read,update,delete} permission. PATCH role/password on another user (if no row filter)
+      = account takeover / privilege escalation.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/me
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  statuses:
+  - 200
+  - 401
+  params: []
+  content_types:
+  - application/json
+  inputs: &id018
+  - data
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id018
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: own account
+    reason: the caller's own account
+    evidence: users.ts GET /me
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: own editable fields
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update own profile
+    evidence: users.ts PATCH /me
+  operation_semantic: users_me
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Self profile.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated user (or share). PATCH /me field allow-list governs self-escalation risk.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: Self-update must not allow editing role/policies -- verify the editable-field set.
+- key: http://localhost:8055/users/invite
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id019
+  - email
+  - role
+  - invite_url
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id019
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - role
+    - invite_url
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: role
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: invite_url
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: invite a user into a role
+    evidence: users.ts /invite
+  operation_semantic: user_invite
+  semantic_inputs:
+  - UserEmail(user)
+  - RoleID(role)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: User email.
+  - raw_field: role
+    resource: RoleID(role)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - role
+    reason: Invite role.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: User invite.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_users create permission. Invites into an arbitrary 'role' (escalation if admin role).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: invite_url is allow-listed (USER_INVITE_URL_ALLOW_LIST).
+- key: http://localhost:8055/users/invite/accept
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id020
+  - token
+  - password
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id020
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - token
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: accept an invite + set password
+    evidence: users.ts /invite/accept
+  operation_semantic: user_invite_accept
+  semantic_inputs:
+  - InviteToken(invite)
+  - Password(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: token
+    resource: InviteToken(invite)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Invite token.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Invite acceptance.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF a valid invite token is held.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/register
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id021
+  - email
+  - password
+  - verification_url
+  - first_name
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id021
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    - verification_url
+    - first_name
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: verification_url
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: first_name
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: public self-registration (if enabled)
+    evidence: users.ts /register
+  operation_semantic: user_register
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: User email.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public self-registration.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF AUTH_* registration is enabled (settings). Rate-limited (rate-limiter-registration). New
+      user lands in the configured default registration role.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: Open registration + a powerful default role = self-service privilege.
+- key: http://localhost:8055/users/:pk/tfa/disable
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id022
+  - pk
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id022
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: admin disables another user's 2FA
+    evidence: users.ts /:pk/tfa/disable
+  operation_semantic: user_tfa_disable_admin
+  semantic_inputs:
+  - UserID(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target user.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin TFA reset.
+    black_box_reachable: true
+    reachability_conditions:
+    - accountability.admin required -> disables a victim's 2FA (weakens their account).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/me/track/page
+  kind: api
+  methods:
+  - PATCH
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id023 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id023
+  io_variants: []
+  operation_semantic: users_track_page
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated self / public verify.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/me/tfa/generate
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id024 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id024
+  io_variants: []
+  operation_semantic: users_tfa_generate
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated self / public verify.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/me/tfa/enable
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id025 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id025
+  io_variants: []
+  operation_semantic: users_tfa_enable
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated self / public verify.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/me/tfa/disable
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id026 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id026
+  io_variants: []
+  operation_semantic: users_tfa_disable
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated self / public verify.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/users/register/verify-email
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id027 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id027
+  io_variants: []
+  operation_semantic: users_verify_email
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated self / public verify.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/users.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/roles
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id028
+  - name
+  - policies
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id028
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: roles
+    reason: list roles
+    evidence: roles.ts readHandler
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - policies
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: policies
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a role
+    evidence: roles.ts POST
+  operation_semantic: roles
+  semantic_inputs: []
+  semantic_outputs:
+  - RoleID(role)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: data
+    resource: RoleID(role)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: Roles.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: RBAC roles.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_roles permission (admin-managed). Roles group policies.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/roles.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/roles/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id029
+  - pk
+  - policies
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id029
+  io_variants:
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - policies
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: policies
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: attached policies
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update a role incl its policies
+    evidence: roles.ts PATCH /:pk
+  operation_semantic: role_one
+  semantic_inputs:
+  - RoleID(role)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: RoleID(role)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target role.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Role management.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_roles update permission. Attaching an admin-access policy to a role = escalation.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/roles.ts
+      supports: route + controller
+    notes: Role<->policy linkage is a privilege-escalation lever.
+- key: http://localhost:8055/policies
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id030
+  - name
+  - admin_access
+  - app_access
+  - ip_access
+  - enforce_tfa
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id030
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - admin_access
+    - app_access
+    - ip_access
+    - enforce_tfa
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: admin_access
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: superuser bypass flag
+      - name: app_access
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: ip_access
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: enforce_tfa
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a policy (carries admin_access/app_access flags)
+    evidence: policies.ts POST
+  operation_semantic: policies
+  semantic_inputs: []
+  semantic_outputs:
+  - PolicyID(policy)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: data
+    resource: PolicyID(policy)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: Policies.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Access policies.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_policies permission. A policy with admin_access=true is full superuser -> creating/attaching
+      one is the top escalation primitive.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/policies.ts
+      supports: route + controller
+    notes: admin_access=true bypasses ALL permission checks.
+- key: http://localhost:8055/policies/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id031
+  - pk
+  - admin_access
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id031
+  io_variants:
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - admin_access
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: admin_access
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update a policy's flags/permissions
+    evidence: policies.ts PATCH /:pk
+  operation_semantic: policy_one
+  semantic_inputs:
+  - PolicyID(policy)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: PolicyID(policy)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target policy.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Policy management.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_policies update. Flipping admin_access=true on a policy the attacker holds = escalation.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/policies.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/permissions
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id032
+  - policy
+  - collection
+  - action
+  - permissions
+  - fields
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id032
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: permission rows
+    reason: list permission rules
+    evidence: permissions.ts readHandler
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - policy
+    - collection
+    - action
+    - permissions
+    - fields
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: policy
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: collection
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: action
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: create|read|update|delete|share
+      - name: permissions
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: filter rule
+      - name: fields
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a permission rule for a policy
+    evidence: permissions.ts POST
+  operation_semantic: permissions
+  semantic_inputs:
+  - CollectionName(collection)
+  - PolicyID(policy)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  - raw_field: policy
+    resource: PolicyID(policy)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - policy
+    reason: Owning policy.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Permission rules.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_permissions permission. Adding a broad rule (e.g. read * on directus_users with no filter)
+      to a low policy opens data to that role.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: Permission rows define the content-API grants; mis-set filters -> exposure.
+- key: http://localhost:8055/permissions/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id033
+  - pk
+  - permissions
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id033
+  io_variants:
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - permissions
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: permissions
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: edit a permission rule
+    evidence: permissions.ts PATCH /:pk
+  operation_semantic: permission_one
+  semantic_inputs:
+  - PermissionID(permission)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: PermissionID(permission)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target rule.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Permission rule edit.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_permissions update.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/permissions/me
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id034 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id034
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: the caller's effective permissions
+    reason: the caller's own permissions
+    evidence: permissions.ts GET /me
+  operation_semantic: permissions_me
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Own permissions.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated; discloses the caller's effective grants (useful recon for the caller).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/access
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id035
+  - user
+  - role
+  - policy
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id035
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - user
+    - role
+    - policy
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: user
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: role
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: policy
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: link a policy to a user or role (directus_access)
+    evidence: access.ts POST
+  operation_semantic: access
+  semantic_inputs:
+  - PolicyID(policy)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: policy
+    resource: PolicyID(policy)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - policy
+    reason: Linked policy.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Policy assignment.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_access permission. Attaching an admin-access policy directly to a user = escalation.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/access.ts
+      supports: route + controller
+    notes: directus_access is the user/role <-> policy junction; a direct escalation lever.
+- key: http://localhost:8055/access/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id036 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id036
+  io_variants: []
+  operation_semantic: access_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / RBAC-managed.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/policies/me/globals
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id037 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id037
+  io_variants: []
+  operation_semantic: policies_me_globals
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / RBAC-managed.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/permissions/me/:collection/:pk?
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id038 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id038
+  io_variants: []
+  operation_semantic: permissions_me_collection
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / RBAC-managed.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/permissions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/files
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id039
+  - file
+  outputs:
+  - data
+  - meta
+  input_spec:
+    format: plain
+    fields: *id039
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - file
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: multipart
+      body_example: {}
+      fields:
+      - name: file
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: multipart upload
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: file record
+    reason: upload a file (create permission on directus_files)
+    evidence: files.ts POST /
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    - meta
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+      - name: meta
+        path: meta
+        type: string
+        flow: true
+        description: ''
+    reason: list files
+    evidence: files.ts readHandler
+  operation_semantic: files
+  semantic_inputs: []
+  semantic_outputs:
+  - FileID(file)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: data
+    resource: FileID(file)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: Stored files.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: File library.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files permission. Upload = stored-file + content-type surface; list exposes metadata.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/files/import
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id040
+  - url
+  - data
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id040
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - url
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: url
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: remote URL the server fetches
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: file metadata
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: import a file from a remote URL (server-side fetch)
+    evidence: files.ts POST /import
+  operation_semantic: file_import
+  semantic_inputs:
+  - RemoteURL(url)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: url
+    resource: RemoteURL(url)
+    mergeable: true
+    value_kind: locator
+    reference_capable: true
+    reference_fields:
+    - url
+    reason: Server-fetched URL.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Import-from-URL (SSRF).
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files create permission. Server GETs an attacker-chosen 'url' = SSRF (cloud metadata /
+      internal services).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: route + controller
+    notes: Classic Directus SSRF vector.
+- key: http://localhost:8055/files/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id041
+  - pk
+  - data
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id041
+  io_variants:
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update file metadata / replace
+    evidence: files.ts PATCH /:pk
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: delete a file
+    evidence: files.ts DELETE /:pk
+  operation_semantic: file_one
+  semantic_inputs:
+  - FileID(file)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: FileID(file)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target file.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: File CRUD.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_files {read,update,delete} permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/files.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/assets/:pk/:filename?
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id042
+  - pk
+  - key
+  - width
+  - height
+  - transforms
+  outputs:
+  - asset
+  input_spec:
+    format: plain
+    fields: *id042
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - key
+    - width
+    - height
+    - transforms
+    outputs:
+    - asset
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: file id
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: named transform preset
+      - name: width
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: height
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: transforms
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: binary
+      scalar_type: binary
+      value_name: asset
+      value_type: binary
+      value_flow: true
+      value_description: the (optionally transformed) file bytes
+      fields: []
+    reason: download/stream a file with on-the-fly image transforms
+    evidence: assets.ts GET /:pk
+  operation_semantic: asset_download
+  semantic_inputs:
+  - FileID(file)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: FileID(file)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: File to serve.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Asset download + transform.
+    black_box_reachable: true
+    reachability_conditions:
+    - Read permission on the file (public if the file's folder/permission allows). Arbitrary 'transforms'
+      params are a CPU/memory DoS surface (ASSETS_TRANSFORM_* limits).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/assets.ts
+      supports: route + controller
+    notes: Image-transform params = resource-exhaustion surface; also the public file-serving path.
+- key: http://localhost:8055/folders
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id043
+  - name
+  - parent
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id043
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - parent
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: parent
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a folder
+    evidence: folders.ts POST
+  operation_semantic: folders
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: File folders.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_folders permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/folders.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/assets/folder/:pk
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id044 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id044
+  io_variants: []
+  operation_semantic: asset_folder_action
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_files/folders permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/assets.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/assets/files/
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id045 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id045
+  io_variants: []
+  operation_semantic: asset_files_action
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_files/folders permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/assets.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/folders/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id046 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id046
+  io_variants: []
+  operation_semantic: folder_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_files/folders permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/assets.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/flows/trigger/:pk
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id047
+  - pk
+  - body
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id047
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - body
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: flow id
+      - name: body
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: passed to the flow payload
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: flow result
+    reason: trigger a webhook/manual flow (runs its operations)
+    evidence: flows.ts webhookFlowHandler
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: trigger a GET-method flow
+    evidence: flows.ts webhookFlowHandler
+  operation_semantic: flow_trigger
+  semantic_inputs:
+  - FlowID(flow)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: FlowID(flow)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target flow.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Flow execution (automation).
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Reachability per the flow''s trigger config: a ''webhook'' flow can be PUBLIC (no auth). A triggered
+      flow runs its operation chain (request/webhook-url = SSRF, run-script = sandboxed JS, item mutations)
+      with the flow''s configured accountability.'
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/flows.ts
+      supports: route + controller
+    notes: 'The automation attack surface: public webhook flows execute server-side operation chains.'
+- key: http://localhost:8055/flows
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id048
+  - name
+  - trigger
+  - operations
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id048
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - trigger
+    - operations
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: trigger
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: webhook|manual|...
+      - name: operations
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: operation chain
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a flow + its operation chain
+    evidence: flows.ts POST
+  operation_semantic: flows
+  semantic_inputs: []
+  semantic_outputs:
+  - FlowID(flow)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: data
+    resource: FlowID(flow)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: Flows.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Flow definitions.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_flows permission (admin-managed). Defining a flow with a run-script/request operation =
+      server-side code/SSRF by configuration.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/flows.ts
+      supports: route + controller
+    notes: Creating flows is effectively server-side automation authoring.
+- key: http://localhost:8055/operations
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id049
+  - type
+  - options
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id049
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - type
+    - options
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: type
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: exec|request|...
+      - name: options
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: e.g. script body / target url
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a flow operation (code/SSRF by type)
+    evidence: operations.ts POST
+  operation_semantic: operations
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Flow operations.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_operations permission. 'exec' runs sandboxed JS; 'request' fetches a URL (SSRF).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/operations.ts
+      supports: route + controller
+    notes: operation 'exec' = sandboxed code; 'request' = SSRF -- the flow building blocks.
+- key: http://localhost:8055/schema/snapshot
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id050
+  - includeCollections
+  - excludeCollections
+  outputs:
+  - data
+  input_spec:
+    format: plain
+    fields: *id050
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - includeCollections
+    - excludeCollections
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: includeCollections
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: excludeCollections
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: full schema snapshot
+    reason: export the full data-model snapshot (admin only)
+    evidence: schema.ts GET /snapshot
+  operation_semantic: schema_snapshot
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Schema export.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin only (checkIsAdmin). Full data-model disclosure.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/schema/apply
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id051
+  - diff
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id051
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - diff
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: diff
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: snapshot diff to apply
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'apply schema changes: create/alter/drop collections+fields (admin only)'
+    evidence: schema.ts POST /apply
+  operation_semantic: schema_apply
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Schema mutation.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin only. Full control of the data model (create/drop tables, change fields) -> destructive +
+      can introduce fields/relations that widen the surface.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: Whole-schema write; highest-impact data-model primitive.
+- key: http://localhost:8055/collections
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id052
+  - collection
+  - schema
+  - fields
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id052
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - schema
+    - fields
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: schema
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: fields
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a collection (table) (admin/collections permission)
+    evidence: collections.ts POST
+  operation_semantic: collections
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Collection (table) management.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_collections permission (admin). Creating/dropping collections changes the DB schema.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collections.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/fields/:collection
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PATCH
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id053
+  - collection
+  - field
+  - type
+  - schema
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id053
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - field
+    - type
+    - schema
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: field
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: type
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: schema
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: add a field to a collection (admin)
+    evidence: fields.ts POST /:collection
+  operation_semantic: fields_collection
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Field management.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_fields permission (admin). Field changes alter the DB columns.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/fields.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/schema/diff
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id054 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id054
+  io_variants: []
+  operation_semantic: schema_diff
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/collections/:collection
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id055 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id055
+  io_variants: []
+  operation_semantic: collection_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/fields
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id056 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id056
+  io_variants: []
+  operation_semantic: fields_all
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/fields/:collection/:field
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id057 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id057
+  io_variants: []
+  operation_semantic: field_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/relations
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PATCH
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id058 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id058
+  io_variants: []
+  operation_semantic: relations
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/relations/:collection
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id059 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id059
+  io_variants: []
+  operation_semantic: relations_collection
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/relations/:collection/:field
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id060 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id060
+  io_variants: []
+  operation_semantic: relation_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin / data-model permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/schema.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/export/:collection
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id061
+  - collection
+  - query
+  - format
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id061
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - query
+    - format
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: query
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: filter/fields to export
+      - name: format
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: csv|json|xml|yaml
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: export query results to a file (background, saved as a directus_file)
+    evidence: utils.ts POST /export/:collection
+  operation_semantic: utils_export
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Data export (exfil).
+    black_box_reachable: true
+    reachability_conditions:
+    - Read permission on the collection. Bulk exfiltration of readable data to a file.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: Permission-scoped, but a convenient bulk-exfil channel.
+- key: http://localhost:8055/utils/import/:collection
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id062
+  - collection
+  - file
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id062
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - file
+    outputs: []
+    input: {}
+    request:
+      body_format: multipart
+      body_example: {}
+      fields:
+      - name: collection
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: file
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: uploaded file
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: import a file's rows into a collection
+    evidence: utils.ts POST /import/:collection
+  operation_semantic: utils_import
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Bulk data import.
+    black_box_reachable: true
+    reachability_conditions:
+    - Create permission on the collection. Bulk write from an uploaded file.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/cache/clear
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id063
+  - system
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id063
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - system
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: system
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: also clear system cache
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: clear the cache
+    evidence: utils.ts POST /cache/clear
+  operation_semantic: utils_cache_clear
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Cache clear.
+    black_box_reachable: true
+    reachability_conditions:
+    - Permission-gated (admin for system cache). Availability/consistency impact.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/import
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id064
+  - mode
+  - dangerouslyAllowDelete
+  - body
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id064
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - mode
+    - dangerouslyAllowDelete
+    - body
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: mode
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: add|merge
+      - name: dangerouslyAllowDelete
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: body
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: batch items
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: batch import across collections (optional destructive delete)
+    evidence: utils.ts POST /import
+  operation_semantic: utils_import_batch
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Batch import.
+    black_box_reachable: true
+    reachability_conditions:
+    - Create/update permission; 'dangerouslyAllowDelete' flag enables deletions.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: dangerouslyAllowDelete makes this destructive.
+- key: http://localhost:8055/utils/random/string
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id065 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id065
+  io_variants: []
+  operation_semantic: utils_random
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / permission-gated (translations/generate is admin).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/sort/:collection
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id066 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id066
+  io_variants: []
+  operation_semantic: utils_sort
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / permission-gated (translations/generate is admin).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/revert/:revision
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id067 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id067
+  io_variants: []
+  operation_semantic: utils_revert
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / permission-gated (translations/generate is admin).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/translations/generate
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id068 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id068
+  io_variants: []
+  operation_semantic: utils_translations_generate
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / permission-gated (translations/generate is admin).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/utils/resolve-redirect
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id069 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id069
+  io_variants: []
+  operation_semantic: utils_resolve_redirect
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated / permission-gated (translations/generate is admin).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/utils.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/registry/install
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id070
+  - extension
+  - version
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id070
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - extension
+    - version
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: extension
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: registry extension id
+      - name: version
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: install a 3rd-party extension from the registry (runs its code)
+    evidence: extensions.ts POST /registry/install
+  operation_semantic: extension_install
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Extension install (code).
+    black_box_reachable: true
+    reachability_conditions:
+    - admin. Installs and loads third-party extension code into the server -> code-execution-adjacent.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: Installing an extension loads untrusted code; marketplace/supply-chain surface.
+- key: http://localhost:8055/extensions/:pk
+  kind: api
+  methods:
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id071
+  - pk
+  - enabled
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id071
+  io_variants:
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - enabled
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: enabled
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: enable/disable
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: enable/disable an installed extension
+    evidence: extensions.ts PATCH /:pk
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: remove an extension
+    evidence: extensions.ts DELETE /:pk
+  operation_semantic: extension_manage
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Extension enable/remove.
+    black_box_reachable: true
+    reachability_conditions:
+    - admin. Toggling/removing extensions changes loaded server code.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id072 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id072
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: installed extensions
+    reason: list installed extensions
+    evidence: extensions.ts GET /
+  operation_semantic: extensions_list
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Extension inventory.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated (app). Reveals installed extensions (recon).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/registry
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id073 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id073
+  io_variants: []
+  operation_semantic: extensions_registry_browse
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin (registry ops) / app (sources).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/registry/account/:pk
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id074 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id074
+  io_variants: []
+  operation_semantic: extensions_registry_account
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin (registry ops) / app (sources).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/registry/extension/:pk
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id075 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id075
+  io_variants: []
+  operation_semantic: extensions_registry_extension
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin (registry ops) / app (sources).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/registry/reinstall
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id076 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id076
+  io_variants: []
+  operation_semantic: extensions_reinstall
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin (registry ops) / app (sources).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/registry/uninstall/:pk
+  kind: api
+  methods:
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id077 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id077
+  io_variants: []
+  operation_semantic: extensions_uninstall
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin (registry ops) / app (sources).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/extensions/sources/:chunk
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id078 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id078
+  io_variants: []
+  operation_semantic: extensions_sources
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - admin (registry ops) / app (sources).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/extensions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/shares/auth
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id079
+  - share
+  - password
+  - mode
+  outputs:
+  - access_token
+  - refresh_token
+  - expires
+  input_spec:
+    format: json
+    fields: *id079
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - share
+    - password
+    - mode
+    outputs:
+    - access_token
+    - refresh_token
+    - expires
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: share
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: share id
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: if the share is password-protected
+      - name: mode
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: access_token
+        path: access_token
+        type: string
+        flow: true
+        description: ''
+      - name: refresh_token
+        path: refresh_token
+        type: string
+        flow: true
+        description: ''
+      - name: expires
+        path: expires
+        type: string
+        flow: true
+        description: ''
+    reason: authenticate to a share -> item-scoped tokens (no login)
+    evidence: shares.ts POST /auth
+  operation_semantic: share_auth
+  semantic_inputs:
+  - ShareID(share)
+  - SharePassword(share)
+  semantic_outputs:
+  - AccessToken(session)
+  semantic_input_decisions:
+  - raw_field: share
+    resource: ShareID(share)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - share
+    reason: Share id.
+  - raw_field: password
+    resource: SharePassword(share)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Share password (optional).
+  semantic_output_decisions:
+  - raw_field: access_token
+    resource: AccessToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Session access token.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public share login.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public. Anyone with a share id (+ password if set) gets an access token scoped to the shared item.
+      Share id guessability + weak/absent password = unauthenticated data access.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: Public auth surface; brute-force on share password / id enumeration.
+- key: http://localhost:8055/shares/info/:pk
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id080
+  - pk
+  outputs:
+  - data
+  input_spec:
+    format: plain
+    fields: *id080
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: share metadata incl. max_uses/times_used/dates
+    reason: public share metadata (no accountability)
+    evidence: shares.ts GET /info/:pk
+  operation_semantic: share_info
+  semantic_inputs:
+  - ShareID(share)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: ShareID(share)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Share id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public share info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (no auth). Returns share metadata; confirms a share id exists + whether it is password-set.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: Oracle for share existence + password requirement.
+- key: http://localhost:8055/shares
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id081
+  - collection
+  - item
+  - password
+  - max_uses
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id081
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - item
+    - password
+    - max_uses
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: item
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: max_uses
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a share for an item
+    evidence: shares.ts POST /
+  operation_semantic: shares
+  semantic_inputs: []
+  semantic_outputs:
+  - ShareID(share)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: data
+    resource: ShareID(share)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - data
+    reason: Shares.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Share management.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_shares + 'share' permission on the item's collection. Creating a share exposes an item
+      to unauthenticated holders of the link.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: Share create = deliberate public-exposure primitive.
+- key: http://localhost:8055/shares/invite
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id082 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id082
+  io_variants: []
+  operation_semantic: share_invite
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_shares permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/shares/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id083 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id083
+  io_variants: []
+  operation_semantic: share_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_shares permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/shares.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/settings
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - POST
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id084
+  - data
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id084
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: project settings
+    reason: read project settings
+    evidence: settings.ts GET /
+  - method: PATCH
+    content_types:
+    - application/json
+    inputs:
+    - data
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: data
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: settings incl auth/storage/cors/public flags
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: update project settings (admin)
+    evidence: settings.ts PATCH /
+  operation_semantic: settings
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Project settings.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Read: app users (some public-ish fields drive the login screen). Update: directus_settings permission
+      (admin) -> reconfigure storage/CORS/auth/public registration/default role = workspace takeover-adjacent.'
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/settings.ts
+      supports: route + controller
+    notes: Settings writes control registration, default roles, storage and CORS.
+- key: http://localhost:8055/versions/:pk/promote
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id085
+  - pk
+  - mainHash
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id085
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - pk
+    - mainHash
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: pk
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: mainHash
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: promote a content version to the main item
+    evidence: versions.ts promote
+  operation_semantic: version_promote
+  semantic_inputs:
+  - VersionID(version)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: pk
+    resource: VersionID(version)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pk
+    reason: Target version.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Promote content version.
+    black_box_reachable: true
+    reachability_conditions:
+    - Update permission on the versioned collection. Promotes draft content to live.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/versions.ts
+      supports: route + controller
+    notes: Draft->live publish path for content versioning.
+- key: http://localhost:8055/versions
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id086
+  - collection
+  - item
+  - key
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id086
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - item
+    - key
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: item
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: key
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: create a content version (draft)
+    evidence: versions.ts POST
+  operation_semantic: versions
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Content versions.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_versions + collection permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/versions.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/comments
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id087
+  - collection
+  - item
+  - comment
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id087
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - collection
+    - item
+    - comment
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: collection
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: item
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: comment
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: comment on an item
+    evidence: comments.ts POST
+  operation_semantic: comments
+  semantic_inputs:
+  - CollectionName(collection)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: collection
+    resource: CollectionName(collection)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - collection
+    reason: Target collection name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Item comments.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_comments permission. Stored content (XSS-in-studio surface).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/comments.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/notifications
+  kind: api
+  methods:
+  - GET
+  - POST
+  - SEARCH
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id088
+  - recipient
+  - subject
+  - message
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id088
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - recipient
+    - subject
+    - message
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: recipient
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: subject
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+      - name: message
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+    reason: send a notification to a user
+    evidence: notifications.ts POST
+  operation_semantic: notifications
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Notifications.
+    black_box_reachable: true
+    reachability_conditions:
+    - directus_notifications permission. Can message arbitrary users (phishing-in-app surface).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/notifications.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/versions/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id089 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id089
+  io_variants: []
+  operation_semantic: version_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/versions/:pk/save
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id090 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id090
+  io_variants: []
+  operation_semantic: version_save
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/versions/:pk/compare
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id091 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id091
+  io_variants: []
+  operation_semantic: version_compare
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/comments/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id092 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id092
+  io_variants: []
+  operation_semantic: comment_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/notifications/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id093 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id093
+  io_variants: []
+  operation_semantic: notification_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/presets
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id094 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id094
+  io_variants: []
+  operation_semantic: presets
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/presets/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id095 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id095
+  io_variants: []
+  operation_semantic: preset_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/revisions
+  kind: api
+  methods:
+  - GET
+  - SEARCH
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id096 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id096
+  io_variants: []
+  operation_semantic: revisions
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/revisions/:pk
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id097 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id097
+  io_variants: []
+  operation_semantic: revision_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/activity
+  kind: api
+  methods:
+  - GET
+  - SEARCH
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id098 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id098
+  io_variants: []
+  operation_semantic: activity
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/activity/:pk
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id099 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id099
+  io_variants: []
+  operation_semantic: activity_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + relevant directus_* permission.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/collab
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/graphql
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id100
+  - query
+  - variables
+  outputs:
+  - data
+  - errors
+  input_spec:
+    format: json
+    fields: *id100
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - query
+    - variables
+    outputs:
+    - data
+    - errors
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: query
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: GraphQL query/mutation
+      - name: variables
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: directus
+      error_path: errors[].message
+      fields:
+      - name: data
+        path: data
+        type: string
+        flow: true
+        description: ''
+      - name: errors
+        path: errors
+        type: string
+        flow: true
+        description: ''
+    reason: GraphQL endpoint over the item/content schema (same permission model)
+    evidence: graphql.ts
+  operation_semantic: graphql_items
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: GraphQL (items).
+    black_box_reachable: true
+    reachability_conditions:
+    - Same accountability/permission model as REST, re-exposed as GraphQL. Query depth/complexity = DoS
+      surface; introspection (GRAPHQL_INTROSPECTION) discloses the schema.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/graphql.ts
+      supports: route + controller
+    notes: GraphQL mirrors the REST permission model; one POST, broad reach.
+- key: http://localhost:8055/graphql/system
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id101 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id101
+  io_variants: []
+  operation_semantic: graphql_system
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - GraphQL over the system (directus_*) collections; same permission model.
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/graphql.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/dashboards
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id102 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id102
+  io_variants: []
+  operation_semantic: dashboards
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/dashboards.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/dashboards/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id103 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id103
+  io_variants: []
+  operation_semantic: dashboard_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/dashboards.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/panels
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id104 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id104
+  io_variants: []
+  operation_semantic: panels
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/panels.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/panels/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id105 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id105
+  io_variants: []
+  operation_semantic: panel_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/panels.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/translations
+  kind: api
+  methods:
+  - GET
+  - POST
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id106 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id106
+  io_variants: []
+  operation_semantic: translations
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/translations.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/translations/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id107 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id107
+  io_variants: []
+  operation_semantic: translation_one
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/translations.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/metrics
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id108 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id108
+  io_variants: []
+  operation_semantic: metrics
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:8055
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated + directus_* permission (metrics is config-gated).
+    evidence:
+    - type: source
+      ref: directus/api/src/controllers/metrics.ts
+      supports: route + controller
+    notes: null
+- key: http://localhost:8055/admin
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id109 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id109
+  io_variants: []
+  operation_semantic: data_studio
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: app/ (Data Studio SPA)
+      supports: client
+    notes: Vue Data Studio SPA; drives the REST/GraphQL API.
+- key: http://localhost:8055/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id110 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id110
+  io_variants: []
+  operation_semantic: root
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: api/src/app.ts
+      supports: client
+    notes: Root (redirects to /admin or returns server info).
+edges:
+- src: http://localhost:8055/admin
+  dst: http://localhost:8055/auth/login
+  methods:
+  - POST
+  triggers:
+  - xhr
+- src: http://localhost:8055/admin
+  dst: http://localhost:8055/users/me
+  methods:
+  - GET
+  triggers:
+  - xhr
+- src: http://localhost:8055/admin
+  dst: http://localhost:8055/items/:collection
+  methods:
+  - GET
+  triggers:
+  - xhr
+excluded_items:
+- item: Per-collection Content API is served by ONE generic controller (/items/:collection[/:pk]); modeled
+    once, not per user-defined collection
+  reason: Directus has no per-collection route files -- /items/:collection dispatches every collection
+    through the same handler + policy engine. A real project's collections multiply the item nodes but
+    share the identical auth model.
+- item: System-collection convenience controllers already modeled (users, roles, policies, permissions,
+    access, files, folders, flows, operations, presets, dashboards, panels, versions, comments, notifications,
+    translations, revisions, activity, settings)
+  reason: These wrap the directus_* system collections with the same policy engine; the security-critical
+    ones are L2-covered, the rest enumerated as L1 nodes.
+- item: AI routes (/ai, /ai/files), MCP server (/mcp, /mcp-oauth/clients), deployment (/deployments, /deployments/webhooks),
+    license (/license), TUS resumable upload (/files/tus)
+  reason: Feature-flagged / edition-specific surfaces (ENABLE_* envs). They share the token+policy auth
+    model already captured; enumerated rather than modeled per-route.
+- item: Data Studio SPA bundle (/admin/*) and raw asset bytes served under /assets/:pk
+  reason: Client assets / stored file bytes; the REST+GraphQL API that manages them is the modeled surface.
+- item: Realtime (WebSocket/SSE) subscriptions and the GraphQL subscription transport
+  reason: A separate realtime channel carrying the same collections+permissions; out of scope for the
+    REST/GraphQL request GT.

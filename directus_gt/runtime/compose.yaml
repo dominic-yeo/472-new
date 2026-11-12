@@ -1,0 +1,23 @@
+services:
+  directus:
+    image: directus/directus:11
+    ports:
+      - "8055:8055"
+    environment:
+      KEY: "gt-directus-key-9x7Q"
+      SECRET: "gt-directus-secret-3kP8"
+      ADMIN_EMAIL: "gtadmin@example.com"
+      ADMIN_PASSWORD: "Gt-Adm1n-Secret-9xQ"
+      DB_CLIENT: "sqlite3"
+      DB_FILENAME: "/directus/database/data.db"
+      # Keep defaults for registration/CORS so the probe measures the OUT-OF-BOX posture.
+      WEBSOCKETS_ENABLED: "false"
+      TELEMETRY: "false"
+    volumes:
+      - directus_db:/directus/database
+      - directus_uploads:/directus/uploads
+    restart: on-failure
+
+volumes:
+  directus_db:
+  directus_uploads:

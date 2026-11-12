@@ -1,0 +1,4955 @@
+schema_version: pengent-web-gt-v1
+environment_id: rocketchat-oss
+nodes:
+- id: gt-action-001
+  name: Log in
+  kind: normal
+  description: A visitor authenticates and receives an auth token.
+  action_key: login
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: login_user
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: response
+      field: ''
+      resource: AuthToken(session)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: &id003
+      predicate: Know
+      arguments:
+      - &id001
+        kind: subject
+        id: actor
+        type: User
+        relative_role: SELF
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies username/email + password.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AuthToken
+      basis: auth_transition
+      reason: Caller becomes authenticated.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Returns the X-Auth-Token + userId.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: user / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Login identifier.
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: authToken / AuthToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthToken(session:Session{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/login
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: login returns an auth token + userId.
+  l1_keys:
+  - http://localhost:3000/api/v1/login
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],AuthToken(session:Session{created}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (authRequired:false). Brute-force / credential-stuffing; X-2fa-code for 2FA.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/../ApiClass.ts
+      supports: login
+    notes: null
+- id: gt-action-002
+  name: Log out
+  kind: normal
+  description: A user logs out.
+  action_key: logout
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: logout_user
+    crud: Delete
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: self
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: subject
+      field: ''
+      resource: AuthToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id002
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - AuthToken
+    reason: Authenticated.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - AuthToken
+      basis: auth_transition
+      reason: The auth token is invalidated.
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/logout
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: logout invalidates the token.
+  l1_keys:
+  - http://localhost:3000/api/v1/logout
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  produces: []
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/../ApiClass.ts
+      supports: logout
+    notes: null
+- id: gt-action-003
+  name: Read own account
+  kind: normal
+  description: A user reads their own account.
+  action_key: read_me
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: read_me
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: subject
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: self
+      basis: io_reference
+      reason: Returns the caller's own account.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/me
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: me returns the authenticated user.
+  l1_keys:
+  - http://localhost:3000/api/v1/me
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  produces:
+  - Know(actor:User[SELF],UserID(user:User{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Self.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/misc.ts
+      supports: me
+    notes: null
+- id: gt-action-004
+  name: Self-register
+  kind: normal
+  description: A visitor self-registers an account.
+  action_key: register_user
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: register_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact: *id003
+    reason: Caller supplies username/email/password.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A user account is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: created
+      basis: io_reference
+      reason: Returns the created user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Chosen username.
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Email.
+  - direction: input
+    field: pass / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.register
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: users.register creates an account when registration is open.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.register
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Exists(user:User{created})
+  - Know(actor:User[SELF],UserID(user:User{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public self-registration.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public IF Accounts_RegistrationForm='Public' (config-dependent).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/users.ts
+      supports: register
+    notes: null
+- id: gt-action-005
+  name: Generate personal access token
+  kind: normal
+  description: A user mints a personal access token.
+  action_key: generate_pat
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: generate_pat
+    crud: Create
+  object:
+    kind: entity
+    id: token
+    type: Token
+    name: Token
+    entity: Token
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: PersonalAccessToken(user)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: token
+        type: Token
+        role: new
+    reason: Permission 'create-personal-access-tokens'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PersonalAccessToken
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: self
+      basis: io_reference
+      reason: Mints a long-lived personal access token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: tokenName / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Token label.
+  - direction: output
+    field: token / PersonalAccessToken(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PersonalAccessToken(user:User{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.generatePersonalAccessToken
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Mints a persistent API credential.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.generatePersonalAccessToken
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Create,token:Token{new})
+  produces:
+  - Know(actor:User[SELF],PersonalAccessToken(user:User{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: PAT mint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Permission 'create-personal-access-tokens'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/users.ts
+      supports: generatePersonalAccessToken
+    notes: null
+- id: gt-action-006
+  name: Create user
+  kind: normal
+  description: Create user.
+  action_key: create_user
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: create_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Permission 'create-user'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A user is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID(user)
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: created
+      basis: io_reference
+      reason: Returns the new user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user)(user:User{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.create
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Create user.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.create
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Create,user:User{target})
+  produces:
+  - Exists(user:User{created})
+  - Know(actor:User[SELF],UserID(user)(user:User{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create user.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'create-user'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/create_user.ts
+      supports: route + handler
+    notes: roles[] in the body assigns privileges at creation -> escalation if 'admin'.
+- id: gt-action-007
+  name: Update user
+  kind: normal
+  description: Update user.
+  action_key: update_user
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: update_user
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: userId
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id004
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Permission 'edit-other-user-info'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: userId
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id004
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: userId / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(userId:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.update
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Update user.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.update
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(userId:User{target}))
+  produces:
+  - State(user:User{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Update user.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-other-user-info'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/update_user.ts
+      supports: route + handler
+    notes: Can set another user's password/roles -> takeover + escalation.
+- id: gt-action-008
+  name: Delete user
+  kind: normal
+  description: Delete user.
+  action_key: delete_user
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: delete_user
+    crud: Delete
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: userId
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id005
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Permission 'delete-user'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: userId
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id005
+      basis: action_semantics
+      reason: The user is removed.
+  io_accounting:
+  - direction: input
+    field: userId / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(userId:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.delete
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Delete user.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.delete
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Delete,user:User{target})
+  - Know(actor:User[SELF],UserID(userId:User{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete user.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'delete-user'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/delete_user.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-009
+  name: Set user active status
+  kind: normal
+  description: Set user active status.
+  action_key: set_user_active
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: set_user_active
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: userId
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id006
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Permission 'edit-other-user-active-status'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: userId
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id006
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: userId / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(userId:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.setActiveStatus
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Set user active status.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.setActiveStatus
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(userId:User{target}))
+  produces:
+  - State(user:User{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Set user active status.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-other-user-active-status'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/set_user_active.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-010
+  name: Read user info
+  kind: normal
+  description: Read user info.
+  action_key: read_user
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: read_user
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID
+    participants:
+    - id: userId
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: userId
+          type: User
+          role: target
+    reason: References the target by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: target
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: userId / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(userId:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: user / UserID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.info
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Read user info.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.info
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],UserID(userId:User{target}))
+  produces:
+  - Know(actor:User[SELF],UserID(user:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read user info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/read_user.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-011
+  name: Reset avatar
+  kind: normal
+  description: Reset avatar.
+  action_key: reset_avatar
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: reset_avatar
+    crud: Update
+  object:
+    kind: state
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: UserID(user)
+    participants:
+    - id: userId
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id007
+        kind: entity
+        id: user
+        type: User
+        role: target
+    reason: Permission 'edit-other-user-avatar'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target:
+          kind: entity
+          id: userId
+          type: User
+          role: target
+    reason: Targets an existing user.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id007
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: userId / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(userId:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.resetAvatar
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Reset avatar.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.resetAvatar
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,user:User{target})
+  - Know(actor:User[SELF],UserID(userId:User{target}))
+  produces:
+  - State(user:User{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Reset avatar.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-other-user-avatar'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/reset_avatar.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-012
+  name: List users
+  kind: normal
+  description: List users.
+  action_key: list_users
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: list_users
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: user
+        type: User
+        role: scope
+    reason: Permission 'view-user-administration'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: collection
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/users.list
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List users.
+  l1_keys:
+  - http://localhost:3000/api/v1/users.list
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Read,user:User{scope})
+  produces:
+  - Know(actor:User[SELF],UserID(user:User{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List users.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'view-user-administration'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_users.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-013
+  name: Create channel
+  kind: normal
+  description: Create channel.
+  action_key: create_channel
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: create_channel
+    crud: Create
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'create-c'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: room
+          type: Room
+          role: created
+      basis: action_semantics
+      reason: A room is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomID(room)
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: created
+      basis: io_reference
+      reason: Returns the new room.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: room / RoomID(room)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomID(room)(room:Room{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.create
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Create channel.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.create
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Create,room:Room{target})
+  produces:
+  - Exists(room:Room{created})
+  - Know(actor:User[SELF],RoomID(room)(room:Room{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create channel.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'create-c'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/create_channel.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-014
+  name: Delete channel
+  kind: normal
+  description: Delete channel.
+  action_key: delete_channel
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: AuthToken
+  operation:
+    business: delete_channel
+    crud: Delete
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id008
+        kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'delete-c'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id008
+      basis: action_semantics
+      reason: The room is removed.
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.delete
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Delete channel.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.delete
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Delete,room:Room{target})
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete channel.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'delete-c'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/delete_channel.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-015
+  name: Read channel info
+  kind: normal
+  description: Read channel info.
+  action_key: read_channel
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: read_channel
+    crud: Read
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoomID
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: References the target by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomID
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: target
+      basis: io_reference
+      reason: Returns room.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  - direction: output
+    field: room / RoomID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.info
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Read channel info.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.info
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces:
+  - Know(actor:User[SELF],RoomID(room:Room{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read channel info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/read_channel.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-016
+  name: List channels
+  kind: normal
+  description: List channels.
+  action_key: list_channels
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: list_channels
+    crud: Read
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoomID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: room
+        type: Room
+        role: scope
+    reason: Permission 'view-c-room'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomID
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: collection
+      basis: io_reference
+      reason: Returns room.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: room / RoomID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.list
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List channels.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.list
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Read,room:Room{scope})
+  produces:
+  - Know(actor:User[SELF],RoomID(room:Room{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List channels.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'view-c-room'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_channels.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-017
+  name: Invite to channel
+  kind: normal
+  description: Invite to channel.
+  action_key: invite_channel
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: invite_channel
+    crud: Update
+  object:
+    kind: state
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id009
+        kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'add-user-to-joined-room'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.invite
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Invite to channel.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.invite
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,room:Room{target})
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces:
+  - State(room:Room{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Invite to channel.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'add-user-to-joined-room'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/invite_channel.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-018
+  name: Kick from channel
+  kind: normal
+  description: Kick from channel.
+  action_key: kick_channel
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: AuthToken
+  operation:
+    business: kick_channel
+    crud: Update
+  object:
+    kind: state
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id010
+        kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'remove-user'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id010
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.kick
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Kick from channel.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.kick
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,room:Room{target})
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces:
+  - State(room:Room{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Kick from channel.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'remove-user'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/kick_channel.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-019
+  name: Grant channel owner
+  kind: normal
+  description: Grant channel owner.
+  action_key: add_channel_owner
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: AuthToken
+  operation:
+    business: add_channel_owner
+    crud: Update
+  object:
+    kind: state
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id011
+        kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'set-owner'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id011
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.addOwner
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Grant channel owner.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.addOwner
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,room:Room{target})
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces:
+  - State(room:Room{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grant channel owner.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'set-owner'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/add_channel_owner.ts
+      supports: route + handler
+    notes: Room-level privilege escalation.
+- id: gt-action-020
+  name: Set channel type
+  kind: normal
+  description: Set channel type.
+  action_key: set_channel_type
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: AuthToken
+  operation:
+    business: set_channel_type
+    crud: Update
+  object:
+    kind: state
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id012
+        kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'edit-room'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id012
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.setType
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Set channel type.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.setType
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,room:Room{target})
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces:
+  - State(room:Room{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Set channel type.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-room'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/set_channel_type.ts
+      supports: route + handler
+    notes: public<->private visibility boundary change.
+- id: gt-action-021
+  name: List channel members
+  kind: normal
+  description: List channel members.
+  action_key: list_channel_members
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: list_channel_members
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: UserID
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: References the target by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserID
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: collection
+      basis: io_reference
+      reason: Returns user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  - direction: output
+    field: user / UserID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/channels.members
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List channel members.
+  l1_keys:
+  - http://localhost:3000/api/v1/channels.members
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces:
+  - Know(actor:User[SELF],UserID(user:User{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List channel members.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_channel_members.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-022
+  name: Create private group
+  kind: normal
+  description: Create private group.
+  action_key: create_group
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: create_group
+    crud: Create
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'create-p'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: room
+          type: Room
+          role: created
+      basis: action_semantics
+      reason: A room is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomID(room)
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: created
+      basis: io_reference
+      reason: Returns the new room.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: room / RoomID(room)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomID(room)(room:Room{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/groups.create
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Create private group.
+  l1_keys:
+  - http://localhost:3000/api/v1/groups.create
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Create,room:Room{target})
+  produces:
+  - Exists(room:Room{created})
+  - Know(actor:User[SELF],RoomID(room)(room:Room{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create private group.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'create-p'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/create_group.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-023
+  name: List groups
+  kind: normal
+  description: List groups.
+  action_key: list_groups
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: list_groups
+    crud: Read
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoomID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomID
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: collection
+      basis: io_reference
+      reason: Returns room.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: room / RoomID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/groups.list
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List groups.
+  l1_keys:
+  - http://localhost:3000/api/v1/groups.list
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  produces:
+  - Know(actor:User[SELF],RoomID(room:Room{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List groups.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_groups.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-024
+  name: Post message
+  kind: normal
+  description: Post message.
+  action_key: post_message
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: post_message
+    crud: Create
+  object:
+    kind: entity
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: MessageID(message)
+    participants:
+    - id: room
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: room
+          type: Room
+          role: target
+    reason: Targets a room the caller can post to.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: message
+        type: Message
+        role: new
+    reason: Member of the room (post permission).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: message
+          type: Message
+          role: created
+      basis: action_semantics
+      reason: A message is stored.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MessageID
+          target:
+            kind: entity
+            id: message
+            type: Message
+            role: created
+      basis: io_reference
+      reason: Returns the message.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{target}))
+    ignored_reason: ''
+  - direction: input
+    field: text / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Message body (content-injection surface).
+  - direction: output
+    field: message / MessageID(message)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],MessageID(message:Message{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/chat.postMessage
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: Post message.
+  l1_keys:
+  - http://localhost:3000/api/v1/chat.postMessage
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],RoomID(room:Room{target}))
+  - Can(actor:User[SELF],Create,message:Message{new})
+  produces:
+  - Exists(message:Message{created})
+  - Know(actor:User[SELF],MessageID(message:Message{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Post message.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated member of the room.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/chat.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-025
+  name: Send message
+  kind: normal
+  description: Send message.
+  action_key: send_message
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: send_message
+    crud: Create
+  object:
+    kind: entity
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: MessageID(message)
+    participants:
+    - id: room
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: room
+          type: Room
+          role: target
+    reason: Targets a room the caller can post to.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: message
+        type: Message
+        role: new
+    reason: Member of the room (post permission).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: message
+          type: Message
+          role: created
+      basis: action_semantics
+      reason: A message is stored.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MessageID
+          target:
+            kind: entity
+            id: message
+            type: Message
+            role: created
+      basis: io_reference
+      reason: Returns the message.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{target}))
+    ignored_reason: ''
+  - direction: input
+    field: text / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Message body (content-injection surface).
+  - direction: output
+    field: message / MessageID(message)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],MessageID(message:Message{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/chat.sendMessage
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: Send message.
+  l1_keys:
+  - http://localhost:3000/api/v1/chat.sendMessage
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],RoomID(room:Room{target}))
+  - Can(actor:User[SELF],Create,message:Message{new})
+  produces:
+  - Exists(message:Message{created})
+  - Know(actor:User[SELF],MessageID(message:Message{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Send message.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated member of the room.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/chat.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-026
+  name: Edit message
+  kind: normal
+  description: Edit message.
+  action_key: update_message
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: update_message
+    crud: Update
+  object:
+    kind: state
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: MessageID(message)
+    participants:
+    - id: msgId
+      type: Message
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id013
+        kind: entity
+        id: message
+        type: Message
+        role: target
+    reason: Permission 'edit-message'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: MessageID
+        target:
+          kind: entity
+          id: msgId
+          type: Message
+          role: target
+    reason: Targets an existing message.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id013
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: msgId / MessageID(message)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MessageID(msgId:Message{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/chat.update
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Edit message.
+  l1_keys:
+  - http://localhost:3000/api/v1/chat.update
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,message:Message{target})
+  - Know(actor:User[SELF],MessageID(msgId:Message{target}))
+  produces:
+  - State(message:Message{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Edit message.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-message'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/update_message.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-027
+  name: Delete message
+  kind: normal
+  description: Delete message.
+  action_key: delete_message
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: delete_message
+    crud: Delete
+  object:
+    kind: entity
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: MessageID(message)
+    participants:
+    - id: msgId
+      type: Message
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id014
+        kind: entity
+        id: message
+        type: Message
+        role: target
+    reason: Permission 'delete-message'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: MessageID
+        target:
+          kind: entity
+          id: msgId
+          type: Message
+          role: target
+    reason: Targets an existing message.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id014
+      basis: action_semantics
+      reason: The message is removed.
+  io_accounting:
+  - direction: input
+    field: msgId / MessageID(message)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MessageID(msgId:Message{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/chat.delete
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Delete message.
+  l1_keys:
+  - http://localhost:3000/api/v1/chat.delete
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Delete,message:Message{target})
+  - Know(actor:User[SELF],MessageID(msgId:Message{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Delete message.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'delete-message'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/delete_message.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-028
+  name: React to message
+  kind: normal
+  description: React to message.
+  action_key: react_message
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: react_message
+    crud: Update
+  object:
+    kind: state
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: MessageID(message)
+    participants:
+    - id: messageId
+      type: Message
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id015
+        kind: entity
+        id: message
+        type: Message
+        role: target
+    reason: Permission 'post-readonly'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: MessageID
+        target:
+          kind: entity
+          id: messageId
+          type: Message
+          role: target
+    reason: Targets an existing message.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id015
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: messageId / MessageID(message)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MessageID(messageId:Message{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/chat.react
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: React to message.
+  l1_keys:
+  - http://localhost:3000/api/v1/chat.react
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,message:Message{target})
+  - Know(actor:User[SELF],MessageID(messageId:Message{target}))
+  produces:
+  - State(message:Message{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: React to message.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'post-readonly'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/react_message.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-029
+  name: Read message
+  kind: normal
+  description: Read message.
+  action_key: read_message
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: read_message
+    crud: Read
+  object:
+    kind: entity
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: MessageID
+    participants:
+    - id: msgId
+      type: Message
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: MessageID
+        target:
+          kind: entity
+          id: msgId
+          type: Message
+          role: target
+    reason: References the target by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MessageID
+          target:
+            kind: entity
+            id: message
+            type: Message
+            role: target
+      basis: io_reference
+      reason: Returns message.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: msgId / MessageID(message)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MessageID(msgId:Message{target}))
+    ignored_reason: ''
+  - direction: output
+    field: message / MessageID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],MessageID(message:Message{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/chat.getMessage
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Read message.
+  l1_keys:
+  - http://localhost:3000/api/v1/chat.getMessage
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],MessageID(msgId:Message{target}))
+  produces:
+  - Know(actor:User[SELF],MessageID(message:Message{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read message.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/read_message.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-030
+  name: Upload file to room
+  kind: normal
+  description: Upload file to room.
+  action_key: upload_file
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: upload_file
+    crud: Create
+  object:
+    kind: entity
+    id: file
+    type: File
+    name: File
+    entity: File
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: FileID(file)
+    participants:
+    - id: rid
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: file
+        type: File
+        role: target
+    reason: Permission 'post-message-with-files'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: rid
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: file
+          type: File
+          role: created
+      basis: action_semantics
+      reason: A file is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: FileID(file)
+          target:
+            kind: entity
+            id: file
+            type: File
+            role: created
+      basis: io_reference
+      reason: Returns the new file.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: rid / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(rid:Room{target}))
+    ignored_reason: ''
+  - direction: output
+    field: file / FileID(file)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],FileID(file)(file:File{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/rooms.media/:rid
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Upload file to room.
+  l1_keys:
+  - http://localhost:3000/api/v1/rooms.media/:rid
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Create,file:File{target})
+  - Know(actor:User[SELF],RoomID(rid:Room{target}))
+  produces:
+  - Exists(file:File{created})
+  - Know(actor:User[SELF],FileID(file)(file:File{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Upload file to room.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'post-message-with-files'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/upload_file.ts
+      supports: route + handler
+    notes: File upload (type/size validation, storage).
+- id: gt-action-031
+  name: Admin list all rooms
+  kind: normal
+  description: Admin list all rooms.
+  action_key: admin_list_rooms
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: admin_list_rooms
+    crud: Read
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoomID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: room
+        type: Room
+        role: scope
+    reason: Permission 'view-room-administration'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomID
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: collection
+      basis: io_reference
+      reason: Returns room.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: room / RoomID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/rooms.adminRooms
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Admin list all rooms.
+  l1_keys:
+  - http://localhost:3000/api/v1/rooms.adminRooms
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Read,room:Room{scope})
+  produces:
+  - Know(actor:User[SELF],RoomID(room:Room{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin list all rooms.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'view-room-administration'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/admin_list_rooms.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-032
+  name: Save room settings
+  kind: normal
+  description: Save room settings.
+  action_key: save_room_settings
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Owner
+    auth_context: AuthToken
+  operation:
+    business: save_room_settings
+    crud: Update
+  object:
+    kind: state
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: RoomID(room)
+    participants:
+    - id: rid
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id016
+        kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'edit-room'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: rid
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id016
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: rid / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(rid:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/rooms.saveRoomSettings
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Save room settings.
+  l1_keys:
+  - http://localhost:3000/api/v1/rooms.saveRoomSettings
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,room:Room{target})
+  - Know(actor:User[SELF],RoomID(rid:Room{target}))
+  produces:
+  - State(room:Room{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Save room settings.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-room'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/save_room_settings.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-033
+  name: Clean room history
+  kind: normal
+  description: Clean room history.
+  action_key: clean_history
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: clean_history
+    crud: Delete
+  object:
+    kind: entity
+    id: message
+    type: Message
+    name: Message
+    entity: Message
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: MessageID(message)
+    participants:
+    - id: roomId
+      type: Room
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - &id017
+        kind: entity
+        id: message
+        type: Message
+        role: target
+    reason: Permission 'clean-channel-history'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: roomId
+          type: Room
+          role: target
+    reason: Targets an existing room.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id017
+      basis: action_semantics
+      reason: The message is removed.
+  io_accounting:
+  - direction: input
+    field: roomId / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/rooms.cleanHistory
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Clean room history.
+  l1_keys:
+  - http://localhost:3000/api/v1/rooms.cleanHistory
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Delete,message:Message{target})
+  - Know(actor:User[SELF],RoomID(roomId:Room{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Clean room history.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'clean-channel-history'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/clean_history.ts
+      supports: route + handler
+    notes: Bulk destructive message deletion.
+- id: gt-action-034
+  name: Export room
+  kind: normal
+  description: A user exports a room's message history.
+  action_key: export_room
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: Member
+    auth_context: AuthToken
+  operation:
+    business: export_room
+    crud: Read
+  object:
+    kind: entity
+    id: room
+    type: Room
+    name: Room
+    entity: Room
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: rid
+      resource: RoomID(room)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: RoomID
+        target:
+          kind: entity
+          id: room
+          type: Room
+          role: target
+    reason: Target room.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: room
+        type: Room
+        role: target
+    reason: Permission 'mail-messages' or room access.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoomExport
+          target:
+            kind: entity
+            id: room
+            type: Room
+            role: self
+      basis: io_reference
+      reason: Exports the room's messages (exfiltration).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: rid / RoomID(room)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],RoomID(room:Room{target}))
+    ignored_reason: ''
+  - direction: output
+    field: export / RoomExport(room)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoomExport(room:Room{self}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/rooms.export
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: rooms.export dumps room messages.
+  l1_keys:
+  - http://localhost:3000/api/v1/rooms.export
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],RoomID(room:Room{target}))
+  - Can(actor:User[SELF],Read,room:Room{target})
+  produces:
+  - Know(actor:User[SELF],RoomExport(room:Room{self}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Export room.
+    black_box_reachable: true
+    reachability_conditions:
+    - Permission 'mail-messages'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/rooms.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-035
+  name: Read public settings
+  kind: normal
+  description: Anyone reads public workspace settings.
+  action_key: public_settings
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: public_settings
+    crud: Read
+  object:
+    kind: entity
+    id: setting
+    type: Setting
+    name: Setting
+    entity: Setting
+    role: public
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: SettingKey(setting)
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SettingKey
+          target:
+            kind: entity
+            id: setting
+            type: Setting
+            role: public
+      basis: io_reference
+      reason: Returns public settings (fingerprinting).
+    kill: []
+  io_accounting:
+  - direction: output
+    field: settings / SettingKey(setting)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SettingKey(setting:Setting{public}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/settings.public
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: settings.public needs no auth.
+  l1_keys:
+  - http://localhost:3000/api/v1/settings.public
+  consumes: []
+  produces:
+  - Know(actor:User[SELF],SettingKey(setting:Setting{public}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public settings.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (authRequired:false).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/settings.ts
+      supports: public
+    notes: null
+- id: gt-action-036
+  name: List settings
+  kind: normal
+  description: List settings.
+  action_key: list_settings
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: list_settings
+    crud: Read
+  object:
+    kind: entity
+    id: setting
+    type: Setting
+    name: Setting
+    entity: Setting
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: SettingKey
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: setting
+        type: Setting
+        role: scope
+    reason: Permission 'view-privileged-setting'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SettingKey
+          target:
+            kind: entity
+            id: setting
+            type: Setting
+            role: collection
+      basis: io_reference
+      reason: Returns setting.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: setting / SettingKey
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SettingKey(setting:Setting{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/settings
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List settings.
+  l1_keys:
+  - http://localhost:3000/api/v1/settings
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Read,setting:Setting{scope})
+  produces:
+  - Know(actor:User[SELF],SettingKey(setting:Setting{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List settings.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'view-privileged-setting'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_settings.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-037
+  name: Read a setting
+  kind: normal
+  description: Read a setting.
+  action_key: read_setting
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: read_setting
+    crud: Read
+  object:
+    kind: entity
+    id: setting
+    type: Setting
+    name: Setting
+    entity: Setting
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: SettingKey
+    participants:
+    - id: _id
+      type: Setting
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: SettingKey
+        target:
+          kind: entity
+          id: _id
+          type: Setting
+          role: target
+    reason: References the target by id.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: setting
+        type: Setting
+        role: scope
+    reason: Permission 'view-privileged-setting'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SettingKey
+          target:
+            kind: entity
+            id: setting
+            type: Setting
+            role: target
+      basis: io_reference
+      reason: Returns setting.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: _id / SettingKey(setting)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],SettingKey(_id:Setting{target}))
+    ignored_reason: ''
+  - direction: output
+    field: setting / SettingKey
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SettingKey(setting:Setting{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/settings/:_id
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.8
+  reasoning: Read a setting.
+  l1_keys:
+  - http://localhost:3000/api/v1/settings/:_id
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],SettingKey(_id:Setting{target}))
+  - Can(actor:User[SELF],Read,setting:Setting{scope})
+  produces:
+  - Know(actor:User[SELF],SettingKey(setting:Setting{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read a setting.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'view-privileged-setting'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/read_setting.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-038
+  name: Change a setting
+  kind: normal
+  description: Change a setting.
+  action_key: change_setting
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: manage_setting
+    crud: Update
+  object:
+    kind: state
+    id: setting
+    type: Setting
+    name: Setting
+    entity: Setting
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: SettingKey(setting)
+    participants:
+    - id: _id
+      type: Setting
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id018
+        kind: entity
+        id: setting
+        type: Setting
+        role: target
+    reason: Permission 'edit-privileged-setting'.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: SettingKey
+        target:
+          kind: entity
+          id: _id
+          type: Setting
+          role: target
+    reason: Targets an existing setting.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id018
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: _id / SettingKey(setting)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],SettingKey(_id:Setting{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/settings/:_id
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Change a setting.
+  l1_keys:
+  - http://localhost:3000/api/v1/settings/:_id
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,setting:Setting{target})
+  - Know(actor:User[SELF],SettingKey(_id:Setting{target}))
+  produces:
+  - State(setting:Setting{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Change a setting.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'edit-privileged-setting'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/manage_setting.ts
+      supports: route + handler
+    notes: Setting writes reconfigure auth/uploads/integrations -> workspace takeover.
+- id: gt-action-039
+  name: List permissions
+  kind: normal
+  description: List permissions.
+  action_key: list_permissions
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: list_permissions
+    crud: Read
+  object:
+    kind: entity
+    id: permission
+    type: Permission
+    name: Permission
+    entity: Permission
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: PermissionID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: PermissionID
+          target:
+            kind: entity
+            id: permission
+            type: Permission
+            role: collection
+      basis: io_reference
+      reason: Returns permission.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: permission / PermissionID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],PermissionID(permission:Permission{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/permissions.listAll
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List permissions.
+  l1_keys:
+  - http://localhost:3000/api/v1/permissions.listAll
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  produces:
+  - Know(actor:User[SELF],PermissionID(permission:Permission{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List permissions.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_permissions.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-040
+  name: Rewrite permissions
+  kind: normal
+  description: Rewrite permissions.
+  action_key: update_permissions
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: update_permissions
+    crud: Update
+  object:
+    kind: state
+    id: permission
+    type: Permission
+    name: Permission
+    entity: Permission
+    role: target
+    attribute: ''
+    state_field: fields
+    binding:
+      source: request
+      field: ''
+      resource: PermissionID(permission)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - &id019
+        kind: entity
+        id: permission
+        type: Permission
+        role: target
+    reason: Permission 'access-permissions'.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id019
+        - fields
+        - updated
+      basis: action_semantics
+      reason: State is updated.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/permissions.update
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Rewrite permissions.
+  l1_keys:
+  - http://localhost:3000/api/v1/permissions.update
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Update,permission:Permission{target})
+  produces:
+  - State(permission:Permission{target},fields,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Rewrite permissions.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'access-permissions'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/update_permissions.ts
+      supports: route + handler
+    notes: Granting a permission to a low role = global escalation.
+- id: gt-action-041
+  name: Assign role to user
+  kind: normal
+  description: An admin assigns a role (e.g. admin) to a user.
+  action_key: add_user_to_role
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: add_user_to_role
+    crud: Update
+  object:
+    kind: state
+    id: role
+    type: Role
+    name: Role
+    entity: Role
+    role: target
+    attribute: ''
+    state_field: members
+    binding:
+      source: request
+      field: ''
+      resource: RoleID(role)
+    participants:
+    - id: user
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Username
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: target
+    reason: User to elevate.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - kind: entity
+        id: role
+        type: Role
+        role: target
+    reason: Permission 'access-permissions'.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: role
+          type: Role
+          role: target
+        - members
+        - added
+      basis: action_semantics
+      reason: The user is granted the role.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  - direction: input
+    field: roleName / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Role (e.g. admin).
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/roles.addUserToRole
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: roles.addUserToRole grants a role.
+  l1_keys:
+  - http://localhost:3000/api/v1/roles.addUserToRole
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Know(actor:User[SELF],Username(user:User{target}))
+  - Can(actor:User[SELF],Update,role:Role{target})
+  produces:
+  - State(role:Role{target},members,added)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Assign role.
+    black_box_reachable: true
+    reachability_conditions:
+    - Permission 'access-permissions'. Assigning 'admin' = full escalation.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/roles.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-042
+  name: List roles
+  kind: normal
+  description: List roles.
+  action_key: list_roles
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: list_roles
+    crud: Read
+  object:
+    kind: entity
+    id: role
+    type: Role
+    name: Role
+    entity: Role
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: RoleID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: RoleID
+          target:
+            kind: entity
+            id: role
+            type: Role
+            role: collection
+      basis: io_reference
+      reason: Returns role.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: role / RoleID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],RoleID(role:Role{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/roles.list
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List roles.
+  l1_keys:
+  - http://localhost:3000/api/v1/roles.list
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  produces:
+  - Know(actor:User[SELF],RoleID(role:Role{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List roles.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_roles.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-043
+  name: Create integration/webhook
+  kind: normal
+  description: Create integration/webhook.
+  action_key: create_integration
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: create_integration
+    crud: Create
+  object:
+    kind: entity
+    id: integration
+    type: Integration
+    name: Integration
+    entity: Integration
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ''
+      resource: IntegrationID(integration)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: integration
+        type: Integration
+        role: target
+    reason: Permission 'manage-outgoing-integrations'.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: integration
+          type: Integration
+          role: created
+      basis: action_semantics
+      reason: A integration is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: IntegrationID(integration)
+          target:
+            kind: entity
+            id: integration
+            type: Integration
+            role: created
+      basis: io_reference
+      reason: Returns the new integration.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: integration / IntegrationID(integration)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],IntegrationID(integration)(integration:Integration{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/integrations.create
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Create integration/webhook.
+  l1_keys:
+  - http://localhost:3000/api/v1/integrations.create
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Create,integration:Integration{target})
+  produces:
+  - Exists(integration:Integration{created})
+  - Know(actor:User[SELF],IntegrationID(integration)(integration:Integration{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create integration/webhook.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'manage-outgoing-integrations'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/create_integration.ts
+      supports: route + handler
+    notes: Outgoing-webhook 'script' runs in a server VM; 'urls' = SSRF. Code/SSRF-adjacent.
+- id: gt-action-044
+  name: List integrations
+  kind: normal
+  description: List integrations.
+  action_key: list_integrations
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: list_integrations
+    crud: Read
+  object:
+    kind: entity
+    id: integration
+    type: Integration
+    name: Integration
+    entity: Integration
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: IntegrationID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: integration
+        type: Integration
+        role: scope
+    reason: Permission 'manage-outgoing-integrations'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: IntegrationID
+          target:
+            kind: entity
+            id: integration
+            type: Integration
+            role: collection
+      basis: io_reference
+      reason: Returns integration.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: integration / IntegrationID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],IntegrationID(integration:Integration{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/integrations.list
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: List integrations.
+  l1_keys:
+  - http://localhost:3000/api/v1/integrations.list
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Read,integration:Integration{scope})
+  produces:
+  - Know(actor:User[SELF],IntegrationID(integration:Integration{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List integrations.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'manage-outgoing-integrations'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/list_integrations.ts
+      supports: route + handler
+    notes: null
+- id: gt-action-045
+  name: Call server method (DDP bridge)
+  kind: normal
+  description: A user invokes an arbitrary server method via the REST bridge.
+  action_key: call_method
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: AuthToken
+  operation:
+    business: call_method
+    crud: Update
+  object:
+    kind: entity
+    id: method
+    type: Method
+    name: Method
+    entity: Method
+    role: invoked
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: method
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: method / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Server method name.
+  - direction: input
+    field: params / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Method arguments.
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/method.call/:method
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.7
+  reasoning: method.call invokes a server method over REST.
+  l1_keys:
+  - http://localhost:3000/api/v1/method.call/:method
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: DDP method bridge.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated. Proxies ANY Meteor server method -> broad indirect surface; per-method authz varies.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/misc.ts
+      supports: method.call
+    notes: null
+- id: gt-action-046
+  name: Read statistics
+  kind: normal
+  description: Read statistics.
+  action_key: read_statistics
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Admin
+    auth_context: AuthToken
+  operation:
+    business: read_statistics
+    crud: Read
+  object:
+    kind: entity
+    id: statistic
+    type: Statistic
+    name: Statistic
+    entity: Statistic
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: StatID
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (X-Auth-Token).
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Read
+      - kind: entity
+        id: statistic
+        type: Statistic
+        role: scope
+    reason: Permission 'view-statistics'.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: StatID
+          target:
+            kind: entity
+            id: statistic
+            type: Statistic
+            role: collection
+      basis: io_reference
+      reason: Returns statistic.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: statistic / StatID
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],StatID(statistic:Statistic{collection}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:3000/api/v1/statistics
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Read statistics.
+  l1_keys:
+  - http://localhost:3000/api/v1/statistics
+  consumes:
+  - Authenticated(actor:User[SELF],AuthToken)
+  - Can(actor:User[SELF],Read,statistic:Statistic{scope})
+  produces:
+  - Know(actor:User[SELF],StatID(statistic:Statistic{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Read statistics.
+    black_box_reachable: true
+    reachability_conditions:
+    - Admin permission 'view-statistics'.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: apps/meteor/server/api/v1/read_statistics.ts
+      supports: route + handler
+    notes: null
+edges: []
+annotation_issues: []

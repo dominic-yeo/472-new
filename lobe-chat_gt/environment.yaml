@@ -1,0 +1,33 @@
+# LobeChat -- agentic attack-surface GT environment
+app: lobe-chat
+app_version: repo checkout under 472-new/lobe-chat
+source_root: ../lobe-chat
+
+agentic_applicability:
+  verdict: qualifies
+  agent_runtime: client function-calling loop + server plugin gateway
+  evidence:
+    - src/store/chat/slices/plugin/action.ts   (triggerToolCalls -> invoke{Builtin,Default,Markdown,Standalone}TypePlugin)
+    - src/services/chat.ts                      (runPluginApi -> API_ENDPOINTS.gateway -> plugin manifest url)
+    - src/tools/index.ts                        (builtinTools: dalle)
+    - src/store/tool/slices/{plugin,customPlugin,builtin}/action.ts
+
+deliverables:
+  schema: ../Agentic_attack_surface_schema.yaml
+  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py}
+  output: agentic_gt.yaml
+
+phase_status: {A_locate: complete, B_extract: complete, C_trust_authority: complete,
+               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+
+runtime_grounding_plan:
+  image: lobehub/lobe-chat (pin to checkout)
+  targets: [ plugin tool call via gateway (SSRF sink), web-browsing crawl, artifacts iframe render,
+             custom-plugin remote manifest, auto-run with no approval confirmed ]
+
+distinctive_notes: >
+  (1) Tool calls AUTO-RUN with no per-tool human approval by default -- weaker than open-webui/anything-llm.
+  (2) The plugin GATEWAY (server) fetches the plugin's manifest url -> server-side SSRF sink; custom plugins
+      let the user choose that url and the model-facing description.
+  (3) MCP is NOT present in this web source (desktop-only) -- no MCP/sampling edge.
+  (4) Artifacts execute model-authored HTML/React in an iframe sandbox (client code-exec + exfil-on-render).

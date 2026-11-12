@@ -1,0 +1,173 @@
+schema_version: pengent-web-gt-v1
+environment_id: "writefreely-multi-user"
+
+issues:
+  - id: "issue-001"
+    location: "cross-schema (deployment-flag-dependent reachability)"
+    description: >-
+      Several config flags materially change the attack surface and are not knowable from source
+      alone: App.Private (makes every AllReader/LogHandlerFunc read require auth — handle.go:666,950),
+      App.SingleUser (remounts RouteCollections at '/' and changes draft prefix to '/d' — routes.go:195-211),
+      open vs invite-only registration, and anonymous-posting. The GT is authored for a multi-user,
+      public, open-registration instance; reach_conds note the dependencies.
+    evidence:
+      - type: "source"
+        ref: "writefreely/handle.go:59-64 UserLevelReader; 666,950 Private gate; routes.go:44-52,195-211"
+        supports: "Config-driven reachability"
+    proposed_resolution: "Freeze config at runtime; re-confirm reach_conds and identity_statuses."
+
+  - id: "issue-002"
+    location: "L1: handler.All vs handler.AllReader (where auth actually happens)"
+    description: >-
+      handler.All performs NO authentication in the wrapper ('TODO: do any needed authentication',
+      handle.go:551-582); the wrapped handler reads the Authorization header itself (apiAuth,
+      handle.go:251). So POST /api/collections, /api/posts, etc. are reachable by anonymous callers
+      at the transport layer and only rejected (or not) inside the handler. handler.AllReader adds
+      CORS '*' and, only when Private, requires a token/cookie. This matters for probing: a 200/4xx
+      split is per-handler, not per-wrapper.
+    evidence:
+      - type: "source"
+        ref: "writefreely/handle.go:551-582 All; 647-706 AllReader; 251-263 apiAuth"
+        supports: "Wrapper-level auth semantics"
+    proposed_resolution: "Confirm per-endpoint anon behaviour via runtime identity_statuses."
+
+  - id: "issue-003"
+    location: "L2: anonymous posts + edit token (capability model)"
+    description: >-
+      Original model: newPost with no collection mints an anonymous post whose modify_token authorizes
+      later existingPost/deletePost/claim; modeled as Know(actor, PostEditToken(post)) + Can(...).
+      RUNTIME VERDICT (this build/config): the capability is VESTIGIAL and UNREACHABLE.
+      (1) newPost returns ErrNotLoggedIn when userID == -1 (posts.go:600), so truly anonymous creation
+      is impossible: probed POST /api/posts as anon -> 401 "Not logged in."
+      (2) The single INSERT INTO posts (database.go:747) does NOT write modify_token, so EVERY post keeps
+      modify_token = NULL (schema.sql:127 / sqlite.sql:120 default NULL). modify_token is only ever READ,
+      never written (database.go:1824,1829; posts.go:883), always with 'AND owner_id IS NULL'.
+      (3) disperse un-owns a post (owner_id -> NULL) but its response carries NO token field
+      (probed: data[0].post has no 'token'); so no client can ever obtain a usable edit token.
+      The edit-request field name IS 'token' in the JSON body (confirmed via HAR), but it can never be
+      populated with a real value on this build. The capability would only become live if a code path
+      wrote modify_token on creation (legacy write.as behaviour).
+    evidence:
+      - type: "source"
+        ref: "writefreely/posts.go:600 ErrNotLoggedIn; database.go:747 INSERT omits modify_token; 1824/1829 read-only; posts.go:883 delete-by-token"
+        supports: "Edit-token never minted"
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json phase=mint (anon POST 401; disperse 200 w/ no token)"
+        supports: "Capability unreachable at runtime"
+    proposed_resolution: >-
+      Keep the L2 claim/disperse/token-edit actions (surface still exists) but mark the
+      Know(actor, PostEditToken) precondition UNREACHABLE in this environment. Re-evaluate only on a
+      build/config that writes modify_token at creation.
+
+  - id: "issue-008"
+    location: "L2: authorization status-code variance (Can(...) precondition grounding)"
+    description: >-
+      The same 'not authorized' condition surfaces with different HTTP codes per handler, confirmed by
+      the identity matrix: non-owner UPDATE collection -> 401; non-owner UPDATE post -> 401; non-owner
+      DELETE post -> 403; anonymous write -> 400 ("Authorization token required.") or 401 ("Not logged
+      in.") depending on endpoint. Crucially, the ADMIN token gets the SAME 401/403 as a regular
+      non-owner on another user's content: admin is NOT a super-user over the content API. The GT should
+      record the per-endpoint observed code on each Can(...) gate rather than assume one convention.
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json phase=matrix-authz; l1 identity_statuses {owner,non_owner,anonymous}"
+        supports: "Per-endpoint authz code variance; admin not privileged on content API"
+    proposed_resolution: "No schema change; identity_statuses now carry owner/non_owner/anonymous codes per node."
+
+  - id: "issue-009"
+    location: "L1/L2: /admin/* transport split + 404-masking (refines issue-006)"
+    description: >-
+      Confirmed at runtime: /admin/* is reachable ONLY via the web-session cookie. An API bearer token
+      on /admin/users returns 404 (wrong transport, indistinguishable from the admin mask); a non-admin
+      WITH a valid cookie also returns 404 (IsAdmin() masks as 404, never 403); an admin cookie returns
+      200. This is a transport+privilege compound gate: Authenticated(S, web_session) AND IsAdmin(S).
+      The identity_statuses for /admin/users encode all four observations
+      (admin_cookie:200, nonadmin_cookie:404, api_token:404, anonymous:404).
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json phase in {admin-token, admin-cookie}"
+        supports: "Cookie-only admin transport + 404 masking"
+    proposed_resolution: "Model admin L2 actions with subject Administrator authenticated via web_session (not api_token); mask code = 404."
+
+  - id: "issue-004"
+    location: "L1: ActivityPub federation (/api/collections/{alias}/{inbox,outbox,followers,following})"
+    description: >-
+      The inbox (POST) accepts signed ActivityPub activities from remote servers — a distinct,
+      high-value attack surface (HTTP-signature verification, remote-actor fetch, object injection).
+      Its contract is not a browser JSON form, so it is enumerated as a page/api node without a full
+      io_variants contract pending AP-aware runtime capture. outbox/followers/following are public GETs.
+    evidence:
+      - type: "source"
+        ref: "writefreely/routes.go:153-156; activitypub.go handleFetchCollectionInbox"
+        supports: "Federation endpoints"
+    proposed_resolution: "Model inbox as its own L2 federation action once AP fixtures exist."
+
+  - id: "issue-005"
+    location: "L1: single endpoint, multiple business actions (method + discriminator split)"
+    description: >-
+      /api/collections/{alias} carries GET(read)/POST(update)/DELETE(delete) and /api/posts/{post}
+      carries GET/POST/PUT/DELETE. These are split into separate L2 actions bound by method selector,
+      per guide 3.1-3.2. existingPost also branches internally on owner-vs-token; those remain one
+      Action with the authorization expressed as Can(...).
+    evidence:
+      - type: "source"
+        ref: "writefreely/routes.go:138-139,163-165"
+        supports: "Multi-method routes"
+    proposed_resolution: "No schema change; method selectors in l1_bindings."
+
+  - id: "issue-006"
+    location: "L2: admin surface bound to HTML form routes"
+    description: >-
+      Admin user management (delete / status-toggle / passphrase-reset) are handler.Admin HTML POST
+      routes, not JSON APIs, but they are a privileged account-takeover surface so they are modeled as
+      L2 actions bound to the page nodes. They are gated by getUserSession + u.IsAdmin() returning 404
+      (not 403) to non-admins (handle.go:176-211) — confirm the 404 masking at runtime.
+    evidence:
+      - type: "source"
+        ref: "writefreely/handle.go:176-211 Admin; routes.go:176-178"
+        supports: "Admin gating + form routes"
+    proposed_resolution: "Kept as L2 actions over page bindings; contracts confirmed by browser capture."
+
+  - id: "issue-007"
+    location: "L1 scope (single-user mode divergence)"
+    description: >-
+      Under App.SingleUser the collection routes are remounted at '/' (RouteCollections on the root
+      subrouter) and draft editing moves to '/d/*'; the per-collection prefix matcher
+      ('/{prefix:[@~$!\\-+]?}{collection}') is not added. The GT targets multi-user; a single-user
+      deployment needs the collection/page keys re-based to '/'.
+    evidence:
+      - type: "source"
+        ref: "writefreely/routes.go:195-213"
+        supports: "Single-user remounting"
+    proposed_resolution: "Produce a single-user variant if that is the benchmark deployment."
+
+  - id: "issue-010"
+    location: "L1: /api/me/password request-field correction"
+    description: >-
+      The GT originally modeled the passphrase change as JSON body {current_pass, new_pass}. Runtime
+      shows updatePassphrase reads FORM values 'current' and 'new' (account.go:1011 r.FormValue), i.e.
+      application/x-www-form-urlencoded with field names 'current'/'new'. L1 request fields and
+      body_format corrected accordingly (now form). Observed: authenticated 200, anonymous 400.
+    evidence:
+      - type: "source"
+        ref: "writefreely/account.go:1011 r.FormValue(\"current\"/\"new\")"
+        supports: "Form field names"
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json phase=extra (/api/me/password 200/200/400)"
+        supports: "Form change succeeds; anon rejected"
+    proposed_resolution: "L1 updated: body_format=form, fields current/new. No L2 resource change (Password/NewPassword unchanged)."
+
+  - id: "issue-011"
+    location: "L1: login brute-force rate-limiter (/api/auth/login 429)"
+    description: >-
+      POST /api/auth/login throttles repeated attempts per username (loginAttemptUsers) and returns 429
+      after a small number of tries, observed when a freshly signed-up user was immediately re-logged-in.
+      This is a security control worth recording on the login node (statuses include 429) and a probing
+      hazard: the probe avoids it by taking the access_token straight from the signup response rather
+      than re-logging-in. A 404 is returned for login of a non-existent username (user enumeration via
+      login differs from /api/alias).
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json phase=auth (login 404 unknown-user; 429 after signup+login)"
+        supports: "Login throttling + unknown-user 404"
+    proposed_resolution: "Record 429 in login statuses; note enumeration surfaces (login 404 vs /api/alias 409)."

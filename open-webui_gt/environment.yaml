@@ -1,0 +1,44 @@
+# Open WebUI -- agentic attack-surface GT environment
+app: open-webui
+app_version: "0.13.3"
+git_ref: b0e6098e940942281d9c83f3529ea117287a3a22   # 2026-11-09
+source_root: ../open-webui
+
+agentic_applicability:
+  verdict: qualifies
+  agent_runtime: native function-calling loop
+  evidence:
+    - backend/open_webui/utils/middleware.py  (process_chat_payload / process_chat_response: model call -> tool dispatch -> result feedback -> final answer)
+    - backend/open_webui/utils/tools.py        (get_tools / get_builtin_tools: tool registry; builtin / workspace python / server: OpenAPI / mcp / terminal)
+    - backend/open_webui/utils/subagents.py    (delegate: sub-agent spawn)
+  agent_runtime_version: same as app (monorepo)
+
+deliverables:
+  schema: ../Agentic_attack_surface_schema.yaml  (agentic-attack-surface-v1)
+  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py}
+  output: agentic_gt.yaml
+
+phase_status:
+  A_locate: complete
+  B_extract: complete
+  C_trust_authority: complete
+  D_lineage_closure: complete (build_agentic.py enforces)
+  E_runtime_grounding: pending       # no live run yet; evidence_status = source_confirmed throughout
+  F_link_l1_l2: partial              # open-webui L1/L2 GT not built; l1/l2 ids are forward references
+  G_validate: complete (folded into build_agentic.py)
+  H_export: pending
+
+runtime_grounding_plan:   # Phase E, when run
+  image: ghcr.io/open-webui/open-webui:v0.13.3    # pin to source tag
+  provider: a cheap/local model (ollama) wired so the tool loop actually dispatches
+  targets:
+    - orchestration loop (one tool call observed end-to-end)
+    - one tool per effect_class present (code_execution, external_send, write, read)
+    - memory write->recall loop (mem.memories)
+    - each control fired (tool_approval ask/auto; rbac denial; arg_validation)
+
+notes: >
+  Most builtin tools are quadruple-gated (global config AND model capability meta AND
+  per-user permission AND feature flag), so reachability is largely conditionally_mounted
+  until grounded. Secure-ish default: tool_permissions disabled => approval mode 'full'
+  (no gate), which is the important default to confirm at runtime.

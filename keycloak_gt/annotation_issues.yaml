@@ -1,0 +1,153 @@
+schema_version: pengent-web-gt-v1
+environment_id: "keycloak-oss"
+
+issues:
+  - id: "kc-001"
+    location: "Scope: {realm} is a path template; the admin tree is root + critical leaves"
+    description: >-
+      The entire protocol + account + admin surface is replicated under every realm (master + each created
+      realm); the GT models each route once with {realm} as a parameter. The /admin/realms/{realm}/... tree has
+      hundreds of leaves sharing the identical realm-management-role authorization; the resource roots (users,
+      clients, roles, groups, identity-provider, components, authentication, client-scopes, ...) plus the
+      high-value leaves (impersonation, reset-password, role-mappings, client-secret, service-account,
+      certificates, testSMTP/testLDAP/import-config) are L2-covered and the rest enumerated.
+    evidence:
+      - type: "source"
+        ref: "services/resources/RealmsResource.java; services/resources/admin/RealmAdminResource.java"
+        supports: "Realm templating + admin sub-resource routing"
+    proposed_resolution: "Expand specific admin leaves per engagement; the realm-management role model is identical."
+
+  - id: "kc-002"
+    location: "Auth: client auth to token endpoint + bearer-JWT to REST"
+    description: >-
+      Protocol: clients authenticate to the token endpoint via client_secret (Basic/post), a private-key-JWT
+      client assertion, or mTLS; users via browser flows or the direct password grant. REST: an Authorization:
+      Bearer access token (a realm-signed JWT) carrying realm/client roles, scopes and 'aud'. The token endpoint
+      dispatches every grant (code, refresh, password, client_credentials, token-exchange, device, ciba,
+      uma-ticket) via OAuth2GrantType providers.
+    evidence:
+      - type: "source"
+        ref: "protocol/oidc/endpoints/TokenEndpoint.java; services/managers/AuthenticationManager.java"
+        supports: "Client auth + bearer token + grant dispatch"
+    proposed_resolution: "Enumerate enabled grant types per client; restrict token-exchange + direct grant."
+
+  - id: "kc-003"
+    location: "AuthZ: realm-management roles (+ fine-grained admin permissions)"
+    description: >-
+      The admin REST API authorizes by the roles in the bearer token. A realm admin holds realm-management
+      client roles (view-users/manage-users, view-clients/manage-clients, view-realm/manage-realm,
+      manage-identity-providers, impersonation, view-events, query-*) for ONE realm, optionally narrowed by
+      fine-grained admin permissions (fgap, authz-based). The master realm's admins manage ALL realms. Any gap
+      that lets a lower role reach a manage-* operation is a privilege boundary break.
+    evidence:
+      - type: "source"
+        ref: "services/resources/admin/permissions/*; services/resources/admin/AdminAuth.java"
+        supports: "realm-management role checks + fgap"
+    proposed_resolution: "Probe a view-only admin against manage-* operations; audit fgap policies."
+
+  - id: "kc-004"
+    location: "Privilege-escalation ladder (impersonation / role grants / clients / secrets / flows)"
+    description: >-
+      Top primitives: users/{id}/impersonation (become any user); users/{id}/role-mappings and
+      groups/{id}/role-mappings (grant realm-management/admin roles -> self- or target-escalation); create a
+      client with serviceAccountsEnabled + grant its service-account roles; READ clients/{id}/client-secret
+      (impersonate a confidential client via client_credentials / token-exchange); client certificates (install a
+      client signing key); authentication/flows + executions/config (weaken or inject into the login flow, incl.
+      'script' authenticators if scripts are enabled).
+    evidence:
+      - type: "source"
+        ref: "UserResource.impersonate; RoleMapperResource; ClientResource client-secret; AuthenticationManagementResource"
+        supports: "Impersonation + role/secret/flow levers"
+    proposed_resolution: "Treat any path to impersonation/manage-realm/manage-users as realm compromise."
+
+  - id: "kc-005"
+    location: "SSRF: testSMTPConnection / identity-provider import-config / testLDAPConnection / request_uri"
+    description: >-
+      /admin/.../testSMTPConnection opens a connection to an admin-supplied host:port (SSRF / internal port-scan /
+      credential capture). /admin/.../identity-provider/import-config GETs an attacker-chosen metadata 'fromUrl'.
+      /admin/.../testLDAPConnection + LDAP user-federation components connect to an admin-supplied URL with stored
+      bind credentials. The authorize endpoint's 'request_uri' fetches a request object by reference. The
+      client-description-converter can be pointed at a URL.
+    evidence:
+      - type: "source"
+        ref: "RealmAdminResource.testSMTPConnection; IdentityProvidersResource.importFrom; ComponentResource.testLDAPConnection; endpoints/AuthorizationEndpoint.java"
+        supports: "Server-side fetch of caller input"
+    proposed_resolution: "On a grounded instance, point each sink at an internal collaborator; add egress controls."
+
+  - id: "kc-006"
+    location: "Open dynamic client registration (DCR)"
+    description: >-
+      /realms/{realm}/clients-registrations/openid-connect (RFC 7591) is normally gated by an initial-access
+      token, but a realm's client-registration-policy can allow ANONYMOUS registration -> an attacker registers
+      clients with chosen redirect_uris/grant types. The returned registration-access-token then manages that
+      client. The policy providers (TrustedHosts, ConsentRequired, scope/protocol restrictions) are the controls.
+    evidence:
+      - type: "source"
+        ref: "services/clientregistration/*; ClientRegistrationPolicyResource"
+        supports: "DCR + policy gating"
+    proposed_resolution: "Audit client-registration-policy; disallow anonymous DCR or restrict TrustedHosts."
+
+  - id: "kc-007"
+    location: "redirect_uri / post_logout_redirect_uri validation (open redirect / token leak)"
+    description: >-
+      The authorize endpoint validates redirect_uri against the client's registered set; a too-broad pattern
+      (wildcards, loopback, extra hosts) leaks the authorization code / token. logout's post_logout_redirect_uri
+      and the /realms/{realm}/clients/{client_id}/redirect convenience route are open-redirect-adjacent.
+    evidence:
+      - type: "source"
+        ref: "protocol/oidc/utils/RedirectUtils.java; endpoints/AuthorizationEndpoint.java; endpoints/LogoutEndpoint.java"
+        supports: "Redirect-URI matching"
+    proposed_resolution: "Pin exact redirect_uris; forbid wildcards on confidential clients."
+
+  - id: "kc-008"
+    location: "XML / assertion surfaces: SAML endpoint + identity broker callback"
+    description: >-
+      /realms/{realm}/protocol/saml and /realms/{realm}/broker/{provider}/endpoint parse attacker-influenced XML
+      (SAMLRequest/Response) and external IdP responses, then link/create a user and start a session. This is the
+      XML-signature-wrapping / XXE / assertion-injection / account-linking (email-based takeover) surface.
+    evidence:
+      - type: "source"
+        ref: "protocol/saml/SamlService.java; services/resources/IdentityBrokerService.java"
+        supports: "XML + external-assertion handling"
+    proposed_resolution: "Validate signatures strictly; disable XXE; require verified-email linking confirmation."
+
+  - id: "kc-009"
+    location: "Action tokens + account-linking + direct admin password reset"
+    description: >-
+      /realms/{realm}/login-actions/action-token consumes realm-signed JWTs (verify-email, reset-credentials,
+      execute-actions) -- forgery or cross-action replay = account takeover. /admin/.../users/{id}/reset-password
+      sets any user's password directly (manage-users = ATO). Account REST linked-accounts and admin
+      execute-actions-email carry redirect_uris that must be validated.
+    evidence:
+      - type: "source"
+        ref: "services/resources/LoginActionsService.java; UserResource.resetPassword; account/LinkedAccountsResource.java"
+        supports: "Signed action tokens + admin password set"
+    proposed_resolution: "Scope action tokens tightly; rate-limit; monitor admin password resets + impersonation."
+
+  - id: "kc-010"
+    location: "Runtime CONFIRMED: denial convention + redirect validation + admin plane"
+    description: >-
+      Probed against quay.io/keycloak/keycloak:26.0 (26.0.8, start-dev, dev H2, realm master); 16 L1 nodes carry
+      route_confirmed. Confirmed: (1) PUBLIC protocol reads 200 (discovery, JWKS, realm info) -- the discovery doc
+      is the endpoint oracle. (2) ADMIN API DENIAL = HTTP 401 without a token (serverinfo, realms, realm, users,
+      clients). (3) REDIRECT_URI VALIDATION: an unregistered redirect_uri at authorize -> 400, not a login page
+      (kc-007). (4) TOKEN endpoint: bad client -> 401; a valid admin-cli password grant -> 200. (5) MASTER-ADMIN
+      matrix all 200 (serverinfo/realms/realm/users/clients/roles/groups/identity-provider/components/auth-flows).
+      (6) SCOPE boundary: the admin-cli token at userinfo -> 403 (lacks openid scope/audience).
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/{matrix.json,summary.txt}"
+        supports: "Public reads 200, admin denial 401, redirect 400, admin matrix 200, userinfo 403"
+    proposed_resolution: "Map auth failures to 401 and insufficient-scope to 403; treat discovery as the oracle."
+
+  - id: "kc-011"
+    location: "Runtime boundary tests still open (RBAC + cross-realm + SSRF)"
+    description: >-
+      Not yet grounded: a view-only or lower realm admin hitting manage-* (kc-003/kc-004); a realm-X admin
+      reaching realm-Y resources (cross-realm isolation); and the SSRF sinks (kc-005). These need a second
+      realm + scoped admins (realm_admin, realm_admin_b) and an internal collaborator target.
+    evidence:
+      - type: "source"
+        ref: "runtime/probe.ps1 (phases staged); services/resources/admin/permissions/*"
+        supports: "Boundary tests enumerated, pending identities"
+    proposed_resolution: "Create a second realm + scoped admins; add the RBAC/cross-realm/SSRF phases and re-run."

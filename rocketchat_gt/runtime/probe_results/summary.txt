@@ -1,0 +1,27 @@
+﻿Rocket.Chat probe summary (2026-11-10T16:00:10) base=http://localhost:3000 admin_login=True userb_login=True
+IDENTITY METHOD PATH                                       CODE  NOTE
+anon     GET   settings.public                            200   public settings (expect 200)
+anon     GET   me                                         401   me without auth (expect 401)
+anon     GET   channels.list                              401   channels.list anon (expect 401)
+anon     POST  login                                      200   login admin
+anon     POST  login                                      401   wrong password (expect 401)
+admin    GET   me                                         200   admin (expect 200)
+admin    GET   users.list                                 200   admin (expect 200)
+admin    GET   channels.list                              200   admin (expect 200)
+admin    GET   settings                                   200   admin (expect 200)
+admin    GET   rooms.adminRooms                           200   admin (expect 200)
+admin    GET   statistics                                 200   admin (expect 200)
+admin    GET   permissions.listAll                        200   admin (expect 200)
+admin    GET   integrations.list                          200   admin (expect 200)
+admin    POST  channels.create                            200   admin create channel (expect 200)
+admin    POST  users.create                               200   create regular user
+anon     POST  login                                      200   login userb
+userb    GET   me                                         200   userb me (expect 200)
+userb    GET   users.list                                 200   userb users.list (expect 403: no perm)
+userb    GET   settings                                   200   userb settings (expect 403)
+userb    GET   rooms.adminRooms                           400   userb adminRooms (expect 403)
+userb    GET   statistics                                 400   userb statistics (expect 403)
+userb    POST  roles.addUserToRole                        400   userb self-elevate to admin (expect 403)
+userb    POST  channels.create                            200   userb create channel (expect 200: create-c default)
+anon     POST  users.register                             200   self-register (config-dependent)
+

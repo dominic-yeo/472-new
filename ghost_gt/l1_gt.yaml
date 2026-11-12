@@ -1,0 +1,7560 @@
+schema_version: pengent-web-gt-v1
+environment_id: ghost-oss
+nodes:
+- key: http://localhost:2368/ghost/api/content/posts
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id001
+  - key
+  outputs:
+  - posts
+  input_spec:
+    format: plain
+    fields: *id001
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - key
+    outputs:
+    - posts
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Content API key
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: posts
+        path: data.posts
+        type: string
+        flow: true
+        description: posts records
+    reason: authenticatePublic then browse/read
+    evidence: content browse posts
+  operation_semantic: content_posts
+  semantic_inputs:
+  - ContentAPIKey(client)
+  semantic_outputs:
+  - PostID(post)
+  semantic_input_decisions:
+  - raw_field: key
+    resource: ContentAPIKey(client)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Content API key authorizes the read.
+  semantic_output_decisions:
+  - raw_field: posts
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - posts
+    reason: Published posts.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    contentclient:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public Content API read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid Content API key; resource is published.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/pages
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id002
+  - key
+  outputs:
+  - pages
+  input_spec:
+    format: plain
+    fields: *id002
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - key
+    outputs:
+    - pages
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Content API key
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: pages
+        path: data.pages
+        type: string
+        flow: true
+        description: pages records
+    reason: authenticatePublic then browse/read
+    evidence: content browse pages
+  operation_semantic: content_pages
+  semantic_inputs:
+  - ContentAPIKey(client)
+  semantic_outputs:
+  - PageID(page)
+  semantic_input_decisions:
+  - raw_field: key
+    resource: ContentAPIKey(client)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Content API key authorizes the read.
+  semantic_output_decisions:
+  - raw_field: pages
+    resource: PageID(page)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pages
+    reason: Published pages.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public Content API read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid Content API key; resource is published.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/authors
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id003
+  - key
+  outputs:
+  - authors
+  input_spec:
+    format: plain
+    fields: *id003
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - key
+    outputs:
+    - authors
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Content API key
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: authors
+        path: data.authors
+        type: string
+        flow: true
+        description: authors records
+    reason: authenticatePublic then browse/read
+    evidence: content browse authors
+  operation_semantic: content_authors
+  semantic_inputs:
+  - ContentAPIKey(client)
+  semantic_outputs:
+  - AuthorID(author)
+  semantic_input_decisions:
+  - raw_field: key
+    resource: ContentAPIKey(client)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Content API key authorizes the read.
+  semantic_output_decisions:
+  - raw_field: authors
+    resource: AuthorID(author)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - authors
+    reason: Published authors.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public Content API read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid Content API key; resource is published.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/tags
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id004
+  - key
+  outputs:
+  - tags
+  input_spec:
+    format: plain
+    fields: *id004
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - key
+    outputs:
+    - tags
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Content API key
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: tags
+        path: data.tags
+        type: string
+        flow: true
+        description: tags records
+    reason: authenticatePublic then browse/read
+    evidence: content browse tags
+  operation_semantic: content_tags
+  semantic_inputs:
+  - ContentAPIKey(client)
+  semantic_outputs:
+  - TagID(tag)
+  semantic_input_decisions:
+  - raw_field: key
+    resource: ContentAPIKey(client)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Content API key authorizes the read.
+  semantic_output_decisions:
+  - raw_field: tags
+    resource: TagID(tag)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - tags
+    reason: Published tags.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public Content API read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid Content API key; resource is published.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/settings
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id005
+  - key
+  outputs:
+  - settings
+  input_spec:
+    format: plain
+    fields: *id005
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - key
+    outputs:
+    - settings
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Content API key
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: settings
+        path: data.settings
+        type: string
+        flow: true
+        description: settings records
+    reason: authenticatePublic then browse/read
+    evidence: content public settings
+  operation_semantic: content_settings
+  semantic_inputs:
+  - ContentAPIKey(client)
+  semantic_outputs:
+  - SettingKey(setting)
+  semantic_input_decisions:
+  - raw_field: key
+    resource: ContentAPIKey(client)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Content API key authorizes the read.
+  semantic_output_decisions:
+  - raw_field: settings
+    resource: SettingKey(setting)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - settings
+    reason: Published settings.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    contentclient:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public Content API read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid Content API key; resource is published.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/tiers
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id006
+  - key
+  outputs:
+  - tiers
+  input_spec:
+    format: plain
+    fields: *id006
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - key
+    outputs:
+    - tiers
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: key
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Content API key
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: tiers
+        path: data.tiers
+        type: string
+        flow: true
+        description: tiers records
+    reason: authenticatePublic then browse/read
+    evidence: content tiers
+  operation_semantic: content_tiers
+  semantic_inputs:
+  - ContentAPIKey(client)
+  semantic_outputs:
+  - TierID(tier)
+  semantic_input_decisions:
+  - raw_field: key
+    resource: ContentAPIKey(client)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Content API key authorizes the read.
+  semantic_output_decisions:
+  - raw_field: tiers
+    resource: TierID(tier)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - tiers
+    reason: Published tiers.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public Content API read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid Content API key; resource is published.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/posts/:id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id007 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id007
+  io_variants: []
+  operation_semantic: content_read_post
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/posts/slug/:slug
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id008 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id008
+  io_variants: []
+  operation_semantic: content_read_post_slug
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/pages/:id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id009 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id009
+  io_variants: []
+  operation_semantic: content_read_page
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/authors/:id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id010 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id010
+  io_variants: []
+  operation_semantic: content_read_author
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/tags/:id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id011 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id011
+  io_variants: []
+  operation_semantic: content_read_tag
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/newsletters
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id012 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id012
+  io_variants: []
+  operation_semantic: content_browse_newsletters
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/offers/:id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id013 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id013
+  io_variants: []
+  operation_semantic: content_read_offer
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/recommendations
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id014 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id014
+  io_variants: []
+  operation_semantic: content_browse_recommendations
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/search-index/posts
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id015 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id015
+  io_variants: []
+  operation_semantic: content_search_posts
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/search-index/authors
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id016 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id016
+  io_variants: []
+  operation_semantic: content_search_authors
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/content/search-index/tags
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id017 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id017
+  io_variants: []
+  operation_semantic: content_search_tags
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Content API key.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/content/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/session
+  kind: api
+  methods:
+  - POST
+  - DELETE
+  statuses:
+  - 201
+  params: []
+  content_types:
+  - application/json
+  inputs: &id018
+  - email
+  - password
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id018
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'session.add: verify credentials, set admin session cookie'
+    evidence: session.add
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'session.delete: destroy admin session'
+    evidence: session.delete
+  operation_semantic: admin_session
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  semantic_outputs:
+  - AdminSession(session)
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Account email.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions:
+  - raw_field: token
+    resource: AdminSession(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Admin session cookie.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 201
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin login/logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (login); authenticated (logout).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:session
+      supports: route + middleware
+    notes: Primary admin auth surface; brute-force target.
+- key: http://localhost:2368/ghost/api/admin/authentication/setup
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses:
+  - 200
+  - 201
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id019
+  - email
+  - password
+  outputs:
+  - user
+  input_spec:
+    format: json
+    fields: *id019
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    outputs:
+    - user
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: user
+        path: data.user
+        type: string
+        flow: true
+        description: ''
+    reason: 'authentication.setup: create the OWNER on a fresh install (UNAUTHENTICATED)'
+    evidence: authentication.setup
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: status
+        path: data.status
+        type: string
+        flow: false
+        description: ''
+    reason: 'isSetup: whether the blog has been set up'
+    evidence: authentication.isSetup
+  operation_semantic: admin_setup
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  semantic_outputs:
+  - UserID(user)
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Account email.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions:
+  - raw_field: user
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - user
+    reason: Created owner user.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+    - 201
+    - 403
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Initial owner setup.
+    black_box_reachable: true
+    reachability_conditions:
+    - POST reachable ONLY before setup completes (fresh install) -- else 403.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:setup
+      supports: route + middleware
+    notes: Unauthenticated owner-creation; a setup-race / re-setup attack surface.
+- key: http://localhost:2368/ghost/api/admin/authentication/password_reset
+  kind: api
+  methods:
+  - POST
+  - PUT
+  statuses:
+  - 404
+  - 500
+  params: []
+  content_types:
+  - application/json
+  inputs: &id020
+  - email
+  - token
+  - password
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id020
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'generateResetToken: emails a reset link (UNAUTHENTICATED)'
+    evidence: authentication.generateResetToken
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - token
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'resetPassword: set a new password via emailed token'
+    evidence: authentication.resetPassword
+  operation_semantic: admin_password_reset
+  semantic_inputs:
+  - UserEmail(user)
+  - Password(user)
+  - ResetToken(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Account email.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  - raw_field: token
+    resource: ResetToken(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Emailed password-reset token.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 404
+    - 500
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Password reset.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public; PUT needs a valid emailed token.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:password_reset
+      supports: route + middleware
+    notes: Unauthenticated reset-request = user-enumeration + email-bomb surface.
+- key: http://localhost:2368/ghost/api/admin/authentication/invitation
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id021
+  - token
+  - password
+  - email
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id021
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - token
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'acceptInvitation: staff accepts an invite and sets a password (UNAUTH)'
+    evidence: authentication.acceptInvitation
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - email
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: email
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: invitation
+        path: data.invitation
+        type: string
+        flow: false
+        description: ''
+    reason: 'isInvitation: check an invite exists for an email'
+    evidence: authentication.isInvitation
+  operation_semantic: admin_invitation
+  semantic_inputs:
+  - InviteToken(invite)
+  - Password(user)
+  - UserEmail(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: token
+    resource: InviteToken(invite)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Emailed staff-invite token.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Account email.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Invitation accept/check.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public; needs a valid invite token/email.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:invitation
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/session/verify
+  kind: api
+  methods:
+  - POST
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id022
+  - token
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id022
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - token
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: 2FA code
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: sendAuthCode / verifyAuthCode (2FA)
+    evidence: session.verify
+  operation_semantic: admin_session_verify
+  semantic_inputs:
+  - OTPCode(session)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: token
+    resource: OTPCode(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Emailed 2FA code.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin 2FA.
+    black_box_reachable: true
+    reachability_conditions:
+    - Mid-login (staff 2FA enabled).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:session_verify
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/identities
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id023 []
+  outputs:
+  - identities
+  input_spec:
+    format: ''
+    fields: *id023
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - identities
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: identities
+        path: data.identities
+        type: string
+        flow: true
+        description: SSO identity token
+    reason: 'identities.read: mints an SSO identity token for the staff user'
+    evidence: identities.read
+  operation_semantic: admin_read_identities
+  semantic_inputs: []
+  semantic_outputs:
+  - IdentityToken(session)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: identities
+    resource: IdentityToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: SSO identity token for the authenticated staff user.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: SSO identity token.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:identities
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/site
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id024 []
+  outputs:
+  - site
+  input_spec:
+    format: ''
+    fields: *id024
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - site
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: site
+        path: data.site
+        type: string
+        flow: true
+        description: public site info
+    reason: site.read via publicAdminApi (NO auth)
+    evidence: site.read
+  operation_semantic: admin_public_site
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public site info (publicAdminApi).
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (publicAdminApi, no token).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:site
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/posts
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 201
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id025
+  - payload
+  outputs:
+  - posts
+  - post
+  input_spec:
+    format: json
+    fields: *id025
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - posts
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: posts
+        path: data.posts
+        type: string
+        flow: true
+        description: ''
+    reason: browse
+    evidence: posts.browse
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - payload
+    outputs:
+    - post
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: payload
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: post body
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: post
+        path: data.post
+        type: string
+        flow: true
+        description: ''
+    reason: add
+    evidence: posts.add
+  operation_semantic: admin_posts
+  semantic_inputs: []
+  semantic_outputs:
+  - PostID(post)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: posts
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - posts
+    reason: Listed/created post.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    staff:
+    - 200
+    - 201
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin posts browse/create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/posts/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id026
+  - id
+  outputs:
+  - post
+  input_spec:
+    format: json
+    fields: *id026
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - post
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: post
+        path: data.post
+        type: string
+        flow: true
+        description: ''
+    reason: read
+    evidence: posts.read
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - post
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: post
+        path: data.post
+        type: string
+        flow: true
+        description: ''
+    reason: edit
+    evidence: posts.edit
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: destroy
+    evidence: posts.destroy
+  operation_semantic: admin_post_item
+  semantic_inputs:
+  - PostID(post)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: post
+    resource: PostID(post)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - post
+    reason: post id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin post read/edit/delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin; resource exists.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/tags
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id027
+  - payload
+  outputs:
+  - tags
+  - tag
+  input_spec:
+    format: json
+    fields: *id027
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - tags
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: tags
+        path: data.tags
+        type: string
+        flow: true
+        description: ''
+    reason: browse
+    evidence: tags.browse
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - payload
+    outputs:
+    - tag
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: payload
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: tag body
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: tag
+        path: data.tag
+        type: string
+        flow: true
+        description: ''
+    reason: add
+    evidence: tags.add
+  operation_semantic: admin_tags
+  semantic_inputs: []
+  semantic_outputs:
+  - TagID(tag)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: tags
+    resource: TagID(tag)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - tags
+    reason: Listed/created tag.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin tags browse/create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/tags/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id028
+  - id
+  outputs:
+  - tag
+  input_spec:
+    format: json
+    fields: *id028
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - tag
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: tag
+        path: data.tag
+        type: string
+        flow: true
+        description: ''
+    reason: read
+    evidence: tags.read
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - tag
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: tag
+        path: data.tag
+        type: string
+        flow: true
+        description: ''
+    reason: edit
+    evidence: tags.edit
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: destroy
+    evidence: tags.destroy
+  operation_semantic: admin_tag_item
+  semantic_inputs:
+  - TagID(tag)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: tag
+    resource: TagID(tag)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - tag
+    reason: tag id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin tag read/edit/delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin; resource exists.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/members
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id029
+  - payload
+  outputs:
+  - members
+  - member
+  input_spec:
+    format: json
+    fields: *id029
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - members
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: members
+        path: data.members
+        type: string
+        flow: true
+        description: ''
+    reason: browse
+    evidence: members.browse
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - payload
+    outputs:
+    - member
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: payload
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: member body
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: member
+        path: data.member
+        type: string
+        flow: true
+        description: ''
+    reason: add
+    evidence: members.add
+  operation_semantic: admin_members
+  semantic_inputs: []
+  semantic_outputs:
+  - MemberID(member)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: members
+    resource: MemberID(member)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - members
+    reason: Listed/created member.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    staff:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin members browse/create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/members/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id030
+  - id
+  outputs:
+  - member
+  input_spec:
+    format: json
+    fields: *id030
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - member
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: member
+        path: data.member
+        type: string
+        flow: true
+        description: ''
+    reason: read
+    evidence: members.read
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - member
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: member
+        path: data.member
+        type: string
+        flow: true
+        description: ''
+    reason: edit
+    evidence: members.edit
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: destroy
+    evidence: members.destroy
+  operation_semantic: admin_member_item
+  semantic_inputs:
+  - MemberID(member)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: member
+    resource: MemberID(member)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - member
+    reason: member id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin member read/edit/delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin; resource exists.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/integrations
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id031
+  - name
+  outputs:
+  - integrations
+  - integration
+  input_spec:
+    format: json
+    fields: *id031
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - integrations
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: integrations
+        path: data.integrations
+        type: string
+        flow: true
+        description: ''
+    reason: browse
+    evidence: integrations.browse
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    outputs:
+    - integration
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: integration name
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: integration
+        path: data.integration
+        type: string
+        flow: true
+        description: ''
+    reason: add
+    evidence: integrations.add
+  operation_semantic: admin_integrations
+  semantic_inputs: []
+  semantic_outputs:
+  - IntegrationID(integration)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: integrations
+    resource: IntegrationID(integration)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - integrations
+    reason: Listed/created integration.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    staff:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin integrations browse/create.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/integrations/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id032
+  - id
+  outputs:
+  - integration
+  input_spec:
+    format: json
+    fields: *id032
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - integration
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: integration
+        path: data.integration
+        type: string
+        flow: true
+        description: ''
+    reason: read
+    evidence: integrations.read
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - integration
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: integration
+        path: data.integration
+        type: string
+        flow: true
+        description: ''
+    reason: edit
+    evidence: integrations.edit
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: destroy
+    evidence: integrations.destroy
+  operation_semantic: admin_integration_item
+  semantic_inputs:
+  - IntegrationID(integration)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: integration
+    resource: IntegrationID(integration)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - integration
+    reason: integration id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin integration read/edit/delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin; resource exists.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/pages
+  kind: api
+  methods:
+  - GET
+  - POST
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id033 []
+  outputs:
+  - pages
+  input_spec:
+    format: ''
+    fields: *id033
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - pages
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: pages
+        path: data.pages
+        type: string
+        flow: true
+        description: ''
+    reason: authAdminApi then browse
+    evidence: pages.browse
+  operation_semantic: admin_pages_write
+  semantic_inputs: []
+  semantic_outputs:
+  - PageID(page)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: pages
+    resource: PageID(page)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - pages
+    reason: Listed pages.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin browse pages.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin (role Staff).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/pages/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id034 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id034
+  io_variants: []
+  operation_semantic: admin_page_item
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/users
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id035 []
+  outputs:
+  - users
+  input_spec:
+    format: ''
+    fields: *id035
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - users
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: users
+        path: data.users
+        type: string
+        flow: true
+        description: ''
+    reason: users.browse
+    evidence: users.browse
+  operation_semantic: admin_users
+  semantic_inputs: []
+  semantic_outputs:
+  - UserID(user)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: users
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - users
+    reason: Staff users.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    staff:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin user list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/users/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id036
+  - id
+  outputs:
+  - user
+  input_spec:
+    format: json
+    fields: *id036
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - user
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: user
+        path: data.user
+        type: string
+        flow: true
+        description: ''
+    reason: users.read
+    evidence: users.read
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - user
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: user
+        path: data.user
+        type: string
+        flow: true
+        description: ''
+    reason: users.edit
+    evidence: users.edit
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: users.destroy
+    evidence: users.destroy
+  operation_semantic: admin_user_item
+  semantic_inputs:
+  - UserID(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: id
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Target staff user.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin user read/edit/delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin; editing another user requires sufficient role.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: Cross-user edit/delete is role-gated by authorizeAdminApi -- a privilege-boundary surface.
+- key: http://localhost:2368/ghost/api/admin/users/password
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id037
+  - password
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id037
+  io_variants:
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - password
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: new password
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: users.changePassword
+    evidence: users.changePassword
+  operation_semantic: admin_change_password
+  semantic_inputs:
+  - Password(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Account password.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Change password.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/users/owner
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id038
+  - id
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id038
+  io_variants:
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: new owner user id
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: users.transferOwnership
+    evidence: users.transferOwnership
+  operation_semantic: admin_transfer_ownership
+  semantic_inputs:
+  - UserID(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: id
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: New owner.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Transfer ownership.
+    black_box_reachable: true
+    reachability_conditions:
+    - Owner ONLY (highest-privilege action).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: Owner-only; site takeover primitive if abused.
+- key: http://localhost:2368/ghost/api/admin/users/:id/token
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id039 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id039
+  io_variants: []
+  operation_semantic: admin_staff_token
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/members/:id/signin_urls
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id040
+  - id
+  outputs:
+  - signin_url
+  input_spec:
+    format: plain
+    fields: *id040
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - signin_url
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: resource id
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: signin_url
+        path: data.signin_url
+        type: string
+        flow: true
+        description: one-click member sign-in URL
+    reason: 'memberSigninUrls.read: mints a magic sign-in URL for a member'
+    evidence: memberSigninUrls.read
+  operation_semantic: admin_member_signin_url
+  semantic_inputs:
+  - MemberID(member)
+  semantic_outputs:
+  - MemberMagicLink(member)
+  semantic_input_decisions:
+  - raw_field: id
+    resource: MemberID(member)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Target member.
+  semantic_output_decisions:
+  - raw_field: signin_url
+    resource: MemberMagicLink(member)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: 'Impersonation URL: logs anyone in AS the member.'
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Member impersonation URL.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: Member-impersonation surface.
+- key: http://localhost:2368/ghost/api/admin/settings
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses:
+  - 200
+  - 403
+  params: []
+  content_types:
+  - application/json
+  inputs: &id041
+  - settings
+  outputs:
+  - settings
+  input_spec:
+    format: json
+    fields: *id041
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - settings
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: settings
+        path: data.settings
+        type: string
+        flow: true
+        description: ''
+    reason: settings.browse
+    evidence: settings.browse
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - settings
+    outputs:
+    - settings
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: settings
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: settings array
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: settings
+        path: data.settings
+        type: string
+        flow: true
+        description: ''
+    reason: settings.edit
+    evidence: settings.edit
+  operation_semantic: admin_settings
+  semantic_inputs: []
+  semantic_outputs:
+  - SettingKey(setting)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: settings
+    resource: SettingKey(setting)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - settings
+    reason: Settings.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 403
+    staff:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Settings browse/edit.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin (edit may need Administrator).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/roles
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id042 []
+  outputs:
+  - roles
+  input_spec:
+    format: ''
+    fields: *id042
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - roles
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: roles
+        path: data.roles
+        type: string
+        flow: true
+        description: ''
+    reason: roles.browse
+    evidence: roles.browse
+  operation_semantic: admin_roles
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Roles list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/db
+  kind: api
+  methods:
+  - GET
+  - POST
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id043
+  - importfile
+  outputs:
+  - db
+  input_spec:
+    format: plain
+    fields: *id043
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - db
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: db
+        path: data.db
+        type: string
+        flow: true
+        description: full content export
+    reason: 'db.exportContent: dumps ALL content as JSON'
+    evidence: db.exportContent
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - importfile
+    outputs: []
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: importfile
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: import JSON/zip (multipart)
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: db.importContent
+    evidence: db.importContent
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'db.deleteAllContent: wipes all content'
+    evidence: db.deleteAllContent
+  operation_semantic: admin_db
+  semantic_inputs: []
+  semantic_outputs:
+  - ContentExport(site)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: db
+    resource: ContentExport(site)
+    mergeable: true
+    value_kind: summary
+    reference_capable: false
+    reference_fields: []
+    reason: Full-content export (data exfiltration).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Content export/import/delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin (Owner/Admin).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:db
+      supports: route + middleware
+    notes: GET=full exfiltration; DELETE=destructive wipe; POST=import (mass-assignment surface).
+- key: http://localhost:2368/ghost/api/admin/themes/upload
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id044
+  - file
+  outputs:
+  - themes
+  input_spec:
+    format: plain
+    fields: *id044
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - file
+    outputs:
+    - themes
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: file
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: theme .zip (multipart)
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: themes
+        path: data.themes
+        type: string
+        flow: true
+        description: ''
+    reason: 'themes.upload: accepts a theme ZIP'
+    evidence: themes.upload
+  operation_semantic: admin_theme_upload
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Theme ZIP upload.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:themes
+      supports: route + middleware
+    notes: 'Arbitrary ZIP -> theme files (template/helpers): code-adjacent upload surface.'
+- key: http://localhost:2368/ghost/api/admin/themes/install
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id045
+  - source
+  outputs:
+  - themes
+  input_spec:
+    format: plain
+    fields: *id045
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - source
+    outputs:
+    - themes
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: source
+        location: query
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: e.g. github repo ref
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: themes
+        path: data.themes
+        type: string
+        flow: true
+        description: ''
+    reason: 'themes.install: fetch+install from a source (SSRF-adjacent)'
+    evidence: themes.install
+  operation_semantic: admin_theme_install
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Install theme from source.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:themes
+      supports: route + middleware
+    notes: Server fetches a remote source -> SSRF-adjacent.
+- key: http://localhost:2368/ghost/api/admin/themes/:name/activate
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id046
+  - name
+  outputs:
+  - themes
+  input_spec:
+    format: plain
+    fields: *id046
+  io_variants:
+  - method: PUT
+    content_types:
+    - application/json
+    inputs:
+    - name
+    outputs:
+    - themes
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: name
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: theme name
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: themes
+        path: data.themes
+        type: string
+        flow: true
+        description: ''
+    reason: themes.activate
+    evidence: themes.activate
+  operation_semantic: admin_theme_activate
+  semantic_inputs:
+  - ThemeName(theme)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: name
+    resource: ThemeName(theme)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - name
+    reason: Theme to activate.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Activate theme.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:themes
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/themes/
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id047 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id047
+  io_variants: []
+  operation_semantic: admin_themes_browse
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/themes/:name/download
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id048 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id048
+  io_variants: []
+  operation_semantic: admin_theme_download
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/themes/:name
+  kind: api
+  methods:
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id049 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id049
+  io_variants: []
+  operation_semantic: admin_theme_destroy
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/images/upload
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id050
+  - file
+  outputs:
+  - images
+  input_spec:
+    format: plain
+    fields: *id050
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - file
+    outputs:
+    - images
+    input: {}
+    request:
+      body_format: plain
+      body_example: {}
+      fields:
+      - name: file
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: image file (multipart)
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: images
+        path: data.images
+        type: string
+        flow: true
+        description: uploaded image URL
+    reason: images.upload
+    evidence: images.upload
+  operation_semantic: admin_image_upload
+  semantic_inputs: []
+  semantic_outputs:
+  - ImageURL(image)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: images
+    resource: ImageURL(image)
+    mergeable: true
+    value_kind: locator
+    reference_capable: false
+    reference_fields: []
+    reason: Stored image URL.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Image upload.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:images
+      supports: route + middleware
+    notes: File upload (type/size validation surface).
+- key: http://localhost:2368/ghost/api/admin/media/upload
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id051 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id051
+  io_variants: []
+  operation_semantic: admin_media_upload
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/files/upload
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id052 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id052
+  io_variants: []
+  operation_semantic: admin_file_upload
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/webhooks
+  kind: api
+  methods:
+  - POST
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id053
+  - target_url
+  outputs:
+  - webhooks
+  input_spec:
+    format: json
+    fields: *id053
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - target_url
+    outputs:
+    - webhooks
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: target_url
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: webhook target URL
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: webhooks
+        path: data.webhooks
+        type: string
+        flow: true
+        description: ''
+    reason: webhooks.add
+    evidence: webhooks.add
+  operation_semantic: admin_tail_webhooks-deferred
+  semantic_inputs: []
+  semantic_outputs:
+  - WebhookID(webhook)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: webhooks
+    resource: WebhookID(webhook)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - webhooks
+    reason: Created webhook.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Create webhook.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin / integration.
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:webhooks
+      supports: route + middleware
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: Attacker-controlled target_url -> SSRF-adjacent.
+- key: http://localhost:2368/ghost/api/admin/webhooks/:id
+  kind: api
+  methods:
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id054 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id054
+  io_variants: []
+  operation_semantic: admin_webhook_item
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/invites
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id055
+  - email
+  - role_id
+  outputs:
+  - invites
+  input_spec:
+    format: json
+    fields: *id055
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - invites
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: invites
+        path: data.invites
+        type: string
+        flow: true
+        description: ''
+    reason: invites.browse
+    evidence: invites.browse
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - role_id
+    outputs:
+    - invites
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+      - name: role_id
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: ''
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: invites
+        path: data.invites
+        type: string
+        flow: true
+        description: ''
+    reason: 'invites.add: invite a staff user with a role'
+    evidence: invites.add
+  operation_semantic: admin_invites
+  semantic_inputs:
+  - UserEmail(user)
+  semantic_outputs:
+  - InviteID(invite)
+  semantic_input_decisions:
+  - raw_field: email
+    resource: UserEmail(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Account email.
+  semantic_output_decisions:
+  - raw_field: invites
+    resource: InviteID(invite)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - invites
+    reason: Invites.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Staff invites.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin (Administrator to invite).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js:invites
+      supports: route + middleware
+    notes: Inviting a high role is a privilege-escalation surface if role checks are weak.
+- key: http://localhost:2368/ghost/api/admin/invites/:id
+  kind: api
+  methods:
+  - GET
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id056 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id056
+  io_variants: []
+  operation_semantic: admin_invite_item
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/config
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id057 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id057
+  io_variants: []
+  operation_semantic: admin_tail_config
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/config/featurebase
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id058 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id058
+  io_variants: []
+  operation_semantic: admin_tail_config_featurebase
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/mentions
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id059 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id059
+  io_variants: []
+  operation_semantic: admin_tail_mentions
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/comments
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id060 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id060
+  io_variants: []
+  operation_semantic: admin_tail_comments
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/comments/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id061 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id061
+  io_variants: []
+  operation_semantic: admin_tail_comments_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/labels
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id062 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id062
+  io_variants: []
+  operation_semantic: admin_tail_labels
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/labels/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id063 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id063
+  io_variants: []
+  operation_semantic: admin_tail_labels_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/offers
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id064 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id064
+  io_variants: []
+  operation_semantic: admin_tail_offers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/offers/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id065 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id065
+  io_variants: []
+  operation_semantic: admin_tail_offers_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/snippets
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id066 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id066
+  io_variants: []
+  operation_semantic: admin_tail_snippets
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/snippets/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id067 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id067
+  io_variants: []
+  operation_semantic: admin_tail_snippets_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/newsletters
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id068 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id068
+  io_variants: []
+  operation_semantic: admin_tail_newsletters
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/newsletters/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id069 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id069
+  io_variants: []
+  operation_semantic: admin_tail_newsletters_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/recommendations
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id070 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id070
+  io_variants: []
+  operation_semantic: admin_tail_recommendations
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/recommendations/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id071 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id071
+  io_variants: []
+  operation_semantic: admin_tail_recommendations_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/emails/:id
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id072 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id072
+  io_variants: []
+  operation_semantic: admin_tail_emails_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/email_previews/posts/:id
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id073 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id073
+  io_variants: []
+  operation_semantic: admin_tail_email_previews_posts_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/oembed
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id074 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id074
+  io_variants: []
+  operation_semantic: admin_tail_oembed
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/slack/test
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id075 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id075
+  io_variants: []
+  operation_semantic: admin_tail_slack_test
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/redirects/download
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id076 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id076
+  io_variants: []
+  operation_semantic: admin_tail_redirects_download
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/redirects/upload
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id077 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id077
+  io_variants: []
+  operation_semantic: admin_tail_redirects_upload
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/exports/download
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id078 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id078
+  io_variants: []
+  operation_semantic: admin_tail_exports_download
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/exports
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id079 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id079
+  io_variants: []
+  operation_semantic: admin_tail_exports
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/db/backup
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id080 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id080
+  io_variants: []
+  operation_semantic: admin_tail_db_backup
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/db/media/inline
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id081 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id081
+  io_variants: []
+  operation_semantic: admin_tail_db_media_inline
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/schedules/:resource/:id
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id082 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id082
+  io_variants: []
+  operation_semantic: admin_tail_schedules_resource_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/notifications
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id083 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id083
+  io_variants: []
+  operation_semantic: admin_tail_notifications
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/custom_theme_settings
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id084 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id084
+  io_variants: []
+  operation_semantic: admin_tail_custom_theme_settings
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/actions
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id085 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id085
+  io_variants: []
+  operation_semantic: admin_tail_actions
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/tiers
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id086 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id086
+  io_variants: []
+  operation_semantic: admin_tail_tiers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/tiers/:id
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id087 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id087
+  io_variants: []
+  operation_semantic: admin_tail_tiers_id
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/members/upload
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id088 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id088
+  io_variants: []
+  operation_semantic: admin_tail_members_upload
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/api/admin/members/stripe_connect
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id089 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id089
+  io_variants: []
+  operation_semantic: admin_tail_members_stripe_connect
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated admin.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/api/endpoints/admin/routes.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/send-magic-link
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 400
+  params: []
+  content_types:
+  - application/json
+  inputs: &id090
+  - email
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id090
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: member email
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: emails a passwordless sign-in link
+    evidence: send-magic-link
+  operation_semantic: member_send_magic_link
+  semantic_inputs:
+  - MemberEmail(member)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: email
+    resource: MemberEmail(member)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: Member email (signup/signin).
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 400
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Passwordless signin request.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public (members enabled). Enumeration + email-bomb surface.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js:send-magic-link
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/verify-otc
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id091
+  - otc
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id091
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - otc
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: otc
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: one-time code
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: verify one-time code -> member session
+    evidence: verify-otc
+  operation_semantic: member_verify_otc
+  semantic_inputs:
+  - OTPCode(member)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: otc
+    resource: OTPCode(member)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Emailed one-time code.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: OTC verify.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public; needs a valid OTC.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js:verify-otc
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/session
+  kind: api
+  methods:
+  - GET
+  - DELETE
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id092 []
+  outputs:
+  - token
+  input_spec:
+    format: ''
+    fields: *id092
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - token
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: token
+        path: data.token
+        type: string
+        flow: true
+        description: member identity token (JWT)
+    reason: getIdentityToken
+    evidence: members/app.js:session
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: deleteSession (logout)
+    evidence: members/app.js:session
+  operation_semantic: member_session
+  semantic_inputs: []
+  semantic_outputs:
+  - MemberIdentityToken(member)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: token
+    resource: MemberIdentityToken(member)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Member identity JWT.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Member identity token / logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Member session (GET); any (DELETE).
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js:session
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/member
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 204
+  params: []
+  content_types:
+  - application/json
+  inputs: &id093 []
+  outputs:
+  - member
+  input_spec:
+    format: ''
+    fields: *id093
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - member
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: member
+        path: data.member
+        type: string
+        flow: true
+        description: the member's own account
+    reason: account read (self)
+    evidence: members/account
+  operation_semantic: member_read_self
+  semantic_inputs: []
+  semantic_outputs:
+  - MemberID(member)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: member
+    resource: MemberID(member)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - member
+    reason: Own account.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 204
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Member self account.
+    black_box_reachable: true
+    reachability_conditions:
+    - Member session.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js:/api/member
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/create-stripe-checkout-session
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id094
+  - tierId
+  outputs:
+  - url
+  input_spec:
+    format: json
+    fields: *id094
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - tierId
+    outputs:
+    - url
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: tierId
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: tier to subscribe to
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: url
+        path: data.url
+        type: string
+        flow: true
+        description: ''
+    reason: create Stripe checkout session
+    evidence: create-stripe-checkout-session
+  operation_semantic: member_stripe_checkout
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Stripe checkout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Members + Stripe configured.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js:create-stripe-checkout-session
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/site
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  inputs: &id095 []
+  outputs:
+  - site
+  input_spec:
+    format: ''
+    fields: *id095
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - site
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      envelope: impart
+      error_path: error_msg
+      fields:
+      - name: site
+        path: data.site
+        type: string
+        flow: true
+        description: ''
+    reason: public site info
+    evidence: members/app.js:site
+  operation_semantic: member_public_site
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public site info.
+    black_box_reachable: true
+    reachability_conditions:
+    - Public.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js:/api/site
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/member/newsletters
+  kind: api
+  methods:
+  - GET
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id096 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id096
+  io_variants: []
+  operation_semantic: member_newsletters
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/member/email
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id097 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id097
+  io_variants: []
+  operation_semantic: member_update_email
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/entitlements
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id098 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id098
+  io_variants: []
+  operation_semantic: member_entitlements
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/integrity-token
+  kind: api
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id099 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id099
+  io_variants: []
+  operation_semantic: member_integrity_token
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/create-stripe-update-session
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id100 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id100
+  io_variants: []
+  operation_semantic: member_stripe_update
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/create-stripe-billing-portal-session
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id101 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id101
+  io_variants: []
+  operation_semantic: member_stripe_portal
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/subscriptions/:id
+  kind: api
+  methods:
+  - PUT
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id102 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id102
+  io_variants: []
+  operation_semantic: member_update_subscription
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/comments
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id103 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id103
+  io_variants: []
+  operation_semantic: member_comments
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/feedback
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id104 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id104
+  io_variants: []
+  operation_semantic: member_feedback
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/gifts/:token/redeem
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id105 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id105
+  io_variants: []
+  operation_semantic: member_redeem_gift
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/members/api/recommendations/:id/clicked
+  kind: api
+  methods:
+  - POST
+  statuses: []
+  params: []
+  content_types:
+  - application/json
+  inputs: &id106 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id106
+  io_variants: []
+  operation_semantic: member_rec_clicked
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes:
+  - http://localhost:2368
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions:
+    - Members API.
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/members/app.js
+      supports: route + middleware
+    notes: null
+- key: http://localhost:2368/ghost/
+  kind: static
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id107 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id107
+  io_variants: []
+  operation_semantic: admin_spa
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/web/admin
+      supports: frontend
+    notes: Ember Admin SPA shell.
+- key: http://localhost:2368/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id108 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id108
+  io_variants: []
+  operation_semantic: frontend_home
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/web/site
+      supports: frontend
+    notes: Theme-rendered home.
+- key: http://localhost:2368/:slug/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id109 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id109
+  io_variants: []
+  operation_semantic: frontend_post
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/web/site
+      supports: frontend
+    notes: null
+- key: http://localhost:2368/rss/
+  kind: page
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id110 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id110
+  io_variants: []
+  operation_semantic: frontend_rss
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/web/site
+      supports: frontend
+    notes: null
+- key: http://localhost:2368/sitemap.xml
+  kind: static
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id111 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id111
+  io_variants: []
+  operation_semantic: frontend_sitemap
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/web/site
+      supports: frontend
+    notes: null
+- key: http://localhost:2368/.well-known/
+  kind: static
+  methods:
+  - GET
+  statuses: []
+  params: []
+  content_types:
+  - text/html
+  inputs: &id112 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id112
+  io_variants: []
+  operation_semantic: well_known
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - document
+  js_sources: []
+  identity_statuses: {}
+  route_confirmed: false
+  runtime_api_prefixes: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: ''
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: ghost/core/server/web/web/well-known.js
+      supports: frontend
+    notes: null
+edges:
+- src: http://localhost:2368/ghost/
+  dst: http://localhost:2368/ghost/api/admin/session
+  methods:
+  - POST
+  triggers:
+  - xhr
+- src: http://localhost:2368/ghost/
+  dst: http://localhost:2368/ghost/api/admin/posts
+  methods:
+  - GET
+  triggers:
+  - xhr
+- src: http://localhost:2368/
+  dst: http://localhost:2368/members/api/send-magic-link
+  methods:
+  - POST
+  triggers:
+  - xhr
+excluded_items:
+- item: 'Admin API long tail: stats/*, automations/*, automated_emails/*, emails/*, offers, labels, snippets,
+    recommendations, newsletters, links, oembed, actions, email_previews, slack, tinybird, featurebase,
+    mentions, custom_theme_settings, apps/*, members/metafields/*'
+  reason: Enumerated as L1 api nodes (surface-complete) but NOT given io_variants / L2 coverage; they
+    share the authAdminApi gate already modeled by the covered resources.
+- item: Front-end theme rendering (/, /:slug, /tag/*, /author/*, RSS, sitemap, AMP) + Ghost Admin SPA
+    (/ghost/)
+  reason: Theme-rendered HTML + SPA shell; the JSON APIs they call are the modeled surface.
+- item: Stripe / Slack / oembed / webmention outbound callbacks to external services
+  reason: External dependency; reachability needs third-party services configured.

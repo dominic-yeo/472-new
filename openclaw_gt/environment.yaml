@@ -1,0 +1,42 @@
+# OpenClaw -- agentic attack-surface GT environment
+app: openclaw
+app_version: repo checkout under 472-new/openclaw
+source_root: ../openclaw
+
+agentic_applicability:
+  verdict: qualifies
+  agent_runtime: multi-agent gateway + per-agent coding-agent loop (built-in or external runtimes)
+  evidence:
+    - docs/concepts/agent-loop.md       (intake -> model -> tool execution -> stream -> persist; hooks)
+    - docs/concepts/agent-runtimes.md   (claude-cli/codex/copilot/muse/openclaw; native shell+file tools)
+    - docs/concepts/multi-agent.md      (fleet, ownership, agentToAgent, session visibility)
+    - docs/tools/{subagents,agent-send}.md
+    - docs/gateway/sandboxing/{docker-backend,crabbox-backend}.md (sandbox posture)
+    - docs/channels/*                   (WhatsApp/Feishu/... invocation surfaces, dmPolicy)
+
+deliverables:
+  schema: ../Agentic_attack_surface_schema.yaml
+  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py}
+  output: agentic_gt.yaml
+
+phase_status: {A_locate: complete, B_extract: complete (DOC-DERIVED), C_trust_authority: complete,
+               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+
+evidence_caveat: >
+  OpenClaw records are derived from the repo's authoritative design docs (docs/*), not yet from exact
+  code symbols. evidence_status=source_confirmed reflects doc confirmation; a follow-up pass should
+  confirm against the TS monorepo (src/, packages/) and downgrade/annotate any divergence.
+
+runtime_grounding_plan:
+  image: openclaw gateway (docker-compose.yml) + openclaw-sandbox:trixie-slim; a messaging channel (or Gateway RPC)
+  targets: [ channel message -> agent run, exec in docker sandbox (network:none), browser fetch,
+             subagent spawn (restricted tools), agent-send to a peer (allow-gated), before_tool_call hook block,
+             DM allowlist denial ]
+
+distinctive_notes: >
+  (1) The untrusted entry is a MESSAGING CHANNEL message (ctx.channel_message); gated only by a per-account
+      DM allowlist/pairing (ctl.dm_allowlist) -- the primary external authorization boundary.
+  (2) Tool exec/file/browser isolation is a SANDBOX POSTURE (Docker network:none/readOnlyRoot/capDrop ALL, or
+      Crabbox lease); disabling the sandbox turns exec into host RCE -- capture the posture at runtime.
+  (3) Cross-agent (A2A) send + session visibility are lateral-movement edges, bounded by tools.agentToAgent.
+  (4) Gateway before_tool_call hook is a programmable blocking control ({block:true} terminal).

@@ -1,0 +1,64 @@
+schema_version: pengent-web-gt-v1
+environment_id: "rocketchat-oss"
+
+target:
+  application: "Rocket.Chat (OSS)"
+  version: "9.1.0-develop (apps/meteor/package.json)"
+  kind: "Meteor/Node.js + TypeScript team-chat platform; REST API /api/v1 + DDP websocket + React client"
+  source_tree: "rocket.chat/ (RocketChat/Rocket.Chat monorepo); API at apps/meteor/server/api/v1"
+  authoritative_routes: "apps/meteor/server/api/v1/*.ts (fluent API.v1.get/post/put/delete + legacy .addRoute)"
+  handler_semantics: "apps/meteor/server/api/ApiClass.ts (auth, login/logout, apiPath=/api/v1)"
+
+deployment:
+  origin: "http://localhost:3000"
+  requires: "MongoDB REPLICA SET (oplog). See runtime/compose.yaml (mongo:7 --replSet rs0 + init + rocket.chat:latest)."
+  scale: "~358+ REST endpoints parsed; GT models the security-critical OSS core (~45 candidates) and enumerates/excludes the rest (see build_l1.EXCLUDED)."
+
+auth_model:
+  rest: >-
+    X-Auth-Token + X-User-Id headers obtained from POST /api/v1/login, OR
+    'Authorization: Bearer <personal-access-token>'. Each route declares authRequired (bool);
+    unauthenticated routes: login, users.register (if open), settings.public, method.callAnon, shield.svg.
+  twofactor: "2FA via 'X-2fa-code' header (and twoFactorChallenges.* for email codes)."
+  authorization: >-
+    Admin/privileged routes call hasPermission(userId, '<permission>') against the role->permission model
+    (permissions.*/roles.*). Room actions are room-scoped (owner/moderator/member). Modeled as Can(...)
+    requirements with the permission named in reach_conds.
+
+identities_needed:
+  - "anonymous (no auth)"
+  - "user (regular workspace member; from /api/v1/login)"
+  - "user_b (second member, for room/cross-user authz + IDOR tests)"
+  - "room_owner (owner/moderator of a target room)"
+  - "admin (holds admin permissions) -> seeded gtadmin / Gt-Adm1n-Secret-9xQ"
+  - "bot (personal access token)"
+
+notable_findings_source_derived:
+  - "Privilege escalation primitives: roles.addUserToRole (assign 'admin'), permissions.update (rewrite role->perm map), users.create/update with roles[]."
+  - "Workspace takeover: POST settings/:_id can rewrite auth/OAuth/file-upload/URL settings."
+  - "Code/SSRF: integrations.create outgoing webhook 'script' runs in a server VM; 'urls' are server-fetched."
+  - "Account takeover: users.update can set another user's password; users.generatePersonalAccessToken mints persistent creds."
+  - "Data exfiltration: rooms.adminRooms (all rooms incl private), rooms.export, chat.getMessage (IDOR to confirm)."
+  - "Broad indirect surface: POST method.call/:method proxies arbitrary Meteor server methods."
+  - "Enumeration/fingerprinting: settings.public, users.info, directory, spotlight (no/low auth)."
+
+runtime_grounding:
+  status: "PARTIAL -- 14 L1 nodes route_confirmed against rocket.chat:latest (image 8.9; source 9.1.0-develop, auth model stable)."
+  stack: "runtime/compose.yaml: mongo:7 (--replSet rs0) + init + rocket.chat:latest on http://localhost:3000; admin seeded (gtadmin)."
+  identities_used: "anonymous | user (seeded regular user, X-Auth-Token) | admin (gtadmin, X-Auth-Token)."
+  probe: "runtime/probe.ps1 -> runtime/probe_results/{matrix.json,fixtures.json,summary.txt}"
+  confirmed:
+    - "Auth: X-Auth-Token+X-User-Id from /login; wrong password 401; settings.public public (200), me/channels.list need auth (anon 401)."
+    - "Admin matrix: 200 on users.list/channels.list/settings/rooms.adminRooms/statistics/permissions.listAll/integrations.list + channels.create + users.create."
+    - "DENIAL CONVENTION: permission-denied = HTTP 400 ('error-not-authorized'), not 403 (rc-008); missing auth = 401."
+    - "Default-permissive: regular user got 200 on users.list AND settings; admin-gated among tested were rooms.adminRooms/statistics (400) (rc-008)."
+    - "Self-elevation blocked: userb roles.addUserToRole{admin} -> 400."
+    - "Open registration ON: anon users.register -> 200 (rc-004 confirmed)."
+  caveats:
+    - "Image is rocket.chat:latest == 8.9; GT source is 9.1.0-develop (version-divergence, but REST auth model is stable)."
+    - "IDOR reads (rc-006) and the full per-role permission boundary (rc-002) still need user_b non-member probes."
+
+status: >-
+  Source-derived GT at rocket.chat/ v9.1.0-develop. validate_gt.py OK: 154 L1 nodes, 46 L2 actions, all 45
+  candidates covered. Runtime: PARTIALLY grounded (14 nodes route_confirmed; all 3 identity planes) against
+  rocket.chat:latest -- see runtime_grounding + annotation_issues rc-008/009.

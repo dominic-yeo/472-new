@@ -1,0 +1,55 @@
+# LibreChat agentic GT -- annotation issues (modeling decisions; NOT vulnerabilities)
+issues:
+  - id: three-agents
+    kind: modeling
+    note: >
+      Modeled the primary Agents-endpoint agent, the delegated sub-agent (packages/api/src/agents/*),
+      and the background memory agent as three agents. Capability classes (execute_code/file_search/
+      web_search/actions/tools/artifacts/ocr/context/memory/chain) are the AgentCapabilities gates.
+
+  - id: per-user-obo-identity
+    kind: authority
+    note: >
+      MCP (and optionally Actions) execute under the real request user's OAuth/OBO identity
+      (AuthIdentityContext), captured as execution_identity + ctl.mcp_oauth. This is the positive
+      counterpart to anything-llm's instance-credential model.
+
+  - id: capability-gated-reachability
+    kind: reachability
+    note: >
+      Every native tool is gated by AgentCapabilities (admin, librechat.yaml) AND tool role grants AND
+      (for execute_code/file_search) a per-agent tool resource. Marked conditionally_mounted.
+
+  - id: tool-granularity
+    kind: granularity
+    note: >
+      Native tools kept distinct (execute_code, file_search, web_search, image_gen, memory). MCP, Actions,
+      and plugin toolkits are one binding each representing the class.
+
+  - id: l1-l2-forward-refs
+    kind: cross-layer
+    note: LibreChat L1/L2 GT not built; l1/l2 ids are forward references.
+
+methodology_feedback:
+  - id: per-user-vs-shared-identity-axis
+    target: schema tool_bindings.execution_identity
+    finding: >
+      execution_identity cleanly distinguishes LibreChat's per-user OBO (ctl.mcp_oauth) from anything-llm's
+      instance creds and lobe-chat's per-user plugin headers. This field is doing real work across apps;
+      the methodology should call out "whose identity does the tool act as?" as a top-3 extraction question.
+
+  - id: capability-gate-pattern
+    target: methodology Phase B/C
+    finding: >
+      LibreChat's AgentCapabilities is a clean example of a code/config tool-policy gate that removes tools
+      from the registry entirely (not a runtime block). Worth distinguishing in the methodology between
+      "tool never mounted" (tool_policy at load) and "tool blocked at call time" (before_tool), since both
+      map to control_kind tool_policy but differ in applies_at and reachability (conditionally_mounted vs
+      blocked_by_control).
+
+  - id: sandboxed-code-exec
+    target: schema effect_class/execution_environment
+    finding: >
+      execute_code with a remote sandbox (Code API) exercised execution_environment.enforced_by=external_service
+      well -- contrast with open-webui's in-browser pyodide and anything-llm's docker imported plugins. The
+      new execution_environment field discriminates these three sandbox models cleanly.

@@ -1,0 +1,317 @@
+﻿[
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/server/health",
+        "status":  200,
+        "note":  "health (expect 200)",
+        "body":  "123 34 115 116 97 116 117 115 34 58 34 111 107 34 125"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/server/info",
+        "status":  200,
+        "note":  "server info (public fields)",
+        "body":  "{\"data\":{\"project\":{\"project_name\":\"Directus\",\"project_descriptor\":null,\"project_logo\":null,\"project_color\":\"#6644FF\",\"default_appearance\":\"auto\",\"default_theme_light\":null,\"default_theme_dark\":null,\"theme_light_overrides\":null,\"theme_dark_"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/auth",
+        "status":  200,
+        "note":  "auth providers",
+        "body":  "{\"data\":[],\"disableDefault\":false}"
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/server/setup",
+        "status":  403,
+        "note":  "setup (expect 403: already set up)",
+        "body":  ""
+    },
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/users/register",
+        "status":  403,
+        "note":  "self-register (expect 404/403 if disabled)",
+        "body":  ""
+    },
+    {
+        "phase":  "auth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/auth/login",
+        "status":  200,
+        "note":  "admin login",
+        "body":  "{\"data\":{\"expires\":900000,\"refresh_token\":\"cId2sO-c32ex_FOHJXEroK4penz9XewHQd5iF_tVGRWnwRNnT4Ht1IsA-iweXcGq\",\"access_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYxMDhmOGMwLWE4ZDAtNDI4Ni05YjI5LTM3NGE3ZGVmY2QwYiIsInJvbGUiOiJjZWRhOT"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/auth/login",
+        "status":  401,
+        "note":  "wrong password (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/users/me",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":{\"id\":\"6108f8c0-a8d0-4286-9b29-374a7defcd0b\",\"first_name\":\"Admin\",\"last_name\":\"User\",\"email\":\"gtadmin@example.com\",\"password\":\"**********\",\"location\":null,\"title\":null,\"description\":null,\"tags\":null,\"avatar\":null,\"language\":null,\"tf"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/users",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[{\"id\":\"6108f8c0-a8d0-4286-9b29-374a7defcd0b\",\"first_name\":\"Admin\",\"last_name\":\"User\",\"email\":\"gtadmin@example.com\",\"password\":\"**********\",\"location\":null,\"title\":null,\"description\":null,\"tags\":null,\"avatar\":null,\"language\":null,\"t"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/roles",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[{\"id\":\"ceda9750-13b4-464d-89a2-05a4e9f18f73\",\"name\":\"Administrator\",\"icon\":\"verified\",\"description\":\"$t:admin_description\",\"parent\":null,\"children\":[],\"policies\":[\"ba6a6b9c-6e03-4ae6-a8e7-646ab56a0e5c\"],\"users\":[\"6108f8c0-a8d0-4286"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/policies",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[{\"id\":\"0343cffd-89e9-446d-abdf-f27591b28b1c\",\"name\":\"Administrator\",\"icon\":\"verified\",\"description\":\"$t:admin_description\",\"ip_access\":null,\"enforce_tfa\":false,\"admin_access\":true,\"app_access\":true,\"permissions\":[],\"users\":[\"ba6a6b"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/permissions",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[{\"policy\":null,\"permissions\":{},\"validation\":null,\"presets\":null,\"fields\":[\"*\"],\"system\":true,\"collection\":\"directus_collections\",\"action\":\"read\"},{\"policy\":null,\"permissions\":{},\"validation\":null,\"presets\":null,\"fields\":[\"*\"],\"sys"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/settings",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":{\"id\":1,\"project_name\":\"Directus\",\"project_url\":null,\"project_color\":\"#6644FF\",\"project_logo\":null,\"public_foreground\":null,\"public_background\":null,\"public_note\":null,\"auth_login_attempts\":25,\"auth_password_policy\":null,\"storage_as"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/files",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[]}"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/flows",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[]}"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/extensions",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[]}"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/collections",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":[{\"collection\":\"directus_access\",\"meta\":{\"collection\":\"directus_access\",\"hidden\":false,\"singleton\":false,\"icon\":\"admin_panel_settings\",\"note\":\"$t:directus_collection.directus_access\",\"translations\":null,\"display_template\":\"{{ policy"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/schema/snapshot",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"data\":{\"version\":1,\"directus\":\"11.17.4\",\"vendor\":\"sqlite\",\"collections\":[],\"fields\":[],\"systemFields\":[{\"collection\":\"directus_activity\",\"field\":\"timestamp\",\"schema\":{\"is_indexed\":true}},{\"collection\":\"directus_revisions\",\"field\":\"activit"
+    },
+    {
+        "phase":  "admin",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/server/specs/oas",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"openapi\":\"3.0.1\",\"info\":{\"title\":\"Dynamic API Specification\",\"description\":\"This is a dynamically generated API specification for all endpoints existing on the current project.\",\"version\":\"76691e62661393d5fb6511ea6f5f3c46507e8c58\"},\"serve"
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/users",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/roles",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/policies",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/permissions",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/settings",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/files",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/collections",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "boundary",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/users/me",
+        "status":  401,
+        "note":  "anon /users/me (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "items",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/collections",
+        "status":  200,
+        "note":  "admin create collection",
+        "body":  "{\"data\":{\"collection\":\"gtnotes\",\"meta\":{\"collection\":\"gtnotes\",\"icon\":null,\"note\":null,\"display_template\":null,\"hidden\":false,\"singleton\":false,\"translations\":null,\"archive_field\":null,\"archive_app_filter\":true,\"archive_value\":null,\"unarchi"
+    },
+    {
+        "phase":  "items",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/fields/gtnotes",
+        "status":  200,
+        "note":  "admin add field",
+        "body":  "{\"data\":{\"collection\":\"gtnotes\",\"field\":\"title\",\"type\":\"string\",\"meta\":{\"id\":2,\"collection\":\"gtnotes\",\"field\":\"title\",\"special\":null,\"interface\":null,\"options\":null,\"display\":null,\"display_options\":null,\"readonly\":false,\"hidden\":false,\"sort"
+    },
+    {
+        "phase":  "items",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/policies?filter[name][_eq]=$t_directus_public_policy",
+        "status":  200,
+        "note":  "find public policy",
+        "body":  "{\"data\":[]}"
+    },
+    {
+        "phase":  "items",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/items/gtnotes",
+        "status":  200,
+        "note":  "admin create item1",
+        "body":  "{\"data\":{\"id\":1,\"title\":\"alpha\"}}"
+    },
+    {
+        "phase":  "items",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/items/gtnotes",
+        "status":  403,
+        "note":  "anon list (200 if Public read granted)",
+        "body":  ""
+    },
+    {
+        "phase":  "items",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/items/gtnotes/1",
+        "status":  403,
+        "note":  "anon read item by pk",
+        "body":  ""
+    },
+    {
+        "phase":  "items",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/items/gtnotes",
+        "status":  403,
+        "note":  "anon create (expect 403)",
+        "body":  ""
+    },
+    {
+        "phase":  "items",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/items/directus_users",
+        "status":  403,
+        "note":  "system collection via /items (expect 403)",
+        "body":  ""
+    }
+]

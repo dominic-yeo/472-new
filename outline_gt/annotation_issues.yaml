@@ -1,0 +1,157 @@
+schema_version: pengent-web-gt-v1
+environment_id: "outline-oss"
+
+issues:
+  - id: "ol-001"
+    location: "Scope: POST-RPC API; the long tail is enumerated, not variant-modeled"
+    description: >-
+      Outline's API is POST-RPC ("resource.action", e.g. documents.create) with one @koa/router per resource,
+      all mounted at /api. 204 api L1 nodes are authored; 94 security-critical ones carry io_variants + an L2
+      action, and the remainder (list/info/reorder/subscription variants: stars.*, pins.*, searches.*,
+      notifications.*, views.*, emojis.*, templates.* tail, document list variants) are enumerated L1 nodes
+      sharing the identical token+cancan model. SSO start/callback are modeled generically as /auth/:provider
+      (one pair per enabled IdP plugin).
+    evidence:
+      - type: "source"
+        ref: "server/routes/api/index.ts; server/routes/api/*/*.ts"
+        supports: "Per-resource routers mounted at /api"
+    proposed_resolution: "Expand the enumerated tail per-resource if a specific feature is in scope; the auth model is identical."
+
+  - id: "ol-002"
+    location: "Auth: token transports incl. '?token=' query + body; multiple token kinds"
+    description: >-
+      parseAuthentication reads the token from Authorization: Bearer, the body 'token' field, the '?token='
+      QUERY parameter, or the 'accessToken' cookie. Tokens are personal API KEYS (scoped read/write/create,
+      long-lived), OAuth ACCESS TOKENS (scoped + resource-restricted), or app SESSION JWTs. The query/body
+      transports leak tokens via URLs, logs and Referer; API keys are long-lived bearers.
+    evidence:
+      - type: "source"
+        ref: "server/middlewares/authentication.ts parseAuthentication / validateAuthentication"
+        supports: "header|body|query|cookie transports; ApiKey + OAuthAuthentication + JWT"
+    proposed_resolution: "Prefer header/cookie; avoid ?token= in URLs; scope + rotate API keys."
+
+  - id: "ol-003"
+    location: "AuthZ: cancan policies over collection permissions + memberships + groups (IDOR surface)"
+    description: >-
+      Every handler calls authorize(user, action, model). Document access derives from COLLECTION permission
+      (read|read_write|admin; team-default or per-member), per-document MEMBERSHIPS (documents.add_user/add_group),
+      and GROUP membership (inherits the group's collection grants). All objects are TEAM-scoped. A missing or
+      over-broad grant, or a cross-team object id, is the IDOR/row-access class -- e.g. users.info lets any member
+      read any teammate; documents.info by id is gated only by the document policy.
+    evidence:
+      - type: "source"
+        ref: "server/policies/{document,collection,user,group,comment,share}.ts; server/policies/cancan.ts"
+        supports: "authorize(user,action,model); collection+membership+group derivation"
+    proposed_resolution: "Probe user_b against another member's document/collection ids; confirm cross-team denial."
+
+  - id: "ol-004"
+    location: "Privilege-escalation ladder (roles / invites / collection + group grants)"
+    description: >-
+      The top primitive is admin. Levers: users.update_role / users.promote (member -> admin); users.invite with a
+      chosen 'role'; collections.add_user / collections.add_group with permission='admin' (collection-scoped admin);
+      groups.add_user (a member added to a privileged group inherits all its collection grants); team.update
+      defaultUserRole. Any write on these is an escalation path.
+    evidence:
+      - type: "source"
+        ref: "server/routes/api/users/users.ts (update_role,promote,invite); collections.ts; groups.ts"
+        supports: "Role + permission mutation routes"
+    proposed_resolution: "Probe a non-admin user against update_role/promote and add_user(permission=admin)."
+
+  - id: "ol-005"
+    location: "Public sharing: the classic over-exposure (published shares)"
+    description: >-
+      shares.create{published:true} publishes a document to the whole internet at /share/:shareId with NO
+      authentication; includeChildDocuments widens exposure to the entire subtree. documents.info and
+      documents.search accept a shareId branch (public read/search), and shares.info is auth-OPTIONAL (an
+      existence/metadata oracle). Whether sharing is possible is gated by team.update{sharing} and the
+      collection's 'sharing' flag -- a workspace-wide toggle an admin can flip on.
+    evidence:
+      - type: "source"
+        ref: "server/routes/api/shares/shares.ts (create, info auth:{optional:true}); documents.ts info/search shareId; server/routes/index.ts /share/:shareId"
+        supports: "Unauthenticated share read path + oracle"
+    proposed_resolution: "Audit published shares + the team/collection sharing flags; enumerate /share ids."
+
+  - id: "ol-006"
+    location: "SSRF: attachments.createFromUrl, urls.unfurl, imports.create, outbound webhooks"
+    description: >-
+      attachments.createFromUrl makes the server GET an attacker-chosen 'url' and store it (SSRF to cloud
+      metadata / internal services). urls.unfurl is auth-OPTIONAL and fetches URLs 'with workspace credentials'
+      (source comment) for link previews -- an unauthenticated, credentialed SSRF. imports.create pulls from an
+      external provider server-side. integrations.create registers outbound webhooks that POST event payloads to
+      an admin-chosen URL (exfil / internal-callback).
+    evidence:
+      - type: "source"
+        ref: "server/routes/api/attachments/attachments.ts createFromUrl; urls/urls.ts unfurl; imports/imports.ts; integrations/integrations.ts"
+        supports: "Server-side fetch of caller input"
+    proposed_resolution: "On a grounded instance, point createFromUrl/unfurl at an internal collaborator; check egress controls."
+
+  - id: "ol-007"
+    location: "Outline is an OAuth2 PROVIDER + MCP server"
+    description: >-
+      server/routes/oauth exposes /authorize, /token, /revoke and dynamic client registration (/register,
+      /register/:clientId); server/routes/api/oauthClients.* manages clients (create/update/rotate_secret) and
+      oauthAuthentications.* manages user grants. /mcp is an AI transport gated by OAuth access tokens. The
+      redirect_uri / scope / PKCE validation, 'published' client visibility, and client-secret handling are the
+      surface; a lax redirect_uri or an over-scoped published client is a token-theft / consent-phishing path.
+    evidence:
+      - type: "source"
+        ref: "server/routes/oauth/index.ts; server/routes/api/oauthClients/oauthClients.ts; server/routes/mcp"
+        supports: "OAuth2 server endpoints + client management"
+    proposed_resolution: "Review registered clients' redirect_uris + scopes; disallow open/wildcard redirects."
+
+  - id: "ol-008"
+    location: "First-boot bootstrap + workspace-settings exposure toggles"
+    description: >-
+      Self-hosted: POST /api/installation.create creates the first team + admin when no team exists (a first-boot
+      takeover window if the instance is reachable before setup). team.update exposes defaultUserRole,
+      sharing, guestSignin, inviteRequired, allowedDomains, memberCollectionCreate and documentEmbeds -- each an
+      access-surface toggle (e.g. guestSignin or a permissive allowedDomains broadens who can self-provision).
+    evidence:
+      - type: "source"
+        ref: "server/routes/api/installation/installation.ts create; server/routes/api/teams/teams.ts team.update"
+        supports: "Bootstrap + settings toggles"
+    proposed_resolution: "Complete setup before exposing the host; audit guestSignin / allowedDomains / defaultUserRole."
+
+  - id: "ol-009"
+    location: "Untrusted content: import parsing + rendered markdown/HTML"
+    description: >-
+      documents.import ingests uploaded .docx/.html/.md and converts them to Outline documents (parser attack
+      surface); the collaborative editor stores and renders user-authored markdown/HTML + embeds (urls.checkEmbed
+      matchers, documentEmbeds). XSS/content-injection and parser DoS live here.
+    evidence:
+      - type: "source"
+        ref: "server/routes/api/documents/documents.ts import; server/editor; server/routes/api/urls/urls.ts checkEmbed"
+        supports: "File import + rich content rendering"
+    proposed_resolution: "Fuzz the import parsers; review embed allow-list + HTML sanitization."
+
+  - id: "ol-010"
+    location: "Runtime CONFIRMED: denial convention + public-share exposure + token-in-URL"
+    description: >-
+      Probed against outlinewiki/outline:1.12.0 (exact source match) on Postgres+Redis, logging in for real via
+      the email magic-link (Mailpit catches the mail; the login is a two-step GET-interstitial -> POST-token flow).
+      Confirmed: (1) missing/invalid auth = HTTP 401 across /api; auth.config is the only pre-auth read (200).
+      (2) The FIRST email sign-in bootstraps the team + an admin (role=admin); installation.create then 400s.
+      (3) PUBLISHED SHARE: anon documents.info{shareId} + shares.info{id} return 200 with content/metadata while
+      the same document by {id} is 401 -- exposure is a per-document config, not a default. (4) TOKEN-IN-URL: a
+      personal API key authenticates via header, body 'token', AND '?token=' query (all 200); the session JWT is
+      not honored via query (401).
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/{matrix.json,summary.txt}"
+        supports: "401 denial, pre-auth auth.config, published-share unauth read, API-key ?token= transport"
+    proposed_resolution: "Map auth failures to 401 in identity_statuses; treat a published share as an unauth read edge."
+
+  - id: "ol-011"
+    location: "Runtime CONFIRMED: admin plane; RBAC/IDOR boundary still open"
+    description: >-
+      Admin (the first/bootstrap user) matrix all 200: auth.info + users/collections/documents/shares/apiKeys/
+      integrations/groups/oauthClients/events .list and collections.create/documents.create/shares.create/
+      apiKeys.create. 20 L1 nodes carry route_confirmed + identity_statuses (anonymous | admin | apikey). NOT yet
+      grounded: the non-admin RBAC boundary (ol-004: a member hitting users.update_role/promote) and cross-member
+      document/collection IDOR (ol-003), which need a second member (user_b); and the SSRF sinks (ol-006), which
+      need an internal collaborator target.
+    evidence:
+      - type: "runtime"
+        ref: "runtime/probe_results/matrix.json (admin matrix + apikey transports)"
+        supports: "Admin plane confirmed; boundary tests pending a second identity"
+    proposed_resolution: "Invite a second member (user_b, role=member) and re-run with the RBAC/IDOR + SSRF phases."

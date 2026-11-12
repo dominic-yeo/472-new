@@ -1,0 +1,69 @@
+schema_version: pengent-web-gt-v1
+environment_id: "uptrace-oss"
+
+target:
+  application: "Uptrace (OSS / self-hosted)"
+  kind: "OpenTelemetry APM (traces/logs/metrics) -- Go backend (bunrouter) + Vue SPA"
+  source_tree: "uptrace/ (github.com/uptrace/uptrace)"
+  authoritative_routes: "pkg/bunapp/router.go (base groups) + pkg/{org,tracing,metrics}/*_handler.go register* funcs"
+  handler_semantics: "pkg/org/auth.go (Middleware.User / UserAndProject / DSNFromRequest)"
+
+deployment:
+  origin: "http://localhost:14318"   # config listen.http ':14318'
+  grpc: "localhost:14317 (OTLP/gRPC -- OUT OF SCOPE, HTTP mirrors modeled)"
+  stack: "requires ClickHouse (:9000) + PostgreSQL (:5432); see docker-compose.yml"
+  notes: >-
+    Single Go binary serving the Vue SPA, the internal JSON API, the public API and OTLP/HTTP
+    ingestion on one port. Projects + users are defined in config (config/uptrace.yml), created on
+    first startup. site.url (default http://uptrace.local) prefixes routes if a path is set.
+
+auth_model:
+  session: >-
+    JWT in the 'token' cookie (HMAC via config secret_key, 7-day TTL) OR 'Authorization: Bearer <token>'.
+    Set by POST /internal/v1/users/login after bcrypt check. Middleware.User requires it; else 401.
+  project_scope: >-
+    Middleware.UserAndProject additionally loads :project_id by SelectByID. OSS is SINGLE-TENANT:
+    it only checks the project EXISTS (404 if not) -- there is NO per-user project ACL, so any
+    authenticated user can read/write ANY project's data and dashboards.
+  dsn: >-
+    Ingestion auth = project DSN via 'uptrace-dsn' header (or legacy 'uptrace-dns'), 'Authorization:
+    Bearer <dsn>', or '?dsn='. Resolves the project by token. Used by /v1/{traces,logs,metrics},
+    /api/v1/{vector-logs,vector/logs,prometheus/*,cloudwatch/metrics}.
+  response_envelope: "On error: {statusCode, error:{...}, traceId?} (httpErrorHandler). Success bodies are plain handler JSON (no wrapper)."
+
+identities_needed:
+  - "anonymous (no cookie / no DSN)"
+  - "user_a (config user; logs in -> JWT cookie) -> uptrace@localhost / uptrace"
+  - "user_b (second config user, for cross-user checks) -> ADD to config.auth.users"
+  - "ingestor (holds a project DSN) -> project1_secret_token DSN"
+  - "project_1 / project_2 (two projects, for cross-project access checks)"
+
+notable_findings_source_derived:
+  - "No per-user project ACL in OSS: UserAndProject only checks existence (see annotation issue uptrace-001)."
+  - "/internal/v1/projects/:project_id returns the project DSN -> any user can read any project's ingest credential (issue uptrace-002)."
+  - "/internal/v1/traces/search is gated by m.User ONLY (not UserAndProject): a cross-project trace-id oracle (issue uptrace-003)."
+  - "/api/v1/tracing/:project_id/{spans,groups} sit on the PUBLIC path prefix but are USER-gated, not DSN-gated (issue uptrace-004)."
+  - "Dashboard YAML create (POST /dashboards/yaml, PUT /dashboards/:id/yaml) ingests server-side YAML (issue uptrace-005)."
+
+runtime_grounding:
+  status: "PARTIAL -- probed against uptrace/uptrace:2.1.0-rc.1 (example/docker), which DIVERGES from the rc.2 source (see annotation uptrace-009). Only version-stable auth-transport behaviours were stamped."
+  stack: "example/docker/docker-compose.yml: clickhouse 26.3 + postgres 17 + redis + uptrace 2.1.0-rc.1 on http://localhost:14318 (all healthy)."
+  identities_used: "anonymous | admin (Authorization: Bearer user1_secret) | dsn (uptrace-dsn: http://project1_secret@localhost:14318)."
+  probe: "runtime/probe.ps1 -> runtime/probe_results/{matrix.json,fixtures.json,summary.txt}"
+  confirmed_version_independent:
+    - "DSN ingestion /v1/{traces,logs,metrics}: with DSN -> 200, without -> 401."
+    - "uptrace-004: /api/v1/tracing/:project_id/spans is USER-gated not DSN-gated (anon 401, DSN 401, auth 400)."
+    - "Auth required on /internal/v1/projects/:id and /internal/v1/traces/search (anon 401)."
+    - "Existence gate: GET /internal/v1/projects/999999 -> 404 (no ACL 403), supports uptrace-001."
+    - "Admin Bearer user token authenticates as config user; login sets JWT 'token' cookie."
+  image_divergences_NOT_stamped:
+    - "Guest user fallback for anon (rc.1 only); SPA HTML served for some Guest reads."
+    - "project show omits 'dsn' on rc.1 -> finding uptrace-002 is rc.2-source-specific."
+    - "POST /internal/v1/metrics/:id/dashboards -> 405 on rc.1 (create route differs); dashboard/grid L2 remain source-accurate but UNCONFIRMED."
+  to_fully_ground: "Build the rc.2 image from cmd/uptrace/Dockerfile and add a 2nd user + project; re-run probe."
+
+status: >-
+  Source-derived GT (pkg/bunapp/router.go + register* funcs + pkg/org/auth.go) at tag v2.1.0-rc.2.
+  validate_gt.py OK: 54 L1 nodes, 36 L2 actions, all 32 candidates covered. Runtime: PARTIALLY grounded
+  (6 version-stable nodes route_confirmed) against the rc.1 image, which diverges from rc.2 -- see
+  runtime_grounding + annotation uptrace-009.

@@ -1,0 +1,98 @@
+schema_version: pengent-web-gt-v1
+environment_id: "keycloak-oss"
+
+target:
+  application: "Keycloak (OSS, Identity & Access Management -- OAuth2/OIDC + SAML provider)"
+  version: "main @ 999.0.0-SNAPSHOT (the 26.x line; pom.xml placeholder version)"
+  kind: "Java + Quarkus; JAX-RS (RESTEasy) resources; relational DB (default dev H2)"
+  source_tree: "keycloak/ (keycloak/keycloak monorepo); server code in services/ + rest/"
+  authoritative_routes: >-
+    services/src/main/java/org/keycloak/services/resources/*  (RealmsResource routes
+    {realm}/protocol/{protocol}, /login-actions, /account, /broker, /clients-registrations,
+    /.well-known, /authz); protocol/oidc/OIDCLoginProtocolService + endpoints/* (OIDC);
+    protocol/saml/SamlService (SAML); services/resources/admin/* (the /admin/realms/{realm}/...
+    REST API); services/resources/account/AccountRestService (account REST).
+  handler_semantics: >-
+    Everything hangs off /realms/{realm}/... (public + protocol + account) and /admin/realms/{realm}/...
+    (admin REST). {realm} is a path template -- the whole tree is replicated under master + every
+    created realm. Auth in services/managers + the token/cookie providers; admin authZ in
+    services/resources/admin/permissions (realm-management roles / fine-grained admin permissions).
+
+deployment:
+  origin: "http://localhost:8080"
+  requires: "quay.io/keycloak/keycloak start-dev (dev H2 ok). A bootstrap admin (KC_BOOTSTRAP_ADMIN_*). See runtime/compose.yaml."
+  scale: >-
+    122 L1 api nodes + 3 page nodes. {realm} modeled once. The deep admin sub-resource tree is
+    enumerated at the resource roots + the security-critical leaves (impersonation, reset-password,
+    client-secret, service-account, certificates, SSRF test endpoints); the rest are enumerated L1 nodes.
+
+auth_model:
+  transports: >-
+    PROTOCOL endpoints: clients authenticate to the token endpoint via client_secret (Basic/post),
+    a private-key-JWT client assertion, or mTLS; users via browser flows (login-actions) or the
+    direct 'password' grant. REST APIs: an Authorization: Bearer <access_token> (a realm-signed JWT).
+    The token carries realm/client roles, scopes, and the 'aud' audience.
+  authorization: >-
+    The ADMIN REST API authorizes by the roles inside the bearer token. A REALM ADMIN holds
+    'realm-management' client roles for that realm -- view-users/manage-users, view-clients/
+    manage-clients, view-realm/manage-realm, manage-identity-providers, query-*, impersonation,
+    view-events/manage-events -- optionally narrowed by fine-grained admin permissions (fgap). A
+    MASTER-REALM admin ('admin' composite) manages that realm; the master realm's admins manage ALL
+    realms. The ACCOUNT REST API uses the user's own 'account' token (self-service only). Modeled as
+    Can(...) with the required realm-management role named in reach_conds.
+
+identities_needed:
+  - "anonymous (no token -> public: discovery, certs, authorize, login/registration, SAML, broker callback)"
+  - "client (a registered OAuth client: confidential w/ secret, or public w/ PKCE)"
+  - "user (an end user; bearer access token -> userinfo + account REST)"
+  - "realm_admin (realm-management roles in realm X; scoped to X)"
+  - "realm_admin_b (a SECOND realm's admin, for the cross-realm isolation test)"
+  - "master_admin (master-realm admin -> manage ALL realms; the bootstrap admin)"
+
+notable_findings_source_derived:
+  - "Bootstrap: a fresh server has no admin until KC_BOOTSTRAP_ADMIN_* (or the Welcome page on localhost)
+     seeds the first master admin -- a first-run takeover window if reachable before bootstrap."
+  - "Privilege-escalation ladder: users/{id}/impersonation (become any user); users/{id}/role-mappings +
+     groups/{id}/role-mappings (grant realm-management/admin roles); clients create w/ serviceAccountsEnabled
+     + role grant; reading clients/{id}/client-secret (impersonate a confidential client); client certificates
+     (install a client signing key); authentication/flows (weaken the login flow)."
+  - "SSRF sinks: /admin/.../testSMTPConnection (connect to any host:port), /admin/.../identity-provider/
+     import-config (GET a metadata 'fromUrl'), /admin/.../testLDAPConnection + LDAP federation components
+     (connect to an admin-supplied URL), the authorize endpoint's 'request_uri' (request object by reference),
+     and client-description-converter (if given a URL)."
+  - "Open dynamic client registration: /realms/{realm}/clients-registrations/openid-connect can be anonymous
+     if the realm's client-registration-policy allows it -> attacker-registered clients + redirect_uris."
+  - "redirect_uri / post_logout_redirect_uri validation at authorize + logout = the code/token-leak + open-redirect surface."
+  - "SAML + broker endpoints parse attacker-supplied XML / IdP responses -> signature-wrapping / XXE / assertion-injection."
+  - "Action tokens (login-actions/action-token) are realm-signed JWTs for verify-email/reset/execute-actions -- forgery/replay = ATO."
+  - "token-exchange + uma-ticket grants on the token endpoint = delegation/escalation primitives."
+
+runtime_grounding:
+  status: "PARTIAL -- 16 L1 nodes route_confirmed against quay.io/keycloak/keycloak:26.0 (26.0.8, start-dev, dev
+           H2). Anonymous + master-admin planes probed end-to-end (bootstrap admin + admin-cli password grant)."
+  stack: "runtime/compose.yaml: quay.io/keycloak/keycloak start-dev on :8080, KC_BOOTSTRAP_ADMIN_USERNAME/PASSWORD seeded."
+  identities_used: "anonymous (no token) | master_admin (bootstrap admin, password grant on master/admin-cli)."
+  probe: "runtime/probe.ps1 -> runtime/probe_results/{matrix.json,summary.txt}"
+  confirmed:
+    - "PUBLIC protocol reads 200: /.well-known/openid-configuration, /protocol/openid-connect/certs (JWKS),
+       /realms/{realm} (realm info). The discovery doc enumerates every endpoint (the recon oracle)."
+    - "ADMIN API DENIAL = HTTP 401 without a token: /admin/serverinfo, /admin/realms, /admin/realms/{realm},
+       .../users, .../clients all 401 for anon."
+    - "REDIRECT_URI VALIDATION confirmed: authorize with an unregistered redirect_uri -> 400 (Invalid parameter),
+       not a rendered login (kc-007)."
+    - "TOKEN endpoint: a bad client -> 401 (client auth fails); a valid password grant on admin-cli -> 200 with an
+       access token."
+    - "MASTER-ADMIN MATRIX all 200: /admin/serverinfo, /admin/realms, /admin/realms/{realm}, and .../users,
+       clients, roles, groups, identity-provider/instances, components, authentication/flows."
+    - "SCOPE/AUDIENCE boundary: the admin-cli token at /protocol/openid-connect/userinfo -> 403 (lacks the openid
+       scope / account audience), i.e. an admin token is not automatically an openid subject token."
+  caveats:
+    - "Image quay.io/keycloak/keycloak:26.0 == 26.0.8 (release build); GT source is main @ 999.0.0-SNAPSHOT (26.x
+       line). Route/auth model matches; stamp only version-stable behaviors (image/source-divergence lesson)."
+    - "Not yet grounded: the per-realm RBAC boundary + cross-realm isolation (needs realm_admin + realm_admin_b)
+       and the SSRF sinks (need an internal collaborator target)."
+
+status: >-
+  Source-derived GT at keycloak/ main (26.x line). validate_gt.py OK: 125 L1 nodes (122 api, 3 page),
+  50 L2 actions, all 50 candidate L1 nodes covered. Runtime: PARTIALLY grounded (16 nodes route_confirmed; anon +
+  master-admin) against quay.io/keycloak/keycloak:26.0 -- see runtime_grounding + annotation_issues kc-010/kc-011.

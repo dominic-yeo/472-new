@@ -1,0 +1,3865 @@
+schema_version: pengent-web-gt-v1
+environment_id: uptrace-oss
+nodes:
+- id: gt-action-001
+  name: Log in
+  kind: normal
+  description: A visitor logs in and receives a JWT session cookie.
+  action_key: anon_login
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Guest
+    auth_context: Anonymous
+  operation:
+    business: login_user
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: created
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: response
+      field: ''
+      resource: AuthToken(session)
+    participants:
+    - id: user
+      type: User
+      role: self
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - &id001
+        kind: subject
+        id: actor
+        type: User
+        relative_role: SELF
+      - kind: reference
+        type: Password
+        target:
+          kind: entity
+          id: user
+          type: User
+          role: self
+    reason: Caller supplies email+password.
+  effects:
+    gen:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - Session
+      basis: auth_transition
+      reason: Caller becomes authenticated.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthToken
+          target:
+            kind: entity
+            id: session
+            type: Session
+            role: created
+      basis: io_reference
+      reason: Sets the 'token' JWT cookie.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Login identifier.
+  - direction: input
+    field: password / Password(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: token / AuthToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthToken(session:Session{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/users/login
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Login verifies bcrypt and sets the token cookie.
+  l1_keys:
+  - http://localhost:14318/internal/v1/users/login
+  consumes:
+  - Know(actor:User[SELF],Password(user:User{self}))
+  produces:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],AuthToken(session:Session{created}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login.
+    black_box_reachable: true
+    reachability_conditions:
+    - User exists in config/db; password matches (bcrypt).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/org/user_handler.go:Login
+      supports: verify + set cookie
+    notes: null
+- id: gt-action-002
+  name: Log out
+  kind: normal
+  description: A user clears their session cookie.
+  action_key: user_logout
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: logout_user
+    crud: Delete
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: self
+    attribute: ''
+    state_field: authenticated
+    binding:
+      source: subject
+      field: ''
+      resource: AuthToken(session)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id002
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - Session
+    reason: A session identifies the caller.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - Session
+      basis: auth_transition
+      reason: The token cookie is cleared.
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/users/logout
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: Logout clears the token cookie.
+  l1_keys:
+  - http://localhost:14318/internal/v1/users/logout
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces: []
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Logout.
+    black_box_reachable: true
+    reachability_conditions:
+    - Any (clears cookie).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/org/user_handler.go:Logout
+      supports: clear cookie
+    notes: null
+- id: gt-action-003
+  name: Read current user
+  kind: normal
+  description: A user reads their account and the full project list.
+  action_key: user_read_current
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: read_current_user
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: self
+    attribute: ''
+    state_field: ''
+    binding:
+      source: subject
+      field: ''
+      resource: UserEmail(user)
+    participants:
+    - id: project
+      type: Project
+      role: listed
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (cookie/bearer).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: UserEmail
+          target:
+            kind: entity
+            id: user
+            type: User
+            role: self
+      basis: io_reference
+      reason: Returns the caller's user.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ProjectID
+          target:
+            kind: entity
+            id: project
+            type: Project
+            role: listed
+      basis: io_reference
+      reason: Returns ALL projects (OSS lists every project).
+    kill: []
+  io_accounting:
+  - direction: output
+    field: user / UserEmail(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],UserEmail(user:User{self}))
+    ignored_reason: ''
+  - direction: output
+    field: projects / ProjectID(project)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{listed}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/users/current
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Current returns the user and all projects.
+  l1_keys:
+  - http://localhost:14318/internal/v1/users/current
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],UserEmail(user:User{self}))
+  - Know(actor:User[SELF],ProjectID(project:Project{listed}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Self + project list.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/org/user_handler.go:Current
+      supports: self + projects
+    notes: null
+- id: gt-action-004
+  name: Read project + DSN
+  kind: normal
+  description: A user reads a project and obtains its ingest DSN.
+  action_key: user_read_project
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: read_project
+    crud: Read
+  object:
+    kind: entity
+    id: project
+    type: Project
+    name: Project
+    entity: Project
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: &id003
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ProjectID
+        target:
+          kind: entity
+          id: project
+          type: Project
+          role: target
+    reason: References an existing project by id.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ProjectDSN
+          target:
+            kind: entity
+            id: project
+            type: Project
+            role: target
+      basis: io_reference
+      reason: Returns the project DSN (ingest credential).
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: output
+    field: dsn / ProjectDSN(project)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/projects/:project_id
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Show returns the project and its DSN.
+  l1_keys:
+  - http://localhost:14318/internal/v1/projects/:project_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Project incl. DSN.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    - 'DSN DISCLOSURE: any user reads any project''s ingest credential.'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/org/project_handler.go:Show
+      supports: project + BuildDSN
+    notes: null
+- id: gt-action-005
+  name: Read data usage
+  kind: normal
+  description: A user reads account data-usage statistics.
+  action_key: user_read_usage
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: read_data_usage
+    crud: Read
+  object:
+    kind: entity
+    id: usage
+    type: Usage
+    name: Usage
+    entity: Usage
+    role: account
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: output
+    field: spans / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Usage counters (no refs).
+  - direction: output
+    field: bytes / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Byte counters.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/data-usage
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Show returns monthly usage counters.
+  l1_keys:
+  - http://localhost:14318/internal/v1/data-usage
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Usage stats.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/org/usage_handler.go:Show
+      supports: usage
+    notes: null
+- id: gt-action-006
+  name: Search trace by id
+  kind: normal
+  description: A user resolves any trace id to its project (no project scoping).
+  action_key: user_search_trace
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: search_trace
+    crud: Read
+  object:
+    kind: entity
+    id: trace
+    type: Trace
+    name: Trace
+    entity: Trace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: trace_id
+      resource: TraceID(trace)
+    participants:
+    - id: project
+      type: Project
+      role: resolved
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (m.User ONLY -- no project gate).
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ProjectID
+          target:
+            kind: entity
+            id: project
+            type: Project
+            role: resolved
+      basis: io_reference
+      reason: Resolves the owning project id for ANY trace id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: trace_id / TraceID(trace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Trace id probed.
+  - direction: output
+    field: project_id / ProjectID(project)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{resolved}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/traces/search
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: FindTrace resolves a trace id to project/span under m.User.
+  l1_keys:
+  - http://localhost:14318/internal/v1/traces/search
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],ProjectID(project:Project{resolved}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Trace-id lookup.
+    black_box_reachable: true
+    reachability_conditions:
+    - Authenticated. NOT project-scoped -> cross-project trace-id oracle.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/trace_handler.go:FindTrace
+      supports: m.User only
+    notes: null
+- id: gt-action-007
+  name: List span systems
+  kind: normal
+  description: A project member reads systems.
+  action_key: user_list_systems
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_span_systems
+    crud: Read
+  object:
+    kind: entity
+    id: spansystem
+    type: SpanSystem
+    name: SpanSystem
+    entity: SpanSystem
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SpanSystem
+          target:
+            kind: entity
+            id: spansystem
+            type: SpanSystem
+            role: result
+      basis: io_reference
+      reason: Returns systems.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: TQL/time filter.
+  - direction: output
+    field: systems / SpanSystem(spansystem)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SpanSystem(spansystem:SpanSystem{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/tracing/:project_id/systems
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: list_span_systems returns systems for the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/tracing/:project_id/systems
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],SpanSystem(spansystem:SpanSystem{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List span systems.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/*_handler.go
+      supports: project-scoped read
+    notes: null
+- id: gt-action-008
+  name: List spans
+  kind: normal
+  description: A project member reads spans.
+  action_key: user_list_spans
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_spans
+    crud: Read
+  object:
+    kind: entity
+    id: span
+    type: Span
+    name: Span
+    entity: Span
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SpanID
+          target:
+            kind: entity
+            id: span
+            type: Span
+            role: result
+      basis: io_reference
+      reason: Returns spans.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: TQL/time filter.
+  - direction: output
+    field: spans / SpanID(span)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SpanID(span:Span{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/tracing/:project_id/spans
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: list_spans returns spans for the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/tracing/:project_id/spans
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],SpanID(span:Span{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List spans.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/*_handler.go
+      supports: project-scoped read
+    notes: null
+- id: gt-action-009
+  name: List span groups
+  kind: normal
+  description: A project member reads groups.
+  action_key: user_list_groups
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_span_groups
+    crud: Read
+  object:
+    kind: entity
+    id: group
+    type: Group
+    name: Group
+    entity: Group
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: GroupID
+          target:
+            kind: entity
+            id: group
+            type: Group
+            role: result
+      basis: io_reference
+      reason: Returns groups.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: TQL/time filter.
+  - direction: output
+    field: groups / GroupID(group)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],GroupID(group:Group{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/tracing/:project_id/groups
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: list_span_groups returns groups for the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/tracing/:project_id/groups
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],GroupID(group:Group{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List span groups.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/*_handler.go
+      supports: project-scoped read
+    notes: null
+- id: gt-action-010
+  name: List span attribute keys
+  kind: normal
+  description: A project member reads keys.
+  action_key: user_list_span_attrs
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_span_attr_keys
+    crud: Read
+  object:
+    kind: entity
+    id: attr
+    type: Attr
+    name: Attr
+    entity: Attr
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AttrKey
+          target:
+            kind: entity
+            id: attr
+            type: Attr
+            role: result
+      basis: io_reference
+      reason: Returns keys.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: TQL/time filter.
+  - direction: output
+    field: keys / AttrKey(attr)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AttrKey(attr:Attr{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/tracing/:project_id/attributes
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: list_span_attr_keys returns keys for the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/tracing/:project_id/attributes
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],AttrKey(attr:Attr{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List span attribute keys.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/*_handler.go
+      supports: project-scoped read
+    notes: null
+- id: gt-action-011
+  name: Read span group
+  kind: normal
+  description: A project member reads a span group summary.
+  action_key: user_read_group
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: read_span_group
+    crud: Read
+  object:
+    kind: entity
+    id: group
+    type: Group
+    name: Group
+    entity: Group
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: group_id
+      resource: GroupID(group)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: group_id / GroupID(group)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Group selector.
+  - direction: output
+    field: stats / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Group summary stats.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/tracing/:project_id/groups/:group_id
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: ShowSummary returns stats for a group.
+  l1_keys:
+  - http://localhost:14318/internal/v1/tracing/:project_id/groups/:group_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Group summary.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/group_handler.go:ShowSummary
+      supports: group summary
+    notes: null
+- id: gt-action-012
+  name: Read trace
+  kind: normal
+  description: A project member reads a full trace.
+  action_key: user_read_trace
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: read_trace
+    crud: Read
+  object:
+    kind: entity
+    id: trace
+    type: Trace
+    name: Trace
+    entity: Trace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: trace_id
+      resource: TraceID(trace)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    - id: span
+      type: Span
+      role: result
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SpanID
+          target:
+            kind: entity
+            id: span
+            type: Span
+            role: result
+      basis: io_reference
+      reason: Returns the spans of the trace.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: trace_id / TraceID(trace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Trace selector.
+  - direction: output
+    field: spans / SpanID(span)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SpanID(span:Span{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ShowTrace returns the spans of a trace.
+  l1_keys:
+  - http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],SpanID(span:Span{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Trace detail.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/trace_handler.go:ShowTrace
+      supports: trace detail
+    notes: null
+- id: gt-action-013
+  name: List metrics
+  kind: normal
+  description: A project member reads metrics.
+  action_key: user_list_metrics
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_metrics
+    crud: Read
+  object:
+    kind: entity
+    id: metric
+    type: Metric
+    name: Metric
+    entity: Metric
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MetricName
+          target:
+            kind: entity
+            id: metric
+            type: Metric
+            role: result
+      basis: io_reference
+      reason: Returns metrics.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: TQL/time filter.
+  - direction: output
+    field: metrics / MetricName(metric)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],MetricName(metric:Metric{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: list_metrics returns metrics for the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],MetricName(metric:Metric{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List metrics.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/*_handler.go
+      supports: project-scoped read
+    notes: null
+- id: gt-action-014
+  name: List metric attribute keys
+  kind: normal
+  description: A project member reads keys.
+  action_key: user_list_metric_attrs
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_metric_attr_keys
+    crud: Read
+  object:
+    kind: entity
+    id: attr
+    type: Attr
+    name: Attr
+    entity: Attr
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AttrKey
+          target:
+            kind: entity
+            id: attr
+            type: Attr
+            role: result
+      basis: io_reference
+      reason: Returns keys.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: TQL/time filter.
+  - direction: output
+    field: keys / AttrKey(attr)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AttrKey(attr:Attr{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/attributes
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: list_metric_attr_keys returns keys for the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/attributes
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],AttrKey(attr:Attr{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: List metric attribute keys.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/*_handler.go
+      supports: project-scoped read
+    notes: null
+- id: gt-action-015
+  name: Query metrics table
+  kind: normal
+  description: A project member runs a metrics table query.
+  action_key: user_query_metrics_table
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: query_metrics_table
+    crud: Read
+  object:
+    kind: entity
+    id: metric
+    type: Metric
+    name: Metric
+    entity: Metric
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: MQL query (expression surface).
+  - direction: output
+    field: items / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Query result rows.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/table
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Table runs an MQL query over the project's metrics.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/table
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Metrics query.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/query_handler.go:Table
+      supports: MQL table
+    notes: null
+- id: gt-action-016
+  name: Create dashboard
+  kind: normal
+  description: A project member creates a dashboard.
+  action_key: user_create_dashboard
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: create_dashboard
+    crud: Create
+  object:
+    kind: entity
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: project
+        type: Project
+        role: target
+    reason: May create dashboards in the project.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: dashboard
+          type: Dashboard
+          role: created
+      basis: action_semantics
+      reason: A dashboard row is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: DashID
+          target:
+            kind: entity
+            id: dashboard
+            type: Dashboard
+            role: created
+      basis: io_reference
+      reason: Returns the new dashboard id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: name / DashName(dashboard)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New dashboard name.
+  - direction: output
+    field: dashboard / DashID(dashboard)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.85
+  reasoning: Create inserts a dashboard in the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Can(actor:User[SELF],Create,project:Project{target})
+  produces:
+  - Exists(dashboard:Dashboard{created})
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard create.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:Create
+      supports: create dashboard
+    notes: null
+- id: gt-action-017
+  name: List dashboards
+  kind: normal
+  description: A project member lists dashboards.
+  action_key: user_list_dashboards
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: list_dashboards
+    crud: Read
+  object:
+    kind: entity
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: DashID
+          target:
+            kind: entity
+            id: dashboard
+            type: Dashboard
+            role: listed
+      basis: io_reference
+      reason: Returns dashboard ids.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: output
+    field: dashboards / DashID(dashboard)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{listed}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.85
+  reasoning: List returns the project's dashboards.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{listed}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard list.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:List
+      supports: list dashboards
+    notes: null
+- id: gt-action-018
+  name: Create dashboard from YAML
+  kind: normal
+  description: A project member creates a dashboard from YAML.
+  action_key: user_create_dashboard_yaml
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: create_dashboard_yaml
+    crud: Create
+  object:
+    kind: entity
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: project
+        type: Project
+        role: target
+    reason: May create dashboards.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: dashboard
+          type: Dashboard
+          role: created
+      basis: action_semantics
+      reason: A dashboard is created from YAML.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: DashID
+          target:
+            kind: entity
+            id: dashboard
+            type: Dashboard
+            role: created
+      basis: io_reference
+      reason: Returns the new dashboard id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: yaml / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: YAML document (template-injection surface).
+  - direction: output
+    field: dashboard / DashID(dashboard)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/yaml
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: CreateFromYAML builds a dashboard from a YAML body.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/yaml
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Can(actor:User[SELF],Create,project:Project{target})
+  produces:
+  - Exists(dashboard:Dashboard{created})
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard create from YAML.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:CreateFromYAML
+      supports: yaml -> dashboard
+    notes: null
+- id: gt-action-019
+  name: Read dashboard
+  kind: normal
+  description: A project member reads a dashboard.
+  action_key: user_read_dashboard
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: read_dashboard
+    crud: Read
+  object:
+    kind: entity
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dash_id
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: &id004
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: DashID
+        target:
+          kind: entity
+          id: dashboard
+          type: Dashboard
+          role: target
+    reason: Dashboard must belong to the project (m.Dashboard).
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: output
+    field: dashboard / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Dashboard + grid.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+    methods:
+    - GET
+    selector:
+      field: method
+      values:
+      - GET
+  confidence: 0.85
+  reasoning: Show returns a dashboard scoped to the project.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard detail.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    - dash.ProjectID == project (m.Dashboard) else 403.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:Show
+      supports: dashboard detail
+    notes: null
+- id: gt-action-020
+  name: Clone dashboard
+  kind: normal
+  description: A project member clones a dashboard.
+  action_key: user_clone_dashboard
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: clone_dashboard
+    crud: Create
+  object:
+    kind: entity
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: source
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dash_id
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Source dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Create
+      - kind: entity
+        id: project
+        type: Project
+        role: target
+    reason: May create dashboards.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: dashboard
+          type: Dashboard
+          role: created
+      basis: action_semantics
+      reason: A cloned dashboard row is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: DashID
+          target:
+            kind: entity
+            id: dashboard
+            type: Dashboard
+            role: created
+      basis: io_reference
+      reason: Returns the clone id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: output
+    field: dashboard / DashID(dashboard)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Clone duplicates a dashboard.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Create,project:Project{target})
+  produces:
+  - Exists(dashboard:Dashboard{created})
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard clone.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:Clone
+      supports: clone dashboard
+    notes: null
+- id: gt-action-021
+  name: Update dashboard
+  kind: normal
+  description: A project member updates a dashboard.
+  action_key: user_update_dashboard
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: update_dashboard
+    crud: Update
+  object:
+    kind: state
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: target
+    attribute: ''
+    state_field: name
+    binding:
+      source: request
+      field: dash_id
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - kind: entity
+        id: dashboard
+        type: Dashboard
+        role: target
+    reason: May update the dashboard.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: dashboard
+          type: Dashboard
+          role: target
+        - name
+        - updated
+      basis: action_semantics
+      reason: Dashboard fields are updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: input
+    field: name / DashName(dashboard)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New name.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+    methods:
+    - PUT
+    selector:
+      field: method
+      values:
+      - PUT
+  confidence: 0.85
+  reasoning: Update mutates dashboard fields.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Update,dashboard:Dashboard{target})
+  produces:
+  - State(dashboard:Dashboard{target},name,updated)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard update.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:Update
+      supports: update dashboard
+    notes: null
+- id: gt-action-022
+  name: Delete dashboard
+  kind: normal
+  description: A project member deletes a dashboard.
+  action_key: user_delete_dashboard
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: delete_dashboard
+    crud: Delete
+  object:
+    kind: entity
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dash_id
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - kind: entity
+        id: dashboard
+        type: Dashboard
+        role: target
+    reason: May delete the dashboard.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: dashboard
+          type: Dashboard
+          role: target
+      basis: action_semantics
+      reason: The dashboard row is removed.
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+    methods:
+    - DELETE
+    selector:
+      field: method
+      values:
+      - DELETE
+  confidence: 0.85
+  reasoning: Delete removes a dashboard.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Delete,dashboard:Dashboard{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:Delete
+      supports: delete dashboard
+    notes: null
+- id: gt-action-023
+  name: Pin dashboard
+  kind: normal
+  description: A project member pins a dashboard.
+  action_key: user_pin_dashboard
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: pin_dashboard
+    crud: Update
+  object:
+    kind: state
+    id: dashboard
+    type: Dashboard
+    name: Dashboard
+    entity: Dashboard
+    role: target
+    attribute: ''
+    state_field: pinned
+    binding:
+      source: request
+      field: dash_id
+      resource: DashID(dashboard)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - kind: entity
+        id: dashboard
+        type: Dashboard
+        role: target
+    reason: May update pin state.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: dashboard
+          type: Dashboard
+          role: target
+        - pinned
+        - 'true'
+      basis: action_semantics
+      reason: Dashboard is pinned.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/pinned
+    methods:
+    - PUT
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Pin sets the dashboard pinned flag.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/pinned
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Update,dashboard:Dashboard{target})
+  produces:
+  - State(dashboard:Dashboard{target},pinned,true)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Dashboard pin.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/dash_handler.go:Pin
+      supports: pin
+    notes: null
+- id: gt-action-024
+  name: Create grid item
+  kind: normal
+  description: A project member adds a grid item to a dashboard.
+  action_key: user_create_grid_item
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: create_grid_item
+    crud: Create
+  object:
+    kind: entity
+    id: grid_item
+    type: GridItem
+    name: GridItem
+    entity: GridItem
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: GridItemID(grid_item)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    - id: dashboard
+      type: Dashboard
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - kind: entity
+        id: dashboard
+        type: Dashboard
+        role: target
+    reason: May add grid items.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: grid_item
+          type: GridItem
+          role: created
+      basis: action_semantics
+      reason: A grid item is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: GridItemID
+          target:
+            kind: entity
+            id: grid_item
+            type: GridItem
+            role: created
+      basis: io_reference
+      reason: Returns the grid item id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: output
+    field: gridItem / GridItemID(grid_item)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],GridItemID(grid_item:GridItem{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid
+    methods:
+    - POST
+    selector:
+      field: method
+      values:
+      - POST
+  confidence: 0.8
+  reasoning: Create inserts a grid item on the dashboard.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Update,dashboard:Dashboard{target})
+  produces:
+  - Exists(grid_item:GridItem{created})
+  - Know(actor:User[SELF],GridItemID(grid_item:GridItem{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid item create.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/grid_item_handler.go:Create
+      supports: create grid item
+    notes: null
+- id: gt-action-025
+  name: Delete grid item
+  kind: normal
+  description: A project member deletes a grid item.
+  action_key: user_delete_grid_item
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: delete_grid_item
+    crud: Delete
+  object:
+    kind: entity
+    id: grid_item
+    type: GridItem
+    name: GridItem
+    entity: GridItem
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: row_id
+      resource: GridItemID(grid_item)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    - id: dashboard
+      type: Dashboard
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - kind: entity
+        id: grid_item
+        type: GridItem
+        role: target
+    reason: May delete the grid item (GridItemMiddleware scopes it).
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: grid_item
+          type: GridItem
+          role: target
+      basis: action_semantics
+      reason: The grid item is removed.
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: input
+    field: row_id / GridItemID(grid_item)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Grid item id.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/:row_id
+    methods:
+    - DELETE
+    selector:
+      field: method
+      values:
+      - DELETE
+  confidence: 0.8
+  reasoning: Delete removes a grid item.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/:row_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Delete,grid_item:GridItem{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid item delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/grid_item_handler.go:Delete
+      supports: delete grid item
+    notes: null
+- id: gt-action-026
+  name: Create grid row
+  kind: normal
+  description: A project member adds a grid row.
+  action_key: user_create_grid_row
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: create_grid_row
+    crud: Create
+  object:
+    kind: entity
+    id: grid_row
+    type: GridRow
+    name: GridRow
+    entity: GridRow
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: ''
+      resource: GridRowID(grid_row)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    - id: dashboard
+      type: Dashboard
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Update
+      - kind: entity
+        id: dashboard
+        type: Dashboard
+        role: target
+    reason: May add grid rows.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: grid_row
+          type: GridRow
+          role: created
+      basis: action_semantics
+      reason: A grid row is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: GridRowID
+          target:
+            kind: entity
+            id: grid_row
+            type: GridRow
+            role: created
+      basis: io_reference
+      reason: Returns the grid row id.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: output
+    field: gridRow / GridRowID(grid_row)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],GridRowID(grid_row:GridRow{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Create inserts a grid row.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Update,dashboard:Dashboard{target})
+  produces:
+  - Exists(grid_row:GridRow{created})
+  - Know(actor:User[SELF],GridRowID(grid_row:GridRow{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid row create.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/grid_row_handler.go:Create
+      supports: create grid row
+    notes: null
+- id: gt-action-027
+  name: Delete grid row
+  kind: normal
+  description: A project member deletes a grid row.
+  action_key: user_delete_grid_row
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: delete_grid_row
+    crud: Delete
+  object:
+    kind: entity
+    id: grid_row
+    type: GridRow
+    name: GridRow
+    entity: GridRow
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: row_id
+      resource: GridRowID(grid_row)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    - id: dashboard
+      type: Dashboard
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  - type: knowledge
+    fact: *id004
+    reason: Dashboard in project.
+  - type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Delete
+      - kind: entity
+        id: grid_row
+        type: GridRow
+        role: target
+    reason: May delete the grid row (GridRowMiddleware scopes it).
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: grid_row
+          type: GridRow
+          role: target
+      basis: action_semantics
+      reason: The grid row is removed.
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: dash_id / DashID(dashboard)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+    ignored_reason: ''
+  - direction: input
+    field: row_id / GridRowID(grid_row)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Grid row id.
+  l1_bindings:
+  - l1_key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id
+    methods:
+    - DELETE
+    selector:
+      field: method
+      values:
+      - DELETE
+  confidence: 0.8
+  reasoning: Delete removes a grid row.
+  l1_keys:
+  - http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  - Know(actor:User[SELF],DashID(dashboard:Dashboard{target}))
+  - Can(actor:User[SELF],Delete,grid_row:GridRow{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Grid row delete.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/grid_row_handler.go:Delete
+      supports: delete grid row
+    notes: null
+- id: gt-action-028
+  name: Public span query
+  kind: normal
+  description: A project member queries spans via the public API.
+  action_key: public_list_spans
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: public_list_spans
+    crud: Read
+  object:
+    kind: entity
+    id: span
+    type: Span
+    name: Span
+    entity: Span
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated (m.UserAndProject on /api/v1).
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SpanID
+          target:
+            kind: entity
+            id: span
+            type: Span
+            role: result
+      basis: io_reference
+      reason: Returns span rows.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: output
+    field: spans / SpanID(span)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SpanID(span:Span{result}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost:14318/api/v1/tracing/:project_id/spans
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: Public Spans is gated by m.UserAndProject.
+  l1_keys:
+  - http://localhost:14318/api/v1/tracing/:project_id/spans
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces:
+  - Know(actor:User[SELF],SpanID(span:Span{result}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public span query.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    - On /api/v1 path but still USER-gated (not DSN).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/public_handler.go:Spans
+      supports: public spans
+    notes: null
+- id: gt-action-029
+  name: Public group query
+  kind: normal
+  description: A project member queries span groups via the public API.
+  action_key: public_list_groups
+  subject:
+    id: actor
+    identity: CurrentUser
+    role: User
+    auth_context: JWTCookie
+  operation:
+    business: public_list_groups
+    crud: Read
+  object:
+    kind: entity
+    id: group
+    type: Group
+    name: Group
+    entity: Group
+    role: result
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: project_id
+      resource: ProjectID(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: Authenticated.
+  - type: knowledge
+    fact: *id003
+    reason: References an existing project.
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: project_id / ProjectID(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectID(project:Project{target}))
+    ignored_reason: ''
+  - direction: output
+    field: groups / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Group rows.
+  l1_bindings:
+  - l1_key: http://localhost:14318/api/v1/tracing/:project_id/groups
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Public Groups is gated by m.UserAndProject.
+  l1_keys:
+  - http://localhost:14318/api/v1/tracing/:project_id/groups
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],ProjectID(project:Project{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public group query.
+    black_box_reachable: true
+    reachability_conditions:
+    - 'Authenticated; project exists (OSS single-tenant: NO per-user ACL).'
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/public_handler.go:Groups
+      supports: public groups
+    notes: null
+- id: gt-action-030
+  name: Ingest OTLP traces
+  kind: normal
+  description: A telemetry client sends spans using a project DSN.
+  action_key: ingest_otlp_traces
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: ingest_otlp_traces
+    crud: Create
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: ingested
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id005
+      predicate: Authenticated
+      arguments:
+      - *id001
+      - ProjectDSN
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: &id006
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ProjectDSN
+        target:
+          kind: entity
+          id: project
+          type: Project
+          role: target
+    reason: Holds the project DSN (bearer credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: telemetry
+          type: Telemetry
+          role: ingested
+      basis: action_semantics
+      reason: spans are written to the resolved project.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: spans payload.
+  l1_bindings:
+  - l1_key: http://localhost:14318/v1/traces
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ingest_otlp_traces resolves the project from the DSN and ingests spans.
+  l1_keys:
+  - http://localhost:14318/v1/traces
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces:
+  - Exists(telemetry:Telemetry{ingested})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Ingest OTLP traces.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN (no user session required).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/init.go:initOTLP
+      supports: DSN ingest
+    notes: null
+- id: gt-action-031
+  name: Ingest OTLP logs
+  kind: normal
+  description: A telemetry client sends logs using a project DSN.
+  action_key: ingest_otlp_logs
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: ingest_otlp_logs
+    crud: Create
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: ingested
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id005
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: *id006
+    reason: Holds the project DSN (bearer credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: telemetry
+          type: Telemetry
+          role: ingested
+      basis: action_semantics
+      reason: logs are written to the resolved project.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: logs payload.
+  l1_bindings:
+  - l1_key: http://localhost:14318/v1/logs
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ingest_otlp_logs resolves the project from the DSN and ingests logs.
+  l1_keys:
+  - http://localhost:14318/v1/logs
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces:
+  - Exists(telemetry:Telemetry{ingested})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Ingest OTLP logs.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN (no user session required).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/init.go:initOTLP
+      supports: DSN ingest
+    notes: null
+- id: gt-action-032
+  name: Ingest OTLP metrics
+  kind: normal
+  description: A telemetry client sends datapoints using a project DSN.
+  action_key: ingest_otlp_metrics
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: ingest_otlp_metrics
+    crud: Create
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: ingested
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id005
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: *id006
+    reason: Holds the project DSN (bearer credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: telemetry
+          type: Telemetry
+          role: ingested
+      basis: action_semantics
+      reason: datapoints are written to the resolved project.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: datapoints payload.
+  l1_bindings:
+  - l1_key: http://localhost:14318/v1/metrics
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ingest_otlp_metrics resolves the project from the DSN and ingests datapoints.
+  l1_keys:
+  - http://localhost:14318/v1/metrics
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces:
+  - Exists(telemetry:Telemetry{ingested})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Ingest OTLP metrics.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN (no user session required).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/init.go:initOTLP
+      supports: DSN ingest
+    notes: null
+- id: gt-action-033
+  name: Ingest Vector logs
+  kind: normal
+  description: A telemetry client sends ndjson logs using a project DSN.
+  action_key: ingest_vector_logs
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: ingest_vector_logs
+    crud: Create
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: ingested
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id005
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: *id006
+    reason: Holds the project DSN (bearer credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: telemetry
+          type: Telemetry
+          role: ingested
+      basis: action_semantics
+      reason: ndjson logs are written to the resolved project.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: ndjson logs payload.
+  l1_bindings:
+  - l1_key: http://localhost:14318/api/v1/vector-logs
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ingest_vector_logs resolves the project from the DSN and ingests ndjson logs.
+  l1_keys:
+  - http://localhost:14318/api/v1/vector-logs
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces:
+  - Exists(telemetry:Telemetry{ingested})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Ingest Vector logs.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN (no user session required).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/tracing/vector_handler.go:Create
+      supports: DSN ingest
+    notes: null
+- id: gt-action-034
+  name: Prometheus remote write
+  kind: normal
+  description: A telemetry client sends timeseries using a project DSN.
+  action_key: ingest_prometheus_write
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: ingest_prometheus_write
+    crud: Create
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: ingested
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id005
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: *id006
+    reason: Holds the project DSN (bearer credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: telemetry
+          type: Telemetry
+          role: ingested
+      basis: action_semantics
+      reason: timeseries are written to the resolved project.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: timeseries payload.
+  l1_bindings:
+  - l1_key: http://localhost:14318/api/v1/prometheus/write
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ingest_prometheus_write resolves the project from the DSN and ingests timeseries.
+  l1_keys:
+  - http://localhost:14318/api/v1/prometheus/write
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces:
+  - Exists(telemetry:Telemetry{ingested})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Prometheus remote write.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN (no user session required).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/prom_remote_storage.go:Write
+      supports: DSN ingest
+    notes: null
+- id: gt-action-035
+  name: Ingest CloudWatch metrics
+  kind: normal
+  description: A telemetry client sends cloudwatch datapoints using a project DSN.
+  action_key: ingest_cloudwatch_metrics
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: ingest_cloudwatch_metrics
+    crud: Create
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: ingested
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id005
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: *id006
+    reason: Holds the project DSN (bearer credential).
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: telemetry
+          type: Telemetry
+          role: ingested
+      basis: action_semantics
+      reason: cloudwatch datapoints are written to the resolved project.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: cloudwatch datapoints payload.
+  l1_bindings:
+  - l1_key: http://localhost:14318/api/v1/cloudwatch/metrics
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: ingest_cloudwatch_metrics resolves the project from the DSN and ingests cloudwatch datapoints.
+  l1_keys:
+  - http://localhost:14318/api/v1/cloudwatch/metrics
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces:
+  - Exists(telemetry:Telemetry{ingested})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Ingest CloudWatch metrics.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN (no user session required).
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/cloudwatch_handler.go:Metrics
+      supports: DSN ingest
+    notes: null
+- id: gt-action-036
+  name: Prometheus remote read
+  kind: normal
+  description: A client reads back timeseries via Prometheus remote-read using a DSN.
+  action_key: query_prometheus_read
+  subject:
+    id: actor
+    identity: Telemetry
+    role: Ingest
+    auth_context: ProjectDSN
+  operation:
+    business: query_prometheus_read
+    crud: Read
+  object:
+    kind: entity
+    id: telemetry
+    type: Telemetry
+    name: Telemetry
+    entity: Telemetry
+    role: queried
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: dsn
+      resource: ProjectDSN(project)
+    participants:
+    - id: project
+      type: Project
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id005
+    reason: DSN authenticates the client.
+  - type: knowledge
+    fact: *id006
+    reason: Holds the project DSN.
+  effects:
+    gen: []
+    kill: []
+  io_accounting:
+  - direction: input
+    field: dsn / ProjectDSN(project)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+    ignored_reason: ''
+  - direction: input
+    field: raw_body / -
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Remote-read query.
+  - direction: output
+    field: timeseries / -
+    disposition: observed_only
+    facts: []
+    ignored_reason: Matching series.
+  l1_bindings:
+  - l1_key: http://localhost:14318/api/v1/prometheus/read
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.8
+  reasoning: Read resolves the project from the DSN and returns series.
+  l1_keys:
+  - http://localhost:14318/api/v1/prometheus/read
+  consumes:
+  - Authenticated(actor:User[SELF],ProjectDSN)
+  - Know(actor:User[SELF],ProjectDSN(project:Project{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Prometheus remote read.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid project DSN.
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: uptrace/pkg/metrics/prom_remote_storage.go:Read
+      supports: DSN read
+    notes: null
+edges: []
+annotation_issues: []

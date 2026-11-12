@@ -1,0 +1,1517 @@
+schema_version: agentic-attack-surface-v1
+environment_id: librechat-oss
+meta:
+  app: LibreChat
+  app_version: repo @ 472-new checkout
+  git_ref: see source_root
+  applicability:
+    verdict: qualifies
+    evidence: 'Agents endpoint: @librechat/agents LangGraph run (Runs/StreamRunManager.js, createRunBody.js)
+      over ToolService.loadAgentTools; MCP + OpenAPI Actions + sub-agents.'
+  phase_status:
+    static_A_to_D: complete
+    runtime_E: pending (no live grounding yet)
+    link_F: partial (L1/L2 GT for LibreChat not yet built; ids are forward refs)
+agents:
+- id: agent.librechat.primary
+  name: Agent (Agents endpoint)
+  component: LibreChat
+  agent_kind: interactive
+  purpose: User-configured agent run over a LangGraph loop; tools gated by AgentCapabilities; can call
+    MCP servers, OpenAPI Actions, and sub-agents.
+  invocation_surfaces:
+  - l1_id: l1.api.agents.chat
+    trigger: POST agents chat (EModelEndpoint.agents) run
+    auth_context: session JWT -> req.user; agent access + tool role grants
+  model_config:
+    provider: any configured endpoint (OpenAI/Anthropic/Bedrock/Google/custom)
+    model: agent model_parameters
+    config_source: agent definition + librechat.yaml
+    writers:
+    - principal: agent_author
+      l1_id: l1.api.agents.update
+    - principal: admin
+      l1_id: l1.config.librechat_yaml
+    evidence_status: source_confirmed
+  instruction_sources:
+  - surface_id: ctx.system_prompt
+    instruction_role: system
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: agent_author
+      l1_id: l1.api.agents.update
+  tool_binding_ids:
+  - tool.execute_code
+  - tool.file_search
+  - tool.web_search
+  - tool.image_gen
+  - tool.memory
+  - tool.mcp
+  - tool.actions
+  - tool.plugins
+  - tool.subagent
+  context_source_ids:
+  - ctx.system_prompt
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.file_search_rag
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.memory_recall
+  - ctx.ocr_context
+  - ctx.tool_descriptions
+  - ctx.attachments
+  memory_ids:
+  - mem.conversations
+  - mem.vectordb
+  - mem.agent_memory
+  - mem.agents_config
+  - mem.actions
+  output_sink_ids:
+  - sink.chat_response
+  - sink.artifacts
+  - sink.code_exec
+  - sink.image
+  - sink.action_call
+  - sink.mcp_call
+  - sink.web_fetch
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.tool_role_grants
+  - ctl.code_sandbox
+  - ctl.mcp_oauth
+  - ctl.action_auth
+  - ctl.abort
+  resource_limits:
+    max_iterations: LangGraph recursion/step limit (agent run)
+    recursion: sub-agents bounded by routing config
+    token_or_cost_budget: token limits per agent
+    loop_detection: graph recursionLimit
+    enforced_by: code
+  authority_context:
+    principal_source: session JWT -> req.user
+    tenant_scope: per-user; shared agents by permission
+    resource_scope: user's files/memories; agent's actions/MCP
+    delegated_identity: MCP/Actions use PER-USER OAuth/OBO identity (AuthIdentityContext); Actions may
+      also use stored apiKey auth
+    authz_enforcement: code (AgentCapabilities + resolveToolRoleGrants + per-tool auth)
+  related_l2_ids:
+  - l2.agents.chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: api/server/services/ToolService.js loadAgentTools; createRunBody.js; Runs/StreamRunManager.js
+  evidence_status: source_confirmed
+  notes: Tool set = native capability tools + agent.tools (plugins) + agent actions + MCP servers, each
+    gated by AgentCapabilities and tool role grants.
+- id: agent.librechat.subagent
+  name: Sub-agent (delegated)
+  component: LibreChat
+  agent_kind: specialist
+  purpose: Delegated agent/graph run spawned by a parent agent; identity captured as subagentIdentity.
+  invocation_surfaces:
+  - l1_id: l1.internal.subagent
+    trigger: parent agent delegation (chain capability)
+    auth_context: parent run's user identity
+  model_config:
+    provider: sub-agent's own definition
+    model: sub-agent model
+    config_source: agent definition
+    writers:
+    - principal: agent_author
+      l1_id: l1.api.agents.update
+    evidence_status: source_confirmed
+  instruction_sources:
+  - surface_id: ctx.system_prompt
+    instruction_role: system
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: agent_author
+      l1_id: l1.api.agents.update
+  - surface_id: ctx.delegated_task
+    instruction_role: developer
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: agent.librechat.primary
+      l1_id: null
+  tool_binding_ids:
+  - tool.execute_code
+  - tool.file_search
+  - tool.web_search
+  - tool.mcp
+  - tool.actions
+  context_source_ids:
+  - ctx.system_prompt
+  - ctx.delegated_task
+  - ctx.tool_results
+  - ctx.file_search_rag
+  - ctx.web_content
+  memory_ids:
+  - mem.conversations
+  - mem.vectordb
+  output_sink_ids:
+  - sink.delegated_result
+  - sink.action_call
+  - sink.mcp_call
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.subagent_routing
+  - ctl.tool_role_grants
+  resource_limits:
+    max_iterations: graph recursionLimit
+    recursion: routing bounds nesting
+    token_or_cost_budget: per sub-agent
+    loop_detection: graph limit
+    enforced_by: code
+  authority_context:
+    principal_source: inherits parent user
+    tenant_scope: same user
+    resource_scope: sub-agent's tools/actions
+    delegated_identity: subagentIdentity (subagentKind agent|graph + subagentAgentId); per-user OBO
+    authz_enforcement: code (capabilities + routing)
+  related_l2_ids:
+  - l2.agents.chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: packages/api/src/agents/{subagentIdentity,subagentTaskRouting,subagentDelivery}.ts
+  evidence_status: source_confirmed
+  notes: Child content + identity buffered and delivered back to the parent (subagentContent/Delivery).
+- id: agent.librechat.memory
+  name: Memory agent
+  component: LibreChat
+  agent_kind: reviewer
+  purpose: Background agent that extracts/updates long-term memory from conversation turns.
+  invocation_surfaces:
+  - l1_id: l1.internal.memory
+    trigger: post-turn memory processing (memory capability)
+    auth_context: turn user
+  model_config:
+    provider: configured memory model
+    model: memory agent model
+    config_source: librechat.yaml memory
+    writers:
+    - principal: admin
+      l1_id: l1.config.librechat_yaml
+    evidence_status: source_confirmed
+  instruction_sources:
+  - surface_id: ctx.memory_prompt
+    instruction_role: system
+    precedence: base
+    config_version: runtime
+    writers:
+    - principal: admin
+      l1_id: l1.config.librechat_yaml
+  tool_binding_ids:
+  - tool.memory
+  context_source_ids:
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.memory_prompt
+  memory_ids:
+  - mem.agent_memory
+  output_sink_ids:
+  - sink.memory_write
+  control_ids:
+  - ctl.agent_capabilities
+  resource_limits: null
+  authority_context:
+    principal_source: turn user
+    tenant_scope: same user
+    resource_scope: user's memories
+    delegated_identity: runs as the user
+    authz_enforcement: code (memory capability + token limits)
+  related_l2_ids:
+  - l2.agents.chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: packages/api memory processing; Tools memory
+  evidence_status: source_confirmed
+  notes: Turn-derived memory extraction -> poisoning persistence into ctx.memory_recall.
+tool_bindings:
+- id: tool.execute_code
+  agent_id: agent.librechat.primary
+  l1_ids:
+  - l1.api.code.execute
+  tool_name: execute_code (Code Interpreter)
+  tool_source: api
+  server_or_provider: LibreChat Code Interpreter API
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - run code in a sandboxed interpreter; file I/O in the session sandbox
+  execution_identity:
+    identity: Code API session (per-user)
+    credential_source: LIBRECHAT_CODE_API_KEY + user session
+  argument_handling: &id002
+    validation: tool arg schema (LangGraph structured tools)
+    authorization: AgentCapabilities + tool role grants
+    normalization: provider tool-call parsing
+    enforced_by: code
+  output_ids:
+  - ctx.tool_results
+  - sink.code_exec
+  execution_environment:
+    sandbox: LibreChat Code API sandbox (remote container)
+    network_egress: controlled by Code API
+    filesystem_scope: session sandbox FS
+    enforced_by: external_service
+  effect_class: code_execution
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.code_sandbox
+  - ctl.tool_role_grants
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.execute_code enabled + code resource
+  evidence_status: source_confirmed
+  source_ref: ToolService; app/clients/tools code/agent.ts
+  notes: Sandboxed interpreter (stronger isolation than in-process evaluators).
+- id: tool.file_search
+  agent_id: agent.librechat.primary
+  l1_ids:
+  - l1.api.rag.search
+  tool_name: file_search (RAG)
+  tool_source: api
+  server_or_provider: RAG API (vector)
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - semantic search over the user's attached files
+  execution_identity: &id001
+    identity: the request user (AuthIdentityContext / OBO)
+    credential_source: user session + stored OAuth tokens
+  argument_handling: {}
+  output_ids:
+  - ctx.file_search_rag
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: read
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.tool_role_grants
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.file_search + file_search resource
+  evidence_status: source_confirmed
+  source_ref: ToolService file_search; RAG API
+  notes: Retrieved file chunks are untrusted -> indirect injection.
+- id: tool.web_search
+  agent_id: agent.librechat.primary
+  l1_ids: []
+  tool_name: web_search
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - search provider + scrape results + rerank
+  execution_identity:
+    identity: server
+    credential_source: search/scraper/reranker keys (librechat.yaml)
+  argument_handling: {}
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  - sink.web_fetch
+  execution_environment:
+    sandbox: in-process + scraper
+    network_egress: unrestricted scrape (SSRF surface)
+    filesystem_scope: none
+    enforced_by: code
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.web_search enabled
+  evidence_status: source_confirmed
+  source_ref: app/clients/tools web/agent.ts
+  notes: Scrapes model-reachable URLs -> SSRF + indirect injection via page content.
+- id: tool.image_gen
+  agent_id: agent.librechat.primary
+  l1_ids: []
+  tool_name: image generation
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - image_gen_oai / gemini_image_gen / dalle
+  execution_identity:
+    identity: provider key
+    credential_source: image provider config
+  argument_handling: {}
+  output_ids:
+  - sink.image
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: image gen tool enabled
+  evidence_status: source_confirmed
+  source_ref: ToolService imageGenTools
+  notes: ''
+- id: tool.memory
+  agent_id: agent.librechat.primary
+  l1_ids: []
+  tool_name: memory
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - read/write agent long-term memory
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - mem.agent_memory
+  - ctx.memory_recall
+  execution_environment: null
+  effect_class: write
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.memory enabled
+  evidence_status: source_confirmed
+  source_ref: ToolService memory; packages/api memory
+  notes: Agent/turn-written memory re-injected (poisoning loop).
+- id: tool.mcp
+  agent_id: agent.librechat.primary
+  l1_ids: []
+  tool_name: MCP server tools
+  tool_source: mcp
+  server_or_provider: configured MCP servers (user or global)
+  schema_ref: null
+  description_source:
+    source_ref: MCP tool listing (remote)
+    writers:
+    - principal: external_service
+      l1_id: null
+    - principal: admin
+      l1_id: l1.config.mcp_servers
+    - principal: user
+      l1_id: l1.api.mcp.connect
+  capabilities:
+  - call MCP tools; MCP SDK (tools, possibly resources)
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  - ctx.tool_descriptions
+  - sink.mcp_call
+  execution_environment:
+    sandbox: remote MCP server
+    network_egress: per server
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.mcp_oauth
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: MCP server configured + (per-user) OAuth connected
+  evidence_status: source_confirmed
+  source_ref: api/server/services/Tools/mcp.js; packages/api/src/mcp; getMCPManager
+  notes: PER-USER OAuth/OBO identity (AuthIdentityContext) -> not a shared-cred confused deputy; remote
+    tool descriptions still a rug-pull/injection channel.
+- id: tool.actions
+  agent_id: agent.librechat.primary
+  l1_ids:
+  - l1.api.actions.execute
+  tool_name: OpenAPI Actions
+  tool_source: api
+  server_or_provider: per-agent OpenAPI action domains
+  schema_ref: null
+  description_source:
+    source_ref: OpenAPI spec (per agent, authored/imported)
+    writers:
+    - principal: agent_author
+      l1_id: l1.api.actions.create
+    - principal: external_service
+      l1_id: null
+  capabilities:
+  - call operations from an agent's OpenAPI action sets
+  execution_identity:
+    identity: action auth (none | apiKey | OAuth)
+    credential_source: action set auth (stored, encrypted)
+  argument_handling: *id002
+  output_ids:
+  - ctx.tool_results
+  - sink.action_call
+  execution_environment:
+    sandbox: remote action domain
+    network_egress: action domain
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.action_auth
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.actions + agent has action sets
+  evidence_status: source_confirmed
+  source_ref: ToolService loadActionSets/processActions
+  notes: Model-composed args to agent-defined OpenAPI domains -> SSRF/abuse scoped by action auth; OpenAPI
+    description is model-facing.
+- id: tool.plugins
+  agent_id: agent.librechat.primary
+  l1_ids: []
+  tool_name: structured tool plugins
+  tool_source: plugin
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - manifest tools / toolkits (manifestToolMap)
+  execution_identity:
+    identity: plugin
+    credential_source: plugin auth (user-provided keys)
+  argument_handling: {}
+  output_ids:
+  - ctx.tool_results
+  - sink.action_call
+  execution_environment: null
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.tool_role_grants
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: agent.tools includes plugin ids
+  evidence_status: source_confirmed
+  source_ref: app/clients/tools/manifest; loadTools
+  notes: ''
+- id: tool.subagent
+  agent_id: agent.librechat.primary
+  l1_ids: []
+  tool_name: delegate to sub-agent
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - spawn a sub-agent/graph (chain capability)
+  execution_identity: *id001
+  argument_handling: {}
+  output_ids:
+  - ctx.delegated_task
+  - sink.delegated_result
+  execution_environment: null
+  effect_class: none
+  approval_required: unknown
+  control_ids:
+  - ctl.subagent_routing
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: chain/agents capability + referenced sub-agents
+  evidence_status: source_confirmed
+  source_ref: packages/api/src/agents/* (subagent delegation)
+  notes: Delegation edge; sub-agent carries the real effects.
+context_sources:
+- id: ctx.system_prompt
+  source_kind: system_prompt
+  source_ref: agent.instructions
+  writers:
+  - principal: agent_author
+    l1_id: l1.api.agents.update
+  destination_agent_ids: &id003
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  destination_channel: system
+  provenance: agent definition
+  trust_class: trusted_instruction
+  transformation: ''
+  persistence_scope: tenant
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Agent instructions authored by the agent owner; shared agents expose this to other users.
+- id: ctx.memory_prompt
+  source_kind: system_prompt
+  source_ref: librechat.yaml memory prompt
+  writers:
+  - principal: admin
+    l1_id: l1.config.librechat_yaml
+  destination_agent_ids:
+  - agent.librechat.memory
+  destination_channel: system
+  provenance: admin config
+  trust_class: trusted_instruction
+  transformation: ''
+  persistence_scope: global
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.user_message
+  source_kind: user_input
+  source_ref: chat message
+  writers:
+  - principal: user
+    l1_id: l1.api.agents.chat
+  destination_agent_ids:
+  - agent.librechat.primary
+  - agent.librechat.memory
+  destination_channel: user
+  provenance: end user
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.chat_history
+  source_kind: chat_history
+  source_ref: conversations/messages
+  writers:
+  - principal: user
+    l1_id: l1.api.agents.chat
+  - principal: agent.librechat.primary
+    l1_id: null
+  destination_agent_ids:
+  - agent.librechat.primary
+  - agent.librechat.memory
+  destination_channel: user
+  provenance: prior turns
+  trust_class: mixed
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.file_search_rag
+  source_kind: retrieval
+  source_ref: RAG API file_search results
+  writers:
+  - principal: user
+    l1_id: l1.api.files.upload
+  destination_agent_ids: *id003
+  destination_channel: tool
+  provenance: user files
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: user
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Retrieved file chunks -> indirect injection.
+- id: ctx.tool_results
+  source_kind: tool_result
+  source_ref: tool outputs re-fed to the graph
+  writers:
+  - principal: agent.librechat.primary
+    l1_id: null
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id003
+  destination_channel: tool
+  provenance: tool/MCP/action output
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.web_content
+  source_kind: external
+  source_ref: web_search scrape results
+  writers:
+  - principal: external_service
+    l1_id: null
+  destination_agent_ids: *id003
+  destination_channel: tool
+  provenance: scraped web
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Scraped page content -> indirect injection + SSRF reflection.
+- id: ctx.memory_recall
+  source_kind: retrieval
+  source_ref: memory injected into context
+  writers:
+  - principal: agent.librechat.memory
+    l1_id: null
+  - principal: agent.librechat.primary
+    l1_id: null
+  destination_agent_ids:
+  - agent.librechat.primary
+  destination_channel: system
+  provenance: prior memory writes
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: user
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Turn-derived memory re-injected -> poisoning persistence.
+- id: ctx.ocr_context
+  source_kind: document
+  source_ref: ocr/context capability file content injection
+  writers:
+  - principal: user
+    l1_id: l1.api.files.upload
+  destination_agent_ids:
+  - agent.librechat.primary
+  destination_channel: user
+  provenance: uploaded files (OCR/context)
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.ocr / context
+  evidence_status: source_confirmed
+  notes: ''
+- id: ctx.tool_descriptions
+  source_kind: external
+  source_ref: MCP tool listings + OpenAPI action descriptions shown to the model
+  writers:
+  - principal: external_service
+    l1_id: null
+  - principal: agent_author
+    l1_id: l1.api.actions.create
+  destination_agent_ids: *id003
+  destination_channel: tool
+  provenance: remote MCP / OpenAPI specs
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: tenant
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Remote MCP/action descriptions are model-facing -> rug-pull / description injection.
+- id: ctx.delegated_task
+  source_kind: delegated_summary
+  source_ref: parent -> sub-agent task
+  writers:
+  - principal: agent.librechat.primary
+    l1_id: null
+  destination_agent_ids:
+  - agent.librechat.subagent
+  destination_channel: developer
+  provenance: parent agent (model-composed)
+  trust_class: mixed
+  transformation: ''
+  persistence_scope: workflow
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Parent-composed sub-agent task -> parent->child injection path.
+- id: ctx.attachments
+  source_kind: document
+  source_ref: message file/image attachments
+  writers:
+  - principal: user
+    l1_id: l1.api.files.upload
+  destination_agent_ids:
+  - agent.librechat.primary
+  destination_channel: user
+  provenance: user uploads
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: ''
+memory_stores:
+- id: mem.conversations
+  store_kind: conversation_history
+  owner_component: LibreChat
+  readers:
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  - agent.librechat.memory
+  writers:
+  - principal: user
+    l1_id: l1.api.agents.chat
+  - principal: agent.librechat.primary
+    l1_id: null
+  scope: user
+  isolation_enforcement: per-user conversations (userId scoping)
+  write_provenance: user + agent turns
+  read_path: messages replayed into run
+  retention_and_deletion: user-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: packages/data-schemas conversations/messages
+  notes: ''
+- id: mem.vectordb
+  store_kind: vector_store
+  owner_component: LibreChat
+  readers:
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  writers:
+  - principal: user
+    l1_id: l1.api.files.upload
+  scope: user
+  isolation_enforcement: per-user file ownership; shared agent files by permission
+  write_provenance: uploaded files (RAG API)
+  read_path: file_search semantic query
+  retention_and_deletion: file lifecycle
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: RAG API; Files service
+  notes: Shared-agent file resources can cross users.
+- id: mem.agent_memory
+  store_kind: agent_notes
+  owner_component: LibreChat
+  readers:
+  - agent.librechat.primary
+  - agent.librechat.memory
+  writers:
+  - principal: agent.librechat.memory
+    l1_id: null
+  - principal: agent.librechat.primary
+    l1_id: null
+  scope: user
+  isolation_enforcement: per-user memory
+  write_provenance: memory agent (turn-derived) + memory tool
+  read_path: memory injected into context
+  retention_and_deletion: user-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: memory capability
+  source_ref: packages/api memory
+  notes: Poisoning sink -> ctx.memory_recall.
+- id: mem.agents_config
+  store_kind: database
+  owner_component: LibreChat
+  readers:
+  - agent.librechat.primary
+  writers:
+  - principal: agent_author
+    l1_id: l1.api.agents.update
+  - principal: admin
+    l1_id: l1.config.librechat_yaml
+  scope: tenant
+  isolation_enforcement: agent ownership + share permissions
+  write_provenance: agent authors
+  read_path: agent definition supplies instructions + tools + actions
+  retention_and_deletion: owner-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: agents schema
+  notes: Editing a shared agent = provisioning instructions + tools for its users.
+- id: mem.actions
+  store_kind: database
+  owner_component: LibreChat
+  readers:
+  - agent.librechat.primary
+  writers:
+  - principal: agent_author
+    l1_id: l1.api.actions.create
+  scope: tenant
+  isolation_enforcement: per-agent action sets
+  write_provenance: agent authors
+  read_path: loadActionSets -> tools
+  retention_and_deletion: owner-managed
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: ToolService loadActionSets; actions schema (auth encrypted)
+  notes: Action auth (apiKey/OAuth) stored encrypted; defines outbound domains.
+output_sinks:
+- id: sink.chat_response
+  sink_kind: chat_response
+  producer_ids:
+  - agent.librechat.primary
+  audience: user (chat UI)
+  delivery: streamed markdown
+  transformation: ''
+  render_side_effects:
+    auto_fetch: chat UI renders markdown images/links
+    active_content: sanitized markdown
+    enforced_by: code
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids:
+  - l2.agents.chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: StreamRunManager
+  notes: Markdown image/link auto-load = exfil-on-render channel.
+- id: sink.artifacts
+  sink_kind: file
+  producer_ids:
+  - agent.librechat.primary
+  audience: user (iframe)
+  delivery: model-authored HTML/React/Mermaid rendered in a sandboxed artifact iframe
+  transformation: ''
+  render_side_effects:
+    auto_fetch: iframe may load remote resources
+    active_content: executes model-authored code in a sandboxed iframe
+    enforced_by: code (artifacts capability + iframe sandbox)
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: AgentCapabilities.artifacts
+  evidence_status: source_confirmed
+  source_ref: artifacts capability
+  notes: Client-side code execution of model output; gated by artifacts capability.
+- id: sink.code_exec
+  sink_kind: external_api
+  producer_ids:
+  - tool.execute_code
+  audience: Code Interpreter API
+  delivery: HTTP to LibreChat Code API sandbox
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: code/agent.ts
+  notes: Sandboxed remote execution; per-user session.
+- id: sink.image
+  sink_kind: external_api
+  producer_ids:
+  - tool.image_gen
+  audience: image provider
+  delivery: provider API
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: image gen tools
+  notes: ''
+- id: sink.action_call
+  sink_kind: external_api
+  producer_ids:
+  - tool.actions
+  - tool.plugins
+  audience: agent OpenAPI action domains / plugin APIs
+  delivery: HTTP with action/plugin auth + model args
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids:
+  - l2.agents.chat
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: processActions
+  notes: Model-composed args to agent-defined domains under stored action auth.
+- id: sink.mcp_call
+  sink_kind: external_api
+  producer_ids:
+  - tool.mcp
+  audience: MCP servers
+  delivery: MCP call under per-user OBO identity
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: Tools/mcp.js
+  notes: Per-user OAuth identity (not shared creds).
+- id: sink.web_fetch
+  sink_kind: external_api
+  producer_ids:
+  - tool.web_search
+  audience: arbitrary web
+  delivery: scraper fetch
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids:
+  - ctx.web_content
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: web/agent.ts
+  notes: ''
+- id: sink.delegated_result
+  sink_kind: delegated_result
+  producer_ids:
+  - agent.librechat.subagent
+  audience: parent agent
+  delivery: sub-agent content/identity buffered to parent
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids:
+  - ctx.tool_results
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: subagentDelivery/subagentContent
+  notes: Child->parent path.
+- id: sink.memory_write
+  sink_kind: database_record
+  producer_ids:
+  - agent.librechat.memory
+  - tool.memory
+  audience: mem.agent_memory
+  delivery: memory upsert
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids:
+  - ctx.memory_recall
+  related_l1_ids: []
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: packages/api memory
+  notes: Closes poisoning loop into ctx.memory_recall.
+execution_edges:
+- id: edge.user__primary
+  source:
+    agent_id: null
+    step: request
+    external_trigger: agents chat
+  destination:
+    agent_id: agent.librechat.primary
+  decision_maker: user
+  condition: user runs an agent chat
+  input_source_ids:
+  - ctx.user_message
+  - ctx.system_prompt
+  - ctx.file_search_rag
+  argument_sources: ''
+  payload: user message + agent config
+  output_ids: []
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids:
+  - l1.api.agents.chat
+  related_l2_steps:
+  - l2_id: l2.agents.chat
+    order: 1
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: agents endpoint; createRunBody.js
+  notes: ''
+- id: edge.primary__tool
+  source:
+    agent_id: agent.librechat.primary
+    step: tool-node
+    external_trigger: null
+  destination:
+    tool_binding_id: (model-selected binding)
+  decision_maker: llm
+  condition: LangGraph model node emits a tool call
+  input_source_ids:
+  - ctx.user_message
+  - ctx.chat_history
+  - ctx.file_search_rag
+  - ctx.tool_results
+  - ctx.web_content
+  - ctx.memory_recall
+  - ctx.tool_descriptions
+  argument_sources: model-composed args (structured tools)
+  payload: tool name + args
+  output_ids:
+  - ctx.tool_results
+  control_ids:
+  - ctl.agent_capabilities
+  - ctl.tool_role_grants
+  - ctl.code_sandbox
+  - ctl.mcp_oauth
+  - ctl.action_auth
+  validation_or_approval: capability gate + role grants + per-tool auth (NO interactive per-call approval)
+  execution_mode: synchronous
+  loop_bound: graph recursionLimit
+  failure_behavior: retry
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.agents.chat
+    order: 2
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: Runs/StreamRunManager.js; @librechat/agents graph
+  notes: Tool use gated by capability + auth, but no interactive human approval per call.
+- id: edge.tool__primary
+  source:
+    agent_id: agent.librechat.primary
+    step: tool-return
+    external_trigger: null
+  destination:
+    agent_id: agent.librechat.primary
+  decision_maker: deterministic_code
+  condition: tool returns
+  input_source_ids: []
+  argument_sources: ''
+  payload: tool result
+  output_ids:
+  - ctx.tool_results
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: retry
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.agents.chat
+    order: 3
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: RunManager
+  notes: ''
+- id: edge.primary__subagent
+  source:
+    agent_id: agent.librechat.primary
+    step: delegate
+    external_trigger: null
+  destination:
+    agent_id: agent.librechat.subagent
+  decision_maker: llm
+  condition: agent delegates (chain capability)
+  input_source_ids:
+  - ctx.user_message
+  - ctx.chat_history
+  argument_sources: model-composed task
+  payload: delegated task
+  output_ids:
+  - ctx.delegated_task
+  control_ids:
+  - ctl.subagent_routing
+  validation_or_approval: ''
+  execution_mode: background
+  loop_bound: routing nesting bound
+  failure_behavior: partial_effect
+  related_l1_ids:
+  - l1.internal.subagent
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: subagentTaskRouting.ts
+  notes: subagentIdentity captured; parent->child task injection path.
+- id: edge.subagent__primary
+  source:
+    agent_id: agent.librechat.subagent
+    step: result
+    external_trigger: null
+  destination:
+    agent_id: agent.librechat.primary
+    output_sink_id: sink.delegated_result
+  decision_maker: deterministic_code
+  condition: sub-agent completes
+  input_source_ids: []
+  argument_sources: ''
+  payload: sub-agent content
+  output_ids:
+  - sink.delegated_result
+  - ctx.tool_results
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: callback
+  loop_bound: null
+  failure_behavior: partial_effect
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: subagentDelivery.ts
+  notes: ''
+- id: edge.primary__external
+  source:
+    agent_id: agent.librechat.primary
+    step: external-tool
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.mcp
+    external_surface: MCP / OpenAPI action domains
+  decision_maker: llm
+  condition: agent calls MCP / Action
+  input_source_ids: []
+  argument_sources: model-composed args
+  payload: operation + args
+  output_ids:
+  - sink.mcp_call
+  - sink.action_call
+  - ctx.tool_results
+  control_ids:
+  - ctl.mcp_oauth
+  - ctl.action_auth
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: fail_closed
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: Tools/mcp.js; processActions
+  notes: MCP under per-user OBO; Actions under stored action auth. No MCP sampling edge observed.
+- id: edge.primary__code
+  source:
+    agent_id: agent.librechat.primary
+    step: code
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.execute_code
+    external_surface: Code Interpreter API
+  decision_maker: llm
+  condition: agent calls execute_code
+  input_source_ids: []
+  argument_sources: model-composed code
+  payload: code
+  output_ids:
+  - sink.code_exec
+  - ctx.tool_results
+  control_ids:
+  - ctl.code_sandbox
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: code/agent.ts
+  notes: ''
+- id: edge.memory_extract
+  source:
+    agent_id: agent.librechat.memory
+    step: post-turn
+    external_trigger: null
+  destination:
+    agent_id: agent.librechat.memory
+    output_sink_id: sink.memory_write
+  decision_maker: llm
+  condition: post-turn memory processing (memory capability)
+  input_source_ids:
+  - ctx.user_message
+  - ctx.chat_history
+  argument_sources: turn content -> memory ops
+  payload: memory updates
+  output_ids:
+  - sink.memory_write
+  - mem.agent_memory
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: background
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: packages/api memory processing
+  notes: Turn-derived memory write; poisoning persistence edge.
+- id: edge.primary__output
+  source:
+    agent_id: agent.librechat.primary
+    step: final
+    external_trigger: null
+  destination:
+    output_sink_id: sink.chat_response
+  decision_maker: deterministic_code
+  condition: agent run completes
+  input_source_ids: []
+  argument_sources: ''
+  payload: final markdown (+ artifacts)
+  output_ids:
+  - sink.chat_response
+  control_ids: []
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.agents.chat
+    order: 4
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: StreamRunManager finalize
+  notes: ''
+controls:
+- id: ctl.agent_capabilities
+  control_kind: tool_policy
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: platform_config
+  failure_mode: fail_closed
+  applies_to_agent_ids: &id004
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  - agent.librechat.memory
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: ToolService resolveAgentCapabilities; librechat.yaml endpoints.agents.capabilities
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Admin enables capability classes (execute_code/file_search/web_search/actions/tools/artifacts/ocr/context/memory/chain);
+    a disabled capability's tools are never loaded.
+- id: ctl.tool_role_grants
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids: *id004
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: ToolService resolveToolRoleGrants
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Per-role grants decide which tools a user/agent may load.
+- id: ctl.code_sandbox
+  control_kind: tool_policy
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: external_service
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  applies_to_tool_binding_ids:
+  - tool.execute_code
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: LibreChat Code Interpreter API (remote sandbox)
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Code runs in the remote Code API sandbox, not in the app process.
+- id: ctl.mcp_oauth
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  applies_to_tool_binding_ids:
+  - tool.mcp
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: Tools/mcp.js AuthIdentityContext / OBO; getUserConnection; loadUserMCPAuthMap
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: MCP calls use the REAL request user's OAuth identity (per-user), not a shared credential.
+- id: ctl.action_auth
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.librechat.primary
+  - agent.librechat.subagent
+  applies_to_tool_binding_ids:
+  - tool.actions
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: ToolService processActions; action set auth (encrypted apiKey/OAuth)
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Each action set carries its own stored auth and domain scope.
+- id: ctl.subagent_routing
+  control_kind: tool_policy
+  applies_at: delegation
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.librechat.primary
+  applies_to_tool_binding_ids:
+  - tool.subagent
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: packages/api/src/agents/subagentTaskRouting.ts
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Routes/bounds delegation to allowed sub-agents.
+- id: ctl.abort
+  control_kind: monitoring
+  applies_at: after_model
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: abort
+  applies_to_agent_ids: *id004
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: run abort/cancel
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: User can cancel the run; no interactive per-tool approval gate.

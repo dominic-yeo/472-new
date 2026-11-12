@@ -1,0 +1,35 @@
+﻿Outline probe summary (2026-11-12T00:09:06) base=http://localhost:3001 loggedIn=True
+IDENTITY METHOD PATH                                   CODE  NOTE
+anon    POST  /api/auth.config                       200   PUBLIC (expect 200)
+anon    POST  /api/auth.info                         401   anon (expect 401)
+anon    POST  /api/users.list                        401   anon (expect 401)
+anon    POST  /api/collections.list                  401   anon (expect 401)
+anon    POST  /api/documents.list                    401   anon (expect 401)
+anon    POST  /api/shares.list                       401   anon (expect 401)
+anon    POST  /api/apiKeys.list                      401   anon (expect 401)
+anon    POST  /api/integrations.list                 401   anon (expect 401)
+anon    POST  /api/installation.info                 401   anon (expect 401)
+anon    POST  /api/auth.info?token=deadbeef          401   bogus ?token= parses->401
+anon    POST  /auth/email                            200   request magic link
+user    POST  /auth/email.callback                   200   two-step magic-link login
+admin   POST  /api/auth.info                         200   admin (expect 200)
+admin   POST  /api/users.list                        200   admin (expect 200)
+admin   POST  /api/collections.list                  200   admin (expect 200)
+admin   POST  /api/documents.list                    200   admin (expect 200)
+admin   POST  /api/shares.list                       200   admin (expect 200)
+admin   POST  /api/apiKeys.list                      200   admin (expect 200)
+admin   POST  /api/integrations.list                 200   admin (expect 200)
+admin   POST  /api/groups.list                       200   admin (expect 200)
+admin   POST  /api/oauthClients.list                 200   admin (expect 200)
+admin   POST  /api/events.list                       200   admin (expect 200)
+admin   POST  /api/collections.create                200   create collection
+admin   POST  /api/documents.create                  200   create document
+admin   POST  /api/shares.create                     200   publish share
+anon    POST  /api/documents.info                    200   ANON read via share (expect 200 w/ content)
+anon    POST  /api/shares.info                       200   ANON share.info oracle (expect 200)
+anon    POST  /api/documents.info                    401   ANON same doc by id (expect 401)
+admin   POST  /api/apiKeys.create                    200   mint API key
+apikey  POST  /api/auth.info                         200   header Bearer (expect 200)
+apikey  POST  /api/auth.info (body token)            200   body token (expect 200)
+apikey  POST  /api/auth.info?token= (URL)            200   ?token= query == TOKEN-IN-URL (expect 200)
+

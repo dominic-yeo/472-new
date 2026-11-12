@@ -1,0 +1,642 @@
+# Agentic attack-surface schema
+# Companion to L1_schema.yaml and L2_schema.yaml.
+#
+# L1 records concrete interfaces; L2 records business operations. This schema
+# records the agent runtime and its control/data paths, which may be shared by
+# multiple L2 operations and realized through multiple L1 interactions.
+#
+# Model this as linked inventories rather than one oversized record: agents,
+# their capability bindings, context/memory sources, output sinks, execution
+# transitions, and controls. Use stable IDs to connect these records to one
+# another and to the existing L1/L2 inventories. Keep secrets out of this
+# dataset; record the configuration source/version and whether a value was
+# observed or inferred.
+#
+# Data lineage: every piece of content should be traceable from where it
+# enters (context_sources / memory_stores, with writers), through the agents
+# and execution_edges that carry it, to where it leaves (tool_bindings.output_ids,
+# execution_edges.output_ids, output_sinks). Fields typed "see shared_fields.X"
+# use the definition given in shared_fields at the bottom of this file.
+
+record_sets:
+  agents:
+    record: One logical agent role or deployable agent configuration.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier, e.g. "agent.vendor_chat" or "agent.payments".
+
+      name:
+        type: string
+        desc: Human-readable agent name.
+
+      component:
+        type: string
+        desc: Owning L1 component, e.g. vendor, admin, or agent.
+
+      agent_kind:
+        type: enum [interactive, orchestrator, specialist, reviewer, other]
+        desc: The agent's runtime role in the application.
+
+      purpose:
+        type: string
+        desc: Intended task and decision authority of this agent.
+
+      invocation_surfaces:
+        type: list[{l1_id, trigger, auth_context}]
+        desc: L1 entry points and conditions that can start or resume this agent.
+
+      model_config:
+        type: object {provider, model, deployment, version, config_source, writers, evidence_status}
+        desc: >
+          Provider/model identity and where configuration comes from. Record
+          references or redacted values only; never copy API keys or secrets.
+          writers uses shared_fields.writers. evidence_status is observed |
+          source_confirmed | inferred | unknown.
+
+      instruction_sources:
+        type: list[{surface_id, instruction_role, precedence, config_version, writers}]
+        desc: >
+          System/developer instructions and other prompt templates assembled
+          for this agent. writers uses shared_fields.writers; use [] when the
+          instruction is fixed in source code.
+
+      tool_binding_ids:
+        type: list[string]
+        desc: References to the tools/capabilities available to this agent at runtime.
+
+      context_source_ids:
+        type: list[string]
+        desc: References to user, tool, retrieval, history, or delegated-task context sources.
+
+      memory_ids:
+        type: list[string]
+        desc: References to state stores the agent can read or write across turns/runs.
+
+      output_sink_ids:
+        type: list[string]
+        desc: References to destinations that receive this agent's output.
+
+      control_ids:
+        type: list[string]
+        desc: References to controls applied to this agent's model or tool execution.
+
+      resource_limits:
+        type: object {max_iterations, recursion, token_or_cost_budget, loop_detection, enforced_by} | null
+        desc: >
+          Bounds on autonomous execution that cap runaway agency and cost
+          (denial-of-wallet): the maximum reasoning/tool-call iterations per
+          run, whether the agent may recurse or re-invoke itself, any
+          token/cost budget, and loop/cycle detection. enforced_by is code |
+          platform_config | model_prompt | none | unknown; use null when no
+          bound exists.
+
+      authority_context:
+        type: object {principal_source, tenant_scope, resource_scope, delegated_identity, authz_enforcement}
+        desc: >
+          Effective identity and access scope used by the agent's tools. State
+          where authorization is enforced (code, prompt, external policy, or
+          none/unknown), rather than treating prompt instructions as enforcement.
+
+      related_l2_ids:
+        type: list[string]
+        desc: L2 business operations this agent can participate in.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      source_ref:
+        type: string
+        desc: Source/config location supporting this record.
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly this runtime configuration was verified.
+
+      notes:
+        type: string
+        desc: Free-text caveats or configuration details that do not fit the structured fields.
+
+  tool_bindings:
+    record: One tool or capability exposed to an agent in a particular runtime/configuration.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier for this agent-to-tool binding.
+
+      agent_id:
+        type: string
+        desc: Agent that receives this capability.
+
+      l1_ids:
+        type: list[string]
+        desc: L1 tool interactions covered by this binding (one per tool), if catalogued separately.
+
+      tool_name:
+        type: string
+        desc: Name presented to the model or invoked by the agent runtime.
+
+      tool_source:
+        type: enum [native, mcp, api, plugin, code, external, other]
+        desc: How the capability is provided.
+
+      server_or_provider:
+        type: string | null
+        desc: MCP server, API, plugin, or service that supplies the tool.
+
+      schema_ref:
+        type: string | null
+        desc: Reference/version/hash for the argument schema presented at runtime.
+
+      description_source:
+        type: object {source_ref, writers} | null
+        desc: >
+          Authored or overridden source of the tool description shown to the
+          model, and who can change it (shared_fields.writers).
+
+      capabilities:
+        type: list[string]
+        desc: Data/actions the tool can access or perform.
+
+      execution_identity:
+        type: object {identity, credential_source}
+        desc: >
+          Identity the tool acts as when it reaches its backing service, e.g.
+          the caller's SessionContext, a service account, or an API key held
+          by the MCP server. Record the credential's location only, never its value.
+
+      argument_handling:
+        type: object {validation, authorization, normalization, enforced_by}
+        desc: >
+          How arguments are checked and transformed, and whether checks are
+          enforced in code, by an external policy, by prompt guidance, or not at all.
+
+      output_ids:
+        type: list[string]
+        desc: >
+          Context source, memory store, or output sink IDs that receive this
+          tool's result or side-effect data, e.g. ctx.business_tool_results.
+
+      effect_class:
+        type: enum [read, write, external_send, financial, destructive, code_execution, mixed, none, unknown]
+        desc: Security-relevant side-effect class of invoking the tool.
+
+      execution_environment:
+        type: object {sandbox, network_egress, filesystem_scope, enforced_by} | null
+        desc: >
+          Where the tool's work runs and what it can reach: the sandbox or
+          isolation boundary (e.g. gVisor/container, in-process, none), the
+          network_egress scope (none | allowlist | unrestricted, plus any
+          URL/host target control for fetch-style tools), and the
+          filesystem_scope. Populate for code-execution, fetch/URL, and shell
+          tools; use null when not applicable. enforced_by is code |
+          platform_config | external_service | none | unknown.
+
+      approval_required:
+        type: boolean | unknown
+        desc: Whether invocation requires a human or explicit user approval.
+
+      control_ids:
+        type: list[string]
+        desc: >
+          Controls applied specifically to this tool binding, e.g. a tool_policy
+          or human_approval gating this tool. Mirrors
+          controls.applies_to_tool_binding_ids.
+
+      related_l2_ids:
+        type: list[string]
+        desc: L2 operations that use this binding.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly this binding and its effective configuration were verified.
+
+      source_ref:
+        type: string
+        desc: Source/config location supporting this record.
+
+      notes:
+        type: string
+        desc: Free-text caveats.
+
+  context_sources:
+    record: One source of content that may be added to an agent's model context.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier for the context source.
+
+      source_kind:
+        type: enum [system_prompt, developer_prompt, user_input, chat_history, tool_result, document, retrieval, mcp_resource, mcp_prompt, delegated_summary, external, other]
+        desc: >
+          Origin category of the content. mcp_resource / mcp_prompt are content
+          an MCP server exposes to the client (distinct from its tools, which
+          are tool_bindings).
+
+      source_ref:
+        type: string
+        desc: Data field, component, or code/config location where content originates.
+
+      writers:
+        type: see shared_fields.writers
+        desc: Principals or components that can populate this content.
+
+      destination_agent_ids:
+        type: list[string]
+        desc: Agents whose model context may receive this content.
+
+      destination_channel:
+        type: enum [system, developer, user, tool, other, unknown]
+        desc: Message/context role or channel used when content reaches the model.
+
+      provenance:
+        type: string
+        desc: User, tenant, tool, service, or other origin when known.
+
+      trust_class:
+        type: enum [trusted_instruction, untrusted_data, mixed, unknown]
+        desc: Whether content is treated as instruction, data, or a mixture by the runtime.
+
+      transformation:
+        type: string
+        desc: Serialization, interpolation, summarization, truncation, filtering, or other handling before model use.
+
+      persistence_scope:
+        type: see shared_fields.scope
+        desc: How long or how broadly this content is retained or reused.
+
+      related_l2_ids:
+        type: list[string]
+        desc: L2 operations in which this source can participate.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly the source-to-context path was verified.
+
+      notes:
+        type: string
+        desc: Free-text caveats, including known prompt-injection or cross-tenant concerns.
+
+  memory_stores:
+    record: One store or state mechanism that agents can read from or write to across steps.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier for the memory/state store.
+
+      store_kind:
+        type: enum [conversation_history, agent_notes, task_summary, vector_store, database, cache, event_log, external, other]
+        desc: Kind of persistent or semi-persistent state.
+
+      owner_component:
+        type: string
+        desc: Component/service that owns the store.
+
+      readers:
+        type: list[string]
+        desc: Agent IDs or roles that can read this store.
+
+      writers:
+        type: see shared_fields.writers
+        desc: Agents, principals, or components that can write this store.
+
+      scope:
+        type: see shared_fields.scope
+        desc: Isolation and reuse boundary for stored state.
+
+      isolation_enforcement:
+        type: string
+        desc: How the scope boundary is applied, e.g. namespace filter in repository code, per-session key, or by convention only.
+
+      write_provenance:
+        type: string
+        desc: Who or what can populate the memory, including whether untrusted users/tools can write it.
+
+      read_path:
+        type: string
+        desc: How stored content is selected and returned to an agent/model.
+
+      retention_and_deletion:
+        type: string
+        desc: TTL, cleanup, user deletion, or other lifecycle behavior.
+
+      related_l2_ids:
+        type: list[string]
+        desc: L2 operations that read or mutate this store.
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly scope and access behavior were verified.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      source_ref:
+        type: string
+        desc: Source/config location supporting this record.
+
+      notes:
+        type: string
+        desc: Free-text caveats.
+
+  output_sinks:
+    record: One destination where agent output or tool side-effect data leaves the agent runtime.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier, e.g. "sink.vendor_chat_response" or "sink.finmail_outbound".
+
+      sink_kind:
+        type: enum [chat_response, email, file, database_record, external_api, notification, delegated_result, log, other]
+        desc: Kind of destination.
+
+      producer_ids:
+        type: list[string]
+        desc: Agent or tool binding IDs that write to this sink.
+
+      audience:
+        type: string
+        desc: Who or what consumes the output, e.g. current vendor, admin UI, external recipient, parent agent.
+
+      delivery:
+        type: string
+        desc: How output is delivered or rendered, e.g. streamed markdown in chat UI, SMTP send, FinDrive file write.
+
+      transformation:
+        type: string
+        desc: Filtering, sanitization, formatting, or truncation applied before delivery.
+
+      render_side_effects:
+        type: object {auto_fetch, active_content, enforced_by} | null
+        desc: >
+          Whether rendering/delivering this output can trigger outbound requests
+          or execute content — the exfiltration channel where model-authored
+          markdown images, links, or HTML cause the client to fetch an
+          attacker-chosen URL. auto_fetch covers auto-loaded resources (e.g.
+          image URLs); active_content covers HTML/script/iframe rendering.
+          enforced_by names any sanitizer/CSP (code | platform_config |
+          external_service | none | unknown). Use null for plain-text sinks.
+
+      becomes_context_source_ids:
+        type: list[string]
+        desc: Context sources this output later feeds, when it is read back into an agent (e.g. a written file later retrieved).
+
+      related_l1_ids:
+        type: list[string]
+        desc: L1 interactions that expose or read this output.
+
+      related_l2_ids:
+        type: list[string]
+        desc: L2 operations that produce this output.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly the delivery path was verified.
+
+      source_ref:
+        type: string
+        desc: Source/config location supporting this record.
+
+      notes:
+        type: string
+        desc: Free-text caveats.
+
+  execution_edges:
+    record: One possible transition between agent steps, tools, or external events.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier for this transition.
+
+      source:
+        type: object {agent_id, step, external_trigger}
+        desc: >
+          Agent and step that can initiate the transition. For a transition
+          initiated from outside the agent graph — e.g. an MCP server's sampling
+          request that drives the client model — leave agent_id null, set
+          external_trigger to the originating surface, and use decision_maker
+          external_event.
+
+      destination:
+        type: object {agent_id, tool_binding_id, output_sink_id, external_surface}
+        desc: Next agent, tool binding, output sink, or external surface; populate the applicable target.
+
+      decision_maker:
+        type: enum [deterministic_code, llm, user, scheduler, external_event, human_reviewer, unknown]
+        desc: Who or what selects or triggers this transition.
+
+      condition:
+        type: string
+        desc: Condition or model-directed intent that enables the transition.
+
+      input_source_ids:
+        type: list[string]
+        desc: Context or memory sources that can influence this transition.
+
+      argument_sources:
+        type: string
+        desc: How arguments are constructed, including model composition or code pass-through.
+
+      payload:
+        type: string
+        desc: Data carried across the transition, e.g. task description, vendor_id, invoice fields, delegated summary.
+
+      output_ids:
+        type: list[string]
+        desc: Context source, memory store, or output sink IDs that receive the transition's result.
+
+      control_ids:
+        type: list[string]
+        desc: Controls applied before this transition takes effect.
+
+      validation_or_approval:
+        type: string
+        desc: Checks or approvals on this transition that are not catalogued as separate controls.
+
+      execution_mode:
+        type: enum [synchronous, background, queued, repeated, callback, unknown]
+        desc: Whether the transition is immediate, asynchronous, retried, or callback-driven.
+
+      loop_bound:
+        type: string | null
+        desc: >
+          For repeated/callback transitions, the cap on repetitions or
+          recursion depth and where it is enforced; null if unbounded or not
+          applicable. Complements agents.resource_limits.
+
+      failure_behavior:
+        type: see shared_fields.failure_behavior
+        desc: What happens on timeout, error, invalid output, or policy failure.
+
+      related_l1_ids:
+        type: list[string]
+        desc: L1 interactions involved in this transition.
+
+      related_l2_steps:
+        type: list[{l2_id, order}]
+        desc: >
+          L2 operations that contain this transition and its position within
+          each, so an operation's edges can be read in sequence. order is an
+          integer; use the same value for edges that can run in parallel.
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly the transition and its conditions were verified.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      source_ref:
+        type: string
+        desc: Source/config location supporting this record.
+
+      notes:
+        type: string
+        desc: Free-text caveats, including nondeterministic or incompletely explored branches.
+
+  controls:
+    record: One guardrail, policy, approval, or monitoring control affecting agent execution.
+    fields:
+      id:
+        type: string
+        desc: Stable identifier for the control.
+
+      control_kind:
+        type: enum [input_filter, output_filter, tool_policy, authorization, human_approval, rate_limit, monitoring, webhook, other]
+        desc: Control purpose.
+
+      applies_at:
+        type: enum [before_model, after_model, before_tool, after_tool, delegation, memory_read, memory_write, output_delivery, other]
+        desc: Execution point where the control runs.
+
+      enforcement_mode:
+        type: enum [blocking, modifying, advisory, observe_only, unknown]
+        desc: Whether the control can stop or change execution, or only report activity.
+
+      implementation:
+        type: enum [code, model_prompt, external_service, platform_config, human_process, unknown]
+        desc: Where enforcement is implemented.
+
+      failure_mode:
+        type: see shared_fields.failure_behavior
+        desc: Behavior when the control itself errors or times out.
+
+      applies_to_agent_ids:
+        type: list[string]
+        desc: Agents covered by this control.
+
+      applies_to_tool_binding_ids:
+        type: list[string]
+        desc: >
+          Tool bindings covered by this control, for per-tool policies or
+          approvals. Mirrors tool_bindings.control_ids.
+
+      related_l1_ids:
+        type: list[string]
+        desc: L1 interactions used to configure or observe the control.
+
+      related_l2_ids:
+        type: list[string]
+        desc: L2 operations affected by the control.
+
+      evidence_status:
+        type: see shared_fields.evidence_status
+        desc: How directly enforcement behavior was verified.
+
+      source_ref:
+        type: string
+        desc: Source/config location supporting this record.
+
+      visibility:
+        type: see shared_fields.visibility
+
+      reachability:
+        type: see shared_fields.reachability
+
+      notes:
+        type: string
+        desc: Free-text caveats, such as a verdict being logged but not enforced.
+
+shared_fields:
+  related_l1_ids:
+    type: list[string]
+    desc: References to existing L1 interaction IDs; omit when no L1 interaction applies.
+
+  related_l2_ids:
+    type: list[string]
+    desc: References to existing L2 semantic-operation IDs; omit when no L2 operation applies.
+
+  evidence_status:
+    type: enum [observed, source_confirmed, inferred, unknown]
+    desc: >
+      How the record was verified: observed live, confirmed in source/config,
+      inferred, or unverified. This is about the evidence, not about whether
+      the item can be triggered — that is reachability.
+
+  visibility:
+    type: enum [black_box_observable, grey_box_required, white_box_required]
+    desc: >
+      Minimum access needed to understand what this record does — distinct
+      from L1 visibility (knowing an endpoint exists) and from reachability
+      (being able to trigger it). E.g. an admin can black-box-observe that a
+      "tool description" field exists and is editable, but grey/white-box
+      access is needed to see that editing it changes what another agent does
+      several requests later.
+
+  reachability:
+    type: object {status, notes}
+    desc: >
+      Whether this record can be exercised end-to-end in this deployment.
+      status is one of:
+        black_box_reachable     - can be triggered through live interfaces.
+        requires_guessed_path   - reachable once an undiscovered path/name is known.
+        conditionally_mounted   - depends on deployment or namespace config
+                                  (e.g. MCP server enablement, LLM_PROVIDER set).
+        blocked_by_control      - present but a control prevents triggering.
+        unreachable_in_source   - defined in source but not wired to any entry point.
+        unknown                 - not yet determined.
+      Do not use evidence_status values (observed, source_confirmed) here;
+      record how the status was established in evidence_status and notes.
+
+  writers:
+    type: list[{principal, l1_id}]
+    desc: >
+      Who or what can create or change the content. principal is a role,
+      agent ID, or component (e.g. admin, vendor, agent.orchestrator,
+      source_code). l1_id is the interface used to write it, or null. Use []
+      when the content is fixed in source code with no runtime write path.
+
+  scope:
+    type: enum [turn, session, workflow, user, tenant, global, external, none, unknown]
+    desc: Retention and isolation boundary. none means not retained beyond the immediate call.
+
+  failure_behavior:
+    type: enum [fail_closed, fail_open, retry, fallback, abort, partial_effect, bypass, unknown]
+    desc: Behavior on error, timeout, invalid output, or policy failure.

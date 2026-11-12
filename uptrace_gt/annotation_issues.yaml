@@ -1,0 +1,150 @@
+schema_version: pengent-web-gt-v1
+environment_id: "uptrace-oss"
+
+issues:
+  - id: "uptrace-001"
+    location: "L2 authorization model: m.UserAndProject has no per-user ACL"
+    description: >-
+      Middleware.UserAndProject (pkg/org/auth.go:92) loads the project by SelectByID and checks only
+      that it EXISTS (ErrProjectNotFound -> 404). There is no check that the authenticated user owns or
+      is a member of the project. In OSS single-tenant deployments every config user therefore has full
+      read/write access to every project's spans, metrics and dashboards. All project-scoped L2 actions
+      model this as req(authentication, Session) + req(knowledge, ProjectID) WITHOUT an ownership gate,
+      and reach_conds carry the 'NO per-user ACL' note.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/org/auth.go:92 UserAndProject; :159 projectFromRequest (SelectByID only)"
+        supports: "No per-user project authorization"
+    proposed_resolution: "Confirm at runtime that user_b reaches user_a-era projects; keep Can(...) gates as existence-only."
+
+  - id: "uptrace-002"
+    location: "L1/L2: GET /internal/v1/projects/:project_id discloses the project DSN"
+    description: >-
+      ProjectHandler.Show returns BuildDSN(conf, project.Token) -- the ingest DSN embedding the project
+      token -- to any authenticated caller. Combined with uptrace-001 (no ACL), any logged-in user can
+      read ANY project's DSN and then ingest/forge telemetry into it. Modeled as sem_out ProjectDSN
+      (credential) with a reach_cond flagging credential disclosure.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/org/project_handler.go:Show (BuildDSN)"
+        supports: "DSN disclosure to any user"
+    proposed_resolution: "Record statuses per identity at runtime; note the credential-disclosure chain 001->002."
+
+  - id: "uptrace-003"
+    location: "L1/L2: /internal/v1/traces/search is m.User only (cross-project oracle)"
+    description: >-
+      registerTraceHandler mounts /traces/search under m.User (NOT m.UserAndProject), then re-scopes the
+      deeper /tracing/:project_id/traces/* routes. FindTrace resolves a raw trace_id to its project_id +
+      span_id with no project parameter, so any authenticated user can test/resolve trace ids across all
+      projects. Modeled as action user_search_trace (subject User) with a 'cross-project trace-id oracle'
+      reach_cond.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/tracing/trace_handler.go:registerTraceHandler + FindTrace"
+        supports: "Unscoped trace lookup"
+    proposed_resolution: "Confirm 200 vs 404 behaviour for a trace id in another project at runtime."
+
+  - id: "uptrace-004"
+    location: "L1: /api/v1/tracing/:project_id/{spans,groups} is USER-gated, not DSN-gated"
+    description: >-
+      PublicHandler is registered on RouterPublicV1 ('/api/v1') but wrapped in m.UserAndProject, so
+      despite living on the 'public API' prefix it requires a logged-in user session, NOT a project DSN.
+      This is a naming/transport mismatch worth recording: clients expecting token/DSN auth on /api/v1
+      will get 401 without a cookie/bearer. Other /api/v1 routes (vector, prometheus, cloudwatch) DO use
+      DSN -- so /api/v1 is split between user-auth and DSN-auth.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/tracing/public_handler.go:registerPublicHandler (Use m.UserAndProject)"
+        supports: "User auth on a public path"
+    proposed_resolution: "Record identity_statuses: anonymous vs user vs DSN-only on /api/v1/tracing."
+
+  - id: "uptrace-005"
+    location: "L2: dashboard YAML ingestion (template surface)"
+    description: >-
+      POST /dashboards/yaml (CreateFromYAML) and PUT /dashboards/:dash_id/yaml (UpdateYAML) accept a
+      server-parsed YAML document describing dashboards/queries. This is a structured-input surface
+      (YAML parsing, MQL/TQL expressions inside). Modeled as create_dashboard_yaml; the PUT variant is
+      enumerated but L2-deferred. Worth fuzzing the YAML/MQL parser at runtime.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/metrics/dash_handler.go:CreateFromYAML / UpdateYAML"
+        supports: "YAML/MQL ingestion"
+    proposed_resolution: "Capture the YAML schema + error behaviour at runtime; expand MQL/TQL as an input grammar."
+
+  - id: "uptrace-006"
+    location: "L1 scope: OTLP gRPC + debug pprof"
+    description: >-
+      OTLP ingestion is also served over gRPC on :14317 (TraceService/LogsService/MetricsService) -- out
+      of scope for the HTTP web GT (the HTTP mirrors /v1/{traces,logs,metrics} ARE modeled). /debug/pprof/*
+      is only mounted when conf.Debug=true and is excluded from a production surface; enumerated as a
+      Debug-gated page node.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/{tracing,metrics}/init.go:initOTLP (gRPC); pkg/bunapp/router.go (pprof if Debug)"
+        supports: "Transport scope"
+    proposed_resolution: "Keep gRPC out of the HTTP GT; mark pprof reachable only under Debug."
+
+  - id: "uptrace-007"
+    location: "L1: multi-method routes collapsed to one node (method selectors)"
+    description: >-
+      bunrouter dispatches one path across verbs, so /dashboards (POST create / GET list),
+      /dashboards/:dash_id (GET/POST/PUT/DELETE), /dashboards/:dash_id/grid (POST item / PUT grid) and
+      /dashboards/:dash_id/rows/:row_id (GET/PUT/DELETE) are each ONE L1 node with multiple io_variants;
+      the distinct business actions are separate L2 actions bound by a method selector.
+    evidence:
+      - type: "source"
+        ref: "uptrace/pkg/metrics/dash_handler.go / grid_item_handler.go / grid_row_handler.go register*"
+        supports: "Multi-method routes"
+    proposed_resolution: "No schema change; l1_bindings carry sel_field=method."
+
+  - id: "uptrace-008"
+    location: "Runtime grounding pending (heavier stack than writefreely)"
+    description: >-
+      Unlike the writefreely target (single SQLite binary), Uptrace needs ClickHouse + PostgreSQL before
+      the API answers. Statuses/identity_statuses/route_confirmed and exact response shapes are therefore
+      left empty pending `docker-compose up` (clickhouse+postgres+uptrace) and a probe analogous to
+      writefreely_gt/runtime/probe.ps1. Fixtures: login uptrace@localhost/uptrace; projects 1 & 2 with
+      DSNs project1_secret_token / project2_secret_token.
+    evidence:
+      - type: "source"
+        ref: "uptrace/docker-compose.yml; config/uptrace.yml (users, projects, listen :14318)"
+        supports: "Runtime prerequisites"
+    proposed_resolution: "Bring up the compose stack, then probe login + the 32 candidates x {anon,user_a,user_b,DSN}."
+
+  - id: "uptrace-009"
+    location: "Runtime: published image (2.1.0-rc.1) DIVERGES from the rc.2 source the GT models"
+    description: >-
+      The GT is derived from the repo source at tag v2.1.0-rc.2. The only available published image is
+      uptrace/uptrace:2.1.0-rc.1 (example/docker stack). A probe run (runtime/probe.ps1) showed the image
+      behaves DIFFERENTLY from the rc.2 source, so identity_statuses were NOT stamped wholesale; only
+      version-stable auth-transport behaviours were recorded. Observed divergences:
+        (a) GUEST USER: anonymous GET /internal/v1/users/current returns a Guest user (id:0, name "Guest",
+            projects:[]) with HTTP 200 -- the rc.2 source has no Guest fallback (userFromRequest -> 401).
+        (b) DSN NON-DISCLOSURE: GET /internal/v1/projects/1 in the image returns NO 'dsn' field, so the
+            finding uptrace-002 (DSN disclosure to any user) is SPECIFIC TO THE rc.2 SOURCE (Show returns
+            BuildDSN) and does NOT reproduce on the rc.1 image.
+        (c) DASHBOARD ROUTING: POST /internal/v1/metrics/1/dashboards returns 405 on the image, but the
+            rc.2 source registers g.POST("", h.Create) there -- the create route differs between versions.
+        (d) SPA FALLBACK: some project-scoped reads return the Vue index.html (200) for a Guest rather
+            than a JSON 401, so a bare 200 is not proof of API access.
+      WHAT IS VERSION-INDEPENDENTLY CONFIRMED (and stamped):
+        - DSN ingestion: POST /v1/{traces,logs,metrics} with uptrace-dsn -> 200; without -> 401.
+        - finding uptrace-004: /api/v1/tracing/:project_id/spans is USER-gated not DSN-gated
+          (anon 401, DSN-only 401, authenticated reaches it [400 = needs time params]).
+        - /internal/v1/projects/:id and /internal/v1/traces/search require auth (anon 401).
+        - existence gate: GET /internal/v1/projects/999999 -> 404 (not an ACL 403), consistent with
+          the existence-only model behind finding uptrace-001.
+        - admin Bearer (user token 'user1_secret') authenticates as the config user; login sets a JWT
+          'token' cookie (7-day TTL).
+    evidence:
+      - type: "runtime"
+        ref: "uptrace_gt/runtime/probe_results/matrix.json (rc.1 image)"
+        supports: "Image vs source divergence + version-stable confirmations"
+      - type: "source"
+        ref: "git tag v2.1.0-rc.2; pkg/metrics/dash_handler.go g.POST(\"\",Create); pkg/org/project_handler.go Show BuildDSN"
+        supports: "Source-side routes/behaviour the image lacks"
+    proposed_resolution: >-
+      For faithful grounding of the rc.2 GT, build the image from the repo source (cmd/uptrace/Dockerfile)
+      rather than using the rc.1 published image. The findings uptrace-002/005 and the dashboard/grid L2
+      actions remain source-accurate but UNCONFIRMED at runtime; the ingestion + public-path findings are
+      confirmed. A second user + project would ground finding uptrace-001 on the correct build.

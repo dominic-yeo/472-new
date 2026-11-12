@@ -1,0 +1,130 @@
+schema_version: pengent-web-gt-v1
+environment_id: "rocketchat-oss"
+
+issues:
+  - id: "rc-001"
+    location: "Scope: ~358+ endpoints; GT models the OSS security core only"
+    description: >-
+      The REST API has 358+ parsed routes (fluent API.v1.* chains + legacy addRoute). The GT models the
+      security-critical core as L2 candidates (auth, users, channels, groups, chat, rooms, settings,
+      permissions, roles, integrations, misc = 45) and enumerates a representative tail as L1 api nodes
+      without io_variants. Omnichannel/livechat (~150), Enterprise (apps engine, canned-responses), and
+      secondary groups (teams, video-conference, calendar, moderation, cloud, import, e2e, ...) are
+      excluded (build_l1.EXCLUDED) -- they share the same /api/v1 + X-Auth-Token model.
+    evidence:
+      - type: "source"
+        ref: "apps/meteor/server/api/v1/*.ts (358 parsed); ee/server/api/*"
+        supports: "Scale + scoping"
+    proposed_resolution: "Expand candidates into a group if it becomes in-scope; the auth plane is shared."
+
+  - id: "rc-002"
+    location: "L2: authorization is a per-route permission check (Can(...))"
+    description: >-
+      authRequired only gates authentication; privileged routes additionally call hasPermission with a
+      named permission (e.g. create-user, access-permissions, edit-privileged-setting, view-room-administration).
+      Room actions are room-scoped (owner/moderator/member). Each L2 action models this as a Can(...)
+      requirement and names the permission in reach_conds; the EXACT permission/role per endpoint is
+      confidence-flagged and should be confirmed at runtime with user vs admin tokens.
+    evidence:
+      - type: "source"
+        ref: "apps/meteor/server/api/v1/*.ts (hasPermission calls); permissions.ts/roles.ts"
+        supports: "Permission-gated routes"
+    proposed_resolution: "Probe each privileged route with a regular-user token to confirm 403 vs 200."
+
+  - id: "rc-003"
+    location: "L2: privilege-escalation + workspace-takeover primitives"
+    description: >-
+      Highest-impact admin actions: roles.addUserToRole (grant 'admin'), permissions.update (rewrite the
+      role->permission map), users.create/users.update (assign roles / set another user's password),
+      settings/:_id POST (reconfigure auth/OAuth/file-upload/URL), integrations.create (outgoing-webhook
+      'script' runs in a server VM; 'urls' = SSRF). All gated by admin permissions but globally impactful.
+    evidence:
+      - type: "source"
+        ref: "roles.ts addUserToRole; permissions.ts update; users.ts create/update; settings.ts settings/:_id; integrations.ts create"
+        supports: "Escalation/takeover surfaces"
+    proposed_resolution: "Fuzz integration script sandbox + setting writes on a grounded instance."
+
+  - id: "rc-004"
+    location: "L1/L2: unauthenticated surface (login, register, public settings, anon method bridge)"
+    description: >-
+      authRequired:false routes: POST /login (brute-force/credential-stuffing), POST /users.register
+      (open signup if Accounts_RegistrationForm='Public'), GET /settings.public + /service.configurations
+      (workspace fingerprinting), POST /method.callAnon/:method (anonymous Meteor-method bridge),
+      GET /shield.svg. Modeled with subject Anonymous; reachability of register is config-dependent.
+    evidence:
+      - type: "source"
+        ref: "ApiClass.ts login; users.ts register; settings.ts public; misc.ts method.callAnon"
+        supports: "Unauthenticated routes"
+    proposed_resolution: "Confirm register reachability (open vs closed) and method.callAnon allowlist at runtime."
+
+  - id: "rc-005"
+    location: "L1/L2: indirect surfaces -- method.call bridge + DDP websocket"
+    description: >-
+      POST /api/v1/method.call/:method proxies ANY Meteor server method over REST (hundreds of methods,
+      per-method authz). It is modeled as ONE high-risk node rather than expanded. The DDP/websocket
+      transport (/sockjs) is a separate real-time surface carrying the same methods and subscriptions,
+      enumerated as a page node and out of scope for the REST GT.
+    evidence:
+      - type: "source"
+        ref: "misc.ts method.call; Meteor DDP"
+        supports: "Indirect method surface"
+    proposed_resolution: "Treat method.call params as a sub-grammar; enumerate server methods separately if needed."
+
+  - id: "rc-006"
+    location: "L1: IDOR / room-scope verification needed"
+    description: >-
+      Read-by-id endpoints (chat.getMessage, channels.info, rooms.info) and member lists must enforce that
+      the caller has access to the referenced room. These are prime IDOR candidates: supply an arbitrary
+      msgId/roomId as a non-member and confirm 403/empty vs data leak.
+    evidence:
+      - type: "source"
+        ref: "chat.ts getMessage; channels.ts info/members; rooms.ts info"
+        supports: "ID-referenced reads"
+    proposed_resolution: "Probe cross-room reads with user_b (non-member) at runtime."
+
+  - id: "rc-007"
+    location: "Runtime grounding pending (MongoDB replica set required)"
+    description: >-
+      Statuses/identity_statuses/route_confirmed left for runtime capture. Rocket.Chat requires a MongoDB
+      replica set (oplog); runtime/compose.yaml provisions it + an admin (gtadmin). Probe plan: login as
+      admin + a regular user, then matrix {anonymous | user | admin} over the candidates -- especially
+      the rc-002 permission boundaries, rc-004 public routes, and rc-006 IDOR reads. Image tag may differ
+      from v9.1.0-develop (version-divergence caveat, cf. earlier targets).
+    evidence:
+      - type: "source"
+        ref: "runtime/compose.yaml; apps/meteor/package.json 9.1.0-develop"
+        supports: "Runtime prerequisites + caveat"
+    proposed_resolution: "Bring up the stack, seed users, then probe the auth/permission matrix."
+
+  - id: "rc-008"
+    location: "Runtime CONFIRMED: denial convention + default-permissive reads"
+    description: >-
+      Probed against rocket.chat:latest (image 8.9; source 9.1.0-develop -- auth model stable).
+      Findings:
+        (1) PERMISSION DENIALS RETURN HTTP 400 (errorType 'error-not-authorized'), NOT 403: a regular
+            user hitting rooms.adminRooms / statistics / roles.addUserToRole got 400. Unauthenticated
+            (no token) is 401. So the GT's Can(...) denials map to 400, and missing-auth to 401.
+        (2) DEFAULT-PERMISSIVE READS: a REGULAR user got 200 on users.list AND settings (GET) -- these
+            are not admin-only by default (broadly-granted permission or server-side field filtering).
+            Only rooms.adminRooms/statistics were actually admin-gated among those probed.
+        (3) Self-elevation blocked: userb POST roles.addUserToRole{admin} -> 400.
+        (4) OPEN REGISTRATION enabled by default: anonymous POST users.register -> 200 (account created).
+    evidence:
+      - type: "runtime"
+        ref: "rocketchat_gt/runtime/probe_results/matrix.json (phases public/admin/boundary)"
+        supports: "Denial=400, default-permissive reads, open registration"
+    proposed_resolution: "Treat Can(...) failure as 400 in identity_statuses; re-check users.list/settings permission grants per role; confirm whether field-filtering hides sensitive data from regular users."
+
+  - id: "rc-009"
+    location: "Runtime CONFIRMED: auth planes + admin matrix"
+    description: >-
+      X-Auth-Token + X-User-Id from POST /login authenticates; wrong password -> 401; settings.public is
+      public (200) while me/channels.list need auth (anon 401). Admin matrix all 200
+      (users.list/channels.list/settings/rooms.adminRooms/statistics/permissions.listAll/integrations.list,
+      channels.create, users.create). 14 L1 nodes carry route_confirmed + identity_statuses
+      (anonymous | user | admin).
+    evidence:
+      - type: "runtime"
+        ref: "rocketchat_gt/runtime/probe_results/{matrix.json,fixtures.json}"
+        supports: "Auth-plane + admin confirmation"
+    proposed_resolution: "Extend with user_b non-member IDOR reads (rc-006) and more permission boundaries."

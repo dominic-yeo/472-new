@@ -1,0 +1,48 @@
+# LobeChat agentic GT -- annotation issues (modeling decisions; NOT vulnerabilities)
+issues:
+  - id: client-loop-server-gateway
+    kind: modeling
+    note: >
+      The tool-call loop runs client-side (zustand store), but plugin API calls are proxied through a
+      SERVER gateway (runPluginApi -> API_ENDPOINTS.gateway). Execution identity + SSRF sink live at the
+      gateway; captured on tool.plugin_default/custom_plugin and ctl.gateway_proxy.
+
+  - id: artifacts-as-sink
+    kind: modeling
+    note: >
+      Artifacts are not a function-call tool; they are model output rendered in an iframe. Modeled as
+      sink.artifacts with render_side_effects.active_content=true (client code-exec), plus edge.assistant__artifacts.
+
+  - id: builtin-minimal
+    kind: granularity
+    note: Only dalle is a built-in tool in the web source; web-browsing and others are plugins.
+
+  - id: no-mcp-web
+    kind: reachability
+    note: MCP is not present in this web source (desktop-only); no MCP/sampling records emitted.
+
+  - id: l1-l2-forward-refs
+    kind: cross-layer
+    note: lobe-chat L1/L2 GT not built; l1/l2 ids are forward references.
+
+methodology_feedback:
+  - id: auto-run-no-approval
+    target: methodology Phase C (controls)
+    finding: >
+      LobeChat has NO per-tool approval by default (tool calls auto-run). The methodology should make
+      "is there an approval gate at all?" an explicit extraction question, and treat its absence as a
+      first-class recorded fact (here: edge.assistant__tool.validation_or_approval = NONE), not a gap.
+
+  - id: gateway-ssrf-as-control-and-sink
+    target: schema
+    finding: >
+      The plugin gateway is simultaneously a control (mediates/authorizes, attaches identity) and the
+      egress sink (fetches the manifest url). Modeled as both ctl.gateway_proxy and sink.plugin_gateway.
+      The schema handles this cleanly; worth citing as a dual control/sink example.
+
+  - id: market-installed-instructions
+    target: schema context_sources
+    finding: >
+      systemRole and the enabled plugin set can be installed from a MARKET (external authorship). Captured
+      as writers=[external_service via l1.api.market.install] on ctx.system_role / mem.agents -- a good
+      example of an external writer into a trusted_instruction channel.

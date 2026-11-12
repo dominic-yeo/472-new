@@ -1,0 +1,100 @@
+schema_version: pengent-web-gt-v1
+environment_id: "outline-oss"
+
+target:
+  application: "Outline (OSS, team knowledge base / wiki)"
+  version: "1.12.0 (package.json)"
+  kind: "Node.js + Koa + TypeScript; Postgres + Redis; React (Vite) SPA + real-time collaboration (Hocuspocus/y.js)"
+  source_tree: "outline/ (getoutline/outline monorepo)"
+  authoritative_routes: >-
+    server/routes/api/*/*.ts  -- POST-RPC style ("documents.create", "users.invite", ...),
+    one @koa/router per resource, all mounted at /api. Non-API surfaces:
+    server/routes/auth (SSO sign-in), server/routes/oauth (OAuth2 provider server),
+    server/routes/mcp, and the root app (/share/:shareId public pages).
+  handler_semantics: >-
+    mount points are assigned in server/services/web.ts: mount("/api", api), ("/auth", auth),
+    ("/oauth", oauth), ("/mcp", mcp), and the root app for /share/*. Auth in
+    server/middlewares/authentication.ts; authorization via cancan policies in server/policies/*.ts.
+
+deployment:
+  origin: "http://localhost:3000"
+  requires: "Postgres + Redis (+ an auth provider: SMTP email magic-link or an SSO provider). See runtime/compose.yaml."
+  scale: >-
+    204 L1 api nodes + 2 page nodes. 94 are L2 candidates; the long tail (list/info/reorder variants)
+    is enumerated with the same policy model. Real-time collaboration (y-websocket) and background
+    queues carry the same documents+policies and are out of scope for the HTTP request GT.
+
+auth_model:
+  transports: >-
+    A token is read from (server/middlewares/authentication.ts parseAuthentication):
+    'Authorization: Bearer', the request body 'token' field, the '?token=' QUERY parameter, or the
+    'accessToken' cookie. The body + query transports mean tokens can leak via URLs / logs / referrers.
+    Token kinds: a long-lived personal API KEY (scoped read/write/create), an OAuth ACCESS TOKEN
+    (scoped + resource-restricted via OAuthAuthentication.canAccess), or an app SESSION JWT.
+    OAuth access tokens must be sent in the Authorization header (not body/query).
+  authorization: >-
+    A token resolves to a USER belonging to a TEAM (workspace) with a ROLE: admin | member | viewer | guest.
+    Every /api handler calls cancan authorize(user, action, model) (server/policies/*.ts). Access to
+    documents flows through COLLECTION permissions (read | read_write | admin, team-default or per-member),
+    per-document MEMBERSHIPS (users + groups), and GROUP membership (inherits the group's collection grants).
+    Multi-tenant: all objects are team-scoped; cross-team access is an IDOR class. Public document reading is
+    via a SHARE (shares.create -> /share/:shareId); a 'published' share is readable with NO authentication.
+    Modeled as Can(...) with the policy action named in reach_conds; the admin subject is a team admin.
+
+identities_needed:
+  - "anonymous (no token -> public /auth, /oauth, share pages, auth.config, installation.create bootstrap)"
+  - "share_guest (holder of a published /share/:shareId link -- unauthenticated document read)"
+  - "user (member role; session cookie / API key / OAuth token)"
+  - "user_b (second member in the same team, for document/collection IDOR + membership-boundary tests)"
+  - "viewer (viewer role -- read-only; for the write-boundary test)"
+  - "admin (team admin -> users.update_role / team.update / groups / providers / export_all)"
+
+notable_findings_source_derived:
+  - "Bootstrap: POST /api/installation.create creates the first team + admin while no team exists (self-hosted
+     first-boot takeover window); refuses once any team exists."
+  - "Privilege-escalation ladder: users.update_role / users.promote (member -> admin), users.invite (role in the
+     invite), collections.add_user/add_group with permission='admin', groups.add_user (inherits group grants)."
+  - "Public exposure: shares.create{published:true, includeChildDocuments:true} makes a document (and its subtree)
+     readable with no auth at /share/:shareId; documents.info/documents.search accept a shareId branch; shares.info
+     is auth-optional (existence/metadata oracle); team.update{sharing} + collection.sharing gate whether sharing is
+     allowed at all."
+  - "SSRF: attachments.createFromUrl (server GETs an arbitrary 'url' and stores it); urls.unfurl (auth-OPTIONAL,
+     fetches URLs 'with workspace credentials'); imports.create (server pulls from an external provider); outbound
+     webhook integrations (integrations.create) post event payloads to an admin-chosen URL."
+  - "Token-in-URL: the '?token=' query transport + long-lived API keys -> credential leakage via URLs/logs."
+  - "OAuth2 PROVIDER: Outline issues authorization codes + access tokens (/oauth/authorize,/token,/revoke) and
+     supports dynamic client registration (/oauth/register) -- redirect_uri / scope / PKCE validation is the surface."
+  - "Untrusted parsing: documents.import ingests uploaded .docx/.html/.md; the editor renders user HTML/markdown."
+  - "Enumeration oracles: auth.config (team + providers, pre-auth), suggestions.mention (user/doc directory),
+     users.info (any member reads any teammate)."
+
+runtime_grounding:
+  status: "PARTIAL -- 20 L1 nodes route_confirmed against outlinewiki/outline:1.12.0 (exact source match).
+           Anonymous + admin + apikey planes probed end-to-end via a REAL email magic-link login (Mailpit)."
+  stack: "runtime/compose.yaml: outlinewiki/outline:1.12.0 + postgres:16 + redis:7 + Mailpit (SMTP sink);
+          URL=http://localhost:3001 (3000 was occupied by a prior container). Image == source version exactly."
+  identities_used: "anonymous (no token) | admin (first user = team admin, magic-link session) | apikey (personal API key)."
+  probe: "runtime/probe.ps1 -> runtime/probe_results/{matrix.json,summary.txt}"
+  confirmed:
+    - "DENIAL CONVENTION: missing/invalid auth = HTTP 401 across /api (auth.info, users/collections/documents/
+       shares/apiKeys/integrations.list all 401 for anon); a bogus '?token=' parses then 401."
+    - "auth.config is the ONLY pre-auth /api read (200 for anon). installation.info is 401; installation.create
+       returns 400 ('already has existing teams') once seeded."
+    - "ADMIN MATRIX all 200: auth.info, users/collections/documents/shares/apiKeys/integrations/groups/
+       oauthClients/events .list (+ collections.create, documents.create, shares.create, apiKeys.create)."
+    - "FIRST USER = team admin: the first email magic-link sign-in bootstraps the team + an admin user (role=admin)."
+    - "PUBLISHED-SHARE EXPOSURE (end-to-end): with a published share, anon documents.info{shareId} returns the
+       document (title+content) 200 and shares.info{id} returns 200 (oracle); the SAME document read by {id}
+       anonymously is 401. GET /share/:id -> 301 (public page). Exposure is a per-document config, not a default."
+    - "TOKEN-IN-URL: a personal API key is accepted via Authorization: Bearer (200), the body 'token' field
+       (200), AND the '?token=' query parameter (200) -- confirming the URL-leak transport. (The app SESSION JWT
+       was NOT honored via '?token=' (401); API keys are the credential that flows through the query transport.)"
+  caveats:
+    - "Image outline:1.12.0 == GT source version exactly (package.json 1.12.0 / migrations matched) -- route+auth model is 1:1."
+    - "Not yet grounded: the non-admin RBAC boundary + cross-member IDOR (ol-003/ol-004) and the SSRF sinks
+       (ol-006) still want a second member (user_b) and an internal collaborator target."
+
+status: >-
+  Source-derived GT at outline/ @ 1.12.0. validate_gt.py OK: 206 L1 nodes (204 api, 2 page), 95 L2 actions,
+  all 94 candidate L1 nodes covered. Runtime: PARTIALLY grounded (20 nodes route_confirmed; anon + admin + apikey
+  planes) against outlinewiki/outline:1.12.0 -- see runtime_grounding + annotation_issues ol-010/ol-011.

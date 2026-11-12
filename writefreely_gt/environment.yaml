@@ -1,0 +1,43 @@
+schema_version: pengent-web-gt-v1
+environment_id: "writefreely-multi-user"
+
+target:
+  application: "WriteFreely"
+  mode: "multi-user"          # SingleUser=false assumed; single-user remounts collection routes at /
+  source_tree: "writefreely/ (writeas/writefreely, package writefreely)"
+  authoritative_routes: "writefreely/routes.go (InitRoutes / RouteCollections / RouteRead)"
+  handler_semantics: "writefreely/handle.go (UserLevel* + Handler.{All,AllReader,User,UserAPI,UserWebAPI,Admin,Web,Download})"
+
+deployment:
+  origin: "http://localhost"
+  notes: >-
+    ORIGIN is a placeholder. The real host comes from config [app] host; federation keys,
+    webfinger and ActivityPub actor URIs are all derived from it, so it must be fixed before
+    runtime capture. Set App.Private / App.SingleUser / open-registration / anonymous-posting
+    flags are read at runtime and change reachability of many nodes (see annotation_issues).
+
+auth_model:
+  web_session: "cookie (gorilla/sessions); established by /auth/login; used by /me/*, /admin/*, handler.User/Web/Admin"
+  api_token: "Authorization header; CONFIRMED scheme is 'Token <access_token>' (not Bearer); minted by /api/auth/{login,signup}; used by handler.UserAPI and All handlers via apiAuth"
+  csrf: "gorilla/csrf on browser form POSTs; JSON requests are exempt (csrfProtectForm / IsJSON)"
+  response_envelope: "impart: success {\"code\":N,\"data\":<obj|scalar>}; error {\"code\":N,\"error_msg\":\"...\"}. L1 response field paths are re-based under data.* accordingly."
+  transport_split_CONFIRMED: >-
+    /admin/* requires the web-session COOKIE; an API token on /admin/* returns 404 (wrong transport),
+    and a non-admin cookie also returns 404 (IsAdmin() 404-masking, not 403). The content API
+    (/api/collections/*, /api/posts/*) is token-gated and ownership-scoped; admin is NOT a super-user there.
+
+identities_needed:
+  - "anonymous (no auth)"
+  - "user_a (regular account, owns a collection + posts)   -> provisioned as 'usera'"
+  - "user_b (second regular account, for cross-user authorization tests) -> provisioned as 'userb'"
+  - "admin (IsAdmin()=true)                                -> provisioned as 'wfadmin' ('admin' is a reserved username)"
+
+runtime_grounding:
+  status: "RUNTIME-GROUNDED for ALL 21 JSON-API candidates + /admin/users (route_confirmed=true, identity_statuses populated). 0 candidates remain source-only."
+  instance: "WriteFreely 0.17.2-73-gd248591 (local source build), Docker image writefreely-local, SQLite single-file DB."
+  frozen_config: "writefreely_gt/runtime/config.ini  (multi-user, open_registration=true, federation=false, private=false, single_user=false, host=http://localhost:8080)"
+  probe: "writefreely_gt/runtime/probe.ps1  ->  runtime/probe_results/{matrix.json,fixtures.json,summary.txt}. Idempotent: provisions a fresh random usera/userb per run (admin fixed as wfadmin) to avoid max_blogs/state carryover."
+  identity_labels: "anonymous | authenticated (any logged-in) | owner | non_owner | admin_cookie | nonadmin_cookie | api_token"
+  still_source_only:
+    - "Federation/ActivityPub inbox (issue-004), reader timeline, OAuth, email subscriptions, export, sitemap/feeds, and the non-candidate HTML page nodes."
+    - "Single-user deployment variant (issue-007)."

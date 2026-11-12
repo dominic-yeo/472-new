@@ -1,0 +1,84 @@
+# Open WebUI agentic GT -- annotation issues (modeling decisions & caveats; NOT vulnerabilities)
+issues:
+  - id: granularity-builtin-tools
+    kind: granularity
+    note: >
+      get_builtin_tools exposes ~60 builtin functions. They are grouped into capability
+      bindings by effect_class (tool.primary.memory, .knowledge_rag, .files, .notes, .chats,
+      .channels, .calendar, .automations, .tasks, .skills). Security-critical tools are kept
+      distinct: execute_code, search_web/fetch_url, create_tool, create_skill, delegate_task,
+      notify, workspace python, OpenAPI tool servers, MCP, terminal.
+
+  - id: reachability-feature-gated
+    kind: reachability
+    note: >
+      Builtin tools require (global config enable) AND (model meta capability/builtinTools) AND
+      (per-user permission) AND (feature flag on the request). Marked conditionally_mounted;
+      actual reachability needs Phase E grounding against a configured instance.
+
+  - id: evidence-static-only
+    kind: evidence
+    note: >
+      Entire model is source_confirmed (static Phases A-D). No runtime grounding yet, so no
+      record is 'observed'. environment.yaml has the grounding plan.
+
+  - id: default-approval-full
+    kind: control-default
+    note: >
+      When chat.tool_permissions.enable is false, resolve_tool_approval_mode returns 'full'
+      = NO approval gate (tools run without confirmation). ctl.tool_approval models this;
+      confirm the shipped default at runtime.
+
+  - id: terminal-binding-owner
+    kind: modeling
+    note: >
+      Terminal/ACP tools are invoked inside the PRIMARY agent's tool loop but executed by an
+      external ACP agent. tool.primary.terminal.agent_id = primary (the invoker);
+      agent.openwebui.terminal models the external executor and also lists the binding.
+
+  - id: l1-l2-forward-refs
+    kind: cross-layer
+    note: >
+      open-webui has no L1/L2 GT yet, so invocation_surfaces[].l1_id, tool.l1_ids, writers[].l1_id
+      and related_l2_ids are forward references (e.g. l1.api.chat.completions, l2.chat.completion).
+      build_agentic.py validates them only if ../l1_gt.yaml exists.
+
+# ---- Feedback for the schema / methodology (from this first validation run) ----
+methodology_feedback:
+  - id: scope-missing-workspace
+    target: schema shared_fields.scope
+    finding: >
+      No 'workspace' value in the scope enum. Open WebUI (and most multi-user LLM apps) have a
+      workspace/instance tier between 'tenant' and 'global' for admin-managed shared artifacts
+      (skills, tools, knowledge, models). Mapped to 'tenant' here. RECOMMEND adding 'workspace'
+      to the scope enum, or documenting the tenant-mapping convention.
+
+  - id: tool-description-as-context
+    target: schema
+    finding: >
+      Tool descriptions shown to the model are both a tool_bindings.description_source AND a
+      context_sources entry (ctx.tool_descriptions) when they are remote/editable (OpenAPI/MCP/
+      workspace). Modeling them twice is intentional (binding = provenance; context = injection
+      channel) but the schema should state this dual-modeling convention to avoid inconsistency.
+
+  - id: mcp-sampling-absent
+    target: methodology Phase B (MCP)
+    finding: >
+      The schema's external_trigger/MCP-sampling edge is correctly NOT exercised here: open-webui's
+      MCP client (utils/mcp/client.py) supports list_tools/call_tool/list_resources/read_resource
+      only -- no sampling. Good confirmation that the field is optional and app-dependent.
+
+  - id: external-system-prompt
+    target: schema context_sources
+    finding: >
+      get_terminal_system_prompt injects an EXTERNAL server's text into the system channel
+      (ctx.terminal_system_prompt, trust_class untrusted_data, destination_channel system). The
+      schema handles this fine (channel vs trust_class are orthogonal) -- worth citing as the
+      canonical example in the methodology.
+
+  - id: resource-limits-fit
+    target: schema agents.resource_limits
+    finding: >
+      The new resource_limits object fit well: open-webui has no global iteration cap (only
+      tool_repetition_guard) but sub-agents have real max_iterations/max_output/max_concurrent.
+      Captured cleanly. loop_bound on edges also used (edge.primary__tool, edge.primary__subagent).

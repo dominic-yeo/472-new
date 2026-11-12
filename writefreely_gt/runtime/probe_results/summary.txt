@@ -1,0 +1,83 @@
+﻿WriteFreely probe summary  (2026-11-09T22:44:16)
+base=http://localhost:8080  token_scheme=Token
+anon_edit_token=
+usera_collection=coll97199  coll_post_slug=hello
+
+IDENTITY       METHOD  PATH                                       CODE  NOTE
+pa219112       POST    /api/auth/login                            404   login
+pa219112       POST    /api/auth/signup                           201   signup (seed; token from response)
+pa219112       GET     /api/me                                    200   verify Token
+pb598872       POST    /api/auth/login                            404   login
+pb598872       POST    /api/auth/signup                           201   signup (seed; token from response)
+pb598872       GET     /api/me                                    200   verify Token
+wfadmin        POST    /api/auth/login                            200   login
+wfadmin        GET     /api/me                                    200   verify Token
+anon           POST    /api/posts                                 401   create anonymous post (no auth)
+usera          POST    /api/posts                                 201   create draft (no collection)
+usera          POST    /api/posts/disperse                        200   disperse (un-own) -> mint modify_token
+usera          POST    /api/alias                                 200   FREE username (expect 2xx)
+usera          POST    /api/alias                                 409   TAKEN username (expect 409)
+anon           POST    /api/alias                                 200   alias as anon (auth probe)
+usera          POST    /api/collections                           201   create collection
+usera          POST    /api/collections/coll97199/posts           201   create collection post
+wfadmin        GET     /api/me                                    200   
+usera          GET     /api/me                                    200   
+userb          GET     /api/me                                    200   
+anon           GET     /api/me                                    400   
+wfadmin        GET     /api/me/posts                              200   
+usera          GET     /api/me/posts                              200   
+userb          GET     /api/me/posts                              200   
+anon           GET     /api/me/posts                              400   
+wfadmin        GET     /api/me/collections                        200   
+usera          GET     /api/me/collections                        200   
+userb          GET     /api/me/collections                        200   
+anon           GET     /api/me/collections                        400   
+wfadmin        GET     /api/collections/coll97199                 200   
+usera          GET     /api/collections/coll97199                 200   
+userb          GET     /api/collections/coll97199                 200   
+anon           GET     /api/collections/coll97199                 200   
+wfadmin        GET     /api/collections/coll97199/posts           200   
+usera          GET     /api/collections/coll97199/posts           200   
+userb          GET     /api/collections/coll97199/posts           200   
+anon           GET     /api/collections/coll97199/posts           200   
+anon           GET     /api/collections/coll97199/posts/hello     200   read usera collection post (public)
+usera          GET     /api/collections/coll97199/posts/hello     200   read usera collection post (public)
+userb          GET     /api/collections/coll97199/posts/hello     200   read usera collection post (public)
+wfadmin        GET     /api/collections/coll97199/posts/hello     200   read usera collection post (public)
+anon           POST    /api/collections/coll97199                 401   update usera collection - non-owner (expect 401/403/404)
+userb          POST    /api/collections/coll97199                 401   update usera collection - non-owner (expect 401/403/404)
+wfadmin        POST    /api/collections/coll97199                 401   update usera collection - non-owner (expect 401/403/404)
+usera          POST    /api/collections/coll97199                 200   update usera collection - owner (expect 2xx)
+anon           POST    /api/posts/w2ujxfqm73                      400   update usera post by id - non-owner (expect 401/403/404)
+userb          POST    /api/posts/w2ujxfqm73                      401   update usera post by id - non-owner (expect 401/403/404)
+wfadmin        POST    /api/posts/w2ujxfqm73                      401   update usera post by id - non-owner (expect 401/403/404)
+usera          POST    /api/posts/w2ujxfqm73                      200   update usera post by id - owner (expect 2xx)
+anon           DELETE  /api/posts/w2ujxfqm73                      400   delete usera post by id - non-owner (expect 401/403/404)
+userb          DELETE  /api/posts/w2ujxfqm73                      403   delete usera post by id - non-owner (expect 401/403/404)
+wfadmin        DELETE  /api/posts/w2ujxfqm73                      403   delete usera post by id - non-owner (expect 401/403/404)
+usera          DELETE  /api/posts/w2ujxfqm73                      204   delete usera post by id - owner (expect 2xx)
+anon           GET     /admin/users                               404   API token on /admin (expect 404: wrong transport)
+usera          GET     /admin/users                               404   API token on /admin (expect 404: wrong transport)
+wfadmin        GET     /admin/users                               404   API token on /admin (expect 404: wrong transport)
+wfadmin(cookie) GET     /admin/users                               200   admin via cookie (expect 200)
+wfadmin(cookie) GET     /admin/settings                            200   admin via cookie (expect 200)
+wfadmin(cookie) GET     /me/settings                               200   admin via cookie (expect 200)
+usera(cookie)  GET     /admin/users                               404   non-admin via cookie (/admin expect 404 mask)
+usera(cookie)  GET     /me/settings                               -1    non-admin via cookie (/admin expect 404 mask)
+usera          POST    /api/collections/coll97199/posts           201   fresh collection post for property/pin
+anon           POST    /api/markdown                              200   render markdown
+usera          POST    /api/markdown                              200   render markdown
+anon           GET     /api/posts/756bfses4d/views                200   post property 'views' (expect 200)
+usera          GET     /api/posts/756bfses4d/views                200   post property 'views' (expect 200)
+anon           GET     /api/posts/756bfses4d/bogusprop            400   invalid property (expect 400)
+usera          POST    /api/collections/coll97199/pin             200   pin own post (expect 200)
+userb          POST    /api/collections/coll97199/pin             403   pin as non-owner (expect 403)
+usera          POST    /api/collections/coll97199/unpin           200   unpin own post (expect 200)
+usera          POST    /api/collections/coll97199/collect         200   collect w/ empty token (vestigial; capture status)
+usera          POST    /api/posts/claim                           200   claim w/ empty token (vestigial; capture status)
+userb          POST    /api/me/password                           200   change passphrase (form current/new; expect 200)
+userb          POST    /api/me/password                           200   revert passphrase
+anon           POST    /api/me/password                           400   passphrase no auth (expect 401/400)
+userb          DELETE  /api/auth/me                               204   logout/invalidate token (expect 204)
+anon           DELETE  /api/auth/me                               400   logout no token (expect 401)
+

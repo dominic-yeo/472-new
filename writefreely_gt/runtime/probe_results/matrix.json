@@ -1,0 +1,686 @@
+﻿[
+    {
+        "phase":  "auth",
+        "identity":  "pa219112",
+        "method":  "POST",
+        "path":  "/api/auth/login",
+        "status":  404,
+        "note":  "login",
+        "body":  ""
+    },
+    {
+        "phase":  "auth",
+        "identity":  "pa219112",
+        "method":  "POST",
+        "path":  "/api/auth/signup",
+        "status":  201,
+        "note":  "signup (seed; token from response)",
+        "body":  "{\"code\":201,\"data\":{\"access_token\":\"6e6053a9-4e39-48c4-5ec2-bc5670821f20\",\"user\":{\"username\":\"pa219112\",\"has_pass\":true,\"email\":\"\",\"created\":\"2026-11-09T14:44:14Z\",\"status\":0},\"collections\":[{\"alias\":\"pa219112\",\"title\":\"pa219112\",\"description\":\"\",\"style_sheet\":\"\",\"public\":false,\"views\":0,\"verificati"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "pa219112",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  200,
+        "note":  "verify Token",
+        "body":  "{\"code\":200,\"data\":{\"username\":\"pa219112\"}}"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "pb598872",
+        "method":  "POST",
+        "path":  "/api/auth/login",
+        "status":  404,
+        "note":  "login",
+        "body":  ""
+    },
+    {
+        "phase":  "auth",
+        "identity":  "pb598872",
+        "method":  "POST",
+        "path":  "/api/auth/signup",
+        "status":  201,
+        "note":  "signup (seed; token from response)",
+        "body":  "{\"code\":201,\"data\":{\"access_token\":\"fd40e5fd-36b5-40b2-48d2-31989ae97e96\",\"user\":{\"username\":\"pb598872\",\"has_pass\":true,\"email\":\"\",\"created\":\"2026-11-09T14:44:14Z\",\"status\":0},\"collections\":[{\"alias\":\"pb598872\",\"title\":\"pb598872\",\"description\":\"\",\"style_sheet\":\"\",\"public\":false,\"views\":0,\"verificati"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "pb598872",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  200,
+        "note":  "verify Token",
+        "body":  "{\"code\":200,\"data\":{\"username\":\"pb598872\"}}"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "wfadmin",
+        "method":  "POST",
+        "path":  "/api/auth/login",
+        "status":  200,
+        "note":  "login",
+        "body":  "{\"code\":200,\"data\":{\"access_token\":\"6afcb159-549f-49b3-60d5-b34ac6dcb237\",\"user\":{\"username\":\"wfadmin\",\"has_pass\":false,\"email\":\"\",\"created\":\"2026-11-09T13:57:27Z\",\"status\":0}}}"
+    },
+    {
+        "phase":  "auth",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  200,
+        "note":  "verify Token",
+        "body":  "{\"code\":200,\"data\":{\"username\":\"wfadmin\"}}"
+    },
+    {
+        "phase":  "anon-post",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/posts",
+        "status":  401,
+        "note":  "create anonymous post (no auth)",
+        "body":  ""
+    },
+    {
+        "phase":  "mint",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/posts",
+        "status":  201,
+        "note":  "create draft (no collection)",
+        "body":  "{\"code\":201,\"data\":{\"id\":\"izwrd9ir32\",\"slug\":null,\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"\",\"body\":\"draft to disperse 1446061972\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0,\"url\":\"http://localhost:8080/izwrd9ir32.md\"}}"
+    },
+    {
+        "phase":  "mint",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/posts/disperse",
+        "status":  200,
+        "note":  "disperse (un-own) -\u003e mint modify_token",
+        "body":  "{\"code\":200,\"data\":[{\"code\":200,\"post\":{\"id\":\"izwrd9ir32\",\"slug\":null,\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.593506746Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"\",\"body\":\"draft to disperse 1446061972\",\"tags\":null,\"paid\":false,\"views\":0,\"likes\":0}}]}"
+    },
+    {
+        "phase":  "alias",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/alias",
+        "status":  200,
+        "note":  "FREE username (expect 2xx)",
+        "body":  "{\"code\":200,\"data\":\"free27717\"}"
+    },
+    {
+        "phase":  "alias",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/alias",
+        "status":  409,
+        "note":  "TAKEN username (expect 409)",
+        "body":  ""
+    },
+    {
+        "phase":  "alias",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/alias",
+        "status":  200,
+        "note":  "alias as anon (auth probe)",
+        "body":  "{\"code\":200,\"data\":\"free27717\"}"
+    },
+    {
+        "phase":  "fixture",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections",
+        "status":  201,
+        "note":  "create collection",
+        "body":  "{\"code\":201,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"verification_link\":\"\",\"total_posts\":0,\"Format\":null}}"
+    },
+    {
+        "phase":  "fixture",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199/posts",
+        "status":  201,
+        "note":  "create collection post",
+        "body":  "{\"code\":201,\"data\":{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"hello\",\"body\":\"usera collection post\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0,\"url\":\"http://localhost:8080/coll97199/hello\""
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"username\":\"wfadmin\"}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"username\":\"pa219112\"}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"username\":\"pb598872\"}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/me",
+        "status":  400,
+        "note":  "",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/me/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":[{\"id\":\"ddmnp29idz\",\"slug\":null,\"appearance\":\"norm\",\"language\":\"en\",\"rtl\":false,\"created\":\"2026-11-09T14:01:37.021485585Z\",\"updated\":\"2026-11-09T14:01:37Z\",\"title\":\"\",\"body\":\"test\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0}]}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/me/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":[{\"id\":\"izwrd9ir32\",\"slug\":null,\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.593506746Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"\",\"body\":\"draft to disperse 1446061972\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0},{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\","
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "/api/me/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":[]}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/me/posts",
+        "status":  400,
+        "note":  "",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/me/collections",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":[{\"alias\":\"wfadmin\",\"title\":\"wfadmin\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/wfadmin/\",\"verification_link\":\"\"}]}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/me/collections",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":[{\"alias\":\"pa219112\",\"title\":\"pa219112\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/pa219112/\",\"verification_link\":\"\"},{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://local"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "/api/me/collections",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":[{\"alias\":\"pb598872\",\"title\":\"pb598872\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/pb598872/\",\"verification_link\":\"\"}]}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/me/collections",
+        "status":  400,
+        "note":  "",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":0,\"Format\":null}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":1,\"Format\":null}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":0,\"Format\":null}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":0,\"Format\":null}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":0,\"posts\":[],\"Format\":null}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":1,\"posts\":[{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":1,\"posts\":[{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts",
+        "status":  200,
+        "note":  "",
+        "body":  "{\"code\":200,\"data\":{\"alias\":\"coll97199\",\"title\":\"usera blog\",\"description\":\"\",\"style_sheet\":\"\",\"public\":true,\"views\":0,\"url\":\"http://localhost:8080/coll97199/\",\"verification_link\":\"\",\"total_posts\":1,\"posts\":[{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts/hello",
+        "status":  200,
+        "note":  "read usera collection post (public)",
+        "body":  "{\"code\":200,\"data\":{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.728646627Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"hello\",\"body\":\"usera collection post\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts/hello",
+        "status":  200,
+        "note":  "read usera collection post (public)",
+        "body":  "{\"code\":200,\"data\":{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.728646627Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"hello\",\"body\":\"usera collection post\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "userb",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts/hello",
+        "status":  200,
+        "note":  "read usera collection post (public)",
+        "body":  "{\"code\":200,\"data\":{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.728646627Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"hello\",\"body\":\"usera collection post\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0}}"
+    },
+    {
+        "phase":  "matrix-read",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/api/collections/coll97199/posts/hello",
+        "status":  200,
+        "note":  "read usera collection post (public)",
+        "body":  "{\"code\":200,\"data\":{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.728646627Z\",\"updated\":\"2026-11-09T14:44:14Z\",\"title\":\"hello\",\"body\":\"usera collection post\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0}}"
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199",
+        "status":  401,
+        "note":  "update usera collection - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199",
+        "status":  401,
+        "note":  "update usera collection - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "wfadmin",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199",
+        "status":  401,
+        "note":  "update usera collection - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199",
+        "status":  200,
+        "note":  "update usera collection - owner (expect 2xx)",
+        "body":  "{\"code\":200,\"data\":{}}"
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  400,
+        "note":  "update usera post by id - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  401,
+        "note":  "update usera post by id - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "wfadmin",
+        "method":  "POST",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  401,
+        "note":  "update usera post by id - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  200,
+        "note":  "update usera post by id - owner (expect 2xx)",
+        "body":  "{\"code\":200,\"data\":{\"id\":\"w2ujxfqm73\",\"slug\":\"hello\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:14.728646627Z\",\"updated\":\"2026-11-09T14:44:15Z\",\"title\":\"hello\",\"body\":\"MUTATED\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0}}"
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "anon",
+        "method":  "DELETE",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  400,
+        "note":  "delete usera post by id - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "userb",
+        "method":  "DELETE",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  403,
+        "note":  "delete usera post by id - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "wfadmin",
+        "method":  "DELETE",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  403,
+        "note":  "delete usera post by id - non-owner (expect 401/403/404)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix-authz",
+        "identity":  "usera",
+        "method":  "DELETE",
+        "path":  "/api/posts/w2ujxfqm73",
+        "status":  204,
+        "note":  "delete usera post by id - owner (expect 2xx)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-token",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/admin/users",
+        "status":  404,
+        "note":  "API token on /admin (expect 404: wrong transport)",
+        "body":  "\u003c!DOCTYPE HTML\u003e \u003chtml\u003e \u003chead\u003e \u003ctitle\u003ePage not found \u0026mdash; WF-GT-Targett\u003c/title\u003e \u003clink rel=\"stylesheet\" type=\"text/css\" href=\"/css/write.css\" /\u003e \u003clink rel=\"shortcut icon\" href=\"/favicon.ico\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"application-name\" co"
+    },
+    {
+        "phase":  "admin-token",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/admin/users",
+        "status":  404,
+        "note":  "API token on /admin (expect 404: wrong transport)",
+        "body":  "\u003c!DOCTYPE HTML\u003e \u003chtml\u003e \u003chead\u003e \u003ctitle\u003ePage not found \u0026mdash; WF-GT-Targett\u003c/title\u003e \u003clink rel=\"stylesheet\" type=\"text/css\" href=\"/css/write.css\" /\u003e \u003clink rel=\"shortcut icon\" href=\"/favicon.ico\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"application-name\" co"
+    },
+    {
+        "phase":  "admin-token",
+        "identity":  "wfadmin",
+        "method":  "GET",
+        "path":  "/admin/users",
+        "status":  404,
+        "note":  "API token on /admin (expect 404: wrong transport)",
+        "body":  "\u003c!DOCTYPE HTML\u003e \u003chtml\u003e \u003chead\u003e \u003ctitle\u003ePage not found \u0026mdash; WF-GT-Targett\u003c/title\u003e \u003clink rel=\"stylesheet\" type=\"text/css\" href=\"/css/write.css\" /\u003e \u003clink rel=\"shortcut icon\" href=\"/favicon.ico\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"application-name\" co"
+    },
+    {
+        "phase":  "admin-cookie",
+        "identity":  "wfadmin(cookie)",
+        "method":  "GET",
+        "path":  "/admin/users",
+        "status":  200,
+        "note":  "admin via cookie (expect 200)",
+        "body":  " \u003c!DOCTYPE HTML\u003e \u003chtml\u003e \u003chead\u003e \u003cmeta charset=\"utf-8\"\u003e \u003ctitle\u003eUsers \u0026mdash; WF-GT-Targett\u003c/title\u003e \u003clink rel=\"stylesheet\" type=\"text/css\" href=\"/css/write.css\" /\u003e \u003clink rel=\"shortcut icon\" href=\"/favicon"
+    },
+    {
+        "phase":  "admin-cookie",
+        "identity":  "wfadmin(cookie)",
+        "method":  "GET",
+        "path":  "/admin/settings",
+        "status":  200,
+        "note":  "admin via cookie (expect 200)",
+        "body":  " \u003c!DOCTYPE HTML\u003e \u003chtml\u003e \u003chead\u003e \u003cmeta charset=\"utf-8\"\u003e \u003ctitle\u003eAdmin \u0026mdash; WF-GT-Targett\u003c/title\u003e \u003clink rel=\"stylesheet\" type=\"text/css\" href=\"/css/write.css\" /\u003e \u003clink rel=\"shortcut icon\" href=\"/favicon"
+    },
+    {
+        "phase":  "admin-cookie",
+        "identity":  "wfadmin(cookie)",
+        "method":  "GET",
+        "path":  "/me/settings",
+        "status":  200,
+        "note":  "admin via cookie (expect 200)",
+        "body":  " \u003c!DOCTYPE HTML\u003e \u003chtml\u003e \u003chead\u003e \u003cmeta charset=\"utf-8\"\u003e \u003ctitle\u003eAccount Settings \u0026mdash; WF-GT-Targett\u003c/title\u003e \u003clink rel=\"stylesheet\" type=\"text/css\" href=\"/css/write.css\" /\u003e \u003clink rel=\"shortcut icon\" hre"
+    },
+    {
+        "phase":  "admin-cookie",
+        "identity":  "usera(cookie)",
+        "method":  "GET",
+        "path":  "/admin/users",
+        "status":  404,
+        "note":  "non-admin via cookie (/admin expect 404 mask)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-cookie",
+        "identity":  "usera(cookie)",
+        "method":  "GET",
+        "path":  "/me/settings",
+        "status":  -1,
+        "note":  "non-admin via cookie (/admin expect 404 mask)",
+        "body":  ""
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199/posts",
+        "status":  201,
+        "note":  "fresh collection post for property/pin",
+        "body":  "{\"code\":201,\"data\":{\"id\":\"756bfses4d\",\"slug\":\"p6\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:15Z\",\"updated\":\"2026-11-09T14:44:15Z\",\"title\":\"p6\",\"body\":\"phase6 post\",\"tags\":[],\"paid\":false,\"views\":0,\"likes\":0,\"url\":\"http://localhost:8080/coll97199/p6\",\"collection\":{\"ali"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/markdown",
+        "status":  200,
+        "note":  "render markdown",
+        "body":  "{\"code\":200,\"data\":{\"body\":\"\\u003cp\\u003e\\u003cstrong\\u003ebold\\u003c/strong\\u003e \\u003cem\\u003eem\\u003c/em\\u003e \\u003ca href=\\\"http://a\\\" rel=\\\"nofollow\\\"\\u003ex\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/markdown",
+        "status":  200,
+        "note":  "render markdown",
+        "body":  "{\"code\":200,\"data\":{\"body\":\"\\u003cp\\u003e\\u003cstrong\\u003ebold\\u003c/strong\\u003e \\u003cem\\u003eem\\u003c/em\\u003e \\u003ca href=\\\"http://a\\\" rel=\\\"nofollow\\\"\\u003ex\\u003c/a\\u003e\\u003c/p\\u003e\\n\"}}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/posts/756bfses4d/views",
+        "status":  200,
+        "note":  "post property \u0027views\u0027 (expect 200)",
+        "body":  "{\"code\":200,\"data\":0}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "GET",
+        "path":  "/api/posts/756bfses4d/views",
+        "status":  200,
+        "note":  "post property \u0027views\u0027 (expect 200)",
+        "body":  "{\"code\":200,\"data\":0}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/posts/756bfses4d/bogusprop",
+        "status":  400,
+        "note":  "invalid property (expect 400)",
+        "body":  ""
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199/pin",
+        "status":  200,
+        "note":  "pin own post (expect 200)",
+        "body":  "{\"code\":200,\"data\":[{\"id\":\"756bfses4d\",\"code\":200}]}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199/pin",
+        "status":  403,
+        "note":  "pin as non-owner (expect 403)",
+        "body":  ""
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199/unpin",
+        "status":  200,
+        "note":  "unpin own post (expect 200)",
+        "body":  "{\"code\":200,\"data\":[{\"id\":\"756bfses4d\",\"code\":200}]}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/collections/coll97199/collect",
+        "status":  200,
+        "note":  "collect w/ empty token (vestigial; capture status)",
+        "body":  "{\"code\":200,\"data\":[{\"code\":200,\"post\":{\"id\":\"756bfses4d\",\"slug\":\"p6\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:15.644484191Z\",\"updated\":\"2026-11-09T14:44:15Z\",\"title\":\"p6\",\"body\":\"phase6 post\",\"tags\":null,\"paid\":false,\"views\":0,\"likes\":0,\"collection\":{\"alias\":\"coll97"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "usera",
+        "method":  "POST",
+        "path":  "/api/posts/claim",
+        "status":  200,
+        "note":  "claim w/ empty token (vestigial; capture status)",
+        "body":  "{\"code\":200,\"data\":[{\"code\":200,\"post\":{\"id\":\"756bfses4d\",\"slug\":\"p6\",\"appearance\":\"norm\",\"language\":\"\",\"rtl\":false,\"created\":\"2026-11-09T14:44:15.644484191Z\",\"updated\":\"2026-11-09T14:44:15Z\",\"title\":\"p6\",\"body\":\"phase6 post\",\"tags\":null,\"paid\":false,\"views\":0,\"likes\":0}}]}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "/api/me/password",
+        "status":  200,
+        "note":  "change passphrase (form current/new; expect 200)",
+        "body":  "{\"code\":200,\"data\":{}}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "userb",
+        "method":  "POST",
+        "path":  "/api/me/password",
+        "status":  200,
+        "note":  "revert passphrase",
+        "body":  "{\"code\":200,\"data\":{}}"
+    },
+    {
+        "phase":  "extra",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/api/me/password",
+        "status":  400,
+        "note":  "passphrase no auth (expect 401/400)",
+        "body":  ""
+    },
+    {
+        "phase":  "extra",
+        "identity":  "userb",
+        "method":  "DELETE",
+        "path":  "/api/auth/me",
+        "status":  204,
+        "note":  "logout/invalidate token (expect 204)",
+        "body":  ""
+    },
+    {
+        "phase":  "extra",
+        "identity":  "anon",
+        "method":  "DELETE",
+        "path":  "/api/auth/me",
+        "status":  400,
+        "note":  "logout no token (expect 401)",
+        "body":  ""
+    }
+]

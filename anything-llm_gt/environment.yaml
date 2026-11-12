@@ -1,0 +1,34 @@
+# AnythingLLM -- agentic attack-surface GT environment
+app: anything-llm
+app_version: repo checkout under 472-new/anything-llm
+source_root: ../anything-llm
+
+agentic_applicability:
+  verdict: qualifies
+  agent_runtime: AIbitat agent graph + provider tool-call loop
+  evidence:
+    - server/utils/agents/aibitat/index.js   (AIbitat: agents graph, functions Map, handleExecution loop, AGENT_MAX_TOOL_CALLS)
+    - server/utils/agents/index.js           (AgentHandler: @agent invocation, USER + @agent registration)
+    - server/utils/agents/defaults.js        (WORKSPACE_AGENT / USER_AGENT; skill assembly)
+    - server/utils/agents/aibitat/plugins/index.js  (skill catalog)
+    - server/utils/agents/imported.js        (community plugins, docker runtime)
+    - server/utils/MCP/index.js              (MCPCompatibilityLayer: tools only)
+
+deliverables:
+  schema: ../Agentic_attack_surface_schema.yaml
+  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py}
+  output: agentic_gt.yaml
+
+phase_status: {A_locate: complete, B_extract: complete, C_trust_authority: complete,
+               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+
+runtime_grounding_plan:
+  image: mintplexlabs/anythingllm (pin to the checked-out version)
+  provider: local ollama agent model so the tool loop dispatches
+  targets: [ "@agent tool call observed", web-scraping SSRF path, memory write->recall,
+             imported-plugin docker exec, MCP call under withMCPIdentity, USER interrupt oversight ]
+
+key_authority_note: >
+  External skills (gmail/outlook/gcal/sql/mcp/imported) execute under INSTANCE-level stored
+  credentials, not the invoking user's. Any user who can reach @agent in a workspace wields the
+  instance's connected accounts -- the central confused-deputy axis to confirm at runtime.

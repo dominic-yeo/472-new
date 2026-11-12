@@ -1,0 +1,34 @@
+# LibreChat -- agentic attack-surface GT environment
+app: LibreChat
+app_version: repo checkout under 472-new/LibreChat
+source_root: ../LibreChat
+
+agentic_applicability:
+  verdict: qualifies
+  agent_runtime: "@librechat/agents LangGraph run (Agents endpoint)"
+  evidence:
+    - api/server/services/ToolService.js        (loadAgentTools, resolveAgentCapabilities, loadActionSets)
+    - api/server/services/createRunBody.js      (run assembly)
+    - api/server/services/Runs/StreamRunManager.js (tool loop)
+    - api/server/services/Tools/mcp.js          (per-user OBO MCP identity)
+    - packages/api/src/agents/*                 (subagentIdentity, subagentTaskRouting, subagentDelivery)
+
+deliverables:
+  schema: ../Agentic_attack_surface_schema.yaml
+  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py}
+  output: agentic_gt.yaml
+
+phase_status: {A_locate: complete, B_extract: complete, C_trust_authority: complete,
+               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+
+runtime_grounding_plan:
+  image: ghcr.io/danny-avila/librechat (pin to checkout); needs Code API + RAG API + a model endpoint + an MCP server
+  targets: [ execute_code sandbox call, file_search RAG, web_search scrape (SSRF), MCP under per-user OAuth,
+             OpenAPI action call, sub-agent delegation + identity, memory extract->recall ]
+
+distinctive_notes: >
+  (1) MCP + (optionally) Actions run under PER-USER OAuth/OBO identity (AuthIdentityContext from req.user) --
+      not a shared-credential confused deputy like anything-llm. Capture this as the positive control.
+  (2) execute_code runs in the remote LibreChat Code Interpreter sandbox, not in-process.
+  (3) No interactive per-tool human approval; safety rests on AgentCapabilities + tool role grants + per-tool auth.
+  (4) Sub-agents are real: delegation with captured subagentIdentity (agent|graph).

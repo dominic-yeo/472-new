@@ -1,0 +1,218 @@
+﻿[
+    {
+        "phase":  "public",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/site/",
+        "status":  200,
+        "note":  "publicAdminApi (expect 200)",
+        "body":  "{\"site\":{\"title\":\"Ghost\",\"description\":\"Thoughts, stories and ideas\",\"logo\":null,\"icon\":null,\"cover_image\":\"https://static.ghost.org/v5.0.0/images/publication-cover.jpg\",\"accent_color\":\"#FF1A75\",\"locale\":\"en\",\"timezone\":\"Etc/UTC\",\"url\":\"htt"
+    },
+    {
+        "phase":  "bootstrap",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/authentication/setup/",
+        "status":  200,
+        "note":  "isSetup",
+        "body":  "{\"setup\":[{\"status\":false}]}"
+    },
+    {
+        "phase":  "bootstrap",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/ghost/api/admin/authentication/setup/",
+        "status":  201,
+        "note":  "create owner (expect 201)",
+        "body":  "{\"users\":[{\"id\":\"6af2be2a6e167700012bb1c5\",\"name\":\"GT Owner\",\"slug\":\"gt\",\"email\":\"gtowner@example.com\",\"profile_image\":null,\"cover_image\":null,\"bio\":null,\"website\":null,\"location\":null,\"facebook\":null,\"twitter\":null,\"threads\":null,\"bluesky\""
+    },
+    {
+        "phase":  "bootstrap",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/ghost/api/admin/session/",
+        "status":  201,
+        "note":  "login -\u003e admin session cookie (expect 201)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/posts/",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "owner",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/posts/",
+        "status":  200,
+        "note":  "owner cookie (expect 200)",
+        "body":  "{\"posts\":[{\"id\":\"6af2be2b6e167700012bb1d8\",\"uuid\":\"b5213f94-9901-46a5-85fc-636ab89bcc3a\",\"title\":\"Coming soon\",\"slug\":\"coming-soon\",\"mobiledoc\":null,\"lexical\":\"{\\\"root\\\":{\\\"children\\\":[{\\\"children\\\":[{\\\"detail\\\":0,\\\"format\\\":0,\\\"mode\\\":\\\"no"
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/users/",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "owner",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/users/",
+        "status":  200,
+        "note":  "owner cookie (expect 200)",
+        "body":  "{\"users\":[{\"id\":\"6af2be2a6e167700012bb1c5\",\"name\":\"GT Owner\",\"slug\":\"gt\",\"email\":\"gtowner@example.com\",\"profile_image\":null,\"cover_image\":null,\"bio\":null,\"website\":null,\"location\":null,\"facebook\":null,\"twitter\":null,\"threads\":null,\"bluesky\""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/members/",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "owner",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/members/",
+        "status":  200,
+        "note":  "owner cookie (expect 200)",
+        "body":  "{\"members\":[],\"meta\":{\"pagination\":{\"page\":1,\"limit\":15,\"pages\":1,\"total\":0,\"next\":null,\"prev\":null}}}"
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/settings/",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "owner",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/settings/",
+        "status":  200,
+        "note":  "owner cookie (expect 200)",
+        "body":  "{\"settings\":[{\"key\":\"title\",\"value\":\"GT Target\"},{\"key\":\"description\",\"value\":\"Thoughts, stories and ideas.\"},{\"key\":\"heading_font\",\"value\":\"\"},{\"key\":\"body_font\",\"value\":\"\"},{\"key\":\"logo\",\"value\":\"\"},{\"key\":\"cover_image\",\"value\":\"https://s"
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/integrations/?include=api_keys",
+        "status":  403,
+        "note":  "anon (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "owner",
+        "method":  "GET",
+        "path":  "/ghost/api/admin/integrations/?include=api_keys",
+        "status":  200,
+        "note":  "owner cookie (expect 200)",
+        "body":  "{\"integrations\":[{\"id\":\"6af2be2c6e167700012bb1dc\",\"type\":\"builtin\",\"name\":\"Zapier\",\"slug\":\"zapier\",\"icon_image\":null,\"description\":\"Built-in Zapier integration\",\"created_at\":\"2026-11-10T06:48:12.000Z\",\"updated_at\":\"2026-11-10T06:48:12.000Z\""
+    },
+    {
+        "phase":  "admin-matrix",
+        "identity":  "owner",
+        "method":  "POST",
+        "path":  "/ghost/api/admin/posts/",
+        "status":  201,
+        "note":  "owner create post (expect 201)",
+        "body":  "{\"posts\":[{\"id\":\"6af2be446e167700012bb294\",\"uuid\":\"6abab3bf-9d08-461d-a369-eb058ee45f7b\",\"title\":\"probe post\",\"slug\":\"probe-post\",\"mobiledoc\":null,\"lexical\":\"{\\\"root\\\":{\\\"children\\\":[{\\\"children\\\":[],\\\"direction\\\":null,\\\"format\\\":\\\"\\\",\\\"ind"
+    },
+    {
+        "phase":  "bootstrap",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/ghost/api/admin/authentication/setup/",
+        "status":  403,
+        "note":  "re-setup after owner exists (expect 403)",
+        "body":  ""
+    },
+    {
+        "phase":  "content",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/ghost/api/content/posts/",
+        "status":  403,
+        "note":  "content posts NO key (expect 401/403)",
+        "body":  ""
+    },
+    {
+        "phase":  "content",
+        "identity":  "contentkey",
+        "method":  "GET",
+        "path":  "/ghost/api/content/posts/",
+        "status":  200,
+        "note":  "content posts WITH key (expect 200)",
+        "body":  "{\"posts\":[{\"id\":\"6af2be2b6e167700012bb1d8\",\"uuid\":\"b5213f94-9901-46a5-85fc-636ab89bcc3a\",\"title\":\"Coming soon\",\"slug\":\"coming-soon\",\"html\":\"\u003cp\u003eThis is GT Target, a brand new site by GT Owner that\u0027s just getting started. Things will be up an"
+    },
+    {
+        "phase":  "content",
+        "identity":  "contentkey",
+        "method":  "GET",
+        "path":  "/ghost/api/content/settings/",
+        "status":  200,
+        "note":  "content settings WITH key",
+        "body":  "{\"settings\":{\"title\":\"GT Target\",\"description\":\"Thoughts, stories and ideas.\",\"logo\":null,\"icon\":null,\"accent_color\":\"#FF1A75\",\"cover_image\":\"https://static.ghost.org/v5.0.0/images/publication-cover.jpg\",\"facebook\":\"ghost\",\"twitter\":\"@ghost"
+    },
+    {
+        "phase":  "unauth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/ghost/api/admin/authentication/password_reset/",
+        "status":  500,
+        "note":  "reset request, real email (enumeration)",
+        "body":  ""
+    },
+    {
+        "phase":  "unauth",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/ghost/api/admin/authentication/password_reset/",
+        "status":  404,
+        "note":  "reset request, unknown email (enum oracle?)",
+        "body":  ""
+    },
+    {
+        "phase":  "members",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/members/api/site/",
+        "status":  200,
+        "note":  "members public site (expect 200)",
+        "body":  "{\"site\":{\"title\":\"GT Target\",\"description\":\"Thoughts, stories and ideas.\",\"logo\":null,\"icon\":null,\"cover_image\":\"https://static.ghost.org/v5.0.0/images/publication-cover.jpg\",\"accent_color\":\"#FF1A75\",\"locale\":\"en\",\"timezone\":\"Etc/UTC\",\"url\""
+    },
+    {
+        "phase":  "members",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/members/api/send-magic-link/",
+        "status":  400,
+        "note":  "magic-link request (expect 2xx/201)",
+        "body":  ""
+    },
+    {
+        "phase":  "members",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/members/api/member/",
+        "status":  204,
+        "note":  "member self NO session (expect 204/401)",
+        "body":  ""
+    }
+]

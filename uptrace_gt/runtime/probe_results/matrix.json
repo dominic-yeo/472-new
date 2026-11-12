@@ -1,0 +1,317 @@
+﻿[
+    {
+        "phase":  "auth",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/users/current",
+        "status":  200,
+        "note":  "bearer token sanity (expect 200)",
+        "body":  "{\"user\":{\"id\":1,\"name\":\"Admin\",\"kind\":\"human\",\"email\":\"admin@uptrace.local\",\"phone\":\"\",\"emailConfirmed\":true,\"avatar\":\"https://gravatar.com/avatar/c69004cbc73fbb32b5456b8345326994?d=identicon\",\"emailsMutedUntil\":1794237521848.033,\"otpEnabled\":false,\"timeZone\":\"\",\"createdAt\":17942"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/users/current",
+        "status":  200,
+        "note":  "anon (expect 401)",
+        "body":  "{\"user\":{\"id\":0,\"name\":\"Guest\",\"kind\":\"\",\"email\":\"\",\"phone\":\"\",\"emailConfirmed\":false,\"avatar\":\"\",\"emailsMutedUntil\":0,\"otpEnabled\":false,\"timeZone\":\"\",\"createdAt\":0},\"ssoSession\":false,\"projects\":[]} "
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/users/current",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"user\":{\"id\":1,\"name\":\"Admin\",\"kind\":\"human\",\"email\":\"admin@uptrace.local\",\"phone\":\"\",\"emailConfirmed\":true,\"avatar\":\"https://gravatar.com/avatar/c69004cbc73fbb32b5456b8345326994?d=identicon\",\"emailsMutedUntil\":1794237521848.033,\"otpEnabled\":false,\"timeZone\":\"\",\"createdAt\":17942"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/data-usage",
+        "status":  200,
+        "note":  "anon (expect 401)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/data-usage",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/systems",
+        "status":  200,
+        "note":  "anon (expect 401)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/systems",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/spans",
+        "status":  200,
+        "note":  "anon (expect 401)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/spans",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/groups",
+        "status":  200,
+        "note":  "anon (expect 401)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/groups",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/attributes",
+        "status":  401,
+        "note":  "anon (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/1/attributes",
+        "status":  400,
+        "note":  "admin (expect 200)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/metrics/1",
+        "status":  401,
+        "note":  "anon (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/metrics/1",
+        "status":  400,
+        "note":  "admin (expect 200)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/metrics/1/attributes",
+        "status":  401,
+        "note":  "anon (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/metrics/1/attributes",
+        "status":  200,
+        "note":  "admin (expect 200)",
+        "body":  "{\"items\":[{\"value\":\"_attribute\",\"kind\":\"str\",\"unit\":\"\",\"pinned\":false,\"count\":91},{\"value\":\"_instrument\",\"kind\":\"str\",\"unit\":\"\",\"pinned\":false,\"count\":91},{\"value\":\"_library_name\",\"kind\":\"str\",\"unit\":\"\",\"pinned\":false,\"count\":71},{\"value\":\"service_name::str\",\"kind\":\"str\",\"unit\":\""
+    },
+    {
+        "phase":  "matrix",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/metrics/1/table?query=count()",
+        "status":  400,
+        "note":  "metrics table query",
+        "body":  ""
+    },
+    {
+        "phase":  "dsn-disclosure",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/projects/1",
+        "status":  200,
+        "note":  "admin reads project -\u003e DSN?",
+        "body":  "{\"project\":{\"id\":1,\"orgId\":1,\"orgName\":\"Org1\",\"name\":\"Project1\",\"avatar\":\"https://gravatar.com/avatar/fe13aebd50b0933b335d4428e2521b1e?d=identicon\u0026f=y\",\"samplingMode\":\"org_wide\",\"samplingFraction\":0,\"samplingBudget\":0,\"suspended\":false,\"groupByEnv\":false,\"groupFuncsByService\":fal"
+    },
+    {
+        "phase":  "dsn-disclosure",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/projects/1",
+        "status":  401,
+        "note":  "anon (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "acl",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/projects/999999",
+        "status":  404,
+        "note":  "nonexistent project (expect 404 not 403)",
+        "body":  ""
+    },
+    {
+        "phase":  "acl",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/tracing/999999/spans",
+        "status":  200,
+        "note":  "spans for nonexistent project (gate=existence)",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "oracle",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/traces/search?trace_id=0123456789abcdef0123456789abcdef",
+        "status":  400,
+        "note":  "search trace (m.User only, no project)",
+        "body":  ""
+    },
+    {
+        "phase":  "oracle",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/internal/v1/traces/search?trace_id=0123456789abcdef0123456789abcdef",
+        "status":  401,
+        "note":  "anon (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "pubpath",
+        "identity":  "anon",
+        "method":  "GET",
+        "path":  "/api/v1/tracing/1/spans",
+        "status":  401,
+        "note":  "public path, anon (expect 401 = user-gated)",
+        "body":  ""
+    },
+    {
+        "phase":  "pubpath",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/api/v1/tracing/1/spans",
+        "status":  400,
+        "note":  "public path, admin cookie/bearer (expect 200)",
+        "body":  ""
+    },
+    {
+        "phase":  "pubpath",
+        "identity":  "dsn",
+        "method":  "GET",
+        "path":  "/api/v1/tracing/1/spans",
+        "status":  401,
+        "note":  "public path, DSN only (expect 401 = NOT dsn-gated)",
+        "body":  ""
+    },
+    {
+        "phase":  "dash",
+        "identity":  "admin",
+        "method":  "POST",
+        "path":  "/internal/v1/metrics/1/dashboards",
+        "status":  405,
+        "note":  "create dashboard",
+        "body":  ""
+    },
+    {
+        "phase":  "dash",
+        "identity":  "admin",
+        "method":  "GET",
+        "path":  "/internal/v1/metrics/1/dashboards",
+        "status":  200,
+        "note":  "list dashboards",
+        "body":  "\u003c!doctype html\u003e \u003chtml lang=\"en\"\u003e \u003chead\u003e \u003cmeta charset=\"UTF-8\" /\u003e \u003clink rel=\"icon\" href=\"/favicon.svg\" /\u003e \u003clink rel=\"stylesheet\" href=\"/layers.css\" /\u003e \u003cmeta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" /\u003e \u003cmeta name=\"color-scheme\" content=\"light dark\" /\u003e \u003ctitle\u003e"
+    },
+    {
+        "phase":  "dash",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/internal/v1/metrics/1/dashboards",
+        "status":  405,
+        "note":  "create as anon (expect 401)",
+        "body":  ""
+    },
+    {
+        "phase":  "ingest",
+        "identity":  "dsn",
+        "method":  "POST",
+        "path":  "/v1/traces",
+        "status":  200,
+        "note":  "OTLP traces w/ DSN (expect 2xx)",
+        "body":  "{}"
+    },
+    {
+        "phase":  "ingest",
+        "identity":  "anon",
+        "method":  "POST",
+        "path":  "/v1/traces",
+        "status":  401,
+        "note":  "OTLP traces NO dsn (expect 401/400)",
+        "body":  ""
+    },
+    {
+        "phase":  "ingest",
+        "identity":  "dsn",
+        "method":  "POST",
+        "path":  "/v1/logs",
+        "status":  200,
+        "note":  "OTLP logs w/ DSN",
+        "body":  "{}"
+    },
+    {
+        "phase":  "ingest",
+        "identity":  "dsn",
+        "method":  "POST",
+        "path":  "/v1/metrics",
+        "status":  200,
+        "note":  "OTLP metrics w/ DSN",
+        "body":  "{}"
+    },
+    {
+        "phase":  "ingest",
+        "identity":  "dsn",
+        "method":  "POST",
+        "path":  "/api/v1/vector-logs",
+        "status":  500,
+        "note":  "vector logs w/ DSN",
+        "body":  ""
+    }
+]
