@@ -1,0 +1,425 @@
+schema_version: pengent-web-gt-v1
+environment_id: openclaw-oss
+scope: 'focused: agentic invocation/config/tool-backing surfaces (not a full-app HTTP sweep)'
+nodes:
+- id: l1.channel.whatsapp
+  key: channel:whatsapp/inbound
+  kind: channel
+  surface_class: invocation
+  methods: []
+  auth_context: channel identity gated by DM allowlist/pairing
+  inputs:
+  - message_text
+  - sender
+  - attachments
+  outputs:
+  - agent_reply
+  source_ref: src/channels/* (direct-dm.ts, inbound-event/context.ts); message-access/decision.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: PRIMARY untrusted entry. Inbound WhatsApp DM/group message drives an agent turn.
+    black_box_reachable: true
+    reachability_conditions:
+    - sender passes dmPolicy allowlist/pairing
+    evidence: []
+    notes: PRIMARY untrusted entry. Inbound WhatsApp DM/group message drives an agent turn.
+  notes: PRIMARY untrusted entry. Inbound WhatsApp DM/group message drives an agent turn.
+- id: l1.channel.feishu
+  key: channel:feishu-slack-other/inbound
+  kind: channel
+  surface_class: invocation
+  methods: []
+  auth_context: channel account; agent binding
+  inputs:
+  - message_text
+  - sender
+  outputs:
+  - agent_reply
+  source_ref: src/channels/*
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Other messaging channels (Feishu/Slack/...) as invocation surfaces.
+    black_box_reachable: true
+    reachability_conditions:
+    - sender passes channel dmPolicy
+    evidence: []
+    notes: Other messaging channels (Feishu/Slack/...) as invocation surfaces.
+  notes: Other messaging channels (Feishu/Slack/...) as invocation surfaces.
+- id: l1.gateway.rpc
+  key: gateway:rpc/control
+  kind: rpc
+  surface_class: invocation
+  methods: []
+  auth_context: operator/owner (gateway caller context + receipt)
+  inputs:
+  - rpc_call
+  outputs:
+  - rpc_result
+  source_ref: src/gateway/*; src/agents/tools/gateway-caller-context.ts; in-process-gateway.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Gateway RPC / Control UI talk surface (operator-facing).
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Gateway RPC / Control UI talk surface (operator-facing).
+  notes: Gateway RPC / Control UI talk surface (operator-facing).
+- id: l1.gateway.system
+  key: gateway:system-agent/ring-zero
+  kind: rpc
+  surface_class: invocation
+  methods: []
+  auth_context: owner/operator; ring-zero
+  inputs:
+  - system_instruction
+  outputs:
+  - fleet_change
+  source_ref: src/agents/tools/system-agent-tool.ts; execution-authority.ts; qa/scenarios/config/system-agent-ring-zero-setup.yaml
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Privileged system-agent / ring-zero setup surface.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Privileged system-agent / ring-zero setup surface.
+  notes: Privileged system-agent / ring-zero setup surface.
+- id: l1.a2a.inbound
+  key: fleet:agent-to-agent/inbound
+  kind: internal
+  surface_class: invocation
+  methods: []
+  auth_context: tools.agentToAgent allow policy
+  inputs:
+  - peer_message
+  outputs:
+  - agent_reply
+  source_ref: src/agents/tools/sessions-send-tool.a2a.ts; src/channels/inbound-event
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Peer-agent (A2A) message as an invocation surface -> lateral movement entry.
+    black_box_reachable: false
+    reachability_conditions:
+    - agentToAgent enabled + allowed sender pair
+    evidence: []
+    notes: Peer-agent (A2A) message as an invocation surface -> lateral movement entry.
+  notes: Peer-agent (A2A) message as an invocation surface -> lateral movement entry.
+- id: l1.internal.subagent_spawn
+  key: fleet:subagent/spawn
+  kind: internal
+  surface_class: invocation
+  methods: []
+  auth_context: parent agent; allowAgents + spawn limits
+  inputs:
+  - subagent_task
+  outputs:
+  - subagent_result
+  source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts; sessions-spawn-access-program.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Internal spawn of a background sub-agent run.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Internal spawn of a background sub-agent run.
+  notes: Internal spawn of a background sub-agent run.
+- id: l1.cron.scheduled
+  key: scheduler:cron/agent-turn
+  kind: scheduler
+  surface_class: invocation
+  methods: []
+  auth_context: job creator identity; creator cap
+  inputs:
+  - scheduled_prompt
+  outputs:
+  - agent_reply
+  source_ref: src/cron/active-jobs.ts; agent-turn-command-prompt.ts; agent-availability.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Scheduler-driven self-trigger of a future agent turn.
+    black_box_reachable: false
+    reachability_conditions:
+    - a cron job exists (agent- or operator-created)
+    evidence: []
+    notes: Scheduler-driven self-trigger of a future agent turn.
+  notes: Scheduler-driven self-trigger of a future agent turn.
+- id: l1.config.agents
+  key: config:agents.defaults+entries
+  kind: config
+  surface_class: config_write
+  methods: []
+  auth_context: operator
+  inputs:
+  - agent_role
+  - allowlists
+  - owner
+  - model
+  outputs:
+  - fleet_config
+  source_ref: src/config/zod-schema.agent-runtime.ts; src/commands/agents.config.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: 'Fleet wiring: roles, system prompts, allowlists, ownership, agentToAgent allow.'
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: 'Fleet wiring: roles, system prompts, allowlists, ownership, agentToAgent allow.'
+  notes: 'Fleet wiring: roles, system prompts, allowlists, ownership, agentToAgent allow.'
+- id: l1.config.mcp
+  key: config:mcp-servers
+  kind: config
+  surface_class: config_write
+  methods: []
+  auth_context: operator
+  inputs:
+  - mcp_server_spec
+  outputs:
+  - mcp_catalog
+  source_ref: src/agents/agent-bundle-mcp-manager.ts; config MCP server entries
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Operator-configured MCP servers (whose tool descriptions become model-facing).
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Operator-configured MCP servers (whose tool descriptions become model-facing).
+  notes: Operator-configured MCP servers (whose tool descriptions become model-facing).
+- id: l1.workspace.skills
+  key: workspace:skills/files
+  kind: config
+  surface_class: config_write
+  methods: []
+  auth_context: operator + agent file tools
+  inputs:
+  - skill_file
+  outputs:
+  - skill_instruction
+  source_ref: src/agents/installed-skill-catalog.ts; ~/.openclaw/skills
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Skill instruction files (stored-instruction surface).
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Skill instruction files (stored-instruction surface).
+  notes: Skill instruction files (stored-instruction surface).
+- id: l1.workspace.files
+  key: workspace:agent-root/files
+  kind: config
+  surface_class: config_write
+  methods: []
+  auth_context: agent file tools + operator
+  inputs:
+  - file_content
+  outputs:
+  - workspace_file
+  source_ref: src/agents/sandbox/fs-bridge.ts; fs-paths.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Agent workspace filesystem writes.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Agent workspace filesystem writes.
+  notes: Agent workspace filesystem writes.
+- id: l1.plugin.hook
+  key: plugin:prompt-context+tool-policy/hook
+  kind: internal
+  surface_class: config_write
+  methods: []
+  auth_context: pluginOwnerId trust
+  inputs:
+  - prepend_context
+  - tool_policy
+  outputs:
+  - injected_context
+  - tool_decision
+  source_ref: src/agents/cli-runner/execute-plugin.steered-transcript.ts; plugins/trusted-tool-policy.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Plugin hooks that steer context and gate tool calls; trust bound to pluginOwnerId.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Plugin hooks that steer context and gate tool calls; trust bound to pluginOwnerId.
+  notes: Plugin hooks that steer context and gate tool calls; trust bound to pluginOwnerId.
+- id: l1.tool.exec_shell
+  key: tool-backend:shell
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: sandbox/host process identity
+  inputs:
+  - command
+  outputs:
+  - stdout
+  - stderr
+  source_ref: src/agents/bash-tools.exec-run.ts; src/agents/sandbox/docker-backend.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Shell/exec backend (sandboxed by default; host if unsandboxed).
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Shell/exec backend (sandboxed by default; host if unsandboxed).
+  notes: Shell/exec backend (sandboxed by default; host if unsandboxed).
+- id: l1.tool.web_fetch
+  key: tool-backend:http-fetch
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: anonymous outbound (net-policy guarded)
+  inputs:
+  - url
+  outputs:
+  - response_body
+  source_ref: src/agents/tools/web-guarded-fetch.ts; src/infra/net/ssrf.ts; packages/net-policy
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Outbound HTTP fetch backend; SSRF-guarded.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Outbound HTTP fetch backend; SSRF-guarded.
+  notes: Outbound HTTP fetch backend; SSRF-guarded.
+- id: l1.tool.web_search
+  key: tool-backend:search-provider
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: provider credentials
+  inputs:
+  - query
+  outputs:
+  - results
+  source_ref: src/agents/tools/web-search.ts; web-search-provider-common.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Search provider API backend.
+    black_box_reachable: false
+    reachability_conditions:
+    - search provider configured
+    evidence: []
+    notes: Search provider API backend.
+  notes: Search provider API backend.
+- id: l1.tool.browser
+  key: tool-backend:sandboxed-browser-cdp
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: sandbox browser profile
+  inputs:
+  - navigate
+  - action
+  outputs:
+  - page_content
+  source_ref: src/agents/sandbox/browser.ts; browser-network.ts; computer-tool-gateway.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Sandboxed browser (CDP) backend.
+    black_box_reachable: false
+    reachability_conditions:
+    - computer/browser tool enabled; sandbox browser bridge
+    evidence: []
+    notes: Sandboxed browser (CDP) backend.
+  notes: Sandboxed browser (CDP) backend.
+- id: l1.tool.message_send
+  key: tool-backend:channel-send
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: channel account
+  inputs:
+  - target
+  - message
+  outputs:
+  - delivery_receipt
+  source_ref: src/agents/tools/message-tool-execution.ts; message-tool-source-policy.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Outbound channel message backend (under the channel account).
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence: []
+    notes: Outbound channel message backend (under the channel account).
+  notes: Outbound channel message backend (under the channel account).
+- id: l1.tool.github
+  key: tool-backend:github-api
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: configured GitHub identity
+  inputs:
+  - repo
+  - content
+  outputs:
+  - publish_result
+  source_ref: src/agents/tools/github-publish-tool.ts; src/agents/sandbox/github-publication.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: GitHub publish backend.
+    black_box_reachable: false
+    reachability_conditions:
+    - github tool + identity configured
+    evidence: []
+    notes: GitHub publish backend.
+  notes: GitHub publish backend.
+- id: l1.tool.media
+  key: tool-backend:media-providers
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: provider credentials
+  inputs:
+  - prompt
+  outputs:
+  - media_asset
+  source_ref: src/agents/tools/image-generate-tool.ts; media-generation-tool-providers.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: Media generation provider backend.
+    black_box_reachable: false
+    reachability_conditions:
+    - media provider configured
+    evidence: []
+    notes: Media generation provider backend.
+  notes: Media generation provider backend.
+- id: l1.mcp.call
+  key: tool-backend:mcp-server
+  kind: tool_backend
+  surface_class: egress
+  methods: []
+  auth_context: MCP server config
+  inputs:
+  - mcp_tool_args
+  outputs:
+  - mcp_tool_result
+  source_ref: src/agents/native-mcp-runtime-client.ts; src/mcp/openclaw-tools-serve.ts
+  gt:
+    visibility:
+      minimum: grey_box
+      reason: MCP server call backend (remote or bundled).
+    black_box_reachable: false
+    reachability_conditions:
+    - MCP server configured
+    evidence: []
+    notes: MCP server call backend (remote or bundled).
+  notes: MCP server call backend (remote or bundled).

@@ -1,64 +1,111 @@
 # OpenClaw agentic GT -- annotation issues (modeling decisions; NOT vulnerabilities)
 issues:
-  - id: doc-derived
+  - id: code-grounded
     kind: evidence
     note: >
-      This model is derived from the repo's design docs (docs/concepts, docs/gateway, docs/tools, qa/scenarios),
-      which are authoritative but not code. source_ref cites doc paths. A follow-up should confirm tool names,
-      hook names, and policy keys against src/ + packages/ and adjust evidence_status where code diverges.
+      SUPERSEDES the earlier "doc-derived" model. This GT is now built from the TypeScript monorepo (src/ +
+      packages/); every source_ref cites a real file/symbol. The tool surface expanded from 9 doc-level groupings
+      to ~27 code-confirmed bindings and gained surfaces that the docs did not make explicit (cron self-trigger,
+      net-policy SSRF guard, per-requester tool policy, exec approval). evidence_status=source_confirmed reflects
+      confirmation against committed source at this checkout.
+
+  - id: phase-e-offline
+    kind: evidence
+    note: >
+      Phase E (runtime grounding) could not produce 'observed' records in this environment: no network (pnpm
+      install to registry.npmjs.org times out), no Docker, no model-provider credentials. Per methodology, nothing
+      is marked evidence_status=observed. Instead: reachability.status is derived from source gating (annotated),
+      and environment.yaml carries a per-path grounding runbook citing the committed repo tests that exercise each
+      control/data path. Completing live grounding is a mechanical follow-up on a networked host with Docker + a
+      provider key.
 
   - id: platform-granularity
     kind: granularity
     note: >
-      OpenClaw is a platform with many channels/runtimes. Modeled at the class level: 3 agents (primary fleet
-      agent, background subagent, ring-zero system agent); tools grouped as exec/file/browser/message/
-      subagent_spawn/agent_send/mcp/skills/session. Channels are invocation_surfaces, not separate agents.
+      Modeled at the agent-class level: 3 agents (primary fleet agent, background subagent, ring-zero system agent).
+      Tools are modeled per (agent, tool-family): the same family offered to primary/subagent/system is a separate
+      binding because execution_identity + controls differ. Channels are invocation_surfaces (L1), not separate agents.
 
   - id: external-runtimes
     kind: modeling
     note: >
-      The agent loop can be the built-in runner or an external runtime (claude-cli/codex/copilot/muse). Modeled
-      as one agent with model_config.provider = the selected runtime; the tool surface is bridged through native
-      hooks regardless.
+      The agent loop can be the built-in runner (packages/agent-core) or an external runtime
+      (claude-cli/codex/copilot/muse). Modeled as one agent with model_config.provider = the selected runtime; the
+      native tool surface is bridged regardless (src/agents/cli-runner, embedded-agent-runner).
 
   - id: sandbox-as-posture
     kind: authority
     note: >
-      exec/file/browser execution_environment depends on the sandbox backend (Docker default network:none, or
-      Crabbox, or UNSANDBOXED host). Captured on each binding + ctl.sandbox; the host-vs-sandbox choice is the
-      decisive posture to confirm at runtime.
+      exec/file/computer execution_environment depends on the sandbox backend. Defaults confirmed in
+      src/agents/sandbox/config.ts (network 'none', readOnlyRoot true) + container-allocation.ts (--network, capDrop).
+      UNSANDBOXED host is the decisive posture to confirm at runtime; captured on each binding + ctl.sandbox.
 
-  - id: l1-l2-forward-refs
+  - id: subagent-surface-subset
+    kind: modeling
+    note: >
+      Subagent tool bindings are a deliberate restricted subset (terminal/file/web_fetch/computer/mcp -- no
+      message/sessions_send/sessions_spawn by default), per src/agents/delegated-tool-policy.ts +
+      tools.subagents.tools denylist. ctl.subagent_policy enforces it.
+
+  - id: mcp-sampling-absent
+    kind: scope
+    note: >
+      openclaw is an MCP client (calls configured servers) and an MCP server (exposes selected built-ins via
+      src/mcp/openclaw-tools-serve.ts). No MCP *sampling* path (server asking the client to run a completion) was
+      found in source, so no external->model sampling edge is modeled. Re-confirm if MCP wiring changes.
+
+  - id: l1-l2-focused
     kind: cross-layer
-    note: openclaw L1/L2 GT not built; l1/channel/l2 ids are forward references.
+    note: >
+      Phase F is complete but the L1/L2 GT (l1_gt.yaml 20 nodes, l2_gt.yaml 4 nodes, via build_links.py) is a
+      FOCUSED catalog of the surfaces the agentic layer references (messaging/RPC/A2A/cron invocation, config-write,
+      and tool-backing egress), NOT a full-app HTTP/route sweep of the gateway. All agentic l1/l2 references resolve
+      and are enforced in build_agentic.py. A full-app L1/L2 would add gateway HTTP endpoints not touched by the loop.
 
 methodology_feedback:
-  - id: messaging-channel-entry
+  - id: non-human-entry-surfaces
     target: methodology Phase A (invocation surfaces)
     finding: >
-      OpenClaw's primary untrusted entry is a MESSAGING CHANNEL, not an HTTP endpoint. The methodology's
-      invocation_surfaces should explicitly include non-HTTP channels (messaging, A2A, scheduler) and tie the
-      who-can-invoke gate (DM allowlist) to a control, as done here (ctl.dm_allowlist + edge.channel__primary
-      with decision_maker external_event).
+      Source confirmed THREE non-HTTP entry surfaces for one app: a messaging channel (primary untrusted entry),
+      peer A2A messages, and a CRON scheduler that an agent can program to trigger its OWN future turns. The
+      methodology should list messaging, A2A, and scheduler as first-class invocation surfaces, and call out
+      agent-created scheduled jobs as a deferred self-trigger (entry that no live human initiates).
 
   - id: fleet-lateral-movement
     target: schema / methodology
     finding: >
-      Multi-agent fleets add a LATERAL dimension: agent-to-agent send (sink.agent_send -> peer's
-      ctx.cross_agent_message) and cross-agent session visibility. The schema captured this with
-      becomes_context_source_ids + a dedicated control (ctl.agent_to_agent). Methodology should name
-      "cross-agent reachability" as an explicit extraction target for fleet apps.
+      Multi-agent fleets add a LATERAL dimension: sessions_send (A2A, sessions-send-tool.a2a.ts) ->
+      peer's ctx.cross_agent_message, and cross-agent session visibility. Captured via becomes_context_source_ids +
+      ctl.agent_to_agent + ctl.session_visibility. Methodology should name "cross-agent reachability" as an explicit
+      extraction target for fleet apps.
 
   - id: programmable-tool-hook
     target: schema controls
     finding: >
-      before_tool_call is a programmable, blocking, code-implemented tool guard (not a fixed policy).
-      Modeled as ctl.before_tool_hook (tool_policy / before_tool / blocking / code). Fits cleanly; worth
-      citing as the canonical "host hook" control example.
+      before_tool_call is a programmable, ordered, fail-closed policy chain (runBeforeToolCallHook, approvalMode
+      request|report|deny|defer; agent-tools.before-tool-call.policy.ts), not a fixed policy. Canonical "host hook"
+      control example. Worth a methodology note that approval mode is a per-policy dimension (request vs deny vs defer).
+
+  - id: ssrf-guard-as-control
+    target: schema tool_bindings.execution_environment / controls
+    finding: >
+      web_fetch is SSRF-guarded by a dedicated net-policy layer (src/infra/net/ssrf.ts + packages/net-policy:
+      ip/ipv4 private-range detection, url-protocol/userinfo checks). Modeled as ctl.net_policy_ssrf
+      (output_filter/before_tool/blocking/code). Methodology should require an explicit SSRF-guard control record for
+      any model-chosen-URL fetch tool, separate from the sandbox.
+
+  - id: requester-scoped-tool-policy
+    target: schema controls
+    finding: >
+      Beyond per-agent tool mounting, openclaw has a per-REQUESTER tool policy (requester-tool-policy.ts +
+      tool-policy-match.ts: isToolAllowedByPolicies) for external/delegated runs -- which tools a given inbound
+      requester may invoke. This is distinct from "tool not mounted" and from "blocked at call"; the methodology's
+      control taxonomy should include a requester/delegation-scoped authorization control.
 
   - id: sandbox-posture-field
     target: schema tool_bindings.execution_environment
     finding: >
-      execution_environment captured the three sandbox postures (docker network:none / crabbox lease / host)
-      well. Suggest the methodology require recording whether a sandbox is ON by default vs opt-in, since the
-      same binding is code_execution either way but the reachable blast radius differs by posture.
+      execution_environment captured the sandbox postures (docker network 'none' default / crabbox lease / host)
+      well. Recommend the methodology require recording whether the sandbox is ON by default vs opt-in, since the
+      same binding is code_execution either way but the reachable blast radius differs by posture (confirmed default-on
+      in src/agents/sandbox/config.ts).

@@ -6,19 +6,25 @@ meta:
   git_ref: see source_root
   applicability:
     verdict: qualifies
-    evidence: multi-agent gateway running coding-agent loops (built-in or external runtimes) over shell/file/browser/MCP/subagent/A2A
-      tools, driven by messaging channels (docs/concepts/agent-loop.md, docs/gateway/*).
+    evidence: multi-agent gateway running coding-agent loops (packages/agent-core/src/agent-loop.ts, built-in
+      or external runtimes) over terminal/file/web/computer/MCP/subagent/A2A tools, driven by messaging
+      channels (src/channels/*), gateway RPC, A2A, and a cron scheduler (src/cron/*).
   phase_status:
-    static_A_to_D: complete (DOC-DERIVED; code symbols pending)
-    runtime_E: pending (no live grounding yet)
-    link_F: partial (L1/L2 GT for openclaw not yet built; ids are forward refs)
+    static_A_to_D: complete (CODE-GROUNDED; source_ref cites src/ + packages/ symbols)
+    runtime_E: 'performed offline: reachability set from source gating + per-record grounding runbook
+      written; live ''observed'' upgrade blocked (no network/docker/model provider in this environment)
+      -- see environment.yaml runtime_grounding_plan + annotation issue phase-e-offline. No record is
+      marked ''observed''.'
+    link_F: complete (../l1_gt.yaml + ../l2_gt.yaml built via build_links.py; all cross-layer l1/l2 references
+      resolved and enforced below)
 agents:
 - id: agent.openclaw.primary
   name: Fleet agent (per channel/role)
   component: openclaw
   agent_kind: interactive
-  purpose: An agent entry in the fleet; runs a coding-agent loop (built-in or external runtime) over shell/file/browser/MCP/skill
-    tools, reachable via messaging channels.
+  purpose: An agent entry in the fleet; runs the agent-core loop (packages/agent-core/src/agent-loop.ts,
+    built-in or external runtime) over terminal/file/web/computer/MCP/skill tools, reachable via messaging
+    channels, gateway RPC, A2A, and the cron scheduler.
   invocation_surfaces:
   - l1_id: l1.channel.whatsapp
     trigger: inbound WhatsApp DM/group message (dmPolicy pairing/allowlist)
@@ -32,6 +38,9 @@ agents:
   - l1_id: l1.a2a.inbound
     trigger: agent-to-agent message from a peer agent
     auth_context: tools.agentToAgent allow policy
+  - l1_id: l1.cron.scheduled
+    trigger: cron/scheduled self-triggered turn
+    auth_context: job creator identity; creator cap
   model_config:
     provider: configurable per agentRuntime (claude-cli/codex/copilot/muse/openclaw)
     model: provider/model runtime policy
@@ -40,7 +49,7 @@ agents:
     - principal: operator
       l1_id: l1.config.agents
     - principal: plugin
-      l1_id: l1.plugin.before_prompt_build
+      l1_id: l1.plugin.hook
     evidence_status: source_confirmed
   instruction_sources:
   - surface_id: ctx.system_prompt
@@ -65,17 +74,25 @@ agents:
     config_version: runtime
     writers:
     - principal: plugin
-      l1_id: l1.plugin.before_prompt_build
+      l1_id: l1.plugin.hook
   tool_binding_ids:
-  - tool.exec
-  - tool.file
-  - tool.browser
-  - tool.message
-  - tool.subagent_spawn
-  - tool.agent_send
-  - tool.mcp
-  - tool.skills
-  - tool.session
+  - tool.primary.terminal
+  - tool.primary.file_read
+  - tool.primary.apply_patch
+  - tool.primary.web_fetch
+  - tool.primary.web_search
+  - tool.primary.computer
+  - tool.primary.message
+  - tool.primary.sessions_send
+  - tool.primary.sessions_spawn
+  - tool.primary.sessions_read
+  - tool.primary.cron
+  - tool.primary.ask_user
+  - tool.primary.mcp
+  - tool.primary.skills
+  - tool.primary.github
+  - tool.primary.media
+  - tool.primary.gateway
   context_source_ids:
   - ctx.system_prompt
   - ctx.skill_instructions
@@ -83,22 +100,28 @@ agents:
   - ctx.channel_message
   - ctx.session_history
   - ctx.tool_results
-  - ctx.browser_content
+  - ctx.web_content
   - ctx.tool_descriptions
   - ctx.subagent_task
   - ctx.cross_agent_message
+  - ctx.cron_prompt
+  - ctx.ask_user_response
   memory_ids:
   - mem.sessions
   - mem.workspace
   - mem.skills
   - mem.fleet_config
+  - mem.cron_jobs
   output_sink_ids:
   - sink.channel_reply
   - sink.exec
-  - sink.browser
+  - sink.web_egress
   - sink.file_write
   - sink.agent_send
   - sink.mcp_call
+  - sink.github
+  - sink.media
+  - sink.cron_schedule
   control_ids:
   - ctl.sandbox
   - ctl.before_tool_hook
@@ -108,38 +131,45 @@ agents:
   - ctl.owner_trust
   - ctl.tool_arg_validation
   - ctl.session_visibility
+  - ctl.exec_approval
+  - ctl.net_policy_ssrf
+  - ctl.requester_tool_policy
+  - ctl.cron_creator_cap
   resource_limits:
-    max_iterations: turn-scoped; model attempt timeout aborts a stuck attempt
-    recursion: subagent spawn depth + child limits
-    token_or_cost_budget: global capacity + per-turn
-    loop_detection: session controller serialization + host stop decisions
+    max_iterations: turn/attempt scoped; model attempt timeout aborts a stuck attempt
+    recursion: subagent spawn depth + child limits (sessions-spawn)
+    token_or_cost_budget: global capacity + per-turn (agent-loop steering)
+    loop_detection: assistant-repetition-guard.ts + repetition-guard.ts; session serialization
     enforced_by: code
   authority_context:
     principal_source: messaging-channel sender (gated) or operator
     tenant_scope: per-agent workspace/session; fleet isolation
     resource_scope: agent workspace + sandbox; channel account; allowed peer agents
     delegated_identity: tools run in the agent's workspace/sandbox; messaging under the channel account
-    authz_enforcement: code/config (DM allowlist + agentToAgent allow + skill allowlist + sandbox + hooks)
+    authz_enforcement: code/config (DM allowlist + agentToAgent allow + requester tool policy + skill
+      allowlist + sandbox + before_tool_call hook)
   related_l2_ids:
   - l2.agent.channel_run
+  - l2.agent.scheduled_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs/concepts/agent-loop.md; agent-runtimes.md; docs/gateway/*; src (TS monorepo)
+  source_ref: packages/agent-core/src/agent-loop.ts; agent-loop-tool-execution.ts; src/agents/* (embedded-agent-runner,
+    cli-runner); src/channels/* (inbound-event); src/cron/*
   evidence_status: source_confirmed
-  notes: 'Untrusted entry is a channel message: anyone who passes the DM allowlist can drive the agent
-    and its tools. The core attack surface.'
+  notes: 'Untrusted entry is a channel message (or A2A/cron prompt): anyone who passes the DM allowlist
+    can drive the agent + its tools. The core attack surface.'
 - id: agent.openclaw.subagent
   name: Sub-agent (background spawn)
   component: openclaw
   agent_kind: specialist
-  purpose: Background run spawned from a parent (agent:<id>:subagent:<uuid>), session-separated, with
-    a deliberately restricted tool surface (no session/message tools by default).
+  purpose: Background run spawned from a parent (sessions_spawn / subagents-tool), session-separated,
+    with a deliberately restricted tool surface (no session/message/spawn tools by default).
   invocation_surfaces:
   - l1_id: l1.internal.subagent_spawn
-    trigger: sessions_spawn / subagent tool
-    auth_context: parent agent; operator approval for creation hierarchy
+    trigger: sessions_spawn / subagents tool
+    auth_context: parent agent; allowAgents + spawn limits
   model_config:
     provider: agents.defaults.subagents.model or per-agent override
     model: subagent model
@@ -157,28 +187,32 @@ agents:
     - principal: agent.openclaw.primary
       l1_id: null
   tool_binding_ids:
-  - tool.exec
-  - tool.file
-  - tool.browser
-  - tool.mcp
+  - tool.subagent.terminal
+  - tool.subagent.file_read
+  - tool.subagent.apply_patch
+  - tool.subagent.web_fetch
+  - tool.subagent.computer
+  - tool.subagent.mcp
   context_source_ids:
   - ctx.subagent_task
   - ctx.tool_results
-  - ctx.browser_content
+  - ctx.web_content
   memory_ids:
   - mem.sessions
   - mem.workspace
   output_sink_ids:
   - sink.exec
-  - sink.browser
+  - sink.web_egress
   - sink.file_write
   - sink.subagent_result
   control_ids:
   - ctl.sandbox
   - ctl.before_tool_hook
   - ctl.subagent_policy
+  - ctl.net_policy_ssrf
+  - ctl.requester_tool_policy
   resource_limits:
-    max_iterations: turn-scoped
+    max_iterations: turn/attempt scoped
     recursion: own spawn depth/child limits still govern
     token_or_cost_budget: subagent model budget
     loop_detection: lifecycle owner
@@ -186,16 +220,17 @@ agents:
   authority_context:
     principal_source: parent agent (inherited sender)
     tenant_scope: separate session; optional separate sandbox
-    resource_scope: 'restricted: no session/message tools by default'
+    resource_scope: 'restricted: no session/message/spawn tools by default'
     delegated_identity: inherited sender + sandbox/channel restrictions
-    authz_enforcement: code (tools.subagents.tools; allowAgents; spawn limits)
+    authz_enforcement: code (tools.subagents.tools denylist; allowAgents; spawn limits)
   related_l2_ids:
-  - l2.agent.channel_run
+  - l2.agent.subagent_delegation
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs/concepts/multi-agent.md; docs/tools/subagents.md
+  source_ref: src/agents/tools/subagents-tool.ts; sessions-spawn-tool.ts; sessions-spawn-access-program.ts;
+    delegated-tool-policy.ts
   evidence_status: source_confirmed
   notes: Hidden subagents get the restrictive tool denies; visible spawned sessions are interactive and
     get message/session tools.
@@ -203,7 +238,8 @@ agents:
   name: System agent (ring-zero)
   component: openclaw
   agent_kind: other
-  purpose: Privileged system/owner agent governing fleet creation, onboarding, and owner-trust decisions.
+  purpose: Privileged system/owner agent governing fleet creation, onboarding, and owner-trust decisions
+    (system-agent-tool).
   invocation_surfaces:
   - l1_id: l1.gateway.system
     trigger: system-agent chat / ring-zero setup
@@ -225,10 +261,10 @@ agents:
     - principal: operator
       l1_id: l1.config.agents
   tool_binding_ids:
-  - tool.subagent_spawn
-  - tool.agent_send
-  - tool.session
-  - tool.message
+  - tool.system.system_agent
+  - tool.system.sessions_spawn
+  - tool.system.sessions_send
+  - tool.system.message
   context_source_ids:
   - ctx.system_prompt
   - ctx.channel_message
@@ -248,70 +284,112 @@ agents:
     tenant_scope: fleet-wide
     resource_scope: fleet creation + role assignment
     delegated_identity: ring-zero/owner
-    authz_enforcement: human approval for creation/role instructions + owner trust
+    authz_enforcement: human approval (owner trust) for creation/role instructions
   related_l2_ids:
   - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs/concepts/multi-agent.md (ownership, ring-zero); qa/scenarios/config/system-agent-ring-zero-setup.yaml
+  source_ref: src/agents/tools/system-agent-tool.ts; src/agents/execution-authority.ts (resolveGatewayExecAuthority);
+    qa/scenarios/config/system-agent-ring-zero-setup.yaml
   evidence_status: source_confirmed
   notes: Elevated authority node; role instructions require human approval before taking effect.
 tool_bindings:
-- id: tool.exec
+- id: tool.primary.terminal
   agent_id: agent.openclaw.primary
-  l1_ids: []
-  tool_name: shell / exec (native)
+  l1_ids:
+  - l1.tool.exec_shell
+  tool_name: terminal / bash exec
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - run shell commands; background exec
+  - run shell commands; background/durable exec
   execution_identity: &id001
     identity: agent workspace/sandbox process
-    credential_source: agent config / sandbox lease
-  argument_handling:
-    validation: tool args validated against the tool schema before execution
-    authorization: before_tool_call hook + policy
-    normalization: runtime-specific
+    credential_source: agent config / sandbox lease; resolveGatewayExecAuthority (execution-authority.ts)
+  argument_handling: &id002
+    validation: tool args validated against the tool JSON schema before execution (agent-loop validation.ts)
+    authorization: before_tool_call hook/policy chain (agent-tools.before-tool-call.policy.ts)
+    normalization: runtime-specific (tool-call-repair)
     enforced_by: code
   output_ids:
   - ctx.tool_results
   - sink.exec
-  execution_environment:
-    sandbox: Docker sandbox (default network:none, readOnlyRoot, capDrop ALL) or Crabbox lease or UNSANDBOXED
-      host if sandbox off
-    network_egress: none by default; host network if unsandboxed
+  execution_environment: &id003
+    sandbox: 'Docker sandbox (src/agents/sandbox/config.ts: network default ''none'', readOnlyRoot default
+      true; container-allocation.ts applies --network + capDrop) or Crabbox lease; UNSANDBOXED host if
+      sandbox disabled'
+    network_egress: none by default (network 'none'); host network if unsandboxed
     filesystem_scope: agent/sandbox workspace
     enforced_by: platform_config
   effect_class: code_execution
-  approval_required: unknown
+  approval_required: true
   control_ids:
   - ctl.sandbox
   - ctl.before_tool_hook
-  related_l2_ids: []
+  - ctl.exec_approval
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs/gateway/sandboxing/docker-backend.md; agent-loop tool execution
+  source_ref: src/agents/tools/terminal-tool.ts; src/agents/bash-tools.exec-run.ts; bash-tools.exec-approval-request.ts;
+    bash-process-registry.ts
   notes: Arbitrary command execution; isolation depends on sandbox config -> UNSANDBOXED host runs = full
-    RCE.
-- id: tool.file
+    RCE. Exec can require approval (bash-tools.exec-approval-*).
+- id: tool.primary.file_read
   agent_id: agent.openclaw.primary
   l1_ids: []
-  tool_name: file read/write (native)
+  tool_name: read (file)
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - read/write/edit files in the workspace
+  - read workspace files
   execution_identity: *id001
-  argument_handling: {}
+  argument_handling: *id002
+  output_ids:
+  - ctx.tool_results
+  execution_environment:
+    sandbox: sandbox or host workspace (fs-bridge path-safety)
+    network_egress: none
+    filesystem_scope: workspace root
+    enforced_by: platform_config
+  effect_class: read
+  approval_required: unknown
+  control_ids:
+  - ctl.sandbox
+  - ctl.before_tool_hook
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/agent-tools.read.ts; src/agents/sandbox/fs-bridge-path-safety.ts
+  notes: Reads workspace files into context; fs-bridge path safety bounds traversal under the workspace
+    root.
+- id: tool.primary.apply_patch
+  agent_id: agent.openclaw.primary
+  l1_ids: []
+  tool_name: apply_patch / edit file
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - write/edit files in the workspace via apply_patch
+  execution_identity: *id001
+  argument_handling: *id002
   output_ids:
   - mem.workspace
   - ctx.tool_results
@@ -326,62 +404,147 @@ tool_bindings:
   control_ids:
   - ctl.sandbox
   - ctl.before_tool_hook
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs agent-runtimes (native shell and file tools)
-  notes: Writing workspace files incl. skills = stored-instruction injection (ties ctx.skill_instructions).
-- id: tool.browser
+  source_ref: src/agents/apply-patch-file-ops.ts; src/agents/sandbox/fs-bridge-mutation-helper.ts
+  notes: Writing workspace files incl. skills = stored-instruction injection (feeds ctx.skill_instructions).
+- id: tool.primary.web_fetch
   agent_id: agent.openclaw.primary
-  l1_ids: []
-  tool_name: browser tools
+  l1_ids:
+  - l1.tool.web_fetch
+  tool_name: web_fetch
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - 'drive a (sandboxed) browser: navigate, read, act'
-  execution_identity: *id001
-  argument_handling: {}
+  - fetch an arbitrary URL and return its content
+  execution_identity:
+    identity: gateway/agent process
+    credential_source: none (anonymous outbound)
+  argument_handling: *id002
   output_ids:
-  - ctx.browser_content
+  - ctx.web_content
   - ctx.tool_results
-  - sink.browser
+  - sink.web_egress
   execution_environment:
-    sandbox: sandboxed browser container (hot containers)
-    network_egress: browser egress
+    sandbox: host/gateway egress guarded by net-policy SSRF check
+    network_egress: outbound HTTP (SSRF-guarded)
+    filesystem_scope: n/a
+    enforced_by: code
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.net_policy_ssrf
+  - ctl.before_tool_hook
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/web-fetch.ts; web-guarded-fetch.ts; src/infra/net/ssrf.ts; packages/net-policy/src/{ip,ipv4,url-protocol}.ts
+  notes: Fetches arbitrary web content -> indirect injection + egress. net-policy blocks private/internal
+    IPs (SSRF).
+- id: tool.primary.web_search
+  agent_id: agent.openclaw.primary
+  l1_ids:
+  - l1.tool.web_search
+  tool_name: web_search
+  tool_source: native
+  server_or_provider: configured search provider
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - query a web search provider; return results/citations
+  execution_identity:
+    identity: search-provider API client
+    credential_source: provider credentials (config)
+  argument_handling: *id002
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  - sink.web_egress
+  execution_environment:
+    sandbox: provider API
+    network_egress: outbound to provider
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: read
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: search provider configured (web-search-provider-config.ts)
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/web-search.ts; web-search-provider-common.ts; web-search-citation-redirect.ts
+  notes: Returns external search content -> indirect injection; results carry provider citation redirects.
+- id: tool.primary.computer
+  agent_id: agent.openclaw.primary
+  l1_ids:
+  - l1.tool.browser
+  tool_name: computer / browser (computer-use)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - 'drive a sandboxed browser/computer: navigate, read, click, type'
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  - sink.web_egress
+  execution_environment:
+    sandbox: sandboxed browser container (bridge network; 'none' unsupported for browser) - sandbox/browser.ts
+    network_egress: browser egress (bridge)
     filesystem_scope: browser profile
     enforced_by: platform_config
-  effect_class: mixed
+  effect_class: code_execution
   approval_required: unknown
   control_ids:
   - ctl.sandbox
   - ctl.before_tool_hook
-  related_l2_ids: []
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
-    notes: browser tools enabled
+    notes: computer/browser tool enabled; sandbox browser bridge required
   evidence_status: source_confirmed
-  source_ref: docs/tools/browser/agent-tools.md; sandboxed browser
-  notes: Fetches arbitrary web content -> indirect injection + egress; sandboxed browser bounds it.
-- id: tool.message
+  source_ref: src/agents/tools/computer-tool.ts; computer-tool-gateway.ts; src/agents/sandbox/browser.ts;
+    browser-network.ts
+  notes: Fetches/acts on arbitrary web content -> indirect injection + egress; sandboxed browser bounds
+    it (network mode 'none' rejected because CDP needs a host-reachable port).
+- id: tool.primary.message
   agent_id: agent.openclaw.primary
-  l1_ids: []
-  tool_name: messaging / session send
+  l1_ids:
+  - l1.tool.message_send
+  tool_name: message (channel send)
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - reply/send to messaging channels; session/conversation sends
+  - reply/send to messaging channels; explicit-target + group-thread sends
   execution_identity:
     identity: channel account
     credential_source: channel connection (WhatsApp/Feishu/...)
-  argument_handling: {}
+  argument_handling: *id002
   output_ids:
   - sink.channel_reply
   execution_environment: null
@@ -389,18 +552,52 @@ tool_bindings:
   approval_required: unknown
   control_ids:
   - ctl.before_tool_hook
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs agent-loop (messaging tool sends tracked)
-  notes: Delivers model-composed content to real messaging recipients under the channel account.
-- id: tool.subagent_spawn
+  source_ref: src/agents/tools/message-tool-execution.ts; message-tool-explicit-target.ts; message-tool-source-policy.ts
+  notes: Delivers model-composed content to real messaging recipients under the channel account; source
+    policy bounds which targets are reachable.
+- id: tool.primary.sessions_send
   agent_id: agent.openclaw.primary
   l1_ids: []
-  tool_name: spawn sub-agent / sessions_spawn
+  tool_name: sessions_send (A2A)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - send a message to a peer agent session in the fleet (A2A)
+  execution_identity:
+    identity: this agent
+    credential_source: fleet auth
+  argument_handling: *id002
+  output_ids:
+  - sink.agent_send
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.agent_to_agent
+  related_l2_ids:
+  - l2.agent.a2a_dispatch
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: tools.agentToAgent.enabled + allowed pair (sessions-send-tool.a2a.ts)
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/sessions-send-tool.a2a.ts (runSessionsSendA2AFlow, replyMode peer|one-way);
+    sessions-send-tool.delivery.ts
+  notes: Cross-agent messaging -> a compromised/injected agent can drive peers (lateral movement), bounded
+    by agentToAgent allow policy.
+- id: tool.primary.sessions_spawn
+  agent_id: agent.openclaw.primary
+  l1_ids: []
+  tool_name: sessions_spawn / subagent
   tool_source: native
   server_or_provider: null
   schema_ref: null
@@ -408,7 +605,7 @@ tool_bindings:
   capabilities:
   - spawn background or visible sub-agent sessions
   execution_identity: *id001
-  argument_handling: {}
+  argument_handling: *id002
   output_ids:
   - ctx.subagent_task
   - sink.subagent_result
@@ -418,48 +615,467 @@ tool_bindings:
   control_ids:
   - ctl.subagent_policy
   - ctl.owner_trust
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.subagent_delegation
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs/concepts/multi-agent.md; docs/tools/subagents.md
+  source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts; sessions-spawn-access-program.ts
   notes: Delegation; spawn depth/child limits + allowAgents + operator approval govern creation.
-- id: tool.agent_send
+- id: tool.primary.sessions_read
   agent_id: agent.openclaw.primary
   l1_ids: []
-  tool_name: agent-to-agent send (A2A)
+  tool_name: sessions read/history/search
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - send a message to a peer agent in the fleet
-  execution_identity:
-    identity: this agent
-    credential_source: fleet auth
-  argument_handling: {}
+  - read sessions/transcripts; cross-agent session access (visibility-governed)
+  execution_identity: *id001
+  argument_handling: *id002
   output_ids:
-  - sink.agent_send
+  - ctx.session_history
+  - ctx.tool_results
   execution_environment: null
-  effect_class: external_send
+  effect_class: read
   approval_required: unknown
   control_ids:
+  - ctl.session_visibility
   - ctl.agent_to_agent
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/sessions-tool.ts; sessions-history-tool.ts; sessions-search-tool.ts; src/plugin-sdk/session-visibility.ts
+  notes: Cross-agent session visibility (tree/all/none) can expose other agents' transcripts.
+- id: tool.primary.cron
+  agent_id: agent.openclaw.primary
+  l1_ids: []
+  tool_name: cron / schedule
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - create/list scheduled jobs that trigger future agent turns
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - mem.cron_jobs
+  - sink.cron_schedule
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: write
+  approval_required: unknown
+  control_ids:
+  - ctl.cron_creator_cap
+  - ctl.before_tool_hook
+  related_l2_ids:
+  - l2.agent.scheduled_run
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
-    notes: tools.agentToAgent.enabled + allow pair
+    notes: cron tool enabled (cron-tool.ts creator cap)
   evidence_status: source_confirmed
-  source_ref: docs/tools/agent-send.md; tools.agentToAgent
-  notes: Cross-agent messaging -> a compromised/injected agent can drive peers (lateral movement), bounded
-    by allow.
-- id: tool.mcp
+  source_ref: src/agents/tools/cron-tool.ts; cron-tool-creator-cap.ts; cron-tool-write.ts; src/cron/agent-turn-command-prompt.ts;
+    src/cron/agent-availability.ts
+  notes: Model can schedule its OWN future turns -> durable, deferred self-trigger (ctx.cron_prompt).
+    Creator cap bounds how many jobs an agent may create.
+- id: tool.primary.ask_user
   agent_id: agent.openclaw.primary
   l1_ids: []
+  tool_name: ask_user
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - ask a human a question and await the answer
+  execution_identity:
+    identity: agent
+    credential_source: n/a
+  argument_handling: *id002
+  output_ids:
+  - ctx.ask_user_response
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: read
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/ask-user-tool.ts; ask-user-tool-normalization.ts; question-prompt-send.ts
+  notes: Human answer re-enters context as untrusted user input (ctx.ask_user_response).
+- id: tool.primary.mcp
+  agent_id: agent.openclaw.primary
+  l1_ids:
+  - l1.mcp.call
   tool_name: MCP server tools
+  tool_source: mcp
+  server_or_provider: configured MCP servers (bundled or external)
+  schema_ref: null
+  description_source:
+    source_ref: MCP tool listing (remote) - agent-bundle-mcp-catalog
+    writers:
+    - principal: external_service
+      l1_id: null
+    - principal: operator
+      l1_id: l1.config.mcp
+  capabilities:
+  - call MCP tools exposed by configured servers
+  execution_identity:
+    identity: MCP client
+    credential_source: MCP server config
+  argument_handling: *id002
+  output_ids:
+  - ctx.tool_results
+  - ctx.tool_descriptions
+  - sink.mcp_call
+  execution_environment:
+    sandbox: remote/bundled MCP server
+    network_egress: per server
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: MCP server configured (agent-bundle-mcp-manager.ts)
+  evidence_status: source_confirmed
+  source_ref: src/agents/agent-bundle-mcp-manager.ts; agent-bundle-mcp-combined.ts; src/agents/native-mcp-runtime-client.ts;
+    src/mcp/openclaw-tools-serve.ts
+  notes: Remote tool descriptions are model-facing -> rug-pull; MCP can also be bundled inside the sandbox.
+    openclaw is MCP client (calls servers) and server (exposes built-ins); no MCP sampling path observed
+    in source.
+- id: tool.primary.skills
+  agent_id: agent.openclaw.primary
+  l1_ids: []
+  tool_name: skills_search / skills_read
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - find + load installed/eligible skills (allowlist-filtered instruction bundles)
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - ctx.skill_instructions
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: read
+  approval_required: unknown
+  control_ids:
+  - ctl.skill_allowlist
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/installed-skill-tools.ts (createInstalledSkillTools; skills_search/skills_read);
+    installed-skill-catalog.ts; skill-instruction-result.ts
+  notes: Skills are instruction content gated by an eligibility/allowlist; editable via file tools ->
+    stored injection.
+- id: tool.primary.github
+  agent_id: agent.openclaw.primary
+  l1_ids:
+  - l1.tool.github
+  tool_name: github_publish
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - publish workspace content to GitHub
+  execution_identity:
+    identity: configured GitHub identity
+    credential_source: github auth profile (auth-profiles)
+  argument_handling: *id002
+  output_ids:
+  - sink.github
+  - ctx.tool_results
+  execution_environment:
+    sandbox: GitHub API
+    network_egress: outbound to github
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: github tool + identity configured
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/github-publish-tool.ts; github-identity-status-tool.ts; src/agents/sandbox/github-publication.ts
+  notes: Model-driven external publication under the configured GitHub identity (data exfil / unwanted
+    publish surface).
+- id: tool.primary.media
+  agent_id: agent.openclaw.primary
+  l1_ids:
+  - l1.tool.media
+  tool_name: media generate (image/video/tts)
+  tool_source: native
+  server_or_provider: configured media providers
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - generate images/video/tts via provider APIs
+  execution_identity:
+    identity: media-provider API client
+    credential_source: provider credentials (config)
+  argument_handling: *id002
+  output_ids:
+  - sink.media
+  - ctx.tool_results
+  execution_environment:
+    sandbox: provider API
+    network_egress: outbound to provider
+    filesystem_scope: remote
+    enforced_by: external_service
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: media provider configured
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/image-generate-tool.ts; video-generate-tool.ts; tts-tool.ts; media-generation-tool-providers.ts
+  notes: Outbound provider calls with model-composed prompts; cost + egress surface.
+- id: tool.primary.gateway
+  agent_id: agent.openclaw.primary
+  l1_ids: []
+  tool_name: gateway (control RPC)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - call gateway control operations via the in-process/embedded gateway
+  execution_identity:
+    identity: agent via gateway caller context
+    credential_source: gateway caller receipt
+  argument_handling: *id002
+  output_ids:
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: none
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  - ctl.requester_tool_policy
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/gateway-tool.ts; gateway-caller-context.ts; in-process-gateway.ts
+  notes: Bridges the agent to gateway control operations; scoped by gateway caller context/receipt.
+- id: tool.subagent.terminal
+  agent_id: agent.openclaw.subagent
+  l1_ids:
+  - l1.tool.exec_shell
+  tool_name: terminal / bash exec (subagent)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - run shell commands
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - ctx.tool_results
+  - sink.exec
+  execution_environment: *id003
+  effect_class: code_execution
+  approval_required: true
+  control_ids:
+  - ctl.sandbox
+  - ctl.before_tool_hook
+  - ctl.exec_approval
+  - ctl.subagent_policy
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/terminal-tool.ts via delegated-tool-policy.ts (subagent surface)
+  notes: Same exec surface as primary, inside the subagent's (optionally separate) sandbox.
+- id: tool.subagent.file_read
+  agent_id: agent.openclaw.subagent
+  l1_ids: []
+  tool_name: read (file) (subagent)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - read workspace files
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - ctx.tool_results
+  execution_environment: null
+  effect_class: read
+  approval_required: unknown
+  control_ids:
+  - ctl.sandbox
+  - ctl.before_tool_hook
+  - ctl.subagent_policy
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/agent-tools.read.ts (subagent surface)
+  notes: ''
+- id: tool.subagent.apply_patch
+  agent_id: agent.openclaw.subagent
+  l1_ids: []
+  tool_name: apply_patch / edit file (subagent)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - write/edit workspace files
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - mem.workspace
+  - ctx.tool_results
+  - sink.file_write
+  execution_environment: null
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.sandbox
+  - ctl.before_tool_hook
+  - ctl.subagent_policy
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/apply-patch-file-ops.ts (subagent surface)
+  notes: ''
+- id: tool.subagent.web_fetch
+  agent_id: agent.openclaw.subagent
+  l1_ids:
+  - l1.tool.web_fetch
+  tool_name: web_fetch (subagent)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - fetch an arbitrary URL
+  execution_identity:
+    identity: gateway/agent process
+    credential_source: none
+  argument_handling: *id002
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  - sink.web_egress
+  execution_environment:
+    sandbox: egress guarded by net-policy SSRF check
+    network_egress: outbound HTTP (SSRF-guarded)
+    filesystem_scope: n/a
+    enforced_by: code
+  effect_class: mixed
+  approval_required: unknown
+  control_ids:
+  - ctl.net_policy_ssrf
+  - ctl.before_tool_hook
+  - ctl.subagent_policy
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/web-guarded-fetch.ts; src/infra/net/ssrf.ts (subagent surface)
+  notes: ''
+- id: tool.subagent.computer
+  agent_id: agent.openclaw.subagent
+  l1_ids:
+  - l1.tool.browser
+  tool_name: computer / browser (subagent)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - drive a sandboxed browser
+  execution_identity: *id001
+  argument_handling: *id002
+  output_ids:
+  - ctx.web_content
+  - ctx.tool_results
+  - sink.web_egress
+  execution_environment:
+    sandbox: sandboxed browser container
+    network_egress: browser egress (bridge)
+    filesystem_scope: browser profile
+    enforced_by: platform_config
+  effect_class: code_execution
+  approval_required: unknown
+  control_ids:
+  - ctl.sandbox
+  - ctl.before_tool_hook
+  - ctl.subagent_policy
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: browser enabled for subagent
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/computer-tool.ts; src/agents/sandbox/browser.ts (subagent surface)
+  notes: ''
+- id: tool.subagent.mcp
+  agent_id: agent.openclaw.subagent
+  l1_ids:
+  - l1.mcp.call
+  tool_name: MCP server tools (subagent)
   tool_source: mcp
   server_or_provider: configured MCP servers
   schema_ref: null
@@ -470,18 +1086,17 @@ tool_bindings:
       l1_id: null
     - principal: operator
       l1_id: l1.config.mcp
-  capabilities:
-  - call MCP tools (bundled or external)
+  capabilities: []
   execution_identity:
     identity: MCP client
     credential_source: MCP server config
-  argument_handling: {}
+  argument_handling: *id002
   output_ids:
   - ctx.tool_results
   - ctx.tool_descriptions
   - sink.mcp_call
   execution_environment:
-    sandbox: remote MCP server
+    sandbox: remote/bundled MCP server
     network_egress: per server
     filesystem_scope: remote
     enforced_by: external_service
@@ -489,75 +1104,144 @@ tool_bindings:
   approval_required: unknown
   control_ids:
   - ctl.before_tool_hook
-  related_l2_ids: []
+  - ctl.subagent_policy
+  related_l2_ids:
+  - l2.agent.subagent_delegation
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
-    notes: MCP server configured
+    notes: MCP configured + allowed for subagent
   evidence_status: source_confirmed
-  source_ref: docs/tools/multi-agent-sandbox-tools.md; docker-agent-bundle-mcp-tools qa
-  notes: Remote tool descriptions model-facing -> rug-pull; MCP can also be bundled in the sandbox.
-- id: tool.skills
-  agent_id: agent.openclaw.primary
+  source_ref: src/agents/agent-bundle-mcp-manager.ts (subagent surface)
+  notes: ''
+- id: tool.system.system_agent
+  agent_id: agent.openclaw.system
   l1_ids: []
-  tool_name: skills (read/use)
+  tool_name: system-agent op
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - load and use workspace/shared skills (allowlisted)
-  execution_identity: *id001
-  argument_handling: {}
+  - fleet creation / onboarding / owner-trust operations
+  execution_identity:
+    identity: ring-zero/owner
+    credential_source: owner trust (execution-authority.ts)
+  argument_handling: *id002
   output_ids:
-  - ctx.skill_instructions
+  - mem.fleet_config
   - ctx.tool_results
   execution_environment: null
-  effect_class: read
+  effect_class: none
   approval_required: unknown
   control_ids:
-  - ctl.skill_allowlist
-  related_l2_ids: []
+  - ctl.owner_trust
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs multi-agent (skills allowlist); ~/.openclaw/skills
-  notes: Skills are instruction content filtered by the agent skill allowlist; editable -> stored injection.
-- id: tool.session
-  agent_id: agent.openclaw.primary
+  source_ref: src/agents/tools/system-agent-tool.ts; src/agents/execution-authority.ts
+  notes: Privileged fleet-config operations; human owner approval gates creation/role instructions.
+- id: tool.system.sessions_spawn
+  agent_id: agent.openclaw.system
   l1_ids: []
-  tool_name: session / conversation tools
+  tool_name: sessions_spawn (system)
   tool_source: native
   server_or_provider: null
   schema_ref: null
   description_source: null
   capabilities:
-  - read sessions/transcripts; cross-agent session access (visibility-governed)
-  execution_identity: *id001
-  argument_handling: {}
+  - spawn agents in the fleet
+  execution_identity:
+    identity: ring-zero/owner
+    credential_source: owner trust
+  argument_handling: *id002
   output_ids:
-  - ctx.session_history
-  - ctx.tool_results
+  - ctx.subagent_task
+  - sink.subagent_result
   execution_environment: null
-  effect_class: read
+  effect_class: none
   approval_required: unknown
   control_ids:
-  - ctl.session_visibility
+  - ctl.subagent_policy
+  - ctl.owner_trust
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/sessions-spawn-tool.ts (system agent surface)
+  notes: ''
+- id: tool.system.sessions_send
+  agent_id: agent.openclaw.system
+  l1_ids: []
+  tool_name: sessions_send / A2A (system)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - message peer agents
+  execution_identity:
+    identity: system agent
+    credential_source: fleet auth
+  argument_handling: *id002
+  output_ids:
+  - sink.agent_send
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
   - ctl.agent_to_agent
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.a2a_dispatch
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs multi-agent (tools.sessions.visibility; cross-agent session access)
-  notes: Cross-agent session visibility (tree/all) can expose other agents' transcripts.
+  source_ref: src/agents/tools/sessions-send-tool.ts (system agent surface)
+  notes: ''
+- id: tool.system.message
+  agent_id: agent.openclaw.system
+  l1_ids:
+  - l1.tool.message_send
+  tool_name: message (system)
+  tool_source: native
+  server_or_provider: null
+  schema_ref: null
+  description_source: null
+  capabilities:
+  - send to channels
+  execution_identity:
+    identity: channel account
+    credential_source: channel connection
+  argument_handling: *id002
+  output_ids:
+  - sink.channel_reply
+  execution_environment: null
+  effect_class: external_send
+  approval_required: unknown
+  control_ids:
+  - ctl.before_tool_hook
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/message-tool-execution.ts (system agent surface)
+  notes: ''
 context_sources:
 - id: ctx.system_prompt
   source_kind: system_prompt
-  source_ref: prompt assembly; agent role instructions
+  source_ref: src/agents/cli-runner/prompt-context.ts; agent role instructions (config/zod-schema.agent-runtime.ts)
   writers:
   - principal: operator
     l1_id: l1.config.agents
@@ -569,22 +1253,24 @@ context_sources:
   trust_class: trusted_instruction
   transformation: ''
   persistence_scope: tenant
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  notes: Role instructions require human approval before taking effect.
+  notes: Role instructions require human approval (owner trust) before taking effect.
 - id: ctx.skill_instructions
   source_kind: developer_prompt
-  source_ref: workspace/shared skill files (allowlisted)
+  source_ref: src/agents/tools/installed-skill-tools.ts; installed-skill-catalog.ts; ~/.openclaw/skills
+    files
   writers:
   - principal: operator
     l1_id: l1.workspace.skills
   - principal: agent
     l1_id: null
-  destination_agent_ids: &id002
+  destination_agent_ids: &id004
   - agent.openclaw.primary
   - agent.openclaw.subagent
   destination_channel: developer
@@ -592,19 +1278,20 @@ context_sources:
   trust_class: mixed
   transformation: ''
   persistence_scope: tenant
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  notes: Skill files are instruction content; writable by file tools -> stored prompt injection.
+  notes: Skill files are instruction content; writable by apply_patch/file tools -> stored prompt injection.
 - id: ctx.plugin_injected
   source_kind: system_prompt
-  source_ref: before_prompt_build hook (prependContext/systemPrompt)
+  source_ref: src/agents/cli-runner/execute-plugin.steered-transcript.ts; plugin prompt-context steering
   writers:
   - principal: plugin
-    l1_id: l1.plugin.before_prompt_build
+    l1_id: l1.plugin.hook
   destination_agent_ids:
   - agent.openclaw.primary
   destination_channel: system
@@ -612,16 +1299,17 @@ context_sources:
   trust_class: mixed
   transformation: ''
   persistence_scope: global
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  notes: Plugins can inject system context; trust tied to pluginOwnerId.
+  notes: Plugins can steer/inject transcript+system context; trust tied to pluginOwnerId.
 - id: ctx.channel_message
   source_kind: user_input
-  source_ref: inbound messaging (WhatsApp/Feishu/Slack/...)
+  source_ref: src/channels/inbound-event/context.ts; message-access/decision.ts; direct-dm.ts
   writers:
   - principal: channel_sender
     l1_id: l1.channel.whatsapp
@@ -633,7 +1321,8 @@ context_sources:
   trust_class: untrusted_data
   transformation: ''
   persistence_scope: session
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
@@ -642,7 +1331,7 @@ context_sources:
   notes: 'PRIMARY untrusted entry: a message drives the agent + its tools; gated only by DM allowlist/pairing.'
 - id: ctx.session_history
   source_kind: chat_history
-  source_ref: session transcript
+  source_ref: session transcript store (src/agents sessions; mem.sessions)
   writers:
   - principal: channel_sender
     l1_id: l1.channel.whatsapp
@@ -656,7 +1345,8 @@ context_sources:
   trust_class: mixed
   transformation: ''
   persistence_scope: session
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
@@ -665,68 +1355,72 @@ context_sources:
   notes: ''
 - id: ctx.tool_results
   source_kind: tool_result
-  source_ref: exec/file/browser/MCP tool output
+  source_ref: packages/agent-core/src/agent-loop-tool-execution.ts; tool-call-outcome.ts; src/agents/tools/tool-results.ts
   writers:
   - principal: agent.openclaw.primary
     l1_id: null
   - principal: external_service
     l1_id: null
-  destination_agent_ids: *id002
+  destination_agent_ids: *id004
   destination_channel: tool
   provenance: tool output
   trust_class: untrusted_data
   transformation: ''
   persistence_scope: session
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
   notes: ''
-- id: ctx.browser_content
+- id: ctx.web_content
   source_kind: external
-  source_ref: browser tool page content
+  source_ref: src/agents/tools/web-fetch.ts; web-search-output.ts; computer-tool page content
   writers:
   - principal: external_service
     l1_id: null
-  destination_agent_ids: *id002
+  destination_agent_ids: *id004
   destination_channel: tool
-  provenance: arbitrary web
+  provenance: arbitrary web / search provider
   trust_class: untrusted_data
   transformation: ''
   persistence_scope: session
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  notes: Fetched page content -> indirect injection.
+  notes: Fetched/searched/browsed page content -> indirect prompt injection.
 - id: ctx.tool_descriptions
   source_kind: external
-  source_ref: MCP tool listings presented to the model
+  source_ref: src/agents/agent-bundle-mcp-catalog-projection.ts; agent-bundle-mcp-instructions.ts (MCP
+    listings)
   writers:
   - principal: external_service
     l1_id: null
   - principal: operator
     l1_id: l1.config.mcp
-  destination_agent_ids: *id002
+  destination_agent_ids: *id004
   destination_channel: tool
   provenance: remote MCP specs
   trust_class: untrusted_data
   transformation: ''
   persistence_scope: tenant
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  notes: Remote MCP descriptions model-facing -> rug-pull.
+  notes: Remote MCP tool descriptions are model-facing -> rug-pull / tool-description injection.
 - id: ctx.subagent_task
   source_kind: delegated_summary
-  source_ref: parent -> subagent task
+  source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts (parent-composed task)
   writers:
   - principal: agent.openclaw.primary
     l1_id: null
@@ -737,7 +1431,8 @@ context_sources:
   trust_class: mixed
   transformation: ''
   persistence_scope: workflow
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.subagent_delegation
   visibility: white_box_required
   reachability:
     status: black_box_reachable
@@ -746,7 +1441,7 @@ context_sources:
   notes: Parent-composed subagent task -> parent->child injection.
 - id: ctx.cross_agent_message
   source_kind: external
-  source_ref: A2A inbound from a peer agent
+  source_ref: src/agents/tools/sessions-send-tool.a2a.ts (inbound A2A); channels/inbound-event
   writers:
   - principal: peer_agent
     l1_id: l1.a2a.inbound
@@ -757,7 +1452,8 @@ context_sources:
   trust_class: untrusted_data
   transformation: ''
   persistence_scope: session
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.a2a_dispatch
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
@@ -765,6 +1461,51 @@ context_sources:
   evidence_status: source_confirmed
   notes: Cross-agent message = another agent's (possibly injected) output driving this one -> lateral
     injection.
+- id: ctx.cron_prompt
+  source_kind: other
+  source_ref: src/cron/agent-turn-command-prompt.ts; src/agents/tools/cron-tool-write.ts
+  writers:
+  - principal: operator
+    l1_id: l1.config.agents
+  - principal: agent.openclaw.primary
+    l1_id: null
+  destination_agent_ids:
+  - agent.openclaw.primary
+  destination_channel: user
+  provenance: scheduled job prompt (agent- or operator-authored)
+  trust_class: mixed
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids:
+  - l2.agent.scheduled_run
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: cron job scheduled
+  evidence_status: source_confirmed
+  notes: A cron job delivers a stored prompt to a future turn -> deferred self-trigger; an agent can schedule
+    its own (or a poisoned) instruction to run later.
+- id: ctx.ask_user_response
+  source_kind: user_input
+  source_ref: src/agents/tools/ask-user-tool.ts; question-prompt-send.ts (human answer returns)
+  writers:
+  - principal: channel_sender
+    l1_id: l1.channel.whatsapp
+  destination_agent_ids:
+  - agent.openclaw.primary
+  destination_channel: user
+  provenance: human answer to ask_user
+  trust_class: untrusted_data
+  transformation: ''
+  persistence_scope: session
+  related_l2_ids:
+  - l2.agent.channel_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  notes: Human answer re-enters as untrusted user content.
 memory_stores:
 - id: mem.sessions
   store_kind: conversation_history
@@ -780,16 +1521,18 @@ memory_stores:
     l1_id: null
   scope: session
   isolation_enforcement: per session identity; cross-agent access governed by tools.sessions.visibility
+    (src/plugin-sdk/session-visibility.ts)
   write_provenance: channel messages + agent turns
   read_path: session transcript replayed into turn
   retention_and_deletion: session lifecycle
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   evidence_status: source_confirmed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs session/workspace preparation
+  source_ref: src/agents sessions store; src/agents/tools/sessions-history-tool.ts
   notes: Cross-agent session visibility (tree/all) can cross agent boundaries.
 - id: mem.workspace
   store_kind: database
@@ -803,17 +1546,18 @@ memory_stores:
   - principal: operator
     l1_id: l1.workspace.files
   scope: tenant
-  isolation_enforcement: per-agent workspace root; sandbox redirect for sandboxed runs
-  write_provenance: file tools + operator
-  read_path: file tools read the workspace
+  isolation_enforcement: per-agent workspace root; sandbox fs-bridge redirect for sandboxed runs (src/agents/sandbox/fs-bridge.ts)
+  write_provenance: apply_patch/file tools + operator
+  read_path: read tool reads the workspace
   retention_and_deletion: workspace lifecycle
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   evidence_status: source_confirmed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs workspace preparation
+  source_ref: src/agents/sandbox/fs-bridge.ts; fs-paths.ts; host-paths.ts
   notes: Agent workspace filesystem; sandboxed runs use a sandbox workspace root.
 - id: mem.skills
   store_kind: database
@@ -827,17 +1571,18 @@ memory_stores:
   - principal: agent.openclaw.primary
     l1_id: null
   scope: tenant
-  isolation_enforcement: agent skill allowlist
+  isolation_enforcement: agent skill eligibility/allowlist (installed-skill-catalog.ts)
   write_provenance: skill authors + file tools
   read_path: skills loaded into context (allowlist-filtered)
   retention_and_deletion: workspace-managed
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   evidence_status: source_confirmed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs/tools/skills; multi-agent skill allowlists
+  source_ref: src/agents/installed-skill-catalog.ts; src/agents/tools/installed-skill-tools.ts
   notes: Instruction store -> stored prompt injection surface.
 - id: mem.fleet_config
   store_kind: database
@@ -849,24 +1594,50 @@ memory_stores:
   - principal: operator
     l1_id: l1.config.agents
   scope: global
-  isolation_enforcement: operator-only config; ownership explicit
+  isolation_enforcement: operator-only config; ownership explicit (config/zod-schema.agent-runtime.ts)
   write_provenance: operator
   read_path: agent entries/roles/allowlists resolved per run
   retention_and_deletion: operator-managed
-  related_l2_ids: []
+  related_l2_ids:
+  - l2.agent.channel_run
   evidence_status: source_confirmed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  source_ref: docs multi-agent (agents.defaults/entries, ownership, allowAgents)
+  source_ref: src/config/zod-schema.agent-runtime.ts; src/commands/agents.config.ts
   notes: 'Fleet wiring: roles, allowlists, owner, agentToAgent allow -- the policy that bounds everything.'
+- id: mem.cron_jobs
+  store_kind: event_log
+  owner_component: openclaw
+  readers:
+  - agent.openclaw.primary
+  writers:
+  - principal: agent.openclaw.primary
+    l1_id: null
+  - principal: operator
+    l1_id: l1.config.agents
+  scope: tenant
+  isolation_enforcement: per-agent creator cap (cron-tool-creator-cap.ts); active-jobs scope
+  write_provenance: cron tool (agent) + operator
+  read_path: scheduler fires job -> ctx.cron_prompt into a turn
+  retention_and_deletion: job lifecycle (src/cron/active-jobs.ts)
+  related_l2_ids:
+  - l2.agent.scheduled_run
+  evidence_status: source_confirmed
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  source_ref: src/cron/active-jobs.ts; src/cron/agent-turn-command-prompt.ts; src/agents/tools/cron-tool-write.ts
+  notes: Durable scheduled jobs; a stored job is a deferred self-trigger of a future agent turn.
 output_sinks:
 - id: sink.channel_reply
   sink_kind: notification
   producer_ids:
   - agent.openclaw.primary
-  - tool.message
+  - tool.primary.message
+  - tool.system.message
   - agent.openclaw.system
   audience: messaging recipients (WhatsApp/Feishu/Slack)
   delivery: channel send under the channel account
@@ -876,7 +1647,8 @@ output_sinks:
     active_content: channel-dependent
     enforced_by: external_service
   becomes_context_source_ids: []
-  related_l1_ids: []
+  related_l1_ids:
+  - l1.tool.message_send
   related_l2_ids:
   - l2.agent.channel_run
   visibility: white_box_required
@@ -884,51 +1656,61 @@ output_sinks:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs channels; agent-loop messaging sends
+  source_ref: src/agents/tools/message-tool-execution.ts; src/channels/*
   notes: Model-composed content delivered to real recipients; exfil/abuse via outbound messages.
 - id: sink.exec
   sink_kind: external_api
   producer_ids:
-  - tool.exec
+  - tool.primary.terminal
+  - tool.subagent.terminal
   audience: sandbox/host shell
   delivery: command execution in sandbox (or host if unsandboxed)
   transformation: ''
   render_side_effects: null
   becomes_context_source_ids: []
-  related_l1_ids: []
+  related_l1_ids:
+  - l1.tool.exec_shell
   related_l2_ids: []
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docker/crabbox backend
-  notes: RCE-class if sandbox disabled; network:none by default in docker sandbox.
-- id: sink.browser
+  source_ref: src/agents/bash-tools.exec-run.ts; src/agents/sandbox/docker-backend.ts
+  notes: RCE-class if sandbox disabled; network 'none' by default in docker sandbox.
+- id: sink.web_egress
   sink_kind: external_api
   producer_ids:
-  - tool.browser
-  audience: arbitrary web
-  delivery: sandboxed browser actions
+  - tool.primary.web_fetch
+  - tool.primary.web_search
+  - tool.primary.computer
+  - tool.subagent.web_fetch
+  - tool.subagent.computer
+  audience: arbitrary web / search+browser providers
+  delivery: guarded outbound HTTP / sandboxed browser actions
   transformation: ''
   render_side_effects: null
   becomes_context_source_ids:
-  - ctx.browser_content
-  related_l1_ids: []
+  - ctx.web_content
+  related_l1_ids:
+  - l1.tool.web_fetch
+  - l1.tool.web_search
+  - l1.tool.browser
   related_l2_ids: []
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: sandboxed browser
-  notes: ''
+  source_ref: src/agents/tools/web-guarded-fetch.ts; src/infra/net/ssrf.ts; src/agents/sandbox/browser.ts
+  notes: Outbound egress channel; net-policy SSRF guard blocks private/internal IPs for fetch.
 - id: sink.file_write
   sink_kind: file
   producer_ids:
-  - tool.file
+  - tool.primary.apply_patch
+  - tool.subagent.apply_patch
   audience: agent workspace
-  delivery: file write
+  delivery: apply_patch file write
   transformation: ''
   render_side_effects: null
   becomes_context_source_ids:
@@ -941,12 +1723,13 @@ output_sinks:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: file tools
+  source_ref: src/agents/apply-patch-file-ops.ts
   notes: Writing skills/files feeds back as instructions/context.
 - id: sink.agent_send
   sink_kind: delegated_result
   producer_ids:
-  - tool.agent_send
+  - tool.primary.sessions_send
+  - tool.system.sessions_send
   - agent.openclaw.system
   audience: peer fleet agents
   delivery: A2A message
@@ -956,36 +1739,40 @@ output_sinks:
   - ctx.cross_agent_message
   related_l1_ids: []
   related_l2_ids:
-  - l2.agent.channel_run
+  - l2.agent.a2a_dispatch
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs/tools/agent-send.md
+  source_ref: src/agents/tools/sessions-send-tool.a2a.ts
   notes: Becomes a peer's ctx.cross_agent_message -> lateral movement path (allow-gated).
 - id: sink.mcp_call
   sink_kind: external_api
   producer_ids:
-  - tool.mcp
+  - tool.primary.mcp
+  - tool.subagent.mcp
   audience: MCP servers
   delivery: MCP call
   transformation: ''
   render_side_effects: null
   becomes_context_source_ids: []
-  related_l1_ids: []
+  related_l1_ids:
+  - l1.mcp.call
   related_l2_ids: []
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: MCP tools
+  source_ref: src/agents/native-mcp-runtime-client.ts
   notes: ''
 - id: sink.subagent_result
   sink_kind: delegated_result
   producer_ids:
   - agent.openclaw.subagent
+  - tool.primary.sessions_spawn
+  - tool.system.sessions_spawn
   audience: parent agent
   delivery: subagent result delivered to parent
   transformation: ''
@@ -993,14 +1780,73 @@ output_sinks:
   becomes_context_source_ids:
   - ctx.tool_results
   related_l1_ids: []
+  related_l2_ids:
+  - l2.agent.subagent_delegation
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts
+  notes: Child->parent path.
+- id: sink.github
+  sink_kind: external_api
+  producer_ids:
+  - tool.primary.github
+  audience: GitHub
+  delivery: github publish under configured identity
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids:
+  - l1.tool.github
   related_l2_ids: []
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs/concepts/multi-agent.md
-  notes: Child->parent path.
+  source_ref: src/agents/tools/github-publish-tool.ts; src/agents/sandbox/github-publication.ts
+  notes: External publication sink -> exfil / unwanted publish.
+- id: sink.media
+  sink_kind: external_api
+  producer_ids:
+  - tool.primary.media
+  audience: media providers
+  delivery: media generation provider call
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids: []
+  related_l1_ids:
+  - l1.tool.media
+  related_l2_ids: []
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/image-generate-tool.ts; media-generation-tool-providers.ts
+  notes: ''
+- id: sink.cron_schedule
+  sink_kind: database_record
+  producer_ids:
+  - tool.primary.cron
+  audience: scheduler store
+  delivery: write a scheduled job
+  transformation: ''
+  render_side_effects: null
+  becomes_context_source_ids:
+  - ctx.cron_prompt
+  related_l1_ids: []
+  related_l2_ids:
+  - l2.agent.scheduled_run
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/cron-tool-write.ts; src/cron/active-jobs.ts
+  notes: Writing a job becomes a future ctx.cron_prompt -> deferred self-trigger loop.
 execution_edges:
 - id: edge.channel__primary
   source:
@@ -1032,10 +1878,44 @@ execution_edges:
   visibility: white_box_required
   reachability:
     status: black_box_reachable
-    notes: ''
+    notes: sending a channel message from an allowlisted sender triggers a run
   evidence_status: source_confirmed
-  source_ref: docs channels; agent-loop intake
+  source_ref: src/channels/message-access/decision.ts; src/channels/direct-dm-access.ts; inbound-event/context.ts
   notes: 'THE external attack entry: untrusted messaging drives the agent, gated only by DM allowlist.'
+- id: edge.cron__primary
+  source:
+    agent_id: null
+    step: scheduled
+    external_trigger: cron scheduler (active-jobs)
+  destination:
+    agent_id: agent.openclaw.primary
+  decision_maker: external_event
+  condition: scheduled job fires -> agent turn with stored prompt
+  input_source_ids:
+  - ctx.cron_prompt
+  - ctx.system_prompt
+  argument_sources: ''
+  payload: scheduled prompt
+  output_ids: []
+  control_ids:
+  - ctl.cron_creator_cap
+  validation_or_approval: ''
+  execution_mode: queued
+  loop_bound: job schedule + creator cap
+  failure_behavior: abort
+  related_l1_ids:
+  - l1.cron.scheduled
+  related_l2_steps:
+  - l2_id: l2.agent.scheduled_run
+    order: 1
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: a cron job must exist (agent- or operator-created)
+  evidence_status: source_confirmed
+  source_ref: src/cron/active-jobs.ts; src/cron/agent-turn-command-prompt.ts; src/cron/agent-availability.ts
+  notes: 'Scheduler-driven self-trigger: a stored job runs a future agent turn without a live human in
+    the loop.'
 - id: edge.primary__tool
   source:
     agent_id: agent.openclaw.primary
@@ -1044,26 +1924,29 @@ execution_edges:
   destination:
     tool_binding_id: (model-selected binding)
   decision_maker: llm
-  condition: model emits a tool call -> validated + before_tool_call hook
+  condition: model emits a tool call -> schema validation + before_tool_call policy chain
   input_source_ids:
   - ctx.channel_message
   - ctx.session_history
   - ctx.tool_results
-  - ctx.browser_content
+  - ctx.web_content
   - ctx.skill_instructions
   - ctx.tool_descriptions
   - ctx.cross_agent_message
-  argument_sources: model-composed args (validated against schema)
+  - ctx.cron_prompt
+  argument_sources: model-composed args (validated against tool JSON schema)
   payload: tool name + args
   output_ids:
   - ctx.tool_results
   control_ids:
   - ctl.tool_arg_validation
   - ctl.before_tool_hook
+  - ctl.requester_tool_policy
   - ctl.sandbox
-  validation_or_approval: schema validation + before_tool_call hook ({block:true} terminal) + sandbox
+  validation_or_approval: schema validation + before_tool_call policy chain (block terminal) + requester
+    tool policy
   execution_mode: synchronous
-  loop_bound: turn-scoped; attempt timeout
+  loop_bound: turn-scoped; attempt timeout + repetition guard
   failure_behavior: fail_closed
   related_l1_ids: []
   related_l2_steps:
@@ -1074,8 +1957,10 @@ execution_edges:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs agent-loop tool execution + hooks
-  notes: Programmable gateway hook can block a tool call; sandbox bounds exec/browser.
+  source_ref: packages/agent-core/src/agent-loop-tool-execution.ts; src/agents/agent-tools.before-tool-call.policy.ts
+    (runBeforeToolCallHook)
+  notes: Programmable before_tool_call policy chain can block a tool call; requester tool policy gates
+    which tools an external/delegated requester may use.
 - id: edge.tool__primary
   source:
     agent_id: agent.openclaw.primary
@@ -1084,7 +1969,7 @@ execution_edges:
   destination:
     agent_id: agent.openclaw.primary
   decision_maker: deterministic_code
-  condition: tool returns (tool_result_persist hook transforms)
+  condition: tool returns (result persisted + transformed)
   input_source_ids: []
   argument_sources: ''
   payload: tool result
@@ -1105,8 +1990,79 @@ execution_edges:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs hooks (after_tool_call / tool_result_persist)
+  source_ref: packages/agent-core/src/tool-call-outcome.ts; src/agents/tools/tool-results.ts
   notes: ''
+- id: edge.primary__exec
+  source:
+    agent_id: agent.openclaw.primary
+    step: exec
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.primary.terminal
+    external_surface: sandbox/host shell
+  decision_maker: llm
+  condition: model runs a shell command
+  input_source_ids: []
+  argument_sources: model-composed command
+  payload: shell command
+  output_ids:
+  - sink.exec
+  - ctx.tool_results
+  control_ids:
+  - ctl.sandbox
+  - ctl.exec_approval
+  - ctl.before_tool_hook
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.agent.channel_run
+    order: 2
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/bash-tools.exec-run.ts; src/agents/sandbox/docker-backend.ts
+  notes: Isolation depends on sandbox config; unsandboxed = host RCE; exec may require approval.
+- id: edge.primary__fetch
+  source:
+    agent_id: agent.openclaw.primary
+    step: fetch
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.primary.web_fetch
+    external_surface: arbitrary URL
+  decision_maker: llm
+  condition: model fetches a URL -> net-policy SSRF guard
+  input_source_ids: []
+  argument_sources: model-composed URL
+  payload: target URL
+  output_ids:
+  - sink.web_egress
+  - ctx.web_content
+  control_ids:
+  - ctl.net_policy_ssrf
+  - ctl.before_tool_hook
+  validation_or_approval: ''
+  execution_mode: synchronous
+  loop_bound: null
+  failure_behavior: fail_closed
+  related_l1_ids:
+  - l1.tool.web_fetch
+  related_l2_steps:
+  - l2_id: l2.agent.channel_run
+    order: 2
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/web-guarded-fetch.ts; src/infra/net/ssrf.ts
+  notes: SSRF surface; net-policy blocks private/internal targets but model picks the URL (egress + indirect
+    injection).
 - id: edge.primary__subagent
   source:
     agent_id: agent.openclaw.primary
@@ -1130,13 +2086,15 @@ execution_edges:
   failure_behavior: partial_effect
   related_l1_ids:
   - l1.internal.subagent_spawn
-  related_l2_steps: []
+  related_l2_steps:
+  - l2_id: l2.agent.subagent_delegation
+    order: 1
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs/tools/subagents.md
+  source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts; sessions-spawn-access-program.ts
   notes: Restricted child tool surface by default; operator approval for creation hierarchy.
 - id: edge.subagent__primary
   source:
@@ -1160,13 +2118,15 @@ execution_edges:
   loop_bound: null
   failure_behavior: partial_effect
   related_l1_ids: []
-  related_l2_steps: []
+  related_l2_steps:
+  - l2_id: l2.agent.subagent_delegation
+    order: 2
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs multi-agent
+  source_ref: src/agents/tools/sessions-spawn-tool.ts (result delivery)
   notes: ''
 - id: edge.primary__peer
   source:
@@ -1174,7 +2134,7 @@ execution_edges:
     step: a2a
     external_trigger: null
   destination:
-    tool_binding_id: tool.agent_send
+    tool_binding_id: tool.primary.sessions_send
     external_surface: peer fleet agent
   decision_maker: llm
   condition: model sends to a peer agent
@@ -1190,46 +2150,82 @@ execution_edges:
   loop_bound: null
   failure_behavior: fail_closed
   related_l1_ids: []
-  related_l2_steps: []
+  related_l2_steps:
+  - l2_id: l2.agent.a2a_dispatch
+    order: 1
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs/tools/agent-send.md
+  source_ref: src/agents/tools/sessions-send-tool.a2a.ts (runSessionsSendA2AFlow)
   notes: Lateral path -> peer's ctx.cross_agent_message; bounded by agentToAgent allow.
-- id: edge.primary__exec
+- id: edge.primary__cron
   source:
     agent_id: agent.openclaw.primary
-    step: exec
+    step: schedule
     external_trigger: null
   destination:
-    tool_binding_id: tool.exec
-    external_surface: sandbox/host shell
+    tool_binding_id: tool.primary.cron
+    external_surface: scheduler store
   decision_maker: llm
-  condition: model runs a shell command
+  condition: model creates a scheduled job
   input_source_ids: []
-  argument_sources: model-composed command
-  payload: shell command
+  argument_sources: model-composed schedule + prompt
+  payload: cron job (schedule + prompt)
   output_ids:
-  - sink.exec
-  - ctx.tool_results
+  - sink.cron_schedule
+  - mem.cron_jobs
   control_ids:
-  - ctl.sandbox
+  - ctl.cron_creator_cap
   - ctl.before_tool_hook
   validation_or_approval: ''
   execution_mode: synchronous
   loop_bound: null
-  failure_behavior: abort
+  failure_behavior: fail_closed
   related_l1_ids: []
-  related_l2_steps: []
+  related_l2_steps:
+  - l2_id: l2.agent.scheduled_run
+    order: 0
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs sandboxing
-  notes: Isolation depends on sandbox config; unsandboxed = host RCE.
+  source_ref: src/agents/tools/cron-tool-write.ts; cron-tool-creator-cap.ts
+  notes: Model writes a durable self-trigger; creator cap bounds job count. Closes a loop with edge.cron__primary.
+- id: edge.primary__askuser
+  source:
+    agent_id: agent.openclaw.primary
+    step: ask
+    external_trigger: null
+  destination:
+    tool_binding_id: tool.primary.ask_user
+    external_surface: human via channel
+  decision_maker: llm
+  condition: model asks a human a question and awaits reply
+  input_source_ids: []
+  argument_sources: model-composed question
+  payload: question -> human answer
+  output_ids:
+  - ctx.ask_user_response
+  control_ids:
+  - ctl.before_tool_hook
+  validation_or_approval: ''
+  execution_mode: callback
+  loop_bound: null
+  failure_behavior: abort
+  related_l1_ids: []
+  related_l2_steps:
+  - l2_id: l2.agent.channel_run
+    order: 2
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/ask-user-tool.ts; question-prompt-send.ts
+  notes: Human answer re-enters as untrusted ctx.ask_user_response.
 - id: edge.primary__output
   source:
     agent_id: agent.openclaw.primary
@@ -1258,7 +2254,7 @@ execution_edges:
     status: black_box_reachable
     notes: ''
   evidence_status: source_confirmed
-  source_ref: docs agent-loop streaming/persistence
+  source_ref: packages/agent-core/src/agent-stream-response.ts; src/agents (streaming/persistence)
   notes: ''
 controls:
 - id: ctl.sandbox
@@ -1271,26 +2267,34 @@ controls:
   - agent.openclaw.primary
   - agent.openclaw.subagent
   applies_to_tool_binding_ids:
-  - tool.exec
-  - tool.file
-  - tool.browser
-  related_l1_ids: []
+  - tool.primary.terminal
+  - tool.primary.apply_patch
+  - tool.primary.computer
+  - tool.primary.file_read
+  - tool.subagent.terminal
+  - tool.subagent.apply_patch
+  - tool.subagent.computer
+  - tool.subagent.file_read
+  related_l1_ids:
+  - l1.tool.exec_shell
+  - l1.tool.browser
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs/gateway/sandboxing/{docker-backend,crabbox-backend}.md
+  source_ref: src/agents/sandbox/config.ts (network default 'none', readOnlyRoot default true); container-allocation.ts
+    (--network, capDrop); docker-backend.ts; sandbox-tool-policy.ts
   visibility: white_box_required
   reachability:
     status: black_box_reachable
-    notes: ''
-  notes: Docker sandbox defaults network:none + readOnlyRoot + capDrop ALL; Crabbox cloud lease. If sandboxing
-    is DISABLED, exec/file/browser run on the host -> major posture change.
+    notes: default-on; posture observable via container inspect
+  notes: 'Docker sandbox defaults: network ''none'' + readOnlyRoot + capDrop. Crabbox lease alt. If sandboxing
+    is DISABLED (UNSANDBOXED), exec/file/browser run on the host -> major posture change.'
 - id: ctl.before_tool_hook
   control_kind: tool_policy
   applies_at: before_tool
   enforcement_mode: blocking
   implementation: code
   failure_mode: fail_closed
-  applies_to_agent_ids: &id003
+  applies_to_agent_ids: &id005
   - agent.openclaw.primary
   - agent.openclaw.subagent
   - agent.openclaw.system
@@ -1298,12 +2302,14 @@ controls:
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs agent-loop hooks (before_tool_call {block:true} terminal; outbound guards)
+  source_ref: src/agents/agent-tools.before-tool-call.policy.ts (runBeforeToolCallHook; approvalMode request|report|deny|defer);
+    agent-tools.before-tool-call.wrapper.ts; plugins/trusted-tool-policy.ts
   visibility: white_box_required
   reachability:
     status: black_box_reachable
-    notes: ''
-  notes: Programmable gateway/plugin hook can block any tool call; also after_tool_call / tool_result_persist.
+    notes: runs on every wrapped tool call
+  notes: Programmable ordered before_tool_call policy chain (plugin + trusted-tool policies) can block
+    any tool call; fail-closed ('Tool call blocked because before_tool_call hook failed').
 - id: ctl.dm_allowlist
   control_kind: authorization
   applies_at: before_model
@@ -1314,30 +2320,34 @@ controls:
   - agent.openclaw.primary
   - agent.openclaw.system
   applies_to_tool_binding_ids: []
-  related_l1_ids: []
+  related_l1_ids:
+  - l1.channel.whatsapp
+  - l1.channel.feishu
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: 'docs channels (dmPolicy: allowlist/pairing; allowFrom)'
+  source_ref: src/channels/allow-from.ts; allowlist-match.ts; direct-dm-access.ts; message-access/decision.ts
   visibility: white_box_required
   reachability:
     status: black_box_reachable
-    notes: ''
-  notes: Decides WHO can message (invoke) the agent. Global per channel account, not per agent. The primary
-    external authorization boundary.
+    notes: every inbound channel message is matched against the allowlist
+  notes: Decides WHO can message (invoke) the agent. Per channel account. The primary external authorization
+    boundary.
 - id: ctl.agent_to_agent
   control_kind: authorization
   applies_at: before_tool
   enforcement_mode: blocking
   implementation: code
   failure_mode: fail_closed
-  applies_to_agent_ids: *id003
+  applies_to_agent_ids: *id005
   applies_to_tool_binding_ids:
-  - tool.agent_send
-  - tool.session
+  - tool.primary.sessions_send
+  - tool.primary.sessions_read
+  - tool.system.sessions_send
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs multi-agent (tools.agentToAgent allow/enabled; sessions.visibility)
+  source_ref: src/config/zod-schema.agent-runtime.ts (tools.agentToAgent allow/enabled); src/agents/tools/sessions-send-tool.a2a.ts;
+    src/plugin-sdk/session-visibility.ts
   visibility: white_box_required
   reachability:
     status: black_box_reachable
@@ -1352,17 +2362,26 @@ controls:
   applies_to_agent_ids:
   - agent.openclaw.primary
   - agent.openclaw.system
+  - agent.openclaw.subagent
   applies_to_tool_binding_ids:
-  - tool.subagent_spawn
+  - tool.primary.sessions_spawn
+  - tool.system.sessions_spawn
+  - tool.subagent.terminal
+  - tool.subagent.apply_patch
+  - tool.subagent.web_fetch
+  - tool.subagent.computer
+  - tool.subagent.mcp
+  - tool.subagent.file_read
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs/tools/subagents.md; multi-agent (allowAgents, spawn depth, child limits)
+  source_ref: src/agents/delegated-tool-policy.ts; src/agents/tools/subagents-tool.ts; sessions-spawn-access-program.ts
+    (allowAgents, spawn depth, child limits)
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  notes: Subagents get a restricted tool surface by default (no session/message tools); spawn targets
+  notes: Subagents get a restricted tool surface by default (no session/message/spawn tools); spawn targets
     allowlisted.
 - id: ctl.skill_allowlist
   control_kind: tool_policy
@@ -1370,31 +2389,33 @@ controls:
   enforcement_mode: blocking
   implementation: platform_config
   failure_mode: fail_closed
-  applies_to_agent_ids: *id003
+  applies_to_agent_ids: *id005
   applies_to_tool_binding_ids:
-  - tool.skills
+  - tool.primary.skills
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs multi-agent + skills (agent skill allowlist)
+  source_ref: src/agents/installed-skill-catalog.ts; src/agents/tools/installed-skill-tools.ts (eligibility/allowlist)
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  notes: Filters which skills (instruction bundles) load per agent.
+  notes: Filters which skills (instruction bundles) are eligible/loaded per agent.
 - id: ctl.owner_trust
   control_kind: human_approval
   applies_at: delegation
   enforcement_mode: blocking
   implementation: human_process
   failure_mode: fail_closed
-  applies_to_agent_ids: *id003
-  applies_to_tool_binding_ids: []
+  applies_to_agent_ids: *id005
+  applies_to_tool_binding_ids:
+  - tool.system.system_agent
+  - tool.primary.sessions_spawn
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs multi-agent (ownership explicit; operator approval for creation/role instructions;
-    ring-zero)
+  source_ref: src/agents/execution-authority.ts (resolveGatewayExecAuthority, hasUnrestrictedGatewayExecution);
+    qa/scenarios/config/system-agent-ring-zero-setup.yaml
   visibility: white_box_required
   reachability:
     status: black_box_reachable
@@ -1407,32 +2428,118 @@ controls:
   enforcement_mode: blocking
   implementation: code
   failure_mode: fail_closed
-  applies_to_agent_ids: *id003
+  applies_to_agent_ids: *id005
   applies_to_tool_binding_ids: []
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: docs agent-loop (tool arguments validated against schema before execution)
+  source_ref: packages/agent-core/src/validation.ts; agent-loop.prepare-arguments.test.ts; packages/tool-call-repair
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  notes: Structural validation; also hides serialized shadow tool-call copies from replies.
+  notes: Structural validation of model-composed tool args against the tool JSON schema before execution.
 - id: ctl.session_visibility
   control_kind: authorization
   applies_at: memory_read
   enforcement_mode: blocking
   implementation: code
   failure_mode: fail_closed
-  applies_to_agent_ids: *id003
+  applies_to_agent_ids: *id005
   applies_to_tool_binding_ids:
-  - tool.session
+  - tool.primary.sessions_read
   related_l1_ids: []
   related_l2_ids: []
   evidence_status: source_confirmed
-  source_ref: 'docs multi-agent (tools.sessions.visibility: tree/all/none)'
+  source_ref: 'src/plugin-sdk/session-visibility.ts; session-visibility-internal.ts (tools.sessions.visibility:
+    tree/all/none)'
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   notes: Controls cross-agent transcript reads.
+- id: ctl.exec_approval
+  control_kind: human_approval
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.openclaw.primary
+  - agent.openclaw.subagent
+  applies_to_tool_binding_ids:
+  - tool.primary.terminal
+  - tool.subagent.terminal
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: src/agents/bash-tools.exec-approval-request.ts; exec-approval-followup.ts; exec-approval-binding.ts
+  visibility: white_box_required
+  reachability:
+    status: conditionally_mounted
+    notes: exec approval mode = request|deny (per policy)
+  notes: Human approval gate for shell exec when approval mode requires it (approvalMode request/deny).
+- id: ctl.net_policy_ssrf
+  control_kind: output_filter
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.openclaw.primary
+  - agent.openclaw.subagent
+  applies_to_tool_binding_ids:
+  - tool.primary.web_fetch
+  - tool.subagent.web_fetch
+  related_l1_ids:
+  - l1.tool.web_fetch
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: src/infra/net/ssrf.ts; packages/net-policy/src/{ip,ipv4,url-protocol,url-userinfo,redact-sensitive-url}.ts;
+    src/agents/tools/web-guarded-fetch.ts
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: 'SSRF guard: blocks private/internal IPs + disallowed protocols/userinfo for model-chosen fetch
+    URLs.'
+- id: ctl.requester_tool_policy
+  control_kind: authorization
+  applies_at: before_tool
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.openclaw.primary
+  - agent.openclaw.subagent
+  applies_to_tool_binding_ids: []
+  related_l1_ids: []
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: src/agents/requester-tool-policy.ts; src/agents/tool-policy-match.ts (isToolAllowedByPolicies);
+    src/channels/inbound-event/legacy-tool-policy.ts
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: 'Per-requester/delegated-run tool allowlist: which tools a given (external) requester may invoke.'
+- id: ctl.cron_creator_cap
+  control_kind: rate_limit
+  applies_at: delegation
+  enforcement_mode: blocking
+  implementation: code
+  failure_mode: fail_closed
+  applies_to_agent_ids:
+  - agent.openclaw.primary
+  applies_to_tool_binding_ids:
+  - tool.primary.cron
+  related_l1_ids:
+  - l1.cron.scheduled
+  related_l2_ids: []
+  evidence_status: source_confirmed
+  source_ref: src/agents/tools/cron-tool-creator-cap.ts; src/cron/active-jobs.ts
+  visibility: white_box_required
+  reachability:
+    status: black_box_reachable
+    notes: ''
+  notes: Caps how many scheduled jobs an agent/creator may register -> bounds the self-trigger surface.

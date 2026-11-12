@@ -22,13 +22,17 @@ META = {
     "app": "openclaw", "app_version": "repo @ 472-new checkout", "git_ref": "see source_root",
     "applicability": {
         "verdict": "qualifies",
-        "evidence": "multi-agent gateway running coding-agent loops (built-in or external runtimes) over "
-                    "shell/file/browser/MCP/subagent/A2A tools, driven by messaging channels (docs/concepts/"
-                    "agent-loop.md, docs/gateway/*).",
+        "evidence": "multi-agent gateway running coding-agent loops (packages/agent-core/src/agent-loop.ts, "
+                    "built-in or external runtimes) over terminal/file/web/computer/MCP/subagent/A2A tools, driven "
+                    "by messaging channels (src/channels/*), gateway RPC, A2A, and a cron scheduler (src/cron/*).",
     },
-    "phase_status": {"static_A_to_D": "complete (DOC-DERIVED; code symbols pending)",
-                     "runtime_E": "pending (no live grounding yet)",
-                     "link_F": "partial (L1/L2 GT for openclaw not yet built; ids are forward refs)"},
+    "phase_status": {"static_A_to_D": "complete (CODE-GROUNDED; source_ref cites src/ + packages/ symbols)",
+                     "runtime_E": "performed offline: reachability set from source gating + per-record grounding "
+                                  "runbook written; live 'observed' upgrade blocked (no network/docker/model provider "
+                                  "in this environment) -- see environment.yaml runtime_grounding_plan + annotation "
+                                  "issue phase-e-offline. No record is marked 'observed'.",
+                     "link_F": "complete (../l1_gt.yaml + ../l2_gt.yaml built via build_links.py; all cross-layer "
+                               "l1/l2 references resolved and enforced below)"},
 }
 
 ENUMS = {
@@ -215,16 +219,63 @@ def main():
                     and not any(sid in e["output_ids"] for e in D.EDGES):
                 warnings.append(f"sink {sid}: no producer (tool/edge/agent) writes it")
 
-    # ---- optional cross-layer L1 check ----
-    l1_path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "l1_gt.yaml"))
+    # ---- cross-layer L1/L2 check (Phase F): every l1/l2 reference must resolve ----
+    base = os.path.dirname(__file__)
+    l1_path = os.path.normpath(os.path.join(base, "..", "l1_gt.yaml"))
+    l2_path = os.path.normpath(os.path.join(base, "..", "l2_gt.yaml"))
+
     if os.path.exists(l1_path):
         with open(l1_path, encoding="utf-8") as f:
             l1 = yaml.safe_load(f)
         l1_ids = {n.get("id") or n.get("key") for n in (l1.get("nodes") or [])}
+
+        def l1ref(where, ids):
+            for i in ids:
+                if i and i not in l1_ids:
+                    errors.append(f"{where}: dangling L1 ref '{i}'")
+
+        for a in D.AGENTS:
+            l1ref(f"agent {a['id']}.invocation", [s.get("l1_id") for s in a["invocation_surfaces"]])
+            l1ref(f"agent {a['id']}.model_writers",
+                  [w.get("l1_id") for w in a["model_config"].get("writers", [])])
+            for isrc in a["instruction_sources"]:
+                l1ref(f"agent {a['id']}.instr_writers", [w.get("l1_id") for w in isrc.get("writers", [])])
         for t in D.TOOLS:
-            ref(f"tool {t['id']}.l1", t["l1_ids"], l1_ids)
+            l1ref(f"tool {t['id']}.l1", t["l1_ids"])
+            if t.get("description_source"):
+                l1ref(f"tool {t['id']}.desc_writers",
+                      [w.get("l1_id") for w in t["description_source"].get("writers", [])])
+        for c in D.CONTEXT:
+            l1ref(f"ctx {c['id']}.writers", [w.get("l1_id") for w in c["writers"]])
+        for m in D.MEMORY:
+            l1ref(f"mem {m['id']}.writers", [w.get("l1_id") for w in m["writers"]])
+        for s in D.SINKS:
+            l1ref(f"sink {s['id']}.l1", s["related_l1_ids"])
+        for e in D.EDGES:
+            l1ref(f"edge {e['id']}.l1", e["related_l1_ids"])
+        for c in D.CONTROLS:
+            l1ref(f"ctl {c['id']}.l1", c["related_l1_ids"])
     else:
-        warnings.append("l1_gt.yaml not present -> cross-layer L1 refs are forward references (Phase F pending)")
+        errors.append("l1_gt.yaml not present -> Phase F incomplete (run build_links.py)")
+
+    if os.path.exists(l2_path):
+        with open(l2_path, encoding="utf-8") as f:
+            l2 = yaml.safe_load(f)
+        l2_ids = {n.get("id") for n in (l2.get("nodes") or [])}
+
+        def l2ref(where, ids):
+            for i in ids:
+                if i and i not in l2_ids:
+                    errors.append(f"{where}: dangling L2 ref '{i}'")
+
+        for grp, label in [(D.AGENTS, "agent"), (D.TOOLS, "tool"), (D.CONTEXT, "ctx"),
+                           (D.MEMORY, "mem"), (D.SINKS, "sink")]:
+            for r in grp:
+                l2ref(f"{label} {r['id']}.l2", r.get("related_l2_ids", []))
+        for e in D.EDGES:
+            l2ref(f"edge {e['id']}.l2", [st.get("l2_id") for st in e["related_l2_steps"]])
+    else:
+        errors.append("l2_gt.yaml not present -> Phase F incomplete (run build_links.py)")
 
     # ---- report ----
     for ww in warnings:

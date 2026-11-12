@@ -7,36 +7,79 @@ agentic_applicability:
   verdict: qualifies
   agent_runtime: multi-agent gateway + per-agent coding-agent loop (built-in or external runtimes)
   evidence:
-    - docs/concepts/agent-loop.md       (intake -> model -> tool execution -> stream -> persist; hooks)
-    - docs/concepts/agent-runtimes.md   (claude-cli/codex/copilot/muse/openclaw; native shell+file tools)
-    - docs/concepts/multi-agent.md      (fleet, ownership, agentToAgent, session visibility)
-    - docs/tools/{subagents,agent-send}.md
-    - docs/gateway/sandboxing/{docker-backend,crabbox-backend}.md (sandbox posture)
-    - docs/channels/*                   (WhatsApp/Feishu/... invocation surfaces, dmPolicy)
+    - packages/agent-core/src/agent-loop.ts        (model call + tool dispatch cycle)
+    - packages/agent-core/src/agent-loop-tool-execution.ts (model-selected tool execution + result feedback)
+    - src/agents/tools/*                           (built-in tool registry: terminal/file/web/computer/sessions/cron/...)
+    - src/agents/agent-tools.before-tool-call.policy.ts (runBeforeToolCallHook policy chain)
+    - src/agents/sandbox/{config.ts,container-allocation.ts,docker-backend.ts,browser.ts} (sandbox posture)
+    - src/channels/{allow-from.ts,allowlist-match.ts,direct-dm-access.ts,message-access/decision.ts} (DM allowlist)
+    - src/agents/tools/sessions-send-tool.a2a.ts   (agent-to-agent lateral surface)
+    - src/cron/{active-jobs.ts,agent-turn-command-prompt.ts} (scheduler self-trigger)
 
 deliverables:
   schema: ../Agentic_attack_surface_schema.yaml
-  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py}
-  output: agentic_gt.yaml
+  generators: generators/{agentic_lib.py, agentic_data.py, build_agentic.py, build_links.py}
+  agentic_output: agentic_gt.yaml
+  link_layer: {l1: l1_gt.yaml, l2: l2_gt.yaml}   # Phase F (built by build_links.py)
 
-phase_status: {A_locate: complete, B_extract: complete (DOC-DERIVED), C_trust_authority: complete,
-               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+evidence_basis: CODE-GROUNDED
+evidence_note: >
+  Rebuilt from the TypeScript monorepo (src/ + packages/), replacing the earlier doc-derived model. Every
+  record's source_ref now cites real code symbols/paths. The tool surface expanded from 9 doc-level groupings
+  to ~27 code-confirmed bindings (terminal/bash, file read, apply_patch, web_fetch [SSRF-guarded], web_search,
+  computer/browser, message, sessions_send A2A, sessions_spawn, sessions_read, cron self-trigger, ask_user,
+  mcp, skills, github, media, gateway -- across primary/subagent/system agents). New surfaces found in source
+  and added: the cron scheduler as a self-trigger invocation surface, per-requester tool policy, exec approval,
+  and the net-policy SSRF guard.
 
-evidence_caveat: >
-  OpenClaw records are derived from the repo's authoritative design docs (docs/*), not yet from exact
-  code symbols. evidence_status=source_confirmed reflects doc confirmation; a follow-up pass should
-  confirm against the TS monorepo (src/, packages/) and downgrade/annotate any divergence.
+phase_status:
+  A_locate: complete
+  B_extract: complete (CODE-GROUNDED; source_ref cites src/ + packages/ symbols)
+  C_trust_authority: complete
+  D_lineage_closure: complete (build_agentic.py referential + lineage checks pass, 0 warnings)
+  E_runtime_grounding: performed-offline (see runtime_grounding below; NO record marked 'observed')
+  F_link_l1_l2: complete (l1_gt.yaml 20 nodes + l2_gt.yaml 4 nodes; all cross-layer refs enforced by build_agentic.py)
+  G_validate: complete
+  H_export: pending (pengent export not run for openclaw)
 
-runtime_grounding_plan:
-  image: openclaw gateway (docker-compose.yml) + openclaw-sandbox:trixie-slim; a messaging channel (or Gateway RPC)
-  targets: [ channel message -> agent run, exec in docker sandbox (network:none), browser fetch,
-             subagent spawn (restricted tools), agent-send to a peer (allow-gated), before_tool_call hook block,
-             DM allowlist denial ]
+runtime_grounding:
+  status: live-observation-blocked
+  blocker: >
+    This environment has no network (pnpm install to registry.npmjs.org times out), no Docker daemon, and no
+    model-provider credentials. Phase E's "observe one real run on the pinned image" therefore cannot be
+    performed here. Per the methodology, NO record is marked evidence_status=observed -- all remain
+    source_confirmed. reachability.status is set from source gating (default-on vs config-gated), not from a
+    triggered run, and is annotated as such.
+  reachability_derivation: >
+    black_box_reachable = exercised by default once an allowlisted sender/message exists (channel entry, before_tool_call
+    hook, sandbox default-on, dm_allowlist). conditionally_mounted = gated behind config/enablement (browser/computer,
+    mcp, web_search, github, media, a2a send, cron, exec_approval). Derived from source gates, not from triggering.
+  corroborating_tests:   # committed repo tests that already exercise each control/data path (run these to reach 'observed')
+    orchestration_loop: packages/agent-core/src/agent-loop.test.ts; src/agents/code-mode.agent-loop.test.ts
+    before_tool_call_hook: src/agents/agent-tools.before-tool-call.{approval-policy,approval-recovery,decision}.test.ts
+    sandbox_posture: src/agents/core-coding-tools.sandbox.test.ts; src/agents/embedded-agent-runner/run/attempt-system-prompt.sandbox-info.test.ts
+    dm_allowlist: src/channels/allow-from.test.ts; allowlist-match.test.ts; test/channel-message-read-authority.integration.test.ts
+    a2a_send: src/agents/tools/sessions-send-communication.test.ts; src/agents/openclaw-tools.sessions-send-child-coordination.test.ts
+    cron_self_trigger: src/agents/cli-runner.before-agent-reply-cron.test.ts; cli-runner.cron-root-abort.test.ts
+    ssrf_guard: src/infra/net/fetch-guard.ssrf.test.ts; fetch-guard.configured-origin-linklocal.test.ts; fetch-guard.socks.test.ts
+    requester_tool_policy: src/agents/requester-tool-policy.test.ts
+    tool_arg_validation: packages/agent-core/src/agent-loop.prepare-arguments.test.ts
+  reproduce_observed:    # runbook to upgrade exercised records source_confirmed -> observed
+    1: On a networked host with Docker + a model provider key, `corepack pnpm install` at repo root.
+    2: Path-level (cheapest, stub provider): `pnpm vitest run <corroborating test path>` for each target above;
+       a green run observes that control/data path -> mark the matching records evidence_status=observed, cite the test.
+    3: Full run (true E): bring up the gateway (docker-compose.yml + openclaw-sandbox image), bind one messaging
+       channel (or Gateway RPC), send one allowlisted message that forces exactly one tool call; capture the tool
+       args (model-composed?), the identity it used, what landed back in context, and whether before_tool_call
+       fired. Then upgrade the orchestration loop + that tool + its control to observed.
+    4: Re-run `python build_agentic.py`; keep every un-exercised record at source_confirmed.
 
 distinctive_notes: >
-  (1) The untrusted entry is a MESSAGING CHANNEL message (ctx.channel_message); gated only by a per-account
-      DM allowlist/pairing (ctl.dm_allowlist) -- the primary external authorization boundary.
-  (2) Tool exec/file/browser isolation is a SANDBOX POSTURE (Docker network:none/readOnlyRoot/capDrop ALL, or
-      Crabbox lease); disabling the sandbox turns exec into host RCE -- capture the posture at runtime.
-  (3) Cross-agent (A2A) send + session visibility are lateral-movement edges, bounded by tools.agentToAgent.
-  (4) Gateway before_tool_call hook is a programmable blocking control ({block:true} terminal).
+  (1) The untrusted entry is a MESSAGING CHANNEL message (ctx.channel_message), gated by a per-account DM allowlist
+      (ctl.dm_allowlist) -- plus two non-human entries found in source: A2A peer messages (ctx.cross_agent_message)
+      and the CRON scheduler (ctx.cron_prompt), a deferred self-trigger an agent can create for itself.
+  (2) Tool exec/file/browser isolation is a SANDBOX POSTURE (src/agents/sandbox/config.ts: network default 'none',
+      readOnlyRoot default true, capDrop); disabling the sandbox turns exec into host RCE -- capture posture at runtime.
+  (3) Cross-agent (A2A) send + session visibility are lateral-movement edges, bounded by tools.agentToAgent + sessions.visibility.
+  (4) before_tool_call is a programmable, ordered, fail-closed policy chain (runBeforeToolCallHook, approvalMode
+      request|report|deny|defer); web_fetch is additionally guarded by a net-policy SSRF check.

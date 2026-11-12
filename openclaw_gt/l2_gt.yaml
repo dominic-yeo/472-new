@@ -1,0 +1,146 @@
+schema_version: pengent-web-gt-v1
+environment_id: openclaw-oss
+scope: 'focused: agent-run operations referenced by the agentic layer'
+nodes:
+- id: l2.agent.channel_run
+  name: Agent run from a channel message
+  kind: normal
+  action_key: agent_channel_run
+  description: 'An allowlisted channel sender''s message drives a full agent turn: context assembly ->
+    model -> model-selected tool calls (gated by the before_tool_call policy chain + sandbox) -> streamed
+    reply.'
+  subject:
+    id: sender
+    identity: Channel sender (allowlisted)
+    role: External
+    auth_context: DM allowlist / pairing
+  operation:
+    business: agent_turn
+    crud: Execute
+  object:
+    kind: process
+    id: agent_turn
+    type: AgentTurn
+    name: Agent turn
+    entity: AgentTurn
+    role: executed
+  requirements:
+  - type: authorization
+    fact: sender ∈ channel DM allowlist
+    reason: ctl.dm_allowlist gates invocation
+  - type: state
+    fact: agent bound to channel
+    reason: fleet config binds an agent to the channel
+  effects:
+  - fact: tools may execute in sandbox under agent identity
+    basis: ctl.sandbox + ctl.before_tool_hook
+    reason: model-selected tool calls run with workspace/sandbox authority
+  - fact: model-composed reply delivered to sender
+    basis: sink.channel_reply
+    reason: turn output
+  related_l1_ids:
+  - l1.channel.whatsapp
+  - l1.channel.feishu
+  - l1.tool.exec_shell
+  - l1.tool.web_fetch
+  - l1.tool.message_send
+  source_ref: packages/agent-core/src/agent-loop.ts; src/channels/inbound-event; src/agents/embedded-agent-runner
+- id: l2.agent.scheduled_run
+  name: Scheduled (cron) agent run
+  kind: normal
+  action_key: agent_scheduled_run
+  description: A stored cron job fires and drives an agent turn with a saved prompt, without a live human
+    in the loop (deferred self-trigger).
+  subject:
+    id: scheduler
+    identity: Cron scheduler (job creator identity)
+    role: System
+    auth_context: job creator + creator cap
+  operation:
+    business: agent_turn
+    crud: Execute
+  object:
+    kind: process
+    id: scheduled_turn
+    type: AgentTurn
+    name: Scheduled agent turn
+    entity: AgentTurn
+    role: executed
+  requirements:
+  - type: state
+    fact: a cron job exists
+    reason: job was created via the cron tool (ctl.cron_creator_cap)
+  - type: state
+    fact: agent available at fire time
+    reason: src/cron/agent-availability.ts
+  effects:
+  - fact: stored prompt runs as a future turn
+    basis: ctx.cron_prompt
+    reason: scheduler delivers the saved prompt
+  related_l1_ids:
+  - l1.cron.scheduled
+  source_ref: src/cron/active-jobs.ts; agent-turn-command-prompt.ts
+- id: l2.agent.subagent_delegation
+  name: Sub-agent delegation
+  kind: normal
+  action_key: agent_subagent_delegation
+  description: The agent spawns a background sub-agent with a restricted tool surface and a parent-composed
+    task; the child's result is delivered back to the parent.
+  subject:
+    id: parent
+    identity: Parent agent
+    role: Internal
+    auth_context: inherited sender + spawn policy
+  operation:
+    business: delegation
+    crud: Create
+  object:
+    kind: process
+    id: subagent_run
+    type: SubAgentRun
+    name: Sub-agent run
+    entity: SubAgentRun
+    role: created
+  requirements:
+  - type: authorization
+    fact: spawn target ∈ allowAgents, within spawn/child limits
+    reason: ctl.subagent_policy
+  effects:
+  - fact: child result returns to parent context
+    basis: sink.subagent_result
+    reason: child->parent delivery
+  related_l1_ids:
+  - l1.internal.subagent_spawn
+  source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts
+- id: l2.agent.a2a_dispatch
+  name: Agent-to-agent (A2A) dispatch
+  kind: normal
+  action_key: agent_a2a_dispatch
+  description: The agent sends a message to a peer agent in the fleet; the message becomes the peer's
+    inbound context (lateral movement path), bounded by the agentToAgent allow policy.
+  subject:
+    id: sender_agent
+    identity: Sending agent
+    role: Internal
+    auth_context: agentToAgent allow policy
+  operation:
+    business: messaging
+    crud: Create
+  object:
+    kind: message
+    id: a2a_message
+    type: A2AMessage
+    name: A2A message
+    entity: A2AMessage
+    role: created
+  requirements:
+  - type: authorization
+    fact: agentToAgent enabled + sender/target pair allowed
+    reason: ctl.agent_to_agent
+  effects:
+  - fact: peer receives ctx.cross_agent_message
+    basis: sink.agent_send -> ctx.cross_agent_message
+    reason: A2A delivery closes a lateral edge
+  related_l1_ids:
+  - l1.a2a.inbound
+  source_ref: src/agents/tools/sessions-send-tool.a2a.ts
