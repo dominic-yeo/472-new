@@ -1,0 +1,79 @@
+# Lobe Chat -- agentic link layer (Phase F).
+# Focused L1/L2 STUBS for the surfaces the agentic GT forward-references by id
+# (agentic_gt.yaml: l1_id / l1_ids / l2_id / related_l2_ids). Link-resolution
+# stubs only -- the full pengent-web-gt-v1 HTTP/tRPC sweep was intentionally
+# skipped for this app (stub the links the agentic layer needs).
+# Source-only (Next.js route handlers + services/chat.ts; no runtime capture).
+schema_version: pengent-web-gt-v1
+environment_id: lobe-chat-local
+scope: "agentic link layer: L1/L2 ids referenced by agentic_gt.yaml (stubs, not a full HTTP/tRPC sweep)"
+
+l1_nodes:
+# --- invocation ---
+- {id: l1.api.chat.completion, key: "POST /api/chat/[provider]", kind: api, surface_class: invocation,
+   inputs: [messages, model, plugins, files], outputs: [assistant_message, tool_calls],
+   auth_context: user session (self-host single-user, or next-auth/Clerk multi-user),
+   source_ref: "src/app/(backend)/webapi/chat/*; src/services/chat.ts createAssistantMessage",
+   gt: {visibility: {minimum: grey_box, reason: "PRIMARY untrusted entry; user prompt drives the plugin/tool loop."},
+        black_box_reachable: true, notes: "Prompt-injection source steering model-selected plugin calls."}}
+# --- config surfaces ---
+- {id: l1.api.agent.config, key: "agent/session config (tRPC/local)", kind: api, surface_class: config,
+   inputs: [systemRole, model, plugins, params], outputs: [agent_config],
+   auth_context: user session,
+   source_ref: "src/store/agent; src/services/session; agent runtime config",
+   gt: {visibility: {minimum: grey_box, reason: "Agent definition: system role + enabled plugins."},
+        black_box_reachable: true, notes: "Binds system prompt + plugin set to a session/agent."}}
+- {id: l1.api.plugin.install, key: "plugin:install", kind: api, surface_class: config,
+   inputs: [plugin_identifier, manifest_url], outputs: [installed_plugin],
+   auth_context: user session,
+   source_ref: "src/store/tool/plugin; src/services/plugin installPlugin",
+   gt: {visibility: {minimum: grey_box, reason: "Installs a plugin manifest (adds callable tool surface)."},
+        black_box_reachable: true, notes: "Fetches + registers a plugin manifest (SSRF on manifest URL)."}}
+- {id: l1.api.custom_plugin.add, key: "custom_plugin:add", kind: api, surface_class: config,
+   inputs: [manifest, api_endpoints, auth], outputs: [custom_plugin],
+   auth_context: user session,
+   source_ref: "src/services/plugin custom plugin; src/store/tool",
+   gt: {visibility: {minimum: grey_box, reason: "User-defined plugin: arbitrary API endpoints + stored auth."},
+        black_box_reachable: true, notes: "Defines outbound API endpoints the gateway will call."}}
+- {id: l1.api.market.install, key: "market:install", kind: api, surface_class: config,
+   inputs: [agent_or_plugin_id], outputs: [installed],
+   auth_context: user session,
+   source_ref: "src/services/market; discover/market store",
+   gt: {visibility: {minimum: grey_box, reason: "Installs a marketplace agent/plugin (third-party config)."},
+        black_box_reachable: true, notes: "Pulls third-party agent/plugin definitions."}}
+# --- tool-backing ---
+- {id: l1.api.plugin.gateway, key: "POST /api/plugin/gateway (API_ENDPOINTS.gateway)", kind: api, surface_class: tool_backing,
+   inputs: [plugin_identifier, api_name, arguments], outputs: [plugin_result],
+   auth_context: turn user; plugin manifest,
+   source_ref: "src/services/chat.ts runPluginApi -> API_ENDPOINTS.gateway; plugin gateway handler",
+   gt: {visibility: {minimum: grey_box, reason: "mixed effect class; proxies model-selected plugin API calls (SSRF/exfil)."},
+        black_box_reachable: true, notes: "Central plugin execution proxy for tool calls."}}
+# --- context source ---
+- {id: l1.api.file.upload, key: "file:upload (POST /api/upload or S3 presign)", kind: api, surface_class: context_source,
+   inputs: [file], outputs: [file_id, url],
+   auth_context: user session,
+   source_ref: "src/services/file; src/app upload handlers",
+   gt: {visibility: {minimum: grey_box, reason: "Uploaded file content enters chat/RAG context."},
+        black_box_reachable: true, notes: "User file ingestion."}}
+
+l2_nodes:
+- id: l2.chat.agent_session
+  name: Agent session turn
+  kind: normal
+  action_key: lobe_agent_session_turn
+  description: >
+    A user message in a session drives a turn: system role + enabled plugins + files assembled ->
+    model -> model-selected plugin/tool calls proxied through the plugin gateway -> reply. Plugin
+    calls run under the session user against each plugin's configured endpoints.
+  subject: {id: user, identity: session user (single-user self-host or next-auth/Clerk), role: Member, auth_context: Session}
+  operation: {business: agent_turn, crud: Execute}
+  object: {kind: process, id: agent_turn, type: AgentTurn, name: Agent session turn, entity: AgentTurn, role: executed}
+  requirements:
+  - {type: authentication, fact: "Authenticated(user, Session)", reason: session/next-auth resolves the user (or single-user mode)}
+  - {type: state, fact: "State(session, plugins, enabled)", reason: enabled plugins define the callable tool set}
+  effects:
+  - {fact: "model-selected plugin APIs invoked via the gateway under the session user", basis: action_semantics,
+     reason: "runPluginApi dispatches to API_ENDPOINTS.gateway"}
+  - {fact: "model-composed reply streamed to the session", basis: action_semantics, reason: turn output}
+  related_l1_ids: [l1.api.chat.completion, l1.api.agent.config, l1.api.plugin.gateway,
+    l1.api.plugin.install, l1.api.custom_plugin.add, l1.api.market.install, l1.api.file.upload]

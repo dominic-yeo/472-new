@@ -1,0 +1,89 @@
+# Discourse -- Pengent Web GT (L1/L2) environment
+app: discourse
+app_version: "2026.11.0-latest.1"
+source_root: ../discourse
+framework: "Ruby on Rails (API) + Ember.js (SPA frontend)"
+
+agentic_applicability:
+  verdict: does_not_qualify
+  reason: >
+    Discourse is a traditional forum/community platform with no built-in LLM agent runtime
+    (no model-driven tool-calling loop in core). Only the L1/L2 web attack-surface GT applies.
+    (The optional discourse-ai plugin is out of scope for this core build.)
+
+# ===========================================================================
+# Traditional Web GT (L1/L2, pengent-web-gt-v1)
+# ===========================================================================
+web_gt:
+  schema: pengent-web-gt-v1
+  generators: generators/{common.py, l2lib.py, l1_data.py, l2_data.py, build_l1.py, build_l2.py}
+  output: {l1: l1_gt.yaml, l2: l2_gt.yaml}
+  build: "PYTHONIOENCODING=utf-8 python build_l1.py && python build_l2.py"
+  validate: "python ../validate_gt.py --l1 l1_gt.yaml --l2 l2_gt.yaml   (passes)"
+  export: "python ../export_to_pengent.py --l1 l1_gt.yaml --l2 l2_gt.yaml --out <file>  (succeeds)"
+
+  evidence_basis: SOURCE-ONLY
+  evidence_note: >
+    Built source-first from the Rails controllers under app/controllers/*.rb and config/routes.rb.
+    Request params from params.require/permit; responses from `render json:` + app/serializers/*.rb.
+    No runtime capture possible here (no Docker/network), so samples=[] and black_box_reachable is
+    derived from source gating (before_action filters, Guardian checks, Admin/Staff route constraints).
+    Runtime verification (HAR/probe on a discourse container pinned to this version) is the documented follow-up.
+
+  auth_model: >
+    Session cookie `_t` + CSRF token (browser SPA), OR api_key/api_username pair / user-scoped API key
+    (header). Authorization via Guardian (is_staff?/is_admin?/can_*) and route constraints
+    (AdminConstraint, StaffConstraint). SUBJECTS in l2lib.py: Anonymous / User / Staff / Admin.
+
+  surface_inventory:
+    controllers: 168          # app/controllers/**/*.rb
+    serializers: 245          # app/serializers/**/*.rb
+    routes_file: "config/routes.rb (2125 lines)"
+    excluded: "Static/SPA HTML shells (static#show login/signup/faq/tos), asset mounts, Ember app shell -- the JSON API behind them is modeled directly."
+
+  status: "ALL CORE MODULES COMPLETE -- 231 L1 nodes / 287 L2 actions across 16 modules, validator green + export OK."
+  l2_subject_distribution: "Anonymous 61, User 92, Staff 59, Admin 75."
+  generators_layout: >
+    Per-module files l1_<mod>.py (export NODES) + l2_<mod>.py (import registers actions via l2lib qa()).
+    l1_data.py/l2_data.py aggregate them (session module lives inline in l1_data/l2_data). Shared compact
+    helpers snode()/V()/P1()/IDST_* in common.py; qa() quick-action helper in l2lib.py.
+  modules:
+    done:
+      - "Session + Authentication (SessionController, 18 nodes): csrf/honeypot, password login+logout,
+         current-user+scopes, password reset, email/code/OTP passwordless login, step-up 2FA, passkeys,
+         DiscourseConnect SSO (begin/callback/provider). HMAC-gated SSO provisioning + group/role sync."
+      - "Users + Account (UsersController/UsersEmail, 44 nodes): registration, availability checks
+         (enumeration), profile/preference reads+edits, email management, 2FA/passkey lifecycle, confirmed
+         session, password-reset/activation/email-login token flows, confirm-admin (privilege grant)."
+      - "Posts (PostsController, 16 nodes): create/edit/delete/recover, wiki/lock/notice/post_type,
+         revisions (hide/revert/permanently_delete), bulk delete/merge."
+      - "Topics (TopicsController, 24 nodes): CRUD, status/timer/banner, publish shared-draft, convert PM,
+         tags, invite user/group, move/merge/change-owner/change-timestamp, bulk, notifications."
+      - "Categories (13), Tags (10), Groups (14 incl. membership/owners), Invites (9 incl. redemption
+         boundary), Notifications (6), Bookmarks+Drafts (9)."
+      - "Uploads (8 nodes): file+remote-URL ingestion (SSRF), presigned/multipart external upload,
+         upload:// resolution, secure-upload serving (IDOR surface)."
+      - "Misc public (10): search, directory, about, site bootstrap, post_actions (like/flag), user_actions,
+         DSA illegal-content report, composer mentions, click tracking."
+      - "Reviewables (13): moderation queue read + perform (approve/reject/delete/suspend), scrub, notes,
+         DSA classification, settings, claims."
+      - "Admin/Users (23): suspend/silence/approve/activate, grant+revoke admin/moderation, impersonate
+         (full takeover), anonymize, merge, delete, trust-level, group grants, disable-2FA, sync_sso, ip-info."
+      - "Admin/Core (28): site_settings read+update, dashboard, API keys, web_hooks (SSRF/exfil + ping/redeliver),
+         backups (create/download=exfil / restore=takeover / upload), email test + templates."
+      - "Admin/Content (31): themes (create/import=RCE/SSRF, JS-to-all-users), badges (SQL queries),
+         flags, watched_words (regex/ReDoS), embeddable_hosts (SSRF), color_schemes, permalinks, user_fields,
+         emoji, screened IPs, staff_action_logs (audit), site_texts."
+    scope_note: >
+      Attack-surface inventory: all mutating endpoints + security-relevant reads are modeled individually;
+      redundant pure-view routes (users#preferences/#show aliases, topic show/print/summary/feed, tag/group
+      manage views, revision show/unlist/relist, bulk siblings) are grouped into representative nodes and
+      noted on those nodes. Localization sub-controllers (post/topic/tag_localizations), sitemap/news,
+      nested_topics, hashtags, associated_groups, and the static SPA shells are excluded (see excluded_items).
+    remaining_optional:
+      - "Localization controllers (post/topic/tag_localizations) -- i18n content, low security value."
+      - "Plugin surfaces (chat/, discourse-ai, etc.) -- out of scope for core."
+      - "Deeper admin leaf endpoints folded into grouped nodes (notes list each grouping)."
+
+  cross_app_status:   # overall Pengent Web GT program
+    note: "Discourse is a standalone traditional-web target (no agentic layer), separate from the LLM-app set."

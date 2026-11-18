@@ -1,0 +1,110 @@
+# LibreChat -- agentic link layer (Phase F).
+# Focused L1/L2 STUBS for the surfaces the agentic GT forward-references by id
+# (agentic_gt.yaml: l1_id / l1_ids / l2_id / related_l2_ids). Link-resolution
+# stubs only -- the full pengent-web-gt-v1 HTTP sweep was intentionally skipped
+# for this app (per scope decision: stub the links the agentic layer needs).
+# Source-only (Express routes under api/server/routes/*; no runtime capture).
+schema_version: pengent-web-gt-v1
+environment_id: librechat-local
+scope: "agentic link layer: L1/L2 ids referenced by agentic_gt.yaml (stubs, not a full HTTP sweep)"
+
+l1_nodes:
+# --- invocation ---
+- {id: l1.api.agents.chat, key: "POST /api/agents/chat/:conversationId", kind: api, surface_class: invocation,
+   inputs: [messages, agent_id, files], outputs: [assistant_message, tool_calls],
+   auth_context: session JWT -> req.user; agent access + tool role grants,
+   source_ref: "api/server/routes/agents; api/server/controllers/agents/* (AgentClient run loop)",
+   gt: {visibility: {minimum: grey_box, reason: "PRIMARY untrusted entry; user prompt drives the agent tool loop."},
+        black_box_reachable: true, notes: "Prompt-injection source steering model-selected tool calls."}}
+# --- config surfaces shaping the agent / its tools ---
+- {id: l1.api.agents.update, key: "PATCH /api/agents/:id", kind: api, surface_class: config,
+   inputs: [instructions, tools, model, provider], outputs: [agent],
+   auth_context: agent author/admin,
+   source_ref: "api/server/routes/agents (update)",
+   gt: {visibility: {minimum: grey_box, reason: "Agent definition: system instructions + allowed tools."},
+        black_box_reachable: true, notes: "Binds instructions + tool set to an agent."}}
+- {id: l1.api.actions.create, key: "POST /api/actions/:agent_id", kind: api, surface_class: config,
+   inputs: [openapi_spec, auth, domain], outputs: [action],
+   auth_context: agent author,
+   source_ref: "api/server/routes/actions; models/Action",
+   gt: {visibility: {minimum: grey_box, reason: "Registers an OpenAPI action (adds outbound tool surface)."},
+        black_box_reachable: true, notes: "Defines a callable external action + its stored auth."}}
+- {id: l1.config.librechat_yaml, key: "config:librechat.yaml", kind: config, surface_class: config,
+   inputs: [endpoints, tools, mcpServers, interface], outputs: [app_config],
+   auth_context: deploy/operator (file),
+   source_ref: "librechat.yaml; api/server/services/Config/loadCustomConfig",
+   gt: {visibility: {minimum: white_box, reason: "Instance config file; defines endpoints/tools/MCP servers."},
+        black_box_reachable: false, notes: "Operator-controlled; shapes the whole tool surface."}}
+- {id: l1.config.mcp_servers, key: "config:mcpServers", kind: config, surface_class: config,
+   inputs: [mcp_server_defs], outputs: [mcp_registry],
+   auth_context: operator (via librechat.yaml) / user MCP,
+   source_ref: "api/server/services/MCP; librechat.yaml mcpServers",
+   gt: {visibility: {minimum: white_box, reason: "MCP server registry; each server is a tool provider."},
+        black_box_reachable: false, notes: "Defines MCP tool providers + transport/auth."}}
+# --- tool-backing surfaces ---
+- {id: l1.api.actions.execute, key: "action:execute", kind: api, surface_class: tool_backing,
+   inputs: [action_id, operation, args], outputs: [action_result],
+   auth_context: turn user; action's stored auth,
+   source_ref: "api/app/clients/tools; ToolService action dispatch",
+   gt: {visibility: {minimum: grey_box, reason: "mixed effect class; outbound OpenAPI action call (SSRF/exfil)."},
+        black_box_reachable: true, notes: "Executes a registered action against its domain."}}
+- {id: l1.api.code.execute, key: "tool:execute_code", kind: api, surface_class: tool_backing,
+   inputs: [code, lang], outputs: [stdout, files],
+   auth_context: turn user; code interpreter API key,
+   source_ref: "api/server/services/ToolService; app/clients/tools code/agent.ts",
+   gt: {visibility: {minimum: grey_box, reason: "code_execution effect class; sandboxed code run."},
+        black_box_reachable: true, notes: "LibreChat Code Interpreter tool."}}
+- {id: l1.api.mcp.connect, key: "mcp:connect", kind: api, surface_class: tool_backing,
+   inputs: [server_name], outputs: [tools, tool_result],
+   auth_context: turn user; MCP server config,
+   source_ref: "api/server/services/MCP connect/callTool",
+   gt: {visibility: {minimum: grey_box, reason: "mixed effect class; MCP tool invocation."},
+        black_box_reachable: true, notes: "Connects to a configured MCP server and calls its tools."}}
+- {id: l1.api.rag.search, key: "tool:file_search (RAG API)", kind: api, surface_class: tool_backing,
+   inputs: [query, file_ids], outputs: [chunks],
+   auth_context: turn user; file access,
+   source_ref: "api/server/services/ToolService file_search; RAG API",
+   gt: {visibility: {minimum: grey_box, reason: "read effect class; retrieves file content into context."},
+        black_box_reachable: true, notes: "RAG retrieval (indirect-injection source)."}}
+# --- context source ---
+- {id: l1.api.files.upload, key: "POST /api/files", kind: api, surface_class: context_source,
+   inputs: [file], outputs: [file_id],
+   auth_context: session user,
+   source_ref: "api/server/routes/files",
+   gt: {visibility: {minimum: grey_box, reason: "Uploaded files enter RAG/code-tool context."},
+        black_box_reachable: true, notes: "User document ingestion."}}
+# --- internal ---
+- {id: l1.internal.memory, key: "internal:memory", kind: internal, surface_class: context_source,
+   inputs: [memory_write], outputs: [memory_recall],
+   auth_context: turn user,
+   source_ref: "api/server/services memory (agent memory)",
+   gt: {visibility: {minimum: white_box, reason: "Agent memory store recalled into later turns."},
+        black_box_reachable: false, notes: "Write->recall memory loop."}}
+- {id: l1.internal.subagent, key: "internal:subagent", kind: internal, surface_class: internal,
+   inputs: [delegated_task], outputs: [subagent_result],
+   auth_context: parent run's user identity,
+   source_ref: "api/server/controllers/agents (sub-agent / tool-as-agent)",
+   gt: {visibility: {minimum: white_box, reason: "In-process sub-agent; not an external route."},
+        black_box_reachable: false, notes: "Runs under the parent run's identity."}}
+
+l2_nodes:
+- id: l2.agents.chat
+  name: Agent chat turn
+  kind: normal
+  action_key: lc_agent_chat_turn
+  description: >
+    A user message drives a LibreChat agent turn: instructions + files/memory assembled -> model ->
+    model-selected tool calls (code interpreter, OpenAPI actions, MCP servers, file_search RAG) ->
+    reply. Tools run under the turn user with the agent's configured tool grants.
+  subject: {id: user, identity: req.user (session JWT), role: Member, auth_context: Session}
+  operation: {business: agent_turn, crud: Execute}
+  object: {kind: process, id: agent_turn, type: AgentTurn, name: Agent turn, entity: AgentTurn, role: executed}
+  requirements:
+  - {type: authentication, fact: "Authenticated(user, Session)", reason: requireJwtAuth resolves req.user}
+  - {type: authorization, fact: "Can(user, Use, Agent)", reason: agent access + per-tool role grants}
+  effects:
+  - {fact: "model-selected tools execute under the turn user + agent tool grants", basis: action_semantics,
+     reason: "AgentClient dispatches code/action/MCP/RAG tools"}
+  - {fact: "model-composed reply returned and persisted", basis: action_semantics, reason: turn output}
+  related_l1_ids: [l1.api.agents.chat, l1.api.actions.execute, l1.api.code.execute, l1.api.mcp.connect,
+    l1.api.rag.search, l1.api.files.upload, l1.internal.memory, l1.internal.subagent]

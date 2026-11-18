@@ -1,0 +1,2238 @@
+schema_version: pengent-web-gt-v1
+environment_id: open-webui-local
+scope: 'Open WebUI 0.13.3 HTTP API -- module: Authentication + Account (/api/v1/auths)'
+nodes:
+- id: gt-action-001
+  name: Read own session
+  kind: normal
+  description: An authenticated user reads their own session info and receives a refreshed token.
+  action_key: owui_get_session_user
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: get_session_user
+    crud: Read
+  object:
+    kind: entity
+    id: self
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: session
+      type: Session
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - &id002
+    type: authentication
+    fact:
+      predicate: Authenticated
+      arguments:
+      - &id001
+        kind: subject
+        id: actor
+        type: User
+        relative_role: SELF
+      - Session
+    reason: get_current_user resolves the JWT token / API key.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SessionToken
+          target: &id004
+            kind: entity
+            id: session
+            type: Session
+            role: target
+      basis: io_reference
+      reason: Response returns a freshly re-issued session token.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Permissions
+          target: &id003
+            kind: entity
+            id: self
+            type: User
+            role: target
+      basis: io_reference
+      reason: Response returns the caller's effective permission map.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: token / SessionToken(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionToken(session:Session{target}))
+    ignored_reason: ''
+  - direction: output
+    field: permissions / Permissions(authz)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Permissions(self:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: role / UserRole(authz)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Caller's own role, echoed.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Self-scoped read that also rotates the session token.
+  l1_keys:
+  - http://localhost/api/v1/auths/
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],SessionToken(session:Session{target}))
+  - Know(actor:User[SELF],Permissions(self:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Any authenticated caller reads their own session.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid session token or API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:185
+      supports: GET / [get_current_user] -> SessionUserInfoResponse; re-issues token
+    notes: Discloses caller role + effective permissions; re-issues a token on every call.
+- id: gt-action-002
+  name: Update own profile
+  kind: normal
+  description: A verified user updates their own display name, avatar and bio.
+  action_key: owui_update_profile
+  subject:
+    id: actor
+    identity: VerifiedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: update_profile
+    crud: Update
+  object:
+    kind: entity
+    id: self
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: DisplayName(identity)
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - &id007
+    type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Use
+      - &id009
+        kind: entity
+        id: instance
+        type: Instance
+        role: authority
+    reason: get_verified_user requires a non-pending role.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id003
+        - name
+        - updated
+      basis: state_transition
+      reason: Display name is replaced.
+    - fact:
+        predicate: State
+        arguments:
+        - *id003
+        - profile_image_url
+        - updated
+      basis: state_transition
+      reason: Profile image URL is replaced.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: name / DisplayName(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New display name.
+  - direction: input
+    field: profile_image_url / ProfileImage(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New avatar URL (validate_image_url).
+  - direction: input
+    field: bio / Bio(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Free-text bio.
+  - direction: output
+    field: name / DisplayName(identity)
+    disposition: gen
+    facts:
+    - State(self:User{target},name,updated)
+    ignored_reason: ''
+  - direction: output
+    field: profile_image_url / ProfileImage(identity)
+    disposition: gen
+    facts:
+    - State(self:User{target},profile_image_url,updated)
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/update/profile
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Self profile write; name/bio are stored and reflected.
+  l1_keys:
+  - http://localhost/api/v1/auths/update/profile
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Use,instance:Instance{authority})
+  produces:
+  - State(self:User{target},name,updated)
+  - State(self:User{target},profile_image_url,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Verified caller edits own profile.
+    black_box_reachable: true
+    reachability_conditions:
+    - Non-pending role
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:253
+      supports: POST /update/profile [get_verified_user] -> UserProfileImageResponse
+    notes: name/bio are stored-reflected (self stored-XSS surface); image URL passes validate_image_url.
+- id: gt-action-003
+  name: Update own timezone
+  kind: normal
+  description: An authenticated user stores their preferred timezone.
+  action_key: owui_update_timezone
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: update_timezone
+    crud: Update
+  object:
+    kind: entity
+    id: self
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: timezone
+      resource: Timezone(preference)
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id003
+        - timezone
+        - updated
+      basis: state_transition
+      reason: Stored timezone preference is replaced.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: timezone / Timezone(preference)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: IANA timezone.
+  - direction: output
+    field: timezone / Timezone(preference)
+    disposition: gen
+    facts:
+    - State(self:User{target},timezone,updated)
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/update/timezone
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Low-sensitivity preference write.
+  l1_keys:
+  - http://localhost/api/v1/auths/update/timezone
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - State(self:User{target},timezone,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller sets own preference.
+    black_box_reachable: true
+    reachability_conditions: []
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:288
+      supports: POST /update/timezone [get_current_user]
+    notes: null
+- id: gt-action-004
+  name: Rotate own password
+  kind: normal
+  description: An authenticated user changes their own password after proving the current one.
+  action_key: owui_update_password
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: update_password
+    crud: Update
+  object:
+    kind: entity
+    id: self
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: new_password
+      resource: Password(credential)
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Password
+        target: *id003
+    reason: verify_password checks the supplied current password.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id003
+        - password
+        - rotated
+      basis: state_transition
+      reason: The stored password hash is replaced.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: password / Password(credential)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],Password(self:User{target}))
+    ignored_reason: ''
+  - direction: input
+    field: new_password / Password(credential)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Replacement credential.
+  - direction: output
+    field: result / Result(status)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Boolean success flag.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/update/password
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Credential rotation gated by current-password check.
+  l1_keys:
+  - http://localhost/api/v1/auths/update/password
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],Password(self:User{target}))
+  produces:
+  - State(self:User{target},password,rotated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller rotates own credential.
+    black_box_reachable: true
+    reachability_conditions:
+    - Knows current password
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:316
+      supports: POST /update/password [get_current_user] verify_password -> bool
+    notes: Secrets are inputs only, never echoed.
+- id: gt-action-005
+  name: Sign in via LDAP
+  kind: normal
+  description: An anonymous caller authenticates against the configured LDAP directory and obtains a session.
+  action_key: owui_ldap_signin
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Public
+    auth_context: None
+  operation:
+    business: ldap_auth
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: ldap_account
+      type: LdapAccount
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: LdapCredential
+        target:
+          kind: entity
+          id: ldap_account
+          type: LdapAccount
+          role: target
+    reason: Caller must present valid LDAP bind credentials.
+  effects:
+    gen:
+    - fact: &id005
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - Session
+      basis: auth_transition
+      reason: A session is established on successful LDAP bind.
+    - fact: &id006
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SessionToken
+          target: *id004
+      basis: io_reference
+      reason: Response returns the session token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: user / LdapUsername(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: LDAP login name.
+  - direction: input
+    field: password / Password(credential)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: LDAP password.
+  - direction: output
+    field: token / SessionToken(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionToken(session:Session{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/ldap
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Authentication boundary; LDAP filter chars escaped.
+  l1_keys:
+  - http://localhost/api/v1/auths/ldap
+  consumes:
+  - Know(actor:User[SELF],LdapCredential(ldap_account:LdapAccount{target}))
+  produces:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],SessionToken(session:Session{target}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login endpoint (LDAP mode).
+    black_box_reachable: true
+    reachability_conditions:
+    - LDAP enabled in admin config
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:409
+      supports: POST /ldap -> SigninResult; escape_filter_chars on bind
+    notes: Live only when LDAP is enabled.
+- id: gt-action-006
+  name: Sign in with password
+  kind: normal
+  description: An anonymous caller authenticates with email/password and receives a session cookie.
+  action_key: owui_password_signin
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Public
+    auth_context: None
+  operation:
+    business: signin
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: self
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: Password
+        target: *id003
+    reason: Caller must present matching email + password.
+  effects:
+    gen:
+    - fact: *id005
+      basis: auth_transition
+      reason: A session cookie/token is issued on valid credentials.
+    - fact: *id006
+      basis: io_reference
+      reason: Response returns the session token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Account email.
+  - direction: input
+    field: password / Password(credential)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Account password.
+  - direction: output
+    field: token / SessionToken(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionToken(session:Session{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/signin
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Primary authentication boundary; rate-limited.
+  l1_keys:
+  - http://localhost/api/v1/auths/signin
+  consumes:
+  - Know(actor:User[SELF],Password(self:User{target}))
+  produces:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],SessionToken(session:Session{target}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - ENABLE_PASSWORD_AUTH for password mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:660
+      supports: POST /signin -> create_signin_response
+    - type: source
+      ref: backend/open_webui/routers/auths.py:676
+      supports: 'WEBUI_AUTH_TRUSTED_EMAIL/ROLE_HEADER: proxy header establishes identity + role'
+    notes: 'Rate-limited (5*3/180s). Alternate modes: trusted-header (a proxy header sets BOTH identity
+      and role -> impersonation if the header is spoofable) and WEBUI_AUTH=false (admin@localhost/admin
+      bootstrap).'
+- id: gt-action-007
+  name: Register account
+  kind: normal
+  description: An anonymous caller self-registers; the first account created becomes the instance admin.
+  action_key: owui_self_register
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Public
+    auth_context: None
+  operation:
+    business: signup
+    crud: Create
+  object:
+    kind: entity
+    id: new_user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: email
+      resource: UserEmail(identity)
+    participants:
+    - id: session
+      type: Session
+      role: target
+      binding: {}
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - &id010
+          kind: entity
+          id: new_user
+          type: User
+          role: target
+      basis: action_semantics
+      reason: A new user account is created (first user -> admin).
+    - fact: *id005
+      basis: auth_transition
+      reason: The new account is signed in.
+    - fact: *id006
+      basis: io_reference
+      reason: Response returns the session token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New account email.
+  - direction: input
+    field: password / Password(credential)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Initial password.
+  - direction: input
+    field: name / DisplayName(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Display name.
+  - direction: output
+    field: token / SessionToken(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionToken(session:Session{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/signup
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Registration boundary; privilege of first user is elevated.
+  l1_keys:
+  - http://localhost/api/v1/auths/signup
+  consumes: []
+  produces:
+  - Exists(new_user:User{target})
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],SessionToken(session:Session{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public registration endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - ui.enable_signup (or first-ever-user bootstrap)
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:849
+      supports: POST /signup -> signup_handler; first user -> admin
+    notes: Gated by ui.enable_signup except for the initial-admin bootstrap.
+- id: gt-action-008
+  name: Sign out
+  kind: normal
+  description: An authenticated user ends their session; token invalidated and cookies cleared.
+  action_key: owui_signout
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: signout
+    crud: Delete
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Authenticated
+        arguments:
+        - *id001
+        - Session
+      basis: auth_transition
+      reason: The session token is invalidated and cookies cleared.
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/signout
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Session teardown.
+  l1_keys:
+  - http://localhost/api/v1/auths/signout
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces: []
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Any caller may end their own session.
+    black_box_reachable: true
+    reachability_conditions: []
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:905
+      supports: POST /signout -> invalidate_token + delete_cookie
+    notes: May 302-redirect to WEBUI_AUTH_SIGNOUT_REDIRECT_URL.
+- id: gt-action-009
+  name: Drop own OAuth session
+  kind: normal
+  description: A verified user removes their stored OAuth session for a given provider.
+  action_key: owui_delete_oauth_session
+  subject:
+    id: actor
+    identity: VerifiedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: delete_oauth_session
+    crud: Delete
+  object:
+    kind: entity
+    id: oauth_session
+    type: OAuthSession
+    name: OAuthSession
+    entity: OAuthSession
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: path
+      field: provider
+      resource: OAuthProvider(auth)
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id007
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: OAuthProvider
+        target: &id008
+          kind: entity
+          id: oauth_session
+          type: OAuthSession
+          role: target
+    reason: Caller names the provider whose session to drop.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id008
+      basis: state_transition
+      reason: The stored OAuth session for that provider is removed.
+  io_accounting:
+  - direction: input
+    field: provider / OAuthProvider(auth)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],OAuthProvider(oauth_session:OAuthSession{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/oauth/sessions/{provider}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Self-scoped OAuth session deletion.
+  l1_keys:
+  - http://localhost/api/v1/auths/oauth/sessions/{provider}
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Use,instance:Instance{authority})
+  - Know(actor:User[SELF],OAuthProvider(oauth_session:OAuthSession{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Verified caller manages own OAuth links.
+    black_box_reachable: true
+    reachability_conditions: []
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1019
+      supports: DELETE /oauth/sessions/{provider:path} [get_verified_user]
+    notes: null
+- id: gt-action-010
+  name: Exchange IdP token for session
+  kind: normal
+  description: An anonymous caller exchanges a trusted external IdP token for an Open WebUI session.
+  action_key: owui_oauth_token_exchange
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Public
+    auth_context: None
+  operation:
+    business: oauth_token_exchange
+    crud: Create
+  object:
+    kind: state
+    id: session
+    type: Session
+    name: Session
+    entity: Session
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: token
+      resource: ExternalIdpToken(credential)
+    participants:
+    - id: idp
+      type: IdentityProvider
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ExternalIdpToken
+        target:
+          kind: entity
+          id: idp
+          type: IdentityProvider
+          role: target
+    reason: Caller must present a token minted by a trusted external IdP.
+  effects:
+    gen:
+    - fact: *id005
+      basis: auth_transition
+      reason: A local session is minted from the validated external token.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SessionToken
+          target: *id004
+      basis: io_reference
+      reason: Response returns the Open WebUI session token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: token / ExternalIdpToken(credential)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: External IdP token, validated against the provider.
+  - direction: input
+    field: provider / OAuthProvider(auth)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Provider to validate against.
+  - direction: output
+    field: token / SessionToken(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionToken(session:Session{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/oauth/{provider}/token/exchange
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.85
+  reasoning: Federated auth boundary minting a local session from an external credential.
+  l1_keys:
+  - http://localhost/api/v1/auths/oauth/{provider}/token/exchange
+  consumes:
+  - Know(actor:User[SELF],ExternalIdpToken(idp:IdentityProvider{target}))
+  produces:
+  - Authenticated(actor:User[SELF],Session)
+  - Know(actor:User[SELF],SessionToken(session:Session{target}))
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public token-exchange endpoint when enabled.
+    black_box_reachable: true
+    reachability_conditions:
+    - ENABLE_OAUTH_TOKEN_EXCHANGE
+    - client_id in OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1605
+      supports: POST /oauth/{provider}/token/exchange -> SigninResult; trusted client ids + rate limit
+    notes: Best-effort rate limit (no caller identity before the provider answers); trusts configured
+      client ids.
+- id: gt-action-011
+  name: Provision user (admin)
+  kind: normal
+  description: An admin provisions a new account with a chosen role; the response carries a session token.
+  action_key: owui_admin_add_user
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: admin_add_user
+    crud: Create
+  object:
+    kind: entity
+    id: new_user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: email
+      resource: UserEmail(identity)
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - &id011
+    type: authorization
+    fact:
+      predicate: Can
+      arguments:
+      - *id001
+      - Administer
+      - *id009
+    reason: get_admin_user requires role == admin.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id010
+      basis: action_semantics
+      reason: A new account is created directly by the admin.
+    - fact:
+        predicate: State
+        arguments:
+        - *id010
+        - role
+        - assigned
+      basis: state_transition
+      reason: The admin assigns the account's role at creation.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SessionToken
+          target: *id010
+      basis: io_reference
+      reason: Response returns a session token for the created user.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: email / UserEmail(identity)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New account email.
+  - direction: input
+    field: password / Password(credential)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Initial password.
+  - direction: input
+    field: role / UserRole(authz)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Role assigned at creation.
+  - direction: output
+    field: token / SessionToken(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SessionToken(new_user:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: id / UserId(identity)
+    disposition: observed_only
+    facts: []
+    ignored_reason: New user id echoed.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/add
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Admin creates accounts and sets privilege directly.
+  l1_keys:
+  - http://localhost/api/v1/auths/add
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - Exists(new_user:User{target})
+  - State(new_user:User{target},role,assigned)
+  - Know(actor:User[SELF],SessionToken(new_user:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only provisioning.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1051
+      supports: POST /add [get_admin_user] -> AddUserResponse (returns a token)
+    notes: Direct privilege assignment; the returned token can bootstrap the new account's session.
+- id: gt-action-012
+  name: Read admin contact
+  kind: normal
+  description: An authenticated user reads the configured admin's name and email.
+  action_key: owui_read_admin_details
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: get_admin_details
+    crud: Read
+  object:
+    kind: entity
+    id: admin
+    type: AdminProfile
+    name: AdminProfile
+    entity: AdminProfile
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AdminContact
+          target:
+            kind: entity
+            id: admin
+            type: AdminProfile
+            role: target
+      basis: io_reference
+      reason: Response returns the admin's name and contact email.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: name / DisplayName(identity)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AdminContact(admin:AdminProfile{target}))
+    ignored_reason: ''
+  - direction: output
+    field: email / UserEmail(identity)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AdminContact(admin:AdminProfile{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/details
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Admin contact disclosed to any authenticated user when enabled.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/details
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],AdminContact(admin:AdminProfile{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Any authenticated caller can read admin contact.
+    black_box_reachable: true
+    reachability_conditions:
+    - SHOW_ADMIN_DETAILS enabled
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1124
+      supports: GET /admin/details [get_current_user]
+    notes: Information disclosure when SHOW_ADMIN_DETAILS is on.
+- id: gt-action-013
+  name: Read auth/admin config
+  kind: normal
+  description: An admin reads the instance auth/admin configuration.
+  action_key: owui_read_admin_config
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: read_admin_config
+    crud: Read
+  object:
+    kind: entity
+    id: admin_config
+    type: AdminConfig
+    name: AdminConfig
+    entity: AdminConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AdminConfig
+          target: &id012
+            kind: entity
+            id: admin_config
+            type: AdminConfig
+            role: target
+      basis: io_reference
+      reason: Response returns the current auth/admin configuration.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: config / AdminConfig(system)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AdminConfig(admin_config:AdminConfig{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reads signup/role/api-key/JWT policy.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - Know(actor:User[SELF],AdminConfig(admin_config:AdminConfig{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only configuration read.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1155
+      supports: GET /admin/config [get_admin_user]
+    notes: Includes secret-config presence; GT records config location, not secret values.
+- id: gt-action-014
+  name: Update auth/admin config
+  kind: normal
+  description: An admin writes auth/admin configuration (signup, default role, API-key policy, JWT expiry,
+    ...).
+  action_key: owui_update_admin_config
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: update_admin_config
+    crud: Update
+  object:
+    kind: entity
+    id: admin_config
+    type: AdminConfig
+    name: AdminConfig
+    entity: AdminConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: config
+      resource: AdminConfig(system)
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id012
+        - config
+        - updated
+      basis: state_transition
+      reason: Auth/admin policy values are replaced.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: config / AdminConfig(system)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Admin config key/values.
+  - direction: output
+    field: config / AdminConfig(system)
+    disposition: gen
+    facts:
+    - State(admin_config:AdminConfig{target},config,updated)
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reshapes the auth boundary (signup/default-role/api-key policy/JWT expiry).
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - State(admin_config:AdminConfig{target},config,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only configuration write.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1228
+      supports: POST /admin/config [get_admin_user] AdminConfig
+    notes: 'High-impact: changing these alters who can register and how sessions/keys are governed.'
+- id: gt-action-015
+  name: Read LDAP server config
+  kind: normal
+  description: An admin reads the LDAP server/bind configuration.
+  action_key: owui_read_ldap_server_config
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: read_ldap_server_config
+    crud: Read
+  object:
+    kind: entity
+    id: ldap_config
+    type: LdapServerConfig
+    name: LdapServerConfig
+    entity: LdapServerConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: LdapServerConfig
+          target: &id013
+            kind: entity
+            id: ldap_config
+            type: LdapServerConfig
+            role: target
+      basis: io_reference
+      reason: Response returns the LDAP server/bind configuration.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: ldap_config / LdapServerConfig(system)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],LdapServerConfig(ldap_config:LdapServerConfig{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config/ldap/server
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reads LDAP bind config incl. the stored bind-password location.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config/ldap/server
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - Know(actor:User[SELF],LdapServerConfig(ldap_config:LdapServerConfig{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only LDAP config read.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1297
+      supports: GET /admin/config/ldap/server [get_admin_user]
+    notes: Carries the LDAP bind-secret location (app_dn_password); GT records location, not value.
+- id: gt-action-016
+  name: Update LDAP server config
+  kind: normal
+  description: An admin writes the LDAP server/bind configuration, including the bind password.
+  action_key: owui_update_ldap_server_config
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: update_ldap_server_config
+    crud: Update
+  object:
+    kind: entity
+    id: ldap_config
+    type: LdapServerConfig
+    name: LdapServerConfig
+    entity: LdapServerConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: ldap_config
+      resource: LdapServerConfig(system)
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id013
+        - config
+        - updated
+      basis: state_transition
+      reason: LDAP server/bind settings are replaced.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: ldap_config / LdapServerConfig(system)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Host/port/app_dn/app_dn_password/tls.
+  - direction: output
+    field: ldap_config / LdapServerConfig(system)
+    disposition: gen
+    facts:
+    - State(ldap_config:LdapServerConfig{target},config,updated)
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config/ldap/server
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Writes the LDAP bind endpoint + credential.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config/ldap/server
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - State(ldap_config:LdapServerConfig{target},config,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only LDAP config write.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1303
+      supports: POST /admin/config/ldap/server [get_admin_user] LdapServerConfig
+    notes: Sets a stored credential (app_dn_password) and the directory endpoint used for auth.
+- id: gt-action-017
+  name: Read LDAP enabled flag
+  kind: normal
+  description: An admin reads whether the LDAP authentication method is enabled.
+  action_key: owui_read_ldap_toggle
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: read_ldap_toggle
+    crud: Read
+  object:
+    kind: entity
+    id: ldap_config
+    type: LdapServerConfig
+    name: LdapServerConfig
+    entity: LdapServerConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: LdapEnabled
+          target: *id013
+      basis: io_reference
+      reason: Response returns whether LDAP auth is enabled.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: ENABLE_LDAP / LdapEnabled(authz)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],LdapEnabled(ldap_config:LdapServerConfig{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config/ldap
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Reads the LDAP auth-method flag.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config/ldap
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - Know(actor:User[SELF],LdapEnabled(ldap_config:LdapServerConfig{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only read.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1328
+      supports: GET /admin/config/ldap [get_admin_user]
+    notes: null
+- id: gt-action-018
+  name: Toggle LDAP auth method
+  kind: normal
+  description: An admin enables or disables the LDAP authentication method.
+  action_key: owui_set_ldap_toggle
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: set_ldap_toggle
+    crud: Update
+  object:
+    kind: state
+    id: instance
+    type: Instance
+    name: Instance
+    entity: Instance
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: enable_ldap
+      resource: LdapEnabled(authz)
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - ldap_enabled
+        - toggled
+      basis: state_transition
+      reason: The LDAP authentication path is enabled or disabled.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: enable_ldap / LdapEnabled(authz)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Toggle LDAP auth.
+  - direction: output
+    field: ENABLE_LDAP / LdapEnabled(authz)
+    disposition: gen
+    facts:
+    - State(instance:Instance{authority},ldap_enabled,toggled)
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config/ldap
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Enables/disables an entire authentication path.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config/ldap
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - State(instance:Instance{authority},ldap_enabled,toggled)
+  object_type: state
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only auth-method toggle.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1338
+      supports: POST /admin/config/ldap [get_admin_user]
+    notes: null
+- id: gt-action-019
+  name: Read OAuth config
+  kind: normal
+  description: An admin reads the OAuth provider configuration.
+  action_key: owui_read_oauth_config
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: read_oauth_config
+    crud: Read
+  object:
+    kind: entity
+    id: oauth_config
+    type: OAuthConfig
+    name: OAuthConfig
+    entity: OAuthConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: OAuthConfig
+          target: &id014
+            kind: entity
+            id: oauth_config
+            type: OAuthConfig
+            role: target
+      basis: io_reference
+      reason: Response returns the OAuth provider configuration.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: oauth_config / OAuthConfig(system)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],OAuthConfig(oauth_config:OAuthConfig{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config/oauth
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reads federated-auth provider config incl. secret locations.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config/oauth
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - Know(actor:User[SELF],OAuthConfig(oauth_config:OAuthConfig{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only read.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1483
+      supports: GET /admin/config/oauth [get_admin_user] -> OAuthConfigResponse
+    notes: Carries OAuth client-secret locations; GT records location, not value.
+- id: gt-action-020
+  name: Update OAuth config
+  kind: normal
+  description: An admin writes the OAuth provider configuration, including client secrets.
+  action_key: owui_update_oauth_config
+  subject:
+    id: actor
+    identity: AdminUser
+    role: Administrator
+    auth_context: Session
+  operation:
+    business: update_oauth_config
+    crud: Update
+  object:
+    kind: entity
+    id: oauth_config
+    type: OAuthConfig
+    name: OAuthConfig
+    entity: OAuthConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: oauth_config
+      resource: OAuthConfig(system)
+    participants:
+    - id: instance
+      type: Instance
+      role: authority
+      binding: {}
+    constraints: []
+  requirements:
+  - *id002
+  - *id011
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id014
+        - config
+        - updated
+      basis: state_transition
+      reason: OAuth provider settings (incl. client secrets) are replaced.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: oauth_config / OAuthConfig(system)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Per-provider client_id/client_secret/scopes.
+  - direction: output
+    field: oauth_config / OAuthConfig(system)
+    disposition: gen
+    facts:
+    - State(oauth_config:OAuthConfig{target},config,updated)
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/admin/config/oauth
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Controls federated identity providers + their secrets.
+  l1_keys:
+  - http://localhost/api/v1/auths/admin/config/oauth
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  - Can(actor:User[SELF],Administer,instance:Instance{authority})
+  produces:
+  - State(oauth_config:OAuthConfig{target},config,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only write.
+    black_box_reachable: true
+    reachability_conditions:
+    - role == admin
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1489
+      supports: POST /admin/config/oauth [get_admin_user] OAuthConfigForm
+    notes: Controls which external IdPs can mint sessions on this instance.
+- id: gt-action-021
+  name: Read own API key
+  kind: normal
+  description: An authenticated user reads their current `sk-` API key.
+  action_key: owui_read_api_key
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: read_api_key
+    crud: Read
+  object:
+    kind: entity
+    id: api_key
+    type: ApiKey
+    name: ApiKey
+    entity: ApiKey
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  effects:
+    gen:
+    - fact: &id016
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ApiKey
+          target: &id015
+            kind: entity
+            id: api_key
+            type: ApiKey
+            role: target
+      basis: io_reference
+      reason: Response returns the caller's current API key.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: api_key / ApiKey(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ApiKey(api_key:ApiKey{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/api_key
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Returns a long-lived credential in clear to its owner.
+  l1_keys:
+  - http://localhost/api/v1/auths/api_key
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Know(actor:User[SELF],ApiKey(api_key:ApiKey{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller reads own key.
+    black_box_reachable: true
+    reachability_conditions:
+    - auth.enable_api_keys
+    - features.api_keys permission (admins exempt)
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1553
+      supports: GET /api_key [get_current_user]
+    notes: The key is returned in clear; it is a long-lived bearer credential.
+- id: gt-action-022
+  name: Mint own API key
+  kind: normal
+  description: An authenticated user mints a new personal API key.
+  action_key: owui_create_api_key
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: generate_api_key
+    crud: Create
+  object:
+    kind: entity
+    id: api_key
+    type: ApiKey
+    name: ApiKey
+    entity: ApiKey
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id015
+      basis: action_semantics
+      reason: A new personal API key is created and stored.
+    - fact: *id016
+      basis: io_reference
+      reason: Response returns the newly minted key.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: api_key / ApiKey(credential)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ApiKey(api_key:ApiKey{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/api_key
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Issues a long-lived bearer credential.
+  l1_keys:
+  - http://localhost/api/v1/auths/api_key
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces:
+  - Exists(api_key:ApiKey{target})
+  - Know(actor:User[SELF],ApiKey(api_key:ApiKey{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller mints own key.
+    black_box_reachable: true
+    reachability_conditions:
+    - auth.enable_api_keys
+    - features.api_keys permission (admins exempt)
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1510
+      supports: POST /api_key [_check_api_key_permission]
+    notes: Gated by enable_api_keys + the features.api_keys permission.
+- id: gt-action-023
+  name: Revoke own API key
+  kind: normal
+  description: An authenticated user revokes their personal API key.
+  action_key: owui_revoke_api_key
+  subject:
+    id: actor
+    identity: AuthenticatedUser
+    role: Member
+    auth_context: Session
+  operation:
+    business: delete_api_key
+    crud: Delete
+  object:
+    kind: entity
+    id: api_key
+    type: ApiKey
+    name: ApiKey
+    entity: ApiKey
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - *id002
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - *id015
+      basis: state_transition
+      reason: The caller's API key is revoked.
+  io_accounting:
+  - direction: output
+    field: result / Result(status)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Boolean success flag.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auths/api_key
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Credential teardown.
+  l1_keys:
+  - http://localhost/api/v1/auths/api_key
+  consumes:
+  - Authenticated(actor:User[SELF],Session)
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller revokes own key.
+    black_box_reachable: true
+    reachability_conditions: []
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1535
+      supports: DELETE /api_key [get_current_user]
+    notes: null
+edges: []
+annotation_issues: []

@@ -18,7 +18,9 @@ deliverables:
   output: agentic_gt.yaml
 
 phase_status: {A_locate: complete, B_extract: complete, C_trust_authority: complete,
-               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+               D_lineage_closure: complete, E_runtime_grounding: pending,
+               F_link_l1_l2: linked,   # agentic_links.yaml stubs all 7 L1 + 1 L2 ids referenced by agentic_gt.yaml (full HTTP/tRPC web-GT intentionally skipped -- stub link layer only)
+               G_validate: complete, H_export: pending}
 
 runtime_grounding_plan:
   image: lobehub/lobe-chat (pin to checkout)

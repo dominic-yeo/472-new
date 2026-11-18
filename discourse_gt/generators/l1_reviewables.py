@@ -1,0 +1,53 @@
+# -*- coding: utf-8 -*-
+"""Discourse L1 -- module: Reviewables (moderation queue). Routes ~621-660."""
+from common import key as K, snode, V, rf, of, resp_json, resp_empty, IDST_STAFF
+
+R = "app/controllers/reviewables_controller.rb"
+RID = [{"name": "reviewable_id", "in": "path", "type": "integer", "required": True, "flow": True, "description": "Reviewable id."}]
+
+NODES = [
+    snode("/review", ["GET"], "reviewables_index", IDST_STAFF,
+          [V("GET", resp=resp_json([of("reviewables", "array", True, "Pending items in the moderation queue.")]),
+             reason="Lists the moderation queue.", src=f"{R}:13")], "Staff moderation queue.", f"{R}:13",
+          notes="Discloses flagged/queued content (incl. hidden posts) to staff."),
+    snode("/review/{reviewable_id}", ["GET", "PUT", "DELETE"], "reviewable_crud", IDST_STAFF,
+          [V("GET", resp=resp_json([of("reviewable", "object", True, "Queue item detail.")]),
+             reason="Reads a reviewable.", src=f"{R}:173"),
+           V("PUT", [rf("reviewable", "body", "object", required=True, flow=True, description="Edited payload (e.g. post content).")],
+             reason="Edits the reviewable's target (e.g. the flagged post).", src=f"{R}:227"),
+           V("DELETE", reason="Deletes a reviewable.", src=f"{R}:192")],
+          "Staff review.", f"{R}:173", params=RID),
+    snode("/review/{reviewable_id}/perform/{action_id}", ["PUT"], "perform_reviewable", IDST_STAFF,
+          [V("PUT", [rf("version", "body", "integer", required=True, flow=False, description="Optimistic-lock version.")],
+             resp_json([of("reviewable_perform_result", "object", True, "Outcome (approve/reject/delete/suspend/...).")]),
+             reason="Performs a moderation action (approve/reject/delete user/suspend/...).", src=f"{R}:266")],
+          "Staff moderation action.", f"{R}:266",
+          params=RID + [{"name": "action_id", "in": "path", "type": "string", "required": True, "flow": True,
+                         "description": "Action key (approve_post/delete_user/...)."}],
+          notes="HIGH-IMPACT: actions can delete/suspend users, approve/reject posts -- the core moderation authority."),
+    snode("/review/{reviewable_id}/scrub", ["PUT"], "scrub_reviewable", IDST_STAFF,
+          [V("PUT", [rf("reason", "body", "string", required=True, flow=True, description="Scrub reason.")],
+             reason="Scrubs (removes) the sensitive content of a reviewable.", src=f"{R}:207")], "Staff scrub.", f"{R}:207", params=RID),
+    snode("/review/{reviewable_id}/notes", ["POST"], "create_reviewable_note", IDST_STAFF,
+          [V("POST", [rf("content", "body", "string", required=True, flow=True, description="Moderator note.")],
+             reason="Adds a moderator note to a reviewable.", src="app/controllers/reviewable_notes_controller.rb:1")],
+          "Staff note.", "app/controllers/reviewable_notes_controller.rb:1", params=RID),
+    snode("/review/{reviewable_id}/dsa-classification", ["PUT"], "dsa_classify", IDST_STAFF,
+          [V("PUT", [rf("classification", "body", "object", required=True, flow=True, description="DSA statement of reasons.")],
+             reason="Records a DSA classification/statement for the item.", src="app/controllers/dsa_statements_controller.rb:1")],
+          "Staff DSA classification.", "app/controllers/dsa_statements_controller.rb:1", params=RID),
+    snode("/review/settings", ["GET", "PUT"], "reviewable_settings", IDST_STAFF,
+          [V("GET", resp=resp_json([of("reviewable_settings", "object", True, "Queue settings/priorities.")]),
+             reason="Reads moderation-queue settings.", src=f"{R}:310"),
+           V("PUT", [rf("reviewable_priorities", "body", "object", required=True, flow=True, description="Priority thresholds.")],
+             reason="Updates moderation-queue settings.", src=f"{R}:310")],
+          "Staff queue settings.", f"{R}:310"),
+    snode("/review/count", ["GET"], "reviewable_count", IDST_STAFF,
+          [V("GET", resp=resp_json([of("count", "integer", True, "Pending count.")]), reason="Pending-review count.", src=f"{R}:120")],
+          "Staff count.", f"{R}:120", notes="Groups /review/topics and /review/user-menu-list."),
+    snode("/reviewable_claimed_topics", ["POST", "DELETE"], "claim_reviewable_topic", IDST_STAFF,
+          [V("POST", [rf("topic_id", "body", "integer", required=True, flow=True, description="Topic to claim.")],
+             reason="Claims a topic's reviewables for a moderator.", src="app/controllers/reviewable_claimed_topics_controller.rb:1"),
+           V("DELETE", reason="Releases a claimed topic.", src="app/controllers/reviewable_claimed_topics_controller.rb:1")],
+          "Staff claim.", "app/controllers/reviewable_claimed_topics_controller.rb:1"),
+]

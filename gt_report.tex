@@ -1,0 +1,558 @@
+% ======================================================================
+%  A Ground Truth Dataset for Evaluating Agentic Attack Surface
+%  Enumeration Across Vulnerable Applications
+%  FYP research report -- YEO Dominic (SMU SCIS)
+%
+%  Compile:  pdflatex gt_report.tex  (run twice for refs/ToC)
+%  Self-contained: no external image files required.
+% ======================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric}
+\usepackage[hidelinks]{hyperref}
+
+% ---- palette (deck-inspired navy + gold) -----------------------------
+\definecolor{navy}{HTML}{16256A}
+\definecolor{gold}{HTML}{B5861C}
+\definecolor{inkgray}{HTML}{4A5468}
+\definecolor{codebg}{HTML}{F5F6F9}
+\definecolor{l1blue}{HTML}{EAF0FB}
+\definecolor{l2green}{HTML}{EAF5EE}
+\definecolor{agamber}{HTML}{FBF3E1}
+\definecolor{redbox}{HTML}{FBEEEB}
+
+\captionsetup{font=small,labelfont={bf,color=navy}}
+\setlength{\parskip}{4pt}
+\setlength{\parindent}{0pt}
+
+% ---- code listings (verbatim: no escaping needed inside) -------------
+\lstdefinestyle{gt}{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single, rulecolor=\color{black!15},
+  breaklines=true, columns=fullflexible,
+  keepspaces=true, showstringspaces=false,
+  xleftmargin=6pt, xrightmargin=6pt, aboveskip=6pt, belowskip=6pt,
+}
+\lstset{style=gt}
+% inline code token helper (handles underscores)
+\newcommand{\cd}[1]{\lstinline[basicstyle=\ttfamily\small]|#1|}
+
+\newcommand{\L}[1]{\textbf{L#1}}
+
+% ======================================================================
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{1.5cm}
+{\color{gold}\small\bfseries SINGAPORE MANAGEMENT UNIVERSITY}\\
+{\color{inkgray}\small School of Computing and Information Systems}\\[2.4cm]
+{\color{navy}\LARGE\bfseries A Ground Truth Dataset for Evaluating\\[4pt]
+Agentic Attack Surface Enumeration\\[4pt] Across Vulnerable Applications}\\[1.6cm]
+{\large Final Year Project Report}\\[2.2cm]
+{\large\bfseries YEO Dominic}\\[6pt]
+{\normalsize Supervised by Dr.~XIE Xiaofei and YANG Ruozhao}\\[1.6cm]
+{\normalsize November 2026}\\
+\vfill
+{\footnotesize SMU Classification: Restricted}
+\end{titlepage}
+
+% ----------------------------------------------------------------------
+\begin{abstract}
+\noindent
+AI agents are increasingly used to analyse software and explore web applications,
+yet existing agent-security benchmarks measure downstream task or vulnerability
+outcomes and provide little evidence of how effectively an agent \emph{discovers and
+describes} an application's attack surface. This project establishes a ground-truth
+foundation for that evaluation. We define a three-layer schema that represents an
+application's attack surface as (i)~deployed HTTP interfaces and their request/response
+contracts, (ii)~semantic business actions and the state they depend on, and
+(iii)~agent capabilities and data lineage. Using a repeatable workflow that reconciles
+white-box source analysis with black-box runtime capture and enforces cross-layer
+referential integrity, we produce an evidence-backed dataset across \textbf{fifteen}
+open-source vulnerable applications (ten traditional web applications and five
+LLM-integrated systems). The resulting dataset records \textbf{1{,}392 deployed
+endpoints}, \textbf{980 business semantic flows}, and \textbf{327 agentic capability
+records}. Beyond the artefact, the project contributes a reusable annotation-and-review
+methodology and surfaces two findings: the same business action is frequently exposed
+through multiple surfaces that automated crawlers under-count, and the root cause of
+agentic attack vectors is \emph{authority}---an untrusted input reaching a privileged
+tool---which the schema makes directly enumerable and checkable for enforced controls.
+\end{abstract}
+
+\tableofcontents
+\clearpage
+
+% ======================================================================
+\section{Introduction and Motivation}
+% ======================================================================
+
+\subsection{What is an attack surface?}
+An application exposes functionality through UI pages, APIs, and state-dependent
+workflows. Each of these is an entry point that a specific attack vector can target,
+and together they form the application's \emph{attack surface}. LLM-driven applications
+expand this surface with non-deterministic interfaces and context pipelines---system
+prompts, retrieval-augmented-generation (RAG) datastores, and tool-calling
+hooks---that a conventional, route-centric surface map does not capture.
+
+\subsection{AI in attack surface generation}
+AI is increasingly used in security tooling to analyse software and explore web
+applications. Multimodal language-model crawlers can use page state and functional
+context to guide discovery. However, state-dependent workflows, event-driven
+interfaces, and API-only functionality that never appears in the browser are routinely
+missed by automated discovery.
+
+\subsection{Limitation of existing benchmarks}
+Existing agent-security benchmarks tend to measure \emph{downstream} task completion or
+vulnerability-exploitation outcomes. They therefore leave limited evidence about how
+effectively an agent discovers and describes an application's attack surface---and
+discovery recall varies substantially across models, which is precisely the quantity
+that a reliable reference is needed to score.
+
+\subsection{Motivation}
+This project aims to establish a ground-truth foundation for the future evaluation of
+agents' effectiveness at discovering attack surfaces. It gives future evaluations a
+reference for assessing not only \emph{which} surfaces an agent finds, but also
+\emph{how accurately} it describes their application context and the relationships
+between them.
+
+% ======================================================================
+\section{Research Scope and Contributions}
+% ======================================================================
+
+\subsection{Scope}
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item Evidence-grounded attack-surface analysis across \textbf{15} open-source
+      vulnerable applications---\textbf{10} traditional web applications and \textbf{5}
+      LLM-integrated systems---chosen to represent a variety of surface types.
+\item The attack surface is represented at three levels:
+      (a)~deployed web interactions and their request/response contracts;
+      (b)~semantic business actions and the state they depend on;
+      (c)~agent capabilities and data lineage.
+\item The surface is generated using a combination of black-box dynamic analysis and
+      white-box static source analysis, reconciled against one another.
+\end{enumerate}
+
+\subsection{Contributions}
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item \textbf{An evidence-backed, multi-application dataset} recording
+      application-specific surfaces with version and deployment context, observed
+      behaviour, semantic annotations, and supporting evidence:
+      \begin{itemize}[leftmargin=1.4em,itemsep=0pt]
+        \item \textbf{1{,}392} deployed endpoints (\L1);
+        \item \textbf{980} business semantic flows (\L2);
+        \item \textbf{327} agentic capability records.
+      \end{itemize}
+\item \textbf{A repeatable annotation and review workflow} that reconciles source and
+      runtime evidence, generates structured records, tracks unresolved cases, and
+      automatically checks cross-layer references.
+\end{enumerate}
+
+% ======================================================================
+\section{The Three-Layer Schema}
+% ======================================================================
+The schema is the central contribution. It is deliberately grounded in recognised
+standards so that labels are defensible rather than ad hoc. Figure~\ref{fig:layers}
+shows the three layers and the identifier fields that bind them.
+
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[
+  layer/.style={draw, rounded corners, text width=7.4cm, minimum height=1.2cm,
+                align=left, inner sep=6pt, font=\small},
+  lbl/.style={font=\scriptsize\itshape, text=inkgray}]
+\node[layer, fill=l1blue] (l1)
+  {\textbf{\color{navy}L1 --- Deployed HTTP Interfaces}\\[1pt]
+   \scriptsize concrete routes, pages, static; \cd{key}, \cd{methods}, \cd{io_variants}, visibility};
+\node[layer, fill=l2green, below=1.4cm of l1] (l2)
+  {\textbf{\color{navy}L2 --- Semantic Business Actions}\\[1pt]
+   \scriptsize Subject--Operation--Object; \cd{requirements}, \cd{effects}, \cd{l1_bindings}};
+\node[layer, fill=agamber, below=1.4cm of l2] (ag)
+  {\textbf{\color{navy}Agentic --- Capabilities \& Data Lineage}\\[1pt]
+   \scriptsize agents, tool\_bindings, context/memory, sinks, edges, controls};
+\draw[-{Latex[length=2mm]}, thick, navy] (l1) -- node[right,lbl]{operation\_semantic $\cdot$ l1\_bindings} (l2);
+\draw[-{Latex[length=2mm]}, thick, navy] (l2) -- node[right,lbl]{related\_l2\_ids} (ag);
+\node[draw, rounded corners, fill=yellow!10, text width=4.1cm, right=1.1cm of l2,
+      inner sep=5pt, font=\scriptsize, align=left] (x)
+  {\textbf{\color{navy}Cross-layer references}\\[1pt]
+   invocation\_surfaces[].l1\_id\\ model\_config.writers[].l1\_id\\
+   tool\_bindings.l1\_ids\\ related\_l2\_ids / related\_l2\_steps\\[2pt]
+   \textit{declared on agentic records;\\ resolve to real L1/L2 nodes}};
+\draw[-{Latex[length=1.6mm]}, dashed, gold] (x.north) to[out=90,in=0] (l1.east);
+\draw[-{Latex[length=1.6mm]}, dashed, gold] (x.south) to[out=-90,in=0] (ag.east);
+\end{tikzpicture}
+\caption{The three-layer schema. L1 records deployed interfaces; L2 the business
+actions that realise them (bound back to L1 via \cd{l1_bindings}); and the agentic
+layer the capabilities and data lineage. A small set of identifier fields stitches the
+layers into one connected, validatable graph.}
+\label{fig:layers}
+\end{figure}
+
+\subsection{L1 --- deployed interface surface}
+\L1 describes deployed interfaces and their observable interactions---concrete routes,
+pages, and static resources. It maps \emph{where} an actor can interact with the
+deployment, \emph{what} can be sent or received, and \emph{under what conditions} each
+interaction point is reachable.
+
+\paragraph{How it is built.} Fields are derived from OpenAPI/Swagger and REST/HTTP
+semantics. The security labels draw on OWASP: object-tracking labels (\cd{mergeable},
+\cd{reference_capable}, \cd{value_kind}$\in$\{identifier, attribute, \dots\}) follow the
+OWASP API Security Top~10 entry API1:2023 \emph{Broken Object Level Authorization}; the
+visibility/reachability labels follow OWASP WSTG authentication/authorization
+state modelling.
+
+\begin{table}[ht]\centering\small
+\caption{L1 field groups.}\label{tab:l1}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Group} & \textbf{Fields (selected)}\\
+\midrule
+Node identity   & \cd{key} (normalized URL template), \cd{kind}$\in$\{api,page,static\}, \cd{operation_semantic}\\
+HTTP surface    & \cd{methods}, \cd{statuses} (runtime-observed), \cd{content_types}, \cd{params}\\
+Method IO       & per \cd{io_variant}: \cd{method}, \cd{request}\{\cd{body_format}, \cd{body_example}, \cd{fields[]}\}, \cd{response}\{\cd{format}, value fields, \cd{fields[]}\}, \cd{reason}/\cd{evidence}\\
+Request field   & \cd{name}, \cd{location}$\in$\{path,query,header,body\}, \cd{type}, \cd{required}, \cd{flow}, \cd{description}\\
+Semantic IO     & \cd{semantic_inputs}/\cd{semantic_outputs}; \cd{semantic_*_decisions[]}\{\cd{raw_field}, \cd{resource}, \cd{mergeable}, \cd{value_kind}, \cd{reference_capable}, \cd{reference_fields}\}\\
+Runtime/identity& \cd{samples[]}, \cd{identity_statuses} (role$\to$statuses), \cd{sources}, \cd{referrers}, \cd{resource_types}, \cd{js_sources}, \cd{runtime_api_prefixes}\\
+Visibility      & \cd{gt.visibility}\{\cd{minimum}$\in$\{black\_box,grey\_box,white\_box\}\}, \cd{gt.black_box_reachable}, \cd{gt.reachability_conditions}\\
+Evidence/notes  & \cd{gt.evidence[]}\{\cd{type},\cd{ref},\cd{supports}\}, \cd{gt.notes}, \cd{edges[]}, \cd{excluded_items[]}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{L2 --- semantic business actions}
+\L2 describes business actions and the states they depend on; one action may be realised
+by several \L1 calls. It maps what an actor can cause the application to do, what objects
+they can act on, and how the action depends on prior state.
+
+\paragraph{How it is built.} The descriptor structure is drawn from access-control /
+authorization modelling (Subject--Operation--Object). The requirements/effects
+structure---used to chain operations into multi-step semantic flows---is borrowed from
+classical AI planning (STRIPS/PDDL). Facts use a closed predicate vocabulary
+(\cd{Exists}, \cd{Know}, \cd{State}, \cd{Relation}, \cd{Can}, \cd{Authenticated}).
+
+\begin{table}[ht]\centering\small
+\caption{L2 field groups.}\label{tab:l2}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Group} & \textbf{Fields (selected)}\\
+\midrule
+Subject       & \cd{id}, \cd{identity}, \cd{role}, \cd{auth_context} --- distinct subjects are distinct actions\\
+Operation     & \cd{business} verb, \cd{crud}$\in$\{Create,Read,Update,Delete\}\\
+Object        & \cd{kind}$\in$\{entity,state,relation\}, \cd{type}, \cd{role}; \cd{binding}\{\cd{source},\cd{field},\cd{resource}\}; \cd{participants}, \cd{constraints}\\
+Requirements  & \cd{requirements[]}\{\cd{type}$\in$\{authentication,knowledge,existence,\dots\}, \cd{fact}, \cd{reason}\}\\
+Effects       & \cd{effects.gen[]}\{\cd{fact}\{\cd{predicate},\cd{arguments}\}, \cd{basis}\}; \cd{effects.kill[]} (old state on Update, Exists on Delete)\\
+IO accounting & \cd{io_accounting[]}\{\cd{direction}, \cd{field}, \cd{disposition}$\in$\{req,object\_attribute,gen,observed\_only\}, \cd{facts}\}\\
+L1 binding    & \cd{l1_bindings[]}\{\cd{l1_key}, \cd{methods}, \cd{selector}\{\cd{field},\cd{values}\}\}\\
+Visibility    & \cd{gt.visibility}, \cd{gt.black_box_reachable}, \cd{gt.reachability_conditions}, \cd{gt.observable_evidence[]}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Agentic layer --- capabilities and data lineage}
+The agentic layer describes agent capabilities and data paths. It captures how external
+or untrusted content can influence a decision, how authority is applied to tool calls,
+and how data or side effects move across multiple steps.
+
+\paragraph{How it is built.} The layer is derived from the OWASP Top~10 for LLM
+Applications (2025); the structure for tracing an object from entry to exit is derived
+from MITRE ATLAS.
+
+\begin{table}[ht]\centering\small
+\caption{Agentic record types and their principal fields.}\label{tab:ag}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Record} & \textbf{Fields (selected)}\\
+\midrule
+Agents          & identity (\cd{agent_kind}, \cd{purpose}); \cd{invocation_surfaces}, \cd{model_config}, \cd{instruction_sources}; wiring (\cd{tool_binding_ids}, \cd{context_source_ids}, \cd{memory_ids}, \cd{output_sink_ids}, \cd{control_ids}); \cd{resource_limits}, \cd{authority_context}\\
+Tool bindings   & \cd{tool_name}, \cd{tool_source}, \cd{server_or_provider}, \cd{schema_ref}; \cd{description_source}, \cd{capabilities}; \cd{execution_identity}, \cd{argument_handling}, \cd{effect_class}, \cd{execution_environment}, \cd{approval_required}; \cd{output_ids}, \cd{control_ids}\\
+Context sources & \cd{source_kind}, \cd{source_ref}, \cd{writers}, \cd{provenance}; \cd{destination_agent_ids}, \cd{trust_class}, \cd{transformation}; \cd{persistence_scope}\\
+Memory stores   & \cd{store_kind}, \cd{owner_component}; \cd{readers}, \cd{writers}, \cd{write_provenance}, \cd{read_path}; \cd{scope}, \cd{isolation_enforcement}, \cd{retention_and_deletion}\\
+Output sinks    & \cd{sink_kind}, \cd{producer_ids}, \cd{audience}; \cd{delivery}, \cd{transformation}, \cd{render_side_effects}; \cd{becomes_context_source_ids}\\
+Execution edges & \cd{source}, \cd{destination}; \cd{decision_maker}, \cd{condition}; \cd{input_source_ids}, \cd{argument_sources}, \cd{payload}, \cd{output_ids}; \cd{control_ids}, \cd{validation_or_approval}, \cd{execution_mode}, \cd{loop_bound}\\
+Controls        & \cd{control_kind}; \cd{applies_at}, \cd{enforcement_mode}, \cd{implementation}, \cd{failure_mode}; \cd{applies_to_agent_ids}, \cd{applies_to_tool_binding_ids}\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ======================================================================
+\section{Methodology}
+% ======================================================================
+The dataset is produced in four stages---define the schema, choose the environments,
+generate the surfaces, and validate---operationalised as two per-application pipelines.
+
+\subsection{Traditional-web generation pipeline}
+\begin{enumerate}[leftmargin=1.7em,itemsep=2pt]
+\item \textbf{Freeze and deploy.} Pin the exact version, stand up a local instance, and
+      record it in \cd{environment.yaml}; the attack surface is tied to that commit.
+\item \textbf{White-box enumeration.} Read the server handlers, OpenAPI spec, and
+      frontend, and manually list every interface as a curated operation table in code.
+\item \textbf{Black-box capture.} Drive the live application as anonymous, user, and
+      admin identities, recording traffic as HAR files; normalise concrete paths
+      (\cd{/123}$\to$\cd{/{n}}) and aggregate observed statuses, content-types,
+      parameter names, and resource types per (method, path).
+\item \textbf{Build L1.} Join the source operation table with the HAR verification to
+      complete each \L1 row.
+\item \textbf{Introduce semantics.} Lift every \cd{flow=true} field to a semantic input
+      or output (e.g.\ a token field becomes a reference-capable identifier resource).
+\item \textbf{Generate L2.} Map the semantic labels onto a business action
+      (Subject--Operation--Object with requirements and effects).
+\item \textbf{Validate} (Section~\ref{sec:val}).
+\end{enumerate}
+
+\begin{figure}[ht]\centering\footnotesize
+\begin{tabular}{@{}p{3.3cm}p{3.6cm}p{3.6cm}p{3.6cm}@{}}
+\toprule
+\textbf{Evidence} & \textbf{L1 node} & \textbf{Semantics (flow=true)} & \textbf{L2 action}\\
+\midrule
+\ttfamily GET /api/v1/media/\allowbreak Yt7r1RFGP $\to$ 200 \{friendly\_token, title, state, views\}
+&
+\ttfamily key: /api/v1/media/\{friendly\_token\}; kind: api; methods:[GET]; io\_variants: req\{friendly\_token: path, flow:true\}
+&
+\ttfamily friendly\_token $\to$ MediaToken(media) [identifier, reference\_capable]; title $\to$ MediaTitle(media) [attribute]
+&
+\ttfamily user\_read\_media / ``View media'' / Read; Subject: CurrentUser; Object: Media; requires Know(MediaToken)\\
+\bottomrule
+\end{tabular}
+\caption{Worked example (MediaCMS). One field, \cd{friendly_token}, is traced from
+observed traffic, to an \L1 node, to a semantic \cd{MediaToken}, to the \L2 ``View
+media'' action---evidence to interface to meaning to business action.}
+\label{fig:worked}
+\end{figure}
+
+\subsection{Agentic generation pipeline}
+\begin{enumerate}[leftmargin=1.7em,itemsep=2pt]
+\item \textbf{Freeze and deploy} (as above).
+\item \textbf{Identify the loop and its edges} from source: the channel inbound path,
+      the tool registry, and the policy chain---locating where context enters, exits,
+      and originates.
+\item \textbf{Extract records from source.} Map each agentic record (e.g.\ a terminal
+      tool with \cd{effect_class: code_execution}, a sandbox \cd{execution_identity},
+      and \cd{approval_required}).
+\item \textbf{Classify trust and authority}: is the message \cd{trust_class:
+      untrusted_data}; is the tool's \cd{effect_class} code execution; whose identity
+      does it execute as.
+\item \textbf{Draw the connections} (Figure~\ref{fig:ece}): wire
+      \emph{enter}$\to$\emph{carry}$\to$\emph{exit} so every piece of content is
+      traceable end to end.
+\item \textbf{Runtime grounding.} Observe the live loop across entry, model call, tool
+      dispatch, result, and exit while varying identity/requester, and confirm the
+      runtime record matches the source records.
+\item \textbf{Link to L1/L2.} Resolve each agentic identifier
+      (\cd{invocation_surfaces[].l1_id}, \cd{model_config.writers[].l1_id},
+      \cd{tool_bindings.l1_ids}, \cd{related_l2_ids}) to concrete \L1 nodes and \L2
+      actions.
+\item \textbf{Validate} (Section~\ref{sec:val}).
+\end{enumerate}
+
+\begin{figure}[ht]\centering
+\begin{tikzpicture}[
+  box/.style={draw, rounded corners, text width=2.9cm, minimum height=1.5cm,
+              align=left, inner sep=5pt, font=\scriptsize},
+  stage/.style={font=\scriptsize\bfseries, text=gold}]
+\node[box, fill=agamber] (cs) {\textbf{context\_source}\\ Inbound channel message\\[2pt]\textit{trust: untrusted\_data}};
+\node[box, fill=l1blue, right=1.0cm of cs] (ag) {\textbf{agent}\\ model decision\\[2pt]\textit{selects a tool}};
+\node[draw, diamond, aspect=1.3, fill=green!8, right=0.6cm of ag, inner sep=1pt, font=\scriptsize] (ctl) {control};
+\node[box, fill=redbox, right=0.6cm of ctl] (tl) {\textbf{tool: terminal}\\ effect: code\_execution\\ identity: sandbox\\ approval\_required};
+\node[box, fill=l2green, right=1.0cm of tl] (os) {\textbf{output\_sink}\\ reply + exec result\\[2pt]\textit{audience: channel}};
+\draw[-{Latex[length=2mm]}, navy, thick] (cs) -- (ag);
+\draw[-{Latex[length=2mm]}, red!60!black, thick] (ag) -- (ctl);
+\draw[-{Latex[length=2mm]}, red!60!black, thick] (ctl) -- (tl);
+\draw[-{Latex[length=2mm]}, navy, thick] (tl) -- (os);
+\node[stage, above=1pt of cs] {1 $\cdot$ ENTER};
+\node[stage, above=1pt of ag] {2 $\cdot$ CARRY};
+\node[stage, above=1pt of os] {3 $\cdot$ EXIT};
+\end{tikzpicture}
+\caption{Agentic lineage: an untrusted channel message enters as a context source,
+the agent selects a tool, a control gates the edge, the terminal tool executes code as
+the sandbox, and the result exits via an output sink. The root cause of agentic attack
+vectors is authority on this path.}
+\label{fig:ece}
+\end{figure}
+
+\subsection{Validation}\label{sec:val}
+Validation enforces agreement automatically; a record that fails any check is not shipped.
+\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
+\item \textbf{Traditional (L1/L2).} Closed vocabularies (predicates $\in$ the fixed set);
+      semantic consistency (\cd{semantic_outputs} $=$ the set of mergeable resources);
+      cross-layer closure (every \L2 \cd{l1_binding} resolves to a real \L1 route);
+      uniqueness (no duplicate \L1 keys or action keys).
+\item \textbf{Agentic.} Referential integrity (every \cd{*_id} points to a real record);
+      lineage closure (every writer/output resolves); enum validity; and existence of
+      all referenced L1/L2 nodes.
+\end{itemize}
+
+% ======================================================================
+\section{Environments (Dataset)}
+% ======================================================================
+
+\begin{table}[ht]\centering\small
+\caption{Traditional web environments and representative vulnerability classes.}
+\label{tab:envweb}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X l@{}}
+\toprule
+\textbf{Environment} & \textbf{Tech stack} & \textbf{Vulnerability}\\
+\midrule
+VoceChat    & Rust REST (OpenAPI), SSE streams, Bot API (\cd{x-api-key}), admin webhooks & SSRF (CVE-2026-100893)\\
+MediaCMS    & Django + React, REST, upload-driven media handling & RCE (CVE-2024-52004)\\
+WriteFreely & Go templates, token REST, anonymous publishing, ActivityPub, OAuth & Local credential read (CVE-2025-24337)\\
+Uptrace     & OTLP over gRPC/HTTP (project-DSN token), ClickHouse, Postgres & SQLi (CVE-2024-44905/44906)\\
+Discourse   & Rails, Ember SPA, PSQL, Redis, Sidekiq, nginx & SSRF (CVE-2025-68662), IDOR (CVE-2026-26265), XSS (CVE-2025-48954)\\
+Ghost       & Node, Ember admin, two APIs, theme upload, S3/GCS, webhooks & SQLi, token/2FA bypass, SSRF, RCE, path traversal\\
+Rocket.Chat & Meteor/Node, REST + DDP WebSocket, Apps-Engine, SAML/CAS/OAuth & NoSQLi, unauthenticated file deletion\\
+Keycloak    & Java/Quarkus, React console, admin REST, OIDC/SAML flows & Multiple authentication CVEs\\
+Directus    & Node/Vue, REST + GraphQL, WebSocket, TUS uploads, URL import, Flows & Unauth.\ file upload/modification, SSRF, path traversal\\
+Outline     & Node/TS + React, RPC-style REST, WebSocket, email-OTP, OAuth/API-key & OTP brute force, OAuth scope smuggling, IDOR, path traversal, XSS\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[ht]\centering\small
+\caption{LLM-integrated environments and representative vulnerability classes.}
+\label{tab:envllm}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X l@{}}
+\toprule
+\textbf{Environment} & \textbf{Tech stack} & \textbf{Vulnerability}\\
+\midrule
+Open WebUI  & Python backend, Socket.IO, server-side Python, MCP tools, RAG & Multiple agentic tool vulnerabilities\\
+LibreChat   & Node/Express + React, agents with permission/file models, MCP & Multiple MCP issues, unvalidated callback session\\
+AnythingLLM & Node + React, HTTP API, agent WebSocket, developer/extension keys, workspaces, vector DBs, agent skills & SQL-agent injection; streaming-phase XSS$\to$RCE via LLM response injection; AgentFlows path traversal\\
+LobeChat    & Next.js, tRPC, OIDC/Better Auth, PG/Redis/S3, agent \& MCP markets, URL/GitHub skill import, RAG & BOLA via chat-group agent operations; cross-user document disclosure via unscoped RAG; SSRF \& ReDoS in skill import\\
+OpenClaw    & Node gateway (WS/HTTP/Control UI), chat channels + webhooks, exec tool (allowlist/approval), browser tool, skills registry, sub-agents, MCP + vector memory & Env-variable allowlist bypass; working directory injected into prompts; owner-only tools reachable via agent runs; prompt injection\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ======================================================================
+\section{Results: Captured Attack Surface}
+% ======================================================================
+
+\begin{table}[ht]\centering\small
+\caption{Captured traditional-web attack surface ($\Sigma$ = 1{,}392 endpoints,
+980 semantic flows).}\label{tab:resweb}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+\textbf{Environment} & \textbf{L1 endpoints} & \textbf{L2 semantic flows}\\
+\midrule
+VoceChat    & 189 & 205\\
+MediaCMS    & 110 & 104\\
+WriteFreely & 101 &  30\\
+Uptrace     &  54 &  36\\
+Discourse   & 231 & 287\\
+Ghost       & 112 &  59\\
+Rocket.Chat & 154 &  46\\
+Keycloak    & 125 &  50\\
+Directus    & 110 &  68\\
+Outline     & 206 &  95\\
+\midrule
+\textbf{Total} & \textbf{1{,}392} & \textbf{980}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]\centering\small
+\caption{Captured LLM-integrated (agentic) attack surface, by record type
+($\Sigma$ = 327 agentic records).}\label{tab:resllm}
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+\textbf{Environment} & \textbf{Agents} & \textbf{Tools} & \textbf{Invoc.} &
+\textbf{Context} & \textbf{Memory} & \textbf{Sinks} & \textbf{Edges} & \textbf{Controls}\\
+\midrule
+Open WebUI  & 4 & 22 & 5 & 16 & 7 &  8 & 13 & 12\\
+LibreChat   & 3 &  9 & 3 & 12 & 5 &  9 &  9 &  7\\
+AnythingLLM & 2 & 17 & 3 & 11 & 5 &  8 &  8 &  7\\
+LobeChat    & 1 &  5 & 2 &  8 & 3 &  4 &  6 &  4\\
+OpenClaw    & 3 & 27 & 7 & 12 & 5 & 10 & 12 & 13\\
+\midrule
+\textbf{Total} & \textbf{13} & \textbf{80} & \textbf{20} & \textbf{59} & \textbf{25}
+& \textbf{39} & \textbf{48} & \textbf{43}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ======================================================================
+\section{Discussion and Key Insights}
+% ======================================================================
+
+\subsection{Traditional attack surface}
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item \textbf{The exhaustive ground truth exposes surfaces crawlers miss}---notably
+      non-HTTP entries (WebSocket/DDP, gRPC) and endpoints gated behind state or a
+      workflow. These do not appear in a browser-centric crawl.
+\item \textbf{The same business action is exposed through different surfaces}---an
+      internal UI API, a developer/API-key API, and an embed widget can all realise one
+      action. This is exactly where an automated scanner under-counts: it discovers one
+      surface and stops. The schema binds all three to a single \L2 action, making the
+      duplication explicit.
+\end{enumerate}
+
+\subsection{Agentic attack surface}
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item \textbf{The root cause of attack vectors is authority}: untrusted data reaches a
+      model decision, which reaches a privileged tool. By treating the execution edges
+      as a traversable path, the schema lets an investigator enumerate these vectors
+      directly rather than inferring them.
+\item \textbf{Controls must be enforced, not merely present.} For each
+      untrusted$\to$privileged path, the schema records whether the controls on that
+      path (\cd{edge.control_ids} / \cd{tool.control_ids}) are actually enforced---turning
+      a qualitative safety question into a checkable property.
+\end{enumerate}
+
+% ======================================================================
+\section{Future Work}
+% ======================================================================
+\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
+\item \textbf{Benchmark agents.} Define discovery metrics---precision/recall of surface
+      discovery, accuracy of semantic descriptions, and correctness of cross-layer
+      relationships---and run LLM crawlers and agentic scanners against all fifteen
+      applications, scored against this ground truth.
+\item \textbf{Extend schema coverage} to transports modelled only partially here:
+      WebSocket/DDP, gRPC, and GraphQL.
+\item \textbf{Complete runtime grounding} for the applications currently captured
+      source-first, reconciling source and runtime records on pinned containers.
+\end{enumerate}
+
+% ======================================================================
+\section{Conclusion}
+% ======================================================================
+This project delivers an evidence-backed, multi-application ground-truth dataset
+(1{,}392 endpoints, 980 semantic flows, 327 agentic records) and a repeatable
+annotation-and-review workflow that reconciles source and runtime evidence and checks
+every cross-layer reference. It enables rigorous benchmarking of security agents'
+ability to \emph{generate} an attack surface, provides a concrete framework for
+measuring agentic risk, and offers a reusable methodology and dataset for future
+extensions.
+
+% ======================================================================
+\begin{thebibliography}{9}
+\bibitem{owaspapi} OWASP Foundation. \emph{OWASP API Security Top 10 (2023)} ---
+  API1:2023 Broken Object Level Authorization.
+\bibitem{wstg} OWASP Foundation. \emph{Web Security Testing Guide (WSTG)} ---
+  authentication and authorization testing.
+\bibitem{owaspllm} OWASP Foundation. \emph{OWASP Top 10 for Large Language Model
+  Applications} (2025).
+\bibitem{atlas} MITRE. \emph{ATLAS: Adversarial Threat Landscape for Artificial
+  Intelligence Systems}.
+\bibitem{strips} R.~E. Fikes and N.~J. Nilsson. STRIPS: A New Approach to the
+  Application of Theorem Proving to Problem Solving. \emph{Artificial Intelligence},
+  1971.
+\bibitem{pddl} D.~McDermott et al. \emph{PDDL --- The Planning Domain Definition
+  Language}. 1998.
+\bibitem{openapi} OpenAPI Initiative. \emph{OpenAPI Specification}.
+\end{thebibliography}
+
+\end{document}

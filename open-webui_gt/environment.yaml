@@ -24,7 +24,7 @@ phase_status:
   C_trust_authority: complete
   D_lineage_closure: complete (build_agentic.py enforces)
   E_runtime_grounding: pending       # no live run yet; evidence_status = source_confirmed throughout
-  F_link_l1_l2: partial              # open-webui L1/L2 GT not built; l1/l2 ids are forward references
+  F_link_l1_l2: linked               # agentic_links.yaml stubs all 28 L1 + 1 L2 ids referenced by agentic_gt.yaml (validated resolved). Full HTTP web-GT (l1_gt/l2_gt) is separate; module 1 = auths.
   G_validate: complete (folded into build_agentic.py)
   H_export: pending
 
@@ -42,3 +42,60 @@ notes: >
   per-user permission AND feature flag), so reachability is largely conditionally_mounted
   until grounded. Secure-ish default: tool_permissions disabled => approval mode 'full'
   (no gate), which is the important default to confirm at runtime.
+
+# ===========================================================================
+# Traditional Web GT (L1/L2, pengent-web-gt-v1) -- added on top of the agentic layer
+# ===========================================================================
+web_gt:
+  schema: pengent-web-gt-v1
+  generators: generators/{common.py, l2lib.py, l1_data.py, l2_data.py, build_l1.py, build_l2.py}
+  output: {l1: l1_gt.yaml, l2: l2_gt.yaml}
+  build: "PYTHONIOENCODING=utf-8 python build_l1.py && python build_l2.py"
+  validate: "python ../validate_gt.py --l1 l1_gt.yaml --l2 l2_gt.yaml   (passes)"
+  export: "python ../export_to_pengent.py --l1 l1_gt.yaml --l2 l2_gt.yaml --out <file>  (succeeds)"
+
+  evidence_basis: SOURCE-ONLY
+  evidence_note: >
+    Built source-first from the FastAPI routers under backend/open_webui/routers/*.py and the
+    Pydantic request/response models (models/auths.py, models/users.py). No runtime capture is
+    possible in this environment (no Docker/network), so samples=[] and black_box_reachable is
+    derived from source gating (get_current_user / get_verified_user / get_admin_user + config
+    flags). Runtime verification (HAR/probe on ghcr.io/open-webui/open-webui:v0.13.3) is the
+    documented follow-up.
+
+  auth_model: >
+    JWT session-cookie `token` OR `sk-` API key, resolved by get_current_user. Tiers:
+    get_current_user (any principal, role may be 'pending'); get_verified_user (role in
+    {user, admin}); get_admin_user (role == admin). SUBJECTS in l2lib.py mirror these.
+
+  surface_inventory:
+    total_http_routes: 584          # across 36 routers (@router.<verb>, backend/open_webui/routers/*.py)
+    excluded: "WebSocket /ws (socket.io) + static mounts (/static, /pyodide, SPA fallback) -- covered by the agentic layer."
+    mount_prefixes: "/api/v1/<router> for 34 routers; /ollama and /openai for those two proxies."
+
+  status: "Module 1 (Authentication + Account) COMPLETE -- 17 L1 nodes / 23 L2 actions, validator green + export OK."
+  modules:
+    done:
+      - "auths (Authentication + Account, 23 routes): session identity (GET /), account self-service
+         (update profile/timezone/password), login/registration (signin, signup, ldap, signout),
+         OAuth sessions + token-exchange, admin user provisioning (/add), admin auth config
+         (admin/config, ldap/server, ldap toggle, oauth), API keys (GET+POST+DELETE /api_key).
+         Security highlights: trusted-header impersonation (identity+role from a proxy header),
+         WEBUI_AUTH=false bootstrap, first-user->admin, api-key mint/read in clear, admin-contact
+         disclosure, stored LDAP/OAuth secret config (location recorded, not value)."
+    remaining:   # 35 routers, ~561 routes -- route counts from grep '^@router.<verb>'
+      high_value: "users(29), chats(54), models(20), files(16), knowledge(36), tools(23),
+                   functions(22), groups(12), configs(26), retrieval(16), channels(33)"
+      other: "folders(11), prompts(15), memories(12), notes(13), comments(11), evaluations(15),
+              images(6), audio, ollama(45), openai(15), pipelines(8), tasks(10), mfa(8),
+              sessions(8, mounted under /api/v1/auths/sessions), scim(15), skills(21), apps(8),
+              automations(10), calendar(14), notifications(11), analytics(12), terminals(1),
+              utils(4), search(1), tether(0)"
+    note: "sessions router is include_router'd under /api/v1/auths/sessions; modeled as its own module next."
+
+  cross_app_status:   # overall task: full L1/L2 for the LLM-integrated REST apps
+    anything-llm: "Developer API COMPLETE (67 nodes / 67 actions). Internal UI API (~400) remaining."
+    open-webui: "Module 1 (auths) COMPLETE (17 nodes / 23 actions). 35 routers (~561 routes) remaining."
+    LibreChat: "not started (~429 Express routes)"
+    lobe-chat: "not started (22 route files + tRPC surface)"
+    openclaw: "web-GT intentionally skipped -- control plane is the agentic surface."

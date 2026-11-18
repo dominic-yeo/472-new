@@ -1,0 +1,6907 @@
+schema_version: pengent-web-gt-v1
+environment_id: anything-llm-local
+scope: 'AnythingLLM Developer API (/api/v1) -- module: System Settings + Authentication'
+nodes:
+- key: http://localhost/api/v1/auth
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id001 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id001
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: authenticated
+        path: authenticated
+        type: boolean
+        flow: false
+        description: True when the Authorization API key is valid.
+    reason: validApiKey middleware verifies the Bearer API key; body is a fixed status flag.
+    evidence: server/endpoints/api/auth/index.js:6
+  operation_semantic: verify_api_key
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: &id004
+    anonymous:
+    - 403
+    api_key:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Authentication').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/auth/index.js:6
+      supports: GET /v1/auth [validApiKey] -> {authenticated:true}
+    notes: API-key probe; the status flag is not business data (flow=false).
+- key: http://localhost/api/v1/system/env-dump
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id002 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id002
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'Side-effecting GET: flushes in-memory settings to the .env file in production; no IO body.'
+    evidence: server/endpoints/api/system/index.js:18
+  operation_semantic: dump_settings_to_env_file
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses:
+    anonymous:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Intentionally unauthenticated deploy/shutdown hook (see SECURITY.md).
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:16
+      supports: GET /v1/system/env-dump (no auth) -> dumpENV() in production
+    notes: 'UNAUTHENTICATED by design: any caller triggers a settings flush to .env (prod only).'
+- key: http://localhost/api/v1/system
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id003 []
+  outputs:
+  - settings
+  input_spec:
+    format: ''
+    fields: *id003
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - settings
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: settings
+        path: settings
+        type: object
+        flow: true
+        description: All defined system settings (secret values masked to presence booleans).
+    reason: Returns SystemSettings.currentSettings(); secrets appear as booleans, config values in clear.
+    evidence: server/endpoints/api/system/index.js:39
+  operation_semantic: read_system_settings
+  semantic_inputs: []
+  semantic_outputs:
+  - SystemSettings(system)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: settings
+    resource: SystemSettings(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Full instance configuration snapshot (provider, vector DB, flags; secret presence).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'System Settings').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:39
+      supports: GET /v1/system [validApiKey] -> {settings}
+    notes: Exposes instance configuration incl. which provider keys are set (presence booleans).
+- key: http://localhost/api/v1/system/vector-count
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id005 []
+  outputs:
+  - vectorCount
+  input_spec:
+    format: ''
+    fields: *id005
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - vectorCount
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: vectorCount
+        path: vectorCount
+        type: integer
+        flow: true
+        description: Total vectors across the connected vector database.
+    reason: Returns VectorDb.totalVectors().
+    evidence: server/endpoints/api/system/index.js:76
+  operation_semantic: read_vector_count
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'System Settings').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:76
+      supports: GET /v1/system/vector-count [validApiKey] -> {vectorCount}
+    notes: Aggregate count; not an object reference.
+- key: http://localhost/api/v1/system/update-env
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id006
+  - env
+  outputs:
+  - newValues
+  input_spec:
+    format: json
+    fields: *id006
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - env
+    outputs:
+    - newValues
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        VectorDB: lancedb
+        AnotherKey: updatedValue
+      fields:
+      - name: env
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Key/value pairs matching valid settings to apply to instance config.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: newValues
+        path: newValues
+        type: object
+        flow: true
+        description: The applied new values.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error message, or null.
+    reason: updateENV(body) validates keys and persists new settings; returns applied values.
+    evidence: server/endpoints/api/system/index.js:108
+  operation_semantic: update_system_settings
+  semantic_inputs:
+  - EnvConfig(system)
+  semantic_outputs:
+  - EnvValues(system)
+  semantic_input_decisions:
+  - raw_field: env
+    resource: EnvConfig(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Arbitrary settings map; can switch LLM provider, vector DB, embedded keys.
+  semantic_output_decisions:
+  - raw_field: newValues
+    resource: EnvValues(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Echo of the applied configuration values.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'System Settings').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:108
+      supports: POST /v1/system/update-env [validApiKey] -> updateENV(body)
+    notes: 'High-impact: reconfigures the instance (provider/vector-DB/keys) via a single authenticated
+      call.'
+- key: http://localhost/api/v1/system/export-chats
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params:
+  - type
+  inputs: &id007
+  - type
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id007
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - type
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: type
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: 'Export format: jsonl|json|csv|jsonAlpaca (default jsonl).'
+    response:
+      format: raw
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: All workspace chats serialized in the requested format; Content-Type varies.
+      fields: []
+    reason: exportChatsAsType(type,'workspace'); content-type set from the format.
+    evidence: server/endpoints/api/system/index.js:157
+  operation_semantic: export_all_chats
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: type
+    resource: ExportType(export)
+    mergeable: false
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: Format discriminator; not an object reference.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'System Settings').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:157
+      supports: GET /v1/system/export-chats?type= [validApiKey] -> serialized chats
+    notes: Exports ALL chats across every workspace -- bulk data exposure surface.
+- key: http://localhost/api/v1/system/remove-documents
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id008
+  - names
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id008
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - names
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        names:
+        - custom-documents/file.txt-fc4beeeb-e436-454d-8bb4-e5b8979cb48f.json
+      fields:
+      - name: names
+        location: body
+        path: ''
+        type: array
+        required: true
+        flow: true
+        description: Array of document storage locations to permanently remove.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: True on success.
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Iterates names and calls purgeDocument(name) for each.
+    evidence: server/endpoints/api/system/index.js:219
+  operation_semantic: remove_documents
+  semantic_inputs:
+  - DocumentLocation(document)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: names
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - names
+    reason: Document storage paths identifying the documents to delete.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'System Settings').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:219
+      supports: DELETE /v1/system/remove-documents [validApiKey] -> purgeDocument()
+    notes: Permanent deletion keyed by caller-supplied storage path.
+- key: http://localhost/api/v1/workspace/new
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id009
+  - name
+  - config
+  outputs:
+  - workspace
+  input_spec:
+    format: json
+    fields: *id009
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - config
+    outputs:
+    - workspace
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: My New Workspace
+        chatMode: chat
+        topN: 4
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Workspace display name.
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: false
+        flow: true
+        description: 'Optional settings: similarityThreshold, openAiTemp/History/Prompt, queryRefusalResponse,
+          chatMode, topN.'
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: workspace
+        path: workspace
+        type: object
+        flow: true
+        description: Created workspace (contains slug).
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Workspace.new(name, null, additionalFields).
+    evidence: server/endpoints/api/workspace/index.js:28
+  operation_semantic: create_workspace
+  semantic_inputs:
+  - WorkspaceName(workspace)
+  - WorkspaceConfig(workspace)
+  semantic_outputs:
+  - WorkspaceSlug(workspace)
+  semantic_input_decisions:
+  - raw_field: name
+    resource: WorkspaceName(workspace)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: New workspace name.
+  - raw_field: config
+    resource: WorkspaceConfig(workspace)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: New workspace settings.
+  semantic_output_decisions:
+  - raw_field: workspace.slug
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - slug
+    reason: Created workspace slug.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:28
+      supports: POST /v1/workspace/new [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspaces
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id010 []
+  outputs:
+  - workspaces
+  input_spec:
+    format: ''
+    fields: *id010
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - workspaces
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: workspaces
+        path: workspaces
+        type: array
+        flow: true
+        description: All workspaces (slug, name, threads).
+    reason: Workspace._findMany include threads.
+    evidence: server/endpoints/api/workspace/index.js:109
+  operation_semantic: list_workspaces
+  semantic_inputs: []
+  semantic_outputs:
+  - WorkspaceSlug(workspace)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: workspaces[].slug
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - slug
+    reason: Slugs of listed workspaces.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:109
+      supports: GET /v1/workspaces [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}
+  kind: api
+  methods:
+  - GET
+  - DELETE
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id011
+  - slug
+  outputs:
+  - workspace
+  input_spec:
+    format: plain
+    fields: *id011
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    outputs:
+    - workspace
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: workspace
+        path: workspace
+        type: array
+        flow: true
+        description: Workspace with documents + threads.
+    reason: Workspace._findMany by slug.
+    evidence: server/endpoints/api/workspace/index.js:163
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: 'Cascade delete: chats, vectors, documents, workspace, vector namespace.'
+    evidence: server/endpoints/api/workspace/index.js:228
+  operation_semantic: workspace_by_slug
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  semantic_outputs:
+  - WorkspaceConfig(workspace)
+  semantic_input_decisions:
+  - &id013
+    raw_field: slug
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - slug
+    reason: Workspace slug path parameter identifies the workspace.
+  semantic_output_decisions:
+  - raw_field: workspace
+    resource: WorkspaceConfig(workspace)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Workspace config snapshot.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoints (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:163
+      supports: GET + DELETE /v1/workspace/:slug [validApiKey]
+    notes: DELETE is guarded by workspaceDeletionProtection middleware; cascades to chats/vectors/documents.
+- key: http://localhost/api/v1/workspace/{slug}/update
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id012
+  - slug
+  - config
+  outputs:
+  - workspace
+  input_spec:
+    format: json
+    fields: *id012
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - config
+    outputs:
+    - workspace
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: Updated Name
+        openAiTemp: 0.2
+        openAiPrompt: '...'
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Settings to update (all optional keys).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: workspace
+        path: workspace
+        type: object
+        flow: true
+        description: Updated workspace.
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Workspace.update(id, data).
+    evidence: server/endpoints/api/workspace/index.js:279
+  operation_semantic: update_workspace
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - WorkspaceConfig(workspace)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - raw_field: config
+    resource: WorkspaceConfig(workspace)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: New settings values.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:279
+      supports: POST /v1/workspace/:slug/update [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/chats
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params:
+  - apiSessionId
+  - limit
+  - orderBy
+  inputs: &id014
+  - slug
+  - apiSessionId
+  outputs:
+  - history
+  input_spec:
+    format: plain
+    fields: *id014
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - apiSessionId
+    outputs:
+    - history
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: apiSessionId
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Optional session filter.
+      - name: limit
+        location: query
+        path: ''
+        type: integer
+        required: false
+        flow: false
+        description: Max messages (default 100).
+      - name: orderBy
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: asc|desc.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: history
+        path: history
+        type: array
+        flow: true
+        description: Chat history (role, content, sources).
+    reason: WorkspaceChats.forWorkspace / forWorkspaceByApiSessionId.
+    evidence: server/endpoints/api/workspace/index.js:360
+  operation_semantic: read_workspace_chats
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - SessionID(session)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - raw_field: apiSessionId
+    resource: SessionID(session)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - apiSessionId
+    reason: External chat session id filter.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:360
+      supports: GET /v1/workspace/:slug/chats [validApiKey]
+    notes: Returns ALL chats in the workspace regardless of user.
+- key: http://localhost/api/v1/workspace/{slug}/update-embeddings
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id015
+  - slug
+  - adds
+  - deletes
+  outputs:
+  - workspace
+  input_spec:
+    format: json
+    fields: *id015
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - adds
+    - deletes
+    outputs:
+    - workspace
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        adds:
+        - custom-documents/my-pdf.pdf-hash.json
+        deletes:
+        - custom-documents/old.txt-hash.json
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: adds
+        location: body
+        path: ''
+        type: array
+        required: false
+        flow: true
+        description: Document storage paths to embed.
+      - name: deletes
+        location: body
+        path: ''
+        type: array
+        required: false
+        flow: true
+        description: Document storage paths to remove.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: workspace
+        path: workspace
+        type: object
+        flow: true
+        description: Updated workspace.
+    reason: Document.removeDocuments / addDocuments.
+    evidence: server/endpoints/api/workspace/index.js:457
+  operation_semantic: update_workspace_embeddings
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - DocumentLocation(document)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - raw_field: adds
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - adds
+    reason: Documents to embed into the workspace.
+  - raw_field: deletes
+    resource: DocumentLocation(document)
+    mergeable: false
+    value_kind: identifier
+    reference_capable: false
+    reference_fields: []
+    reason: Documents to remove (same resource type as adds).
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:457
+      supports: POST /v1/workspace/:slug/update-embeddings [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/update-pin
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 404
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id016
+  - slug
+  - docPath
+  - pinStatus
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id016
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - docPath
+    - pinStatus
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        docPath: custom-documents/my-pdf.pdf-hash.json
+        pinStatus: true
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: docPath
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Document storage path.
+      - name: pinStatus
+        location: body
+        path: ''
+        type: boolean
+        required: false
+        flow: true
+        description: Pin on/off.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Document.update(id, {pinned}).
+    evidence: server/endpoints/api/workspace/index.js:534
+  operation_semantic: pin_workspace_document
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - DocumentLocation(document)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - raw_field: docPath
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - docPath
+    reason: Document to pin/unpin.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:534
+      supports: POST /v1/workspace/:slug/update-pin [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/chat
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id017
+  - slug
+  - message
+  - mode
+  - sessionId
+  - attachments
+  outputs:
+  - textResponse
+  - sources
+  input_spec:
+    format: json
+    fields: *id017
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - message
+    - mode
+    - sessionId
+    - attachments
+    outputs:
+    - textResponse
+    - sources
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        message: What is AnythingLLM?
+        mode: chat
+        sessionId: ext-1
+      fields: &id019
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: message
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: User prompt.
+      - name: mode
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: automatic|query|chat.
+      - name: sessionId
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: External id to partition chats.
+      - name: attachments
+        location: body
+        path: ''
+        type: array
+        required: false
+        flow: true
+        description: Image/document attachments.
+      - name: reset
+        location: body
+        path: ''
+        type: boolean
+        required: false
+        flow: false
+        description: Reset chat.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: textResponse
+        path: textResponse
+        type: string
+        flow: true
+        description: LLM answer (model-authored; streaming-phase XSS->RCE surface).
+      - name: sources
+        path: sources
+        type: array
+        flow: true
+        description: RAG sources used.
+      - name: id
+        path: id
+        type: string
+        flow: false
+        description: Chat id.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: ApiChatHandler.chatSync.
+    evidence: server/endpoints/api/workspace/index.js:603
+  operation_semantic: chat_with_workspace
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ChatMessage(chat)
+  - SessionID(session)
+  semantic_outputs:
+  - ChatResponse(chat)
+  semantic_input_decisions: &id020
+  - *id013
+  - raw_field: message
+    resource: ChatMessage(chat)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: User prompt (untrusted input to the LLM).
+  - raw_field: mode
+    resource: ChatMode(chat)
+    mergeable: false
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: Chat mode discriminator.
+  - raw_field: sessionId
+    resource: SessionID(session)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - sessionId
+    reason: External chat session id.
+  - raw_field: attachments
+    resource: ChatAttachment(chat)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Attached images/documents.
+  semantic_output_decisions:
+  - raw_field: textResponse
+    resource: ChatResponse(chat)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Model-authored answer.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:603
+      supports: POST /v1/workspace/:slug/chat [validApiKey]
+    notes: 'Untrusted prompt -> LLM; response is model-authored (CVE class: streaming-phase XSS to RCE
+      via LLM response injection).'
+- key: http://localhost/api/v1/workspace/{slug}/stream-chat
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id018
+  - slug
+  - message
+  - mode
+  - sessionId
+  - attachments
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id018
+  io_variants:
+  - method: POST
+    content_types:
+    - text/event-stream
+    inputs:
+    - slug
+    - message
+    - mode
+    - sessionId
+    - attachments
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        message: What is AnythingLLM?
+        mode: chat
+      fields: *id019
+    response:
+      format: raw
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: text/event-stream of textResponseChunk events (id, textResponse, sources, close,
+        error).
+      fields: []
+    reason: ApiChatHandler.streamChat (SSE).
+    evidence: server/endpoints/api/workspace/index.js:737
+  operation_semantic: chat_with_workspace
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ChatMessage(chat)
+  - SessionID(session)
+  semantic_outputs: []
+  semantic_input_decisions: *id020
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:737
+      supports: POST /v1/workspace/:slug/stream-chat [validApiKey]
+    notes: Streaming variant of chat_with_workspace; same untrusted-prompt -> model-authored-output surface.
+- key: http://localhost/api/v1/workspace/{slug}/vector-search
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id021
+  - slug
+  - query
+  outputs:
+  - results
+  input_spec:
+    format: json
+    fields: *id021
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - query
+    outputs:
+    - results
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        query: What is the meaning of life?
+        topN: 4
+        scoreThreshold: 0.75
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: query
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Search query.
+      - name: topN
+        location: body
+        path: ''
+        type: integer
+        required: false
+        flow: false
+        description: Max results.
+      - name: scoreThreshold
+        location: body
+        path: ''
+        type: number
+        required: false
+        flow: false
+        description: Min similarity score.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: results
+        path: results
+        type: array
+        flow: true
+        description: Matching chunks from the vector DB.
+    reason: Vector similarity search over the workspace namespace.
+    evidence: server/endpoints/api/workspace/index.js:899
+  operation_semantic: vector_search_workspace
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - SearchQuery(search)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - raw_field: query
+    resource: SearchQuery(search)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Vector search query.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspaces').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:899
+      supports: POST /v1/workspace/:slug/vector-search [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/thread/new
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id022
+  - slug
+  - name
+  outputs:
+  - thread
+  input_spec:
+    format: json
+    fields: *id022
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - name
+    outputs:
+    - thread
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        userId: 1
+        name: Name
+        slug: thread-slug
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: userId
+        location: body
+        path: ''
+        type: integer
+        required: false
+        flow: false
+        description: Optional owner user id (nulled in single-user).
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Thread name.
+      - name: threadSlugDesired
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: Optional desired thread slug.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: thread
+        path: thread
+        type: object
+        flow: true
+        description: Created thread (contains slug).
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: WorkspaceThread.new.
+    evidence: server/endpoints/api/workspaceThread/index.js:21
+  operation_semantic: create_thread
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ThreadName(thread)
+  semantic_outputs:
+  - ThreadSlug(thread)
+  semantic_input_decisions:
+  - *id013
+  - raw_field: name
+    resource: ThreadName(thread)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: New thread name.
+  semantic_output_decisions:
+  - raw_field: thread.slug
+    resource: ThreadSlug(thread)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - slug
+    reason: Created thread slug.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspace Threads').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:21
+      supports: POST /v1/workspace/:slug/thread/new [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/update
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id023
+  - slug
+  - threadSlug
+  - name
+  outputs:
+  - thread
+  input_spec:
+    format: json
+    fields: *id023
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - threadSlug
+    - name
+    outputs:
+    - thread
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: Updated thread name
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: threadSlug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Thread slug.
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New thread name.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: thread
+        path: thread
+        type: object
+        flow: true
+        description: Updated thread.
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: WorkspaceThread.update name.
+    evidence: server/endpoints/api/workspaceThread/index.js:111
+  operation_semantic: update_thread
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ThreadSlug(thread)
+  - ThreadName(thread)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - &id025
+    raw_field: threadSlug
+    resource: ThreadSlug(thread)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - threadSlug
+    reason: Thread slug path parameter identifies the thread.
+  - raw_field: name
+    resource: ThreadName(thread)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: New thread name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspace Threads').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:111
+      supports: POST /v1/workspace/:slug/thread/:threadSlug/update [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id024
+  - slug
+  - threadSlug
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id024
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - threadSlug
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: threadSlug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Thread slug.
+    response:
+      format: empty
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields: []
+    reason: WorkspaceThread.delete.
+    evidence: server/endpoints/api/workspaceThread/index.js:197
+  operation_semantic: delete_thread
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ThreadSlug(thread)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - *id025
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspace Threads').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:197
+      supports: DELETE /v1/workspace/:slug/thread/:threadSlug [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chats
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id026
+  - slug
+  - threadSlug
+  outputs:
+  - history
+  input_spec:
+    format: plain
+    fields: *id026
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - threadSlug
+    outputs:
+    - history
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: threadSlug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Thread slug.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: history
+        path: history
+        type: array
+        flow: true
+        description: Thread chat history.
+    reason: WorkspaceChats for thread.
+    evidence: server/endpoints/api/workspaceThread/index.js:246
+  operation_semantic: read_thread_chats
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ThreadSlug(thread)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - *id025
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspace Threads').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:246
+      supports: GET /v1/workspace/:slug/thread/:threadSlug/chats [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chat
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id027
+  - slug
+  - threadSlug
+  - message
+  - mode
+  - attachments
+  outputs:
+  - textResponse
+  - sources
+  input_spec:
+    format: json
+    fields: *id027
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - slug
+    - threadSlug
+    - message
+    - mode
+    - attachments
+    outputs:
+    - textResponse
+    - sources
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        message: What is AnythingLLM?
+        mode: chat
+      fields: &id029
+      - name: slug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: threadSlug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Thread slug.
+      - name: message
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: User prompt.
+      - name: mode
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: automatic|query|chat.
+      - name: attachments
+        location: body
+        path: ''
+        type: array
+        required: false
+        flow: true
+        description: Image/document attachments.
+      - name: reset
+        location: body
+        path: ''
+        type: boolean
+        required: false
+        flow: false
+        description: Reset chat.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: textResponse
+        path: textResponse
+        type: string
+        flow: true
+        description: LLM answer (model-authored).
+      - name: sources
+        path: sources
+        type: array
+        flow: true
+        description: RAG sources.
+      - name: id
+        path: id
+        type: string
+        flow: false
+        description: Chat id.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: ApiChatHandler.chatSync with thread.
+    evidence: server/endpoints/api/workspaceThread/index.js:330
+  operation_semantic: chat_in_thread
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ThreadSlug(thread)
+  - ChatMessage(chat)
+  semantic_outputs:
+  - ChatResponse(chat)
+  semantic_input_decisions: &id030
+  - *id013
+  - *id025
+  - raw_field: message
+    resource: ChatMessage(chat)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: User prompt (untrusted input to the LLM).
+  - raw_field: mode
+    resource: ChatMode(chat)
+    mergeable: false
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: Chat mode discriminator.
+  - raw_field: attachments
+    resource: ChatAttachment(chat)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Attached images/documents.
+  semantic_output_decisions:
+  - raw_field: textResponse
+    resource: ChatResponse(chat)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Model-authored answer.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspace Threads').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:330
+      supports: POST /v1/workspace/:slug/thread/:threadSlug/chat [validApiKey]
+    notes: Thread-scoped chat; untrusted prompt -> model-authored output.
+- key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/stream-chat
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id028
+  - slug
+  - threadSlug
+  - message
+  - mode
+  - attachments
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id028
+  io_variants:
+  - method: POST
+    content_types:
+    - text/event-stream
+    inputs:
+    - slug
+    - threadSlug
+    - message
+    - mode
+    - attachments
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        message: What is AnythingLLM?
+        mode: chat
+      fields: *id029
+    response:
+      format: raw
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: text/event-stream of textResponseChunk events.
+      fields: []
+    reason: ApiChatHandler.streamChat with thread.
+    evidence: server/endpoints/api/workspaceThread/index.js:493
+  operation_semantic: chat_in_thread
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ThreadSlug(thread)
+  - ChatMessage(chat)
+  semantic_outputs: []
+  semantic_input_decisions: *id030
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Workspace Threads').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:493
+      supports: POST /v1/workspace/:slug/thread/:threadSlug/stream-chat [validApiKey]
+    notes: Streaming variant of chat_in_thread.
+- key: http://localhost/api/v1/document/upload
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  - 422
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id031
+  - file
+  - metadata
+  - addToWorkspaces
+  outputs:
+  - documents
+  input_spec:
+    format: plain
+    fields: *id031
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - file
+    - metadata
+    - addToWorkspaces
+    outputs:
+    - documents
+    input: {}
+    request:
+      body_format: form
+      body_example: {}
+      fields:
+      - name: file
+        location: body
+        path: ''
+        type: file
+        required: true
+        flow: true
+        description: File to upload and parse.
+      - name: metadata
+        location: body
+        path: ''
+        type: object
+        required: false
+        flow: true
+        description: Optional document metadata.
+      - name: addToWorkspaces
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Workspace slugs to embed into.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Upload succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+      - name: documents
+        path: documents
+        type: array
+        flow: true
+        description: Parsed document records (storage locations).
+    reason: Multipart upload parsed by the document collector.
+    evidence: server/endpoints/api/document/index.js:52
+  operation_semantic: upload_document
+  semantic_inputs:
+  - DocumentFile(document)
+  - WorkspaceSlug(workspace)
+  semantic_outputs:
+  - DocumentLocation(document)
+  semantic_input_decisions:
+  - raw_field: file
+    resource: DocumentFile(document)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Uploaded file content.
+  - &id033
+    raw_field: addToWorkspaces
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - addToWorkspaces
+    reason: Comma-separated target workspace slugs.
+  semantic_output_decisions:
+  - &id034
+    raw_field: documents
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - documents
+    reason: Created document storage locations.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:52
+      supports: POST /v1/document/upload [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/upload/{folderName}
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  - 422
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id032
+  - folderName
+  - file
+  - metadata
+  - addToWorkspaces
+  outputs:
+  - documents
+  input_spec:
+    format: plain
+    fields: *id032
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - folderName
+    - file
+    - metadata
+    - addToWorkspaces
+    outputs:
+    - documents
+    input: {}
+    request:
+      body_format: form
+      body_example: {}
+      fields:
+      - name: folderName
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Target folder (created if missing).
+      - name: file
+        location: body
+        path: ''
+        type: file
+        required: true
+        flow: true
+        description: File to upload and parse.
+      - name: metadata
+        location: body
+        path: ''
+        type: object
+        required: false
+        flow: true
+        description: Optional document metadata.
+      - name: addToWorkspaces
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Workspace slugs to embed into.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Upload succeeded.
+      - name: documents
+        path: documents
+        type: array
+        flow: true
+        description: Parsed documents.
+    reason: Multipart upload into a named folder.
+    evidence: server/endpoints/api/document/index.js:183
+  operation_semantic: upload_document
+  semantic_inputs:
+  - FolderName(folder)
+  - DocumentFile(document)
+  - WorkspaceSlug(workspace)
+  semantic_outputs:
+  - DocumentLocation(document)
+  semantic_input_decisions:
+  - &id039
+    raw_field: folderName
+    resource: FolderName(folder)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - folderName
+    reason: Folder name identifies a storage folder.
+  - raw_field: file
+    resource: DocumentFile(document)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Uploaded file content.
+  - *id033
+  semantic_output_decisions:
+  - *id034
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:183
+      supports: POST /v1/document/upload/:folderName [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/upload-link
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id035
+  - link
+  - addToWorkspaces
+  outputs:
+  - documents
+  input_spec:
+    format: json
+    fields: *id035
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - link
+    - addToWorkspaces
+    outputs:
+    - documents
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        link: https://example.com
+        addToWorkspaces: my-workspace
+      fields:
+      - name: link
+        location: body
+        path: ''
+        type: string|array
+        required: true
+        flow: true
+        description: URL(s) for the server to fetch and scrape.
+      - name: addToWorkspaces
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Workspace slugs to embed into.
+      - name: scraperHeaders
+        location: body
+        path: ''
+        type: object
+        required: false
+        flow: false
+        description: Optional headers for the scrape request.
+      - name: metadata
+        location: body
+        path: ''
+        type: object
+        required: false
+        flow: false
+        description: Optional metadata.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Scrape succeeded.
+      - name: documents
+        path: documents
+        type: array
+        flow: true
+        description: Parsed documents.
+    reason: Collector fetches the model/caller-supplied URL(s).
+    evidence: server/endpoints/api/document/index.js:338
+  operation_semantic: upload_document_from_link
+  semantic_inputs:
+  - ExternalURL(url)
+  - WorkspaceSlug(workspace)
+  semantic_outputs:
+  - DocumentLocation(document)
+  semantic_input_decisions:
+  - raw_field: link
+    resource: ExternalURL(url)
+    mergeable: true
+    value_kind: locator
+    reference_capable: false
+    reference_fields: []
+    reason: Caller-supplied URL the server fetches (SSRF surface).
+  - *id033
+  semantic_output_decisions:
+  - *id034
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:338
+      supports: POST /v1/document/upload-link [validApiKey]
+    notes: 'SSRF surface: the server fetches a caller-supplied URL to scrape.'
+- key: http://localhost/api/v1/document/raw-text
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  - 422
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id036
+  - textContent
+  - metadata
+  - addToWorkspaces
+  outputs:
+  - documents
+  input_spec:
+    format: json
+    fields: *id036
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - textContent
+    - metadata
+    - addToWorkspaces
+    outputs:
+    - documents
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        textContent: '...'
+        metadata:
+          title: doc.txt
+      fields:
+      - name: textContent
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Raw document text.
+      - name: metadata
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Metadata (title required).
+      - name: addToWorkspaces
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Workspace slugs to embed into.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: documents
+        path: documents
+        type: array
+        flow: true
+        description: Parsed documents.
+    reason: Create a document from raw text + metadata.
+    evidence: server/endpoints/api/document/index.js:520
+  operation_semantic: upload_raw_text
+  semantic_inputs:
+  - DocumentText(document)
+  - DocumentMetadata(document)
+  - WorkspaceSlug(workspace)
+  semantic_outputs:
+  - DocumentLocation(document)
+  semantic_input_decisions:
+  - raw_field: textContent
+    resource: DocumentText(document)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Raw document text.
+  - raw_field: metadata
+    resource: DocumentMetadata(document)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Document metadata (title required).
+  - *id033
+  semantic_output_decisions:
+  - *id034
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:520
+      supports: POST /v1/document/raw-text [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/documents
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params:
+  - folder
+  - offset
+  - limit
+  inputs: &id037
+  - folder
+  outputs:
+  - localFiles
+  input_spec:
+    format: plain
+    fields: *id037
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - folder
+    outputs:
+    - localFiles
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: folder
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Optional folder to list.
+      - name: offset
+        location: query
+        path: ''
+        type: integer
+        required: false
+        flow: false
+        description: Pagination offset.
+      - name: limit
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: Page size or 'all'.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: localFiles
+        path: localFiles
+        type: object
+        flow: true
+        description: Document tree / folder contents.
+    reason: List locally-stored documents.
+    evidence: server/endpoints/api/document/index.js:669
+  operation_semantic: list_documents
+  semantic_inputs:
+  - FolderName(folder)
+  semantic_outputs:
+  - DocumentLocation(document)
+  semantic_input_decisions:
+  - raw_field: folder
+    resource: FolderName(folder)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - folder
+    reason: Optional folder filter.
+  semantic_output_decisions:
+  - raw_field: localFiles
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - localFiles
+    reason: Listed document locations.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:669
+      supports: GET /v1/documents [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/documents/folder/{folderName}
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  - 404
+  content_types:
+  - application/json
+  params: []
+  inputs: &id038
+  - folderName
+  outputs:
+  - documents
+  input_spec:
+    format: plain
+    fields: *id038
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - folderName
+    outputs:
+    - documents
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: folderName
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Folder name.
+      - name: offset
+        location: query
+        path: ''
+        type: integer
+        required: false
+        flow: false
+        description: Pagination offset.
+      - name: limit
+        location: query
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: Page size.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: documents
+        path: documents
+        type: array
+        flow: true
+        description: Documents in the folder.
+    reason: List a folder's documents.
+    evidence: server/endpoints/api/document/index.js:725
+  operation_semantic: list_folder_documents
+  semantic_inputs:
+  - FolderName(folder)
+  semantic_outputs:
+  - DocumentLocation(document)
+  semantic_input_decisions:
+  - *id039
+  semantic_output_decisions:
+  - raw_field: documents
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - documents
+    reason: Folder document locations.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:725
+      supports: GET /v1/documents/folder/:folderName [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/accepted-file-types
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id040 []
+  outputs:
+  - types
+  input_spec:
+    format: ''
+    fields: *id040
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - types
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: types
+        path: types
+        type: object
+        flow: true
+        description: Accepted file types / MIMEs.
+    reason: Return supported upload types.
+    evidence: server/endpoints/api/document/index.js:810
+  operation_semantic: read_accepted_file_types
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:810
+      supports: GET /v1/document/accepted-file-types [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/metadata-schema
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id041 []
+  outputs:
+  - schema
+  input_spec:
+    format: ''
+    fields: *id041
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - schema
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: schema
+        path: schema
+        type: object
+        flow: true
+        description: Known metadata schema for raw-text upload.
+    reason: Return metadata schema.
+    evidence: server/endpoints/api/document/index.js:867
+  operation_semantic: read_metadata_schema
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:867
+      supports: GET /v1/document/metadata-schema [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/{docName}
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  - 404
+  content_types:
+  - application/json
+  params: []
+  inputs: &id042
+  - docName
+  outputs:
+  - document
+  input_spec:
+    format: plain
+    fields: *id042
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - docName
+    outputs:
+    - document
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: docName
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Document name.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: document
+        path: document
+        type: object
+        flow: true
+        description: The stored document record.
+    reason: Fetch a single document by name.
+    evidence: server/endpoints/api/document/index.js:919
+  operation_semantic: read_document
+  semantic_inputs:
+  - DocumentName(document)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: docName
+    resource: DocumentName(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - docName
+    reason: Document name identifies a stored document.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:919
+      supports: GET /v1/document/:docName [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/create-folder
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id043
+  - name
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id043
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: my-folder
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New folder name.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Create a folder in the documents storage dir.
+    evidence: server/endpoints/api/document/index.js:974
+  operation_semantic: create_folder
+  semantic_inputs:
+  - FolderName(folder)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: name
+    resource: FolderName(folder)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - name
+    reason: New folder name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:974
+      supports: POST /v1/document/create-folder [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/remove-folder
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id044
+  - name
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id044
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - name
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: my-folder
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Folder to remove (and its contents).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Remove a folder and all its contents.
+    evidence: server/endpoints/api/document/index.js:1048
+  operation_semantic: remove_folder
+  semantic_inputs:
+  - FolderName(folder)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: name
+    resource: FolderName(folder)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - name
+    reason: Folder to remove.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:1048
+      supports: DELETE /v1/document/remove-folder [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/document/move-files
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id045
+  - files
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id045
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - files
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        files:
+        - from: a/x.json
+          to: b/x.json
+      fields:
+      - name: files
+        location: body
+        path: ''
+        type: array
+        required: true
+        flow: true
+        description: Array of {from, to} document paths.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: message
+        path: message
+        type: string
+        flow: false
+        description: Result message.
+    reason: Move files; destinations validated by isFolderFilePath (traversal guard).
+    evidence: server/endpoints/api/document/index.js:1107
+  operation_semantic: move_files
+  semantic_inputs:
+  - DocumentLocation(document)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: files
+    resource: DocumentLocation(document)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - files
+    reason: Document from/to storage paths.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:1107
+      supports: POST /v1/document/move-files [validApiKey]
+    notes: Destination paths are validated to a top-level folder/file (path-traversal guard).
+- key: http://localhost/api/v1/document/generated-files/{filename}
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 404
+  content_types:
+  - application/json
+  params: []
+  inputs: &id046
+  - filename
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id046
+  io_variants:
+  - method: GET
+    content_types:
+    - application/octet-stream
+    inputs:
+    - filename
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: filename
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Generated file storageFilename.
+    response:
+      format: raw
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: application/octet-stream download of the generated file.
+      fields: []
+    reason: Download an agent-generated file; filename format-validated.
+    evidence: server/endpoints/api/document/index.js:1219
+  operation_semantic: download_generated_file
+  semantic_inputs:
+  - GeneratedFileName(file)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: filename
+    resource: GeneratedFileName(file)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - filename
+    reason: Generated file name (format-validated against traversal).
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Documents').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:1219
+      supports: GET /v1/document/generated-files/:filename [validApiKey]
+    notes: Download by caller-supplied filename; format validation rejects traversal ('Invalid filename
+      format').
+- key: http://localhost/api/v1/openai/models
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id047 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id047
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: data
+        path: data
+        type: array
+        flow: true
+        description: OpenAI-style model list (id == workspace slug).
+    reason: Workspaces presented as OpenAI models.
+    evidence: server/endpoints/api/openai/index.js:19
+  operation_semantic: openai_list_models
+  semantic_inputs: []
+  semantic_outputs:
+  - WorkspaceSlug(workspace)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - &id052
+    raw_field: data[].id
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Model/store id == workspace slug.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:19
+      supports: GET /v1/openai/models [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/openai/chat/completions
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id048
+  - model
+  - messages
+  outputs:
+  - choices
+  input_spec:
+    format: json
+    fields: *id048
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - model
+    - messages
+    outputs:
+    - choices
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        model: my-workspace
+        messages:
+        - role: user
+          content: hi
+        stream: false
+      fields:
+      - name: model
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug used as the model.
+      - name: messages
+        location: body
+        path: ''
+        type: array
+        required: true
+        flow: true
+        description: OpenAI messages (last user message is the prompt).
+      - name: stream
+        location: body
+        path: ''
+        type: boolean
+        required: false
+        flow: false
+        description: Stream the completion.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: choices
+        path: choices
+        type: array
+        flow: true
+        description: OpenAI choices (model-authored content).
+      - name: id
+        path: id
+        type: string
+        flow: false
+        description: Completion id.
+    reason: OpenAI-compatible chat over a workspace.
+    evidence: server/endpoints/api/openai/index.js:76
+  operation_semantic: openai_chat_completion
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - ChatMessage(chat)
+  semantic_outputs:
+  - ChatResponse(chat)
+  semantic_input_decisions:
+  - raw_field: model
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - model
+    reason: Workspace slug used as the model.
+  - raw_field: messages
+    resource: ChatMessage(chat)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Untrusted chat messages.
+  semantic_output_decisions:
+  - raw_field: choices
+    resource: ChatResponse(chat)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Model-authored completion.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:76
+      supports: POST /v1/openai/chat/completions [validApiKey]
+    notes: OpenAI-compatible chat; untrusted messages -> LLM -> model-authored output. Supports stream.
+- key: http://localhost/api/v1/openai/images/generations
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id049
+  - prompt
+  - image_references
+  outputs:
+  - data
+  input_spec:
+    format: plain
+    fields: *id049
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - prompt
+    - image_references
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: form
+      body_example: {}
+      fields:
+      - name: prompt
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Image prompt.
+      - name: size
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: Image size.
+      - name: image_references
+        location: body
+        path: ''
+        type: file
+        required: false
+        flow: true
+        description: Reference image(s) for editing.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: data
+        path: data
+        type: array
+        flow: true
+        description: Generated image(s) as base64 PNG.
+    reason: Generate/edit an image via the configured provider.
+    evidence: server/endpoints/api/openai/index.js:195
+  operation_semantic: openai_generate_image
+  semantic_inputs:
+  - ImagePrompt(image)
+  semantic_outputs:
+  - GeneratedImage(image)
+  semantic_input_decisions:
+  - raw_field: prompt
+    resource: ImagePrompt(image)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Image generation prompt.
+  - raw_field: image_references
+    resource: ImageReference(image)
+    mergeable: false
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Reference images for editing.
+  semantic_output_decisions:
+  - raw_field: data
+    resource: GeneratedImage(image)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Generated image bytes (base64).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:195
+      supports: POST /v1/openai/images/generations [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/openai/embeddings
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 500
+  content_types:
+  - application/json
+  params: []
+  inputs: &id050
+  - input
+  outputs:
+  - data
+  input_spec:
+    format: json
+    fields: *id050
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - input
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        input:
+        - some text
+      fields:
+      - name: input
+        location: body
+        path: ''
+        type: string|array
+        required: true
+        flow: true
+        description: Text(s) to embed.
+      - name: model
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: Ignored; uses system embedder.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: data
+        path: data
+        type: array
+        flow: true
+        description: Embedding vectors.
+    reason: Embed arbitrary text with the system embedder.
+    evidence: server/endpoints/api/openai/index.js:290
+  operation_semantic: openai_embeddings
+  semantic_inputs:
+  - EmbedInput(text)
+  semantic_outputs:
+  - Embedding(text)
+  semantic_input_decisions:
+  - raw_field: input
+    resource: EmbedInput(text)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Text to embed.
+  semantic_output_decisions:
+  - raw_field: data
+    resource: Embedding(text)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Embedding vectors.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:290
+      supports: POST /v1/openai/embeddings [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/openai/vector_stores
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id051 []
+  outputs:
+  - data
+  input_spec:
+    format: ''
+    fields: *id051
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - data
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: data
+        path: data
+        type: array
+        flow: true
+        description: Vector stores (== workspace slugs).
+    reason: Workspaces presented as vector stores.
+    evidence: server/endpoints/api/openai/index.js:357
+  operation_semantic: openai_list_vector_stores
+  semantic_inputs: []
+  semantic_outputs:
+  - WorkspaceSlug(workspace)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - *id052
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:357
+      supports: GET /v1/openai/vector_stores [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/users
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id053 []
+  outputs:
+  - users
+  input_spec:
+    format: ''
+    fields: *id053
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - users
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: users
+        path: users
+        type: array
+        flow: true
+        description: All users (id, username, role).
+    reason: List users.
+    evidence: server/endpoints/api/userManagement/index.js:12
+  operation_semantic: list_users
+  semantic_inputs: []
+  semantic_outputs:
+  - Username(user)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - &id057
+    raw_field: users[].username
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - username
+    reason: Listed usernames.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'User Management').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/userManagement/index.js:12
+      supports: GET /v1/users [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/users/{id}/issue-auth-token
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id054
+  - id
+  outputs:
+  - token
+  input_spec:
+    format: plain
+    fields: *id054
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs:
+    - token
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: integer
+        required: true
+        flow: true
+        description: User id.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: Temporary login token for the user.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Issue a temporary auth/login token for a user.
+    evidence: server/endpoints/api/userManagement/index.js:68
+  operation_semantic: issue_user_auth_token
+  semantic_inputs:
+  - UserID(user)
+  semantic_outputs:
+  - AuthToken(session)
+  semantic_input_decisions:
+  - &id060
+    raw_field: id
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: User id path parameter.
+  semantic_output_decisions:
+  - raw_field: token
+    resource: AuthToken(session)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Issued login token for the target user (impersonation surface).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'User Management').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/userManagement/index.js:68
+      supports: GET /v1/users/:id/issue-auth-token [validApiKey]
+    notes: Issues a login token for ANY user id -> impersonation. Requires multi-user mode.
+- key: http://localhost/api/v1/admin/is-multi-user-mode
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id055 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id055
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: isMultiUser
+        path: isMultiUser
+        type: boolean
+        flow: false
+        description: True if multi-user mode is on.
+    reason: Report multi-user mode status.
+    evidence: server/endpoints/api/admin/index.js:15
+  operation_semantic: check_multi_user_mode
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:15
+      supports: GET /v1/admin/is-multi-user-mode [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/admin/users
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id056 []
+  outputs:
+  - users
+  input_spec:
+    format: ''
+    fields: *id056
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - users
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: users
+        path: users
+        type: array
+        flow: true
+        description: All users.
+    reason: Admin list users.
+    evidence: server/endpoints/api/admin/index.js:41
+  operation_semantic: admin_list_users
+  semantic_inputs: []
+  semantic_outputs:
+  - Username(user)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - *id057
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:41
+      supports: GET /v1/admin/users [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/users/new
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id058
+  - username
+  - password
+  - role
+  outputs:
+  - user
+  input_spec:
+    format: json
+    fields: *id058
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - username
+    - password
+    - role
+    outputs:
+    - user
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        username: sample-sam
+        password: hunter2
+        role: default
+      fields:
+      - name: username
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New username.
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New password.
+      - name: role
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: User role (default|manager|admin).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: user
+        path: user
+        type: object
+        flow: true
+        description: Created user.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Create a user.
+    evidence: server/endpoints/api/admin/index.js:85
+  operation_semantic: admin_create_user
+  semantic_inputs:
+  - Username(user)
+  - Password(user)
+  - UserRole(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: username
+    resource: Username(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - username
+    reason: New username.
+  - raw_field: password
+    resource: Password(user)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: New password.
+  - raw_field: role
+    resource: UserRole(user)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: User role.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:85
+      supports: POST /v1/admin/users/new [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/users/{id}
+  kind: api
+  methods:
+  - POST
+  - DELETE
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id059
+  - id
+  - username
+  - password
+  - role
+  - suspended
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id059
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - id
+    - username
+    - password
+    - role
+    - suspended
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        role: admin
+        suspended: 0
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: integer
+        required: true
+        flow: true
+        description: User id.
+      - name: username
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: New username.
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: New password.
+      - name: role
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: New role.
+      - name: suspended
+        location: body
+        path: ''
+        type: integer
+        required: false
+        flow: true
+        description: Suspend flag.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Update user settings.
+    evidence: server/endpoints/api/admin/index.js:143
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: integer
+        required: true
+        flow: true
+        description: User id.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Delete user.
+    evidence: server/endpoints/api/admin/index.js:216
+  operation_semantic: admin_user_by_id
+  semantic_inputs:
+  - UserID(user)
+  - UserRole(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id060
+  - raw_field: role
+    resource: UserRole(user)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: New role.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoints (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:143
+      supports: POST + DELETE /v1/admin/users/:id [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/invites
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id061 []
+  outputs:
+  - invites
+  input_spec:
+    format: ''
+    fields: *id061
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - invites
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: invites
+        path: invites
+        type: array
+        flow: true
+        description: All invites with status.
+    reason: List invites.
+    evidence: server/endpoints/api/admin/index.js:270
+  operation_semantic: admin_list_invites
+  semantic_inputs: []
+  semantic_outputs:
+  - InviteCode(invite)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: invites[].code
+    resource: InviteCode(invite)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - code
+    reason: Invite codes.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:270
+      supports: GET /v1/admin/invites [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/invite/new
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id062
+  - workspaceIds
+  outputs:
+  - invite
+  input_spec:
+    format: json
+    fields: *id062
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - workspaceIds
+    outputs:
+    - invite
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        workspaceIds:
+        - 1
+        - 2
+      fields:
+      - name: workspaceIds
+        location: body
+        path: ''
+        type: array
+        required: false
+        flow: true
+        description: Workspaces to auto-add the invitee to.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: invite
+        path: invite
+        type: object
+        flow: true
+        description: Created invite (code).
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Create an invite code.
+    evidence: server/endpoints/api/admin/index.js:316
+  operation_semantic: admin_create_invite
+  semantic_inputs: []
+  semantic_outputs:
+  - InviteCode(invite)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: invite.code
+    resource: InviteCode(invite)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - code
+    reason: Created invite code.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:316
+      supports: POST /v1/admin/invite/new [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/invite/{id}
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id063
+  - id
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id063
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - id
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: id
+        location: path
+        path: ''
+        type: integer
+        required: true
+        flow: true
+        description: Invite id.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Deactivate invite.
+    evidence: server/endpoints/api/admin/index.js:375
+  operation_semantic: admin_delete_invite
+  semantic_inputs:
+  - InviteID(invite)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: id
+    resource: InviteID(invite)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: Invite id.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:375
+      supports: DELETE /v1/admin/invite/:id [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/workspaces/{workspaceId}/users
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id064
+  - workspaceId
+  outputs:
+  - users
+  input_spec:
+    format: plain
+    fields: *id064
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - workspaceId
+    outputs:
+    - users
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: workspaceId
+        location: path
+        path: ''
+        type: integer
+        required: true
+        flow: true
+        description: Workspace id.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: users
+        path: users
+        type: array
+        flow: true
+        description: Users with access to the workspace.
+    reason: List workspace users.
+    evidence: server/endpoints/api/admin/index.js:442
+  operation_semantic: admin_list_workspace_users
+  semantic_inputs:
+  - WorkspaceID(workspace)
+  semantic_outputs:
+  - Username(user)
+  semantic_input_decisions:
+  - raw_field: workspaceId
+    resource: WorkspaceID(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - workspaceId
+    reason: Workspace id.
+  semantic_output_decisions:
+  - *id057
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:442
+      supports: GET /v1/admin/workspaces/:workspaceId/users [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/workspaces/{workspaceId}/update-users
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id065
+  - workspaceId
+  - userIds
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id065
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - workspaceId
+    - userIds
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        userIds:
+        - 1
+        - 2
+      fields:
+      - name: workspaceId
+        location: path
+        path: ''
+        type: integer
+        required: true
+        flow: true
+        description: Workspace id.
+      - name: userIds
+        location: body
+        path: ''
+        type: array
+        required: true
+        flow: true
+        description: User ids to grant access.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Overwrite workspace access list.
+    evidence: server/endpoints/api/admin/index.js:497
+  operation_semantic: admin_overwrite_workspace_users
+  semantic_inputs:
+  - WorkspaceID(workspace)
+  - UserID(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: workspaceId
+    resource: WorkspaceID(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - workspaceId
+    reason: Workspace id.
+  - raw_field: userIds
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - userIds
+    reason: User ids granted access.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:497
+      supports: POST /v1/admin/workspaces/:workspaceId/update-users [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/workspaces/{workspaceSlug}/manage-users
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id066
+  - workspaceSlug
+  - userIds
+  outputs:
+  - users
+  input_spec:
+    format: json
+    fields: *id066
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - workspaceSlug
+    - userIds
+    outputs:
+    - users
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        userIds:
+        - 1
+        - 2
+        reset: false
+      fields:
+      - name: workspaceSlug
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace slug.
+      - name: userIds
+        location: body
+        path: ''
+        type: array
+        required: true
+        flow: true
+        description: User ids to grant access.
+      - name: reset
+        location: body
+        path: ''
+        type: boolean
+        required: false
+        flow: false
+        description: Reset access list.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: users
+        path: users
+        type: array
+        flow: true
+        description: Resulting access list.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Set workspace access list.
+    evidence: server/endpoints/api/admin/index.js:564
+  operation_semantic: admin_manage_workspace_users
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - UserID(user)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id013
+  - raw_field: userIds
+    resource: UserID(user)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - userIds
+    reason: User ids granted access.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:564
+      supports: POST /v1/admin/workspaces/:workspaceSlug/manage-users [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/admin/workspace-chats
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id067 []
+  outputs:
+  - chats
+  input_spec:
+    format: json
+    fields: *id067
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - chats
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        offset: 0
+      fields:
+      - name: offset
+        location: body
+        path: ''
+        type: integer
+        required: false
+        flow: false
+        description: Pagination offset.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: chats
+        path: chats
+        type: array
+        flow: true
+        description: All chats in the system.
+      - name: hasPages
+        path: hasPages
+        type: boolean
+        flow: false
+        description: More pages flag.
+    reason: All chats across the instance.
+    evidence: server/endpoints/api/admin/index.js:679
+  operation_semantic: admin_read_workspace_chats
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:679
+      supports: POST /v1/admin/workspace-chats [validApiKey]
+    notes: Returns ALL chats across ALL workspaces/users -- instance-wide data exposure. Requires multi-user
+      mode.
+- key: http://localhost/api/v1/admin/preferences
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id068
+  - preferences
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id068
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - preferences
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        limit_user_messages: true
+      fields:
+      - name: preferences
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Multi-user preference settings.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Update multi-user preferences.
+    evidence: server/endpoints/api/admin/index.js:735
+  operation_semantic: admin_update_preferences
+  semantic_inputs:
+  - SystemSettings(system)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: preferences
+    resource: SystemSettings(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Multi-user preference settings.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Admin').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:735
+      supports: POST /v1/admin/preferences [validApiKey]
+    notes: Requires multi-user mode.
+- key: http://localhost/api/v1/embed
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id069 []
+  outputs:
+  - embeds
+  input_spec:
+    format: ''
+    fields: *id069
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - embeds
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: embeds
+        path: embeds
+        type: array
+        flow: true
+        description: Active embed widgets.
+    reason: List embeds.
+    evidence: server/endpoints/api/embed/index.js:10
+  operation_semantic: list_embeds
+  semantic_inputs: []
+  semantic_outputs:
+  - EmbedUUID(embed)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: embeds[].uuid
+    resource: EmbedUUID(embed)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - uuid
+    reason: Embed uuids.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Embed').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:10
+      supports: GET /v1/embed [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/embed/{embedUuid}/chats
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  - 404
+  content_types:
+  - application/json
+  params: []
+  inputs: &id070
+  - embedUuid
+  outputs:
+  - chats
+  input_spec:
+    format: plain
+    fields: *id070
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - embedUuid
+    outputs:
+    - chats
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: embedUuid
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Embed uuid.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: chats
+        path: chats
+        type: array
+        flow: true
+        description: All chats for the embed.
+    reason: Embed chats.
+    evidence: server/endpoints/api/embed/index.js:79
+  operation_semantic: read_embed_chats
+  semantic_inputs:
+  - EmbedUUID(embed)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - &id072
+    raw_field: embedUuid
+    resource: EmbedUUID(embed)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - embedUuid
+    reason: Embed uuid identifies the widget config.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Embed').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:79
+      supports: GET /v1/embed/:embedUuid/chats [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/embed/{embedUuid}/chats/{sessionUuid}
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  - 404
+  content_types:
+  - application/json
+  params: []
+  inputs: &id071
+  - embedUuid
+  - sessionUuid
+  outputs:
+  - chats
+  input_spec:
+    format: plain
+    fields: *id071
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs:
+    - embedUuid
+    - sessionUuid
+    outputs:
+    - chats
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: embedUuid
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Embed uuid.
+      - name: sessionUuid
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Session uuid.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: chats
+        path: chats
+        type: array
+        flow: true
+        description: Chats for the embed session.
+    reason: Embed session chats.
+    evidence: server/endpoints/api/embed/index.js:141
+  operation_semantic: read_embed_session_chats
+  semantic_inputs:
+  - EmbedUUID(embed)
+  - SessionUUID(session)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id072
+  - raw_field: sessionUuid
+    resource: SessionUUID(session)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - sessionUuid
+    reason: Embed chat session uuid.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Embed').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:141
+      supports: GET /v1/embed/:embedUuid/chats/:sessionUuid [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/embed/new
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id073
+  - workspace_slug
+  - config
+  outputs:
+  - embed
+  input_spec:
+    format: json
+    fields: *id073
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - workspace_slug
+    - config
+    outputs:
+    - embed
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        workspace_slug: workspace-slug-1
+        chat_mode: chat
+        allowlist_domains:
+        - example.com
+        allow_prompt_override: false
+      fields:
+      - name: workspace_slug
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Workspace the embed chats against.
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: false
+        flow: true
+        description: Embed config (chat_mode, allowlist_domains, allow_prompt_override, limits...).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: embed
+        path: embed
+        type: object
+        flow: true
+        description: Created embed (uuid).
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Create an embed widget config.
+    evidence: server/endpoints/api/embed/index.js:201
+  operation_semantic: create_embed
+  semantic_inputs:
+  - WorkspaceSlug(workspace)
+  - EmbedConfig(embed)
+  semantic_outputs:
+  - EmbedUUID(embed)
+  semantic_input_decisions:
+  - raw_field: workspace_slug
+    resource: WorkspaceSlug(workspace)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - workspace_slug
+    reason: Target workspace.
+  - raw_field: config
+    resource: EmbedConfig(embed)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Embed widget configuration.
+  semantic_output_decisions:
+  - raw_field: embed.uuid
+    resource: EmbedUUID(embed)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - uuid
+    reason: Created embed uuid.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'Embed').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:201
+      supports: POST /v1/embed/new [validApiKey]
+    notes: Creates a PUBLIC chat widget (allowlist_domains / allow_prompt_override are the exposure controls).
+- key: http://localhost/api/v1/embed/{embedUuid}
+  kind: api
+  methods:
+  - POST
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  - 404
+  content_types:
+  - application/json
+  params: []
+  inputs: &id074
+  - embedUuid
+  - config
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id074
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - embedUuid
+    - config
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example: {}
+      fields:
+      - name: embedUuid
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Embed uuid.
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Updated embed config.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: error
+        path: error
+        type: string
+        flow: false
+        description: Error or null.
+    reason: Update embed config.
+    evidence: server/endpoints/api/embed/index.js:287
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - embedUuid
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: embedUuid
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Embed uuid.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+    reason: Delete embed.
+    evidence: server/endpoints/api/embed/index.js:358
+  operation_semantic: embed_by_uuid
+  semantic_inputs:
+  - EmbedUUID(embed)
+  - EmbedConfig(embed)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id072
+  - raw_field: config
+    resource: EmbedConfig(embed)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Updated embed config.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoints (Swagger 'Embed').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:287
+      supports: POST + DELETE /v1/embed/:embedUuid [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/mcp-servers
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id075 []
+  outputs:
+  - servers
+  input_spec:
+    format: ''
+    fields: *id075
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - servers
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: servers
+        path: servers
+        type: array
+        flow: true
+        description: MCP servers with status, config, tools.
+    reason: List MCP servers.
+    evidence: server/endpoints/api/mcpServers/index.js:8
+  operation_semantic: list_mcp_servers
+  semantic_inputs: []
+  semantic_outputs:
+  - MCPServerName(server)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: servers[].name
+    resource: MCPServerName(server)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - name
+    reason: MCP server names.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:8
+      supports: GET /v1/mcp-servers [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/mcp-servers/new
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id076
+  - name
+  - config
+  outputs:
+  - server
+  input_spec:
+    format: json
+    fields: *id076
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - config
+    outputs:
+    - server
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: my-mcp
+        config:
+          command: npx
+          args:
+          - '...'
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: MCP server name.
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: MCP server config (command/args/env or url).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+      - name: server
+        path: server
+        type: object
+        flow: true
+        description: The new server record.
+    reason: Add + start an MCP server.
+    evidence: server/endpoints/api/mcpServers/index.js:48
+  operation_semantic: add_mcp_server
+  semantic_inputs:
+  - MCPServerName(server)
+  - MCPConfig(server)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: name
+    resource: MCPServerName(server)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - name
+    reason: MCP server name.
+  - raw_field: config
+    resource: MCPConfig(server)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: MCP server config (command executed / URL contacted).
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:48
+      supports: POST /v1/mcp-servers/new [validApiKey]
+    notes: Config can define a command the server executes -> code-execution/tool surface for agents.
+- key: http://localhost/api/v1/mcp-servers/reload
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id077 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id077
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+    reason: Restart all MCP servers.
+    evidence: server/endpoints/api/mcpServers/index.js:108
+  operation_semantic: reload_mcp_servers
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:108
+      supports: POST /v1/mcp-servers/reload [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/mcp-servers/{name}/update
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id078
+  - name
+  - config
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id078
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - config
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        config:
+          command: npx
+      fields:
+      - name: name
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: MCP server name.
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Replacement config.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+    reason: Replace + restart an MCP server.
+    evidence: server/endpoints/api/mcpServers/index.js:139
+  operation_semantic: update_mcp_server
+  semantic_inputs:
+  - MCPServerName(server)
+  - MCPConfig(server)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - &id080
+    raw_field: name
+    resource: MCPServerName(server)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - name
+    reason: MCP server name identifies the server.
+  - raw_field: config
+    resource: MCPConfig(server)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Replacement MCP config.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:139
+      supports: POST /v1/mcp-servers/:name/update [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/mcp-servers/{name}/toggle
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id079
+  - name
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id079
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: name
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: MCP server name.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+    reason: Start/stop an MCP server.
+    evidence: server/endpoints/api/mcpServers/index.js:209
+  operation_semantic: toggle_mcp_server
+  semantic_inputs:
+  - MCPServerName(server)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id080
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:209
+      supports: POST /v1/mcp-servers/:name/toggle [validApiKey]
+    notes: null
+- key: http://localhost/api/v1/mcp-servers/{name}/toggle-tool
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id081
+  - name
+  - toolName
+  - enabled
+  outputs: []
+  input_spec:
+    format: json
+    fields: *id081
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - toolName
+    - enabled
+    outputs: []
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        toolName: search
+        enabled: true
+      fields:
+      - name: name
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: MCP server name.
+      - name: toolName
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Tool to enable/disable.
+      - name: enabled
+        location: body
+        path: ''
+        type: boolean
+        required: true
+        flow: true
+        description: Enable flag.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+    reason: Enable/disable one MCP tool.
+    evidence: server/endpoints/api/mcpServers/index.js:252
+  operation_semantic: toggle_mcp_tool
+  semantic_inputs:
+  - MCPServerName(server)
+  - ToolName(tool)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id080
+  - raw_field: toolName
+    resource: ToolName(tool)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - toolName
+    reason: MCP tool name.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:252
+      supports: POST /v1/mcp-servers/:name/toggle-tool [validApiKey]
+    notes: Disabled tools are not exposed to agents (agent tool-surface control).
+- key: http://localhost/api/v1/mcp-servers/{name}
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 200
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id082
+  - name
+  outputs: []
+  input_spec:
+    format: plain
+    fields: *id082
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs:
+    - name
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields:
+      - name: name
+        location: path
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: MCP server name.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: success
+        path: success
+        type: boolean
+        flow: false
+        description: Succeeded.
+    reason: Stop + remove an MCP server.
+    evidence: server/endpoints/api/mcpServers/index.js:322
+  operation_semantic: delete_mcp_server
+  semantic_inputs:
+  - MCPServerName(server)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - *id080
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id004
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint (Swagger 'MCP Servers').
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:322
+      supports: DELETE /v1/mcp-servers/:name [validApiKey]
+    notes: null
+edges: []
+excluded_items:
+- item: 'Internal UI API (/api/* non-v1: /api/system/*, /api/workspace/*, /api/admin/*, /api/embed/*,
+    /api/agents/*, /api/mobile/*, ...)'
+  reason: Session/JWT-authenticated browser-app API consumed by the frontend; large separate surface.
+    Tracked as remaining work in environment.yaml (web_gt_status). Not yet enumerated here.
+- item: 'Developer API (/api/v1/*) modules not yet modeled: workspace, workspaceThread, document, openai,
+    admin, userManagement, embed, mcp-servers'
+  reason: In-progress. This checkpoint models the System Settings + Authentication module; the remaining
+    /api/v1 modules are enumerated in environment.yaml and will be added incrementally.

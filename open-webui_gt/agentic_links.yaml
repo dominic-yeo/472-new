@@ -1,0 +1,184 @@
+# Open WebUI -- agentic link layer (Phase F).
+# Focused L1/L2 STUBS for the surfaces the agentic GT forward-references by id
+# (agentic_gt.yaml: invocation_surfaces[].l1_id, tool_bindings[].l1_ids,
+#  context_sources/output_sinks[].l1_id, execution_edges, related_l2_ids).
+# These are link-resolution stubs, NOT the full pengent-web-gt-v1 node contract
+# (the validated HTTP web-GT lives in l1_gt.yaml / l2_gt.yaml; module 1 = auths).
+# Stub fields mirror the openclaw focused link-layer. Source-only; no runtime capture.
+schema_version: pengent-web-gt-v1
+environment_id: open-webui-local
+scope: "agentic link layer: L1/L2 ids referenced by agentic_gt.yaml (stubs, not a full HTTP sweep)"
+
+l1_nodes:
+# --- invocation surfaces (untrusted entry that drives an agent turn) ---
+- {id: l1.api.chat.completions, key: "POST /api/chat/completions", kind: api, surface_class: invocation,
+   inputs: [messages, model, tool_ids, files], outputs: [assistant_message, tool_calls],
+   auth_context: session JWT or API key -> UserModel,
+   source_ref: "main.py chat_completion; utils/middleware.py process_chat_payload/response",
+   gt: {visibility: {minimum: grey_box, reason: "PRIMARY untrusted entry; user prompt drives the tool-calling loop."},
+        black_box_reachable: true, notes: "Prompt-injection source that steers model-selected tool calls."}}
+- {id: l1.api.chat.completed, key: "POST /api/chat/completed", kind: api, surface_class: invocation,
+   inputs: [chat_id, message, model], outputs: [persisted_message],
+   auth_context: same user; write access to chat,
+   source_ref: "main.py chat_completed (post-turn hook)",
+   gt: {visibility: {minimum: grey_box, reason: "Post-turn completion hook; finalizes/persists the turn."},
+        black_box_reachable: true, notes: "Carries model-authored content into stored chat state."}}
+- {id: l1.api.chats.params, key: "POST /api/v1/chats/{id} (params)", kind: api, surface_class: config,
+   inputs: [params, system, models], outputs: [chat],
+   source_ref: "routers/chats.py update chat params/system prompt",
+   gt: {visibility: {minimum: grey_box, reason: "Per-chat system prompt / params shape the agent."},
+        black_box_reachable: true, notes: "Chat-scoped system-prompt override."}}
+# --- tool-backing surfaces (HTTP routes behind builtin/workspace tools) ---
+- {id: l1.api.code_execute, key: "builtin:code_interpreter", kind: api, surface_class: tool_backing,
+   inputs: [code], outputs: [stdout, result], auth_context: turn user; code_interpreter enabled,
+   source_ref: "utils/code_interpreter.py; tools.py get_builtin_tools(code_interpreter)",
+   gt: {visibility: {minimum: grey_box, reason: "code_execution effect class; arbitrary code run."},
+        black_box_reachable: true, notes: "Pyodide/Jupyter code execution tool."}}
+- {id: l1.api.terminal.execute, key: "terminal:execute", kind: api, surface_class: tool_backing,
+   inputs: [command], outputs: [terminal_output], auth_context: user session; terminal server config,
+   source_ref: "utils/tools.py get_terminal_tools; utils/agents/acp.py",
+   gt: {visibility: {minimum: grey_box, reason: "code_execution effect class; shell/terminal tool."},
+        black_box_reachable: true, notes: "Terminal server command execution."}}
+- {id: l1.api.tools.execute, key: "tool:workspace_python", kind: api, surface_class: tool_backing,
+   inputs: [tool_id, args], outputs: [tool_result], auth_context: turn user; tool access grant,
+   source_ref: "tools.py get_tools (workspace python tool_ids)",
+   gt: {visibility: {minimum: grey_box, reason: "code_execution effect class; user-authored Python tool."},
+        black_box_reachable: true, notes: "Workspace Python tool execution."}}
+- {id: l1.api.tool_server.execute, key: "tool_server:execute", kind: api, surface_class: tool_backing,
+   inputs: [server_id, operation, args], outputs: [tool_result], auth_context: turn user; tool-server config,
+   source_ref: "tools.py get_tool_servers_data/execute_tool_server",
+   gt: {visibility: {minimum: grey_box, reason: "mixed effect class; external OpenAPI tool server call (SSRF/exfil)."},
+        black_box_reachable: true, notes: "Outbound call to a configured OpenAPI tool server."}}
+- {id: l1.api.retrieval.query, key: "POST /api/v1/retrieval/query", kind: api, surface_class: tool_backing,
+   inputs: [query, collection], outputs: [chunks], auth_context: turn user; knowledge access,
+   source_ref: "tools.py get_builtin_tools(knowledge); routers/retrieval.py",
+   gt: {visibility: {minimum: grey_box, reason: "read effect class; RAG retrieval into context."},
+        black_box_reachable: true, notes: "Knowledge/RAG retrieval tool (indirect-injection source)."}}
+- {id: l1.api.web_search, key: "builtin:web_search", kind: api, surface_class: tool_backing,
+   inputs: [query], outputs: [results], auth_context: turn user; web_search enabled,
+   source_ref: "tools.py get_builtin_tools(web_search): search_web",
+   gt: {visibility: {minimum: grey_box, reason: "external_send effect class; outbound search."},
+        black_box_reachable: true, notes: "Web search tool; untrusted content pulled into context."}}
+- {id: l1.api.web_fetch, key: "builtin:web_fetch", kind: api, surface_class: tool_backing,
+   inputs: [url], outputs: [page_content], auth_context: turn user; web enabled,
+   source_ref: "tools.py get_builtin_tools(web_search): fetch_url",
+   gt: {visibility: {minimum: grey_box, reason: "external_send effect class; URL fetch (SSRF + indirect injection)."},
+        black_box_reachable: true, notes: "Fetches a model-chosen URL into context."}}
+- {id: l1.api.terminal, key: "terminal:session", kind: api, surface_class: tool_backing,
+   inputs: [connection], outputs: [session], auth_context: user session; terminal server connection config,
+   source_ref: "routers/terminals.py",
+   gt: {visibility: {minimum: grey_box, reason: "Terminal session surface backing the terminal tool."},
+        black_box_reachable: true, notes: "Terminal server connection."}}
+# --- config surfaces that shape the agent / its tools ---
+- {id: l1.api.configs.tool_servers, key: "POST /api/v1/configs/tool_servers", kind: api, surface_class: config,
+   inputs: [tool_servers], outputs: [config], auth_context: admin,
+   source_ref: "routers/configs.py tool_servers",
+   gt: {visibility: {minimum: grey_box, reason: "Registers external OpenAPI tool servers (adds tool surface)."},
+        black_box_reachable: true, notes: "Defines outbound tool-server endpoints + auth."}}
+- {id: l1.api.configs.tool_permissions, key: "POST /api/v1/configs/tool_permissions", kind: api, surface_class: config,
+   inputs: [permissions], outputs: [config], auth_context: admin,
+   source_ref: "routers/configs.py tool_permissions",
+   gt: {visibility: {minimum: grey_box, reason: "Approval/permission policy for tool calls (the primary gate)."},
+        black_box_reachable: true, notes: "When disabled, approval mode is 'full' (no gate)."}}
+- {id: l1.api.configs.terminal_servers, key: "POST /api/v1/configs/terminal_servers", kind: api, surface_class: config,
+   inputs: [terminal_servers], outputs: [config], auth_context: admin,
+   source_ref: "routers/configs.py terminal_servers",
+   gt: {visibility: {minimum: grey_box, reason: "Registers terminal servers backing the terminal tool."},
+        black_box_reachable: true, notes: "Command-execution backend config."}}
+- {id: l1.api.configs.subagents, key: "POST /api/v1/configs/subagents", kind: api, surface_class: config,
+   inputs: [subagent_config], outputs: [config], auth_context: admin,
+   source_ref: "routers/configs.py subagents; utils/subagents.py",
+   gt: {visibility: {minimum: grey_box, reason: "Enables/shapes sub-agent delegation."},
+        black_box_reachable: true, notes: "Sub-agent spawn policy."}}
+- {id: l1.api.configs.task, key: "POST /api/v1/configs/task", kind: api, surface_class: config,
+   inputs: [task_model_config], outputs: [config], auth_context: admin,
+   source_ref: "routers/configs.py task; routers/tasks.py",
+   gt: {visibility: {minimum: grey_box, reason: "Task/title/autocomplete model config (system-prompt templates)."},
+        black_box_reachable: true, notes: "Controls auxiliary model prompts."}}
+- {id: l1.api.configs.default_settings, key: "POST /api/v1/configs/default_settings", kind: api, surface_class: config,
+   inputs: [default_settings], outputs: [config], auth_context: admin,
+   source_ref: "routers/configs.py default_settings",
+   gt: {visibility: {minimum: grey_box, reason: "Instance default UI/model settings."},
+        black_box_reachable: true, notes: "Global defaults applied to turns."}}
+- {id: l1.api.models.config, key: "POST /api/v1/models (config)", kind: api, surface_class: config,
+   inputs: [model, params, system, capabilities], outputs: [model],
+   auth_context: admin (or owner for workspace models),
+   source_ref: "routers/models.py",
+   gt: {visibility: {minimum: grey_box, reason: "Model definition: system prompt, capabilities, tool access."},
+        black_box_reachable: true, notes: "Binds system prompt + allowed tools to a model."}}
+- {id: l1.api.tools.create, key: "POST /api/v1/tools/create", kind: api, surface_class: config,
+   inputs: [tool_id, content, meta], outputs: [tool], auth_context: user with tools.create permission,
+   source_ref: "routers/tools.py create",
+   gt: {visibility: {minimum: grey_box, reason: "Registers a Python tool (code that later executes in turns)."},
+        black_box_reachable: true, notes: "Tool source is stored and later run as workspace_python."}}
+- {id: l1.api.skills.update, key: "POST /api/v1/skills/{id}/update", kind: api, surface_class: config,
+   inputs: [skill_id, content], outputs: [skill], auth_context: owner/admin,
+   source_ref: "routers/skills.py update",
+   gt: {visibility: {minimum: grey_box, reason: "Skill content injected into agent context."},
+        black_box_reachable: true, notes: "Lazy-loaded skill content."}}
+- {id: l1.api.tasks, key: "POST /api/v1/tasks/*", kind: api, surface_class: config,
+   inputs: [task_payload], outputs: [task_result], auth_context: user context; task model config,
+   source_ref: "routers/tasks.py",
+   gt: {visibility: {minimum: grey_box, reason: "Auxiliary task generation (titles/tags) via model."},
+        black_box_reachable: true, notes: "Secondary model invocation path."}}
+- {id: l1.api.automations.create, key: "POST /api/v1/automations", kind: api, surface_class: config,
+   inputs: [trigger, action, interval], outputs: [automation], auth_context: user; automations enabled,
+   source_ref: "routers/automations.py create",
+   gt: {visibility: {minimum: grey_box, reason: "Scheduled/triggered agent runs (autonomous invocation)."},
+        black_box_reachable: true, notes: "Time/event-triggered turns without a live user."}}
+- {id: l1.api.users.settings, key: "POST /api/v1/users/user/settings", kind: api, surface_class: config,
+   inputs: [settings], outputs: [settings], auth_context: self,
+   source_ref: "routers/users.py user settings",
+   gt: {visibility: {minimum: grey_box, reason: "Per-user settings incl. tool/model preferences."},
+        black_box_reachable: true, notes: "User-scoped turn configuration."}}
+# --- context sources / output sinks (data into/out of the turn) ---
+- {id: l1.api.files.upload, key: "POST /api/v1/files/", kind: api, surface_class: context_source,
+   inputs: [file], outputs: [file_id], auth_context: user; files enabled,
+   source_ref: "routers/files.py upload",
+   gt: {visibility: {minimum: grey_box, reason: "Uploaded file content enters RAG/turn context (indirect injection)."},
+        black_box_reachable: true, notes: "User-supplied document ingestion."}}
+- {id: l1.api.knowledge.add, key: "POST /api/v1/knowledge/{id}/file/add", kind: api, surface_class: context_source,
+   inputs: [knowledge_id, file_id], outputs: [knowledge], auth_context: knowledge owner,
+   source_ref: "routers/knowledge.py add file",
+   gt: {visibility: {minimum: grey_box, reason: "Knowledge-base content retrieved into context."},
+        black_box_reachable: true, notes: "RAG corpus source."}}
+- {id: l1.api.memories.add, key: "POST /api/v1/memories/add", kind: api, surface_class: context_source,
+   inputs: [content], outputs: [memory], auth_context: self; memories enabled,
+   source_ref: "routers/memories.py add",
+   gt: {visibility: {minimum: grey_box, reason: "Persistent memory recalled into later turns (write->recall)."},
+        black_box_reachable: true, notes: "Cross-session memory store."}}
+- {id: l1.api.notes.write, key: "POST /api/v1/notes/", kind: api, surface_class: output_sink,
+   inputs: [note], outputs: [note_id], auth_context: self; notes enabled,
+   source_ref: "routers/notes.py create",
+   gt: {visibility: {minimum: grey_box, reason: "Agent-written notes persisted."},
+        black_box_reachable: true, notes: "Model output sink."}}
+# --- internal ---
+- {id: l1.internal.subagent, key: "internal:subagent_spawn", kind: internal, surface_class: internal,
+   inputs: [delegated_task], outputs: [subagent_result], auth_context: parent turn user identity,
+   source_ref: "utils/subagents.py delegate",
+   gt: {visibility: {minimum: white_box, reason: "In-process sub-agent spawn; not an external HTTP route."},
+        black_box_reachable: false, notes: "Delegation runs under the parent run's identity."}}
+
+l2_nodes:
+- id: l2.chat.completion
+  name: Agent chat turn
+  kind: normal
+  action_key: owui_agent_chat_turn
+  description: >
+    A user message drives a full agent turn: context assembly (RAG/memory/files) -> model ->
+    model-selected tool calls (builtin code/terminal/web/knowledge, workspace Python, external
+    tool servers) gated by the tool-permission/approval policy -> streamed reply persisted to chat.
+  subject: {id: user, identity: UserModel (session JWT or API key), role: Member, auth_context: Session}
+  operation: {business: agent_turn, crud: Execute}
+  object: {kind: process, id: agent_turn, type: AgentTurn, name: Agent turn, entity: AgentTurn, role: executed}
+  requirements:
+  - {type: authentication, fact: "Authenticated(user, Session)", reason: get_verified_user resolves the turn user}
+  - {type: authorization, fact: "Can(user, Invoke, Model)", reason: model + tool access grants gate the turn}
+  effects:
+  - {fact: "model-selected tools execute under the turn user's authority", basis: action_semantics,
+     reason: "builtin/workspace/tool-server tools dispatch in the middleware loop"}
+  - {fact: "model-composed reply persisted to chat", basis: action_semantics, reason: turn output sink}
+  related_l1_ids: [l1.api.chat.completions, l1.api.chat.completed, l1.api.code_execute,
+    l1.api.terminal.execute, l1.api.tools.execute, l1.api.tool_server.execute, l1.api.retrieval.query,
+    l1.api.web_search, l1.api.web_fetch, l1.api.files.upload, l1.api.knowledge.add, l1.api.memories.add,
+    l1.api.notes.write, l1.internal.subagent]

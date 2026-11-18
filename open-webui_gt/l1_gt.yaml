@@ -1,0 +1,2200 @@
+schema_version: pengent-web-gt-v1
+environment_id: open-webui-local
+scope: 'Open WebUI 0.13.3 HTTP API -- module: Authentication + Account (/api/v1/auths)'
+nodes:
+- key: http://localhost/api/v1/auths/
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id001 []
+  outputs:
+  - token
+  - permissions
+  - id
+  - email
+  - name
+  - role
+  - profile_image_url
+  input_spec:
+    format: ''
+    fields: *id001
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - token
+    - permissions
+    - id
+    - email
+    - name
+    - role
+    - profile_image_url
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: Freshly re-issued JWT session token.
+      - name: token_type
+        path: token_type
+        type: string
+        flow: false
+        description: Bearer.
+      - name: expires_at
+        path: expires_at
+        type: integer
+        flow: false
+        description: Token expiry (epoch).
+      - name: permissions
+        path: permissions
+        type: object
+        flow: true
+        description: Effective permission map for the caller.
+      - name: id
+        path: id
+        type: string
+        flow: true
+        description: User id.
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: User email.
+      - name: name
+        path: name
+        type: string
+        flow: true
+        description: Display name.
+      - name: role
+        path: role
+        type: string
+        flow: true
+        description: user|admin|pending.
+      - name: profile_image_url
+        path: profile_image_url
+        type: string
+        flow: true
+        description: Profile image URL.
+    reason: Returns the caller's session user info and re-issues a token.
+    evidence: backend/open_webui/routers/auths.py:185
+  operation_semantic: get_session_user
+  semantic_inputs: []
+  semantic_outputs:
+  - SessionToken(credential)
+  - Permissions(authz)
+  - UserId(identity)
+  - UserEmail(identity)
+  - DisplayName(identity)
+  - UserRole(authz)
+  - ProfileImage(identity)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - &id010
+    raw_field: token
+    resource: SessionToken(credential)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: token denotes SessionToken(credential).
+  - raw_field: permissions
+    resource: Permissions(authz)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Effective permission map returned with the session.
+  - &id021
+    raw_field: id
+    resource: UserId(identity)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - id
+    reason: id denotes UserId(identity).
+  - &id011
+    raw_field: email
+    resource: UserEmail(identity)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - email
+    reason: email denotes UserEmail(identity).
+  - &id004
+    raw_field: name
+    resource: DisplayName(identity)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: name denotes DisplayName(identity).
+  - &id012
+    raw_field: role
+    resource: UserRole(authz)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: role denotes UserRole(authz).
+  - &id003
+    raw_field: profile_image_url
+    resource: ProfileImage(identity)
+    mergeable: true
+    value_kind: locator
+    reference_capable: true
+    reference_fields:
+    - profile_image_url
+    reason: profile_image_url denotes ProfileImage(identity).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: &id006
+    anonymous:
+    - 401
+    pending:
+    - 200
+    user:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Any authenticated caller reads their own session.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:185
+      supports: GET / [get_current_user] -> SessionUserInfoResponse; re-issues token
+    notes: Re-issues a session token on every call; discloses caller role + effective permissions.
+- key: http://localhost/api/v1/auths/update/profile
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id002
+  - profile_image_url
+  - name
+  - bio
+  outputs:
+  - profile_image_url
+  - name
+  input_spec:
+    format: json
+    fields: *id002
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - profile_image_url
+    - name
+    - bio
+    outputs:
+    - profile_image_url
+    - name
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        profile_image_url: /user.png
+        name: Alice
+        bio: null
+      fields:
+      - name: profile_image_url
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New profile image URL (validate_image_url guards scheme).
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New display name.
+      - name: bio
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Bio text.
+      - name: gender
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: Gender.
+      - name: date_of_birth
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: false
+        description: DOB.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: profile_image_url
+        path: profile_image_url
+        type: string
+        flow: true
+        description: Updated image URL.
+      - name: name
+        path: name
+        type: string
+        flow: true
+        description: Updated name.
+    reason: Updates the caller's own profile fields.
+    evidence: backend/open_webui/routers/auths.py:253
+  operation_semantic: update_profile
+  semantic_inputs:
+  - ProfileImage(identity)
+  - DisplayName(identity)
+  - Bio(identity)
+  semantic_outputs:
+  - ProfileImage(identity)
+  - DisplayName(identity)
+  semantic_input_decisions:
+  - *id003
+  - *id004
+  - raw_field: bio
+    resource: Bio(identity)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Free-text bio.
+  semantic_output_decisions:
+  - *id003
+  - *id004
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: &id018
+    anonymous:
+    - 401
+    pending:
+    - 401
+    user:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Verified caller edits own profile.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:253
+      supports: POST /update/profile [get_verified_user] -> UserProfileImageResponse
+    notes: profile_image_url passes validate_image_url; bio/name are stored-reflected (self-stored XSS
+      surface).
+- key: http://localhost/api/v1/auths/update/timezone
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id005
+  - timezone
+  outputs:
+  - timezone
+  input_spec:
+    format: json
+    fields: *id005
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - timezone
+    outputs:
+    - timezone
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        timezone: Asia/Singapore
+      fields:
+      - name: timezone
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: IANA timezone.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: timezone
+        path: timezone
+        type: string
+        flow: true
+        description: Stored timezone.
+    reason: Stores the caller's preferred timezone.
+    evidence: backend/open_webui/routers/auths.py:288
+  operation_semantic: update_timezone
+  semantic_inputs:
+  - Timezone(preference)
+  semantic_outputs:
+  - Timezone(preference)
+  semantic_input_decisions:
+  - raw_field: timezone
+    resource: Timezone(preference)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: User timezone preference.
+  semantic_output_decisions:
+  - raw_field: timezone
+    resource: Timezone(preference)
+    mergeable: true
+    value_kind: attribute
+    reference_capable: false
+    reference_fields: []
+    reason: Stored timezone.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id006
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller sets own preference.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:288
+      supports: POST /update/timezone [get_current_user]
+    notes: Low-sensitivity preference write.
+- key: http://localhost/api/v1/auths/update/password
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id007
+  - password
+  - new_password
+  outputs:
+  - result
+  input_spec:
+    format: json
+    fields: *id007
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - password
+    - new_password
+    outputs:
+    - result
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        password: old
+        new_password: new
+      fields:
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Current password.
+      - name: new_password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: New password.
+    response:
+      format: scalar
+      scalar_type: boolean
+      value_name: result
+      value_type: boolean
+      value_flow: true
+      value_description: True on success.
+      fields: []
+    reason: Rotates the caller's own password after verifying the current one.
+    evidence: backend/open_webui/routers/auths.py:316
+  operation_semantic: update_password
+  semantic_inputs:
+  - Password(credential)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - &id009
+    raw_field: password
+    resource: Password(credential)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: password denotes Password(credential).
+  - raw_field: new_password
+    resource: Password(credential)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Replacement credential.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id006
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller rotates own credential.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:316
+      supports: POST /update/password [get_current_user] verify_password -> bool
+    notes: Credential write; requires the current password. Secrets are inputs only, never echoed.
+- key: http://localhost/api/v1/auths/ldap
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id008
+  - user
+  - password
+  outputs:
+  - token
+  - email
+  - role
+  input_spec:
+    format: json
+    fields: *id008
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - user
+    - password
+    outputs:
+    - token
+    - email
+    - role
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        user: alice
+        password: '***'
+      fields:
+      - name: user
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: LDAP username.
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: LDAP password.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: Session token on success.
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: Resolved email.
+      - name: role
+        path: role
+        type: string
+        flow: true
+        description: Role.
+    reason: Binds to the configured LDAP server and establishes a session.
+    evidence: backend/open_webui/routers/auths.py:409
+  operation_semantic: ldap_auth
+  semantic_inputs:
+  - LdapUsername(identity)
+  - Password(credential)
+  semantic_outputs:
+  - SessionToken(credential)
+  - UserEmail(identity)
+  - UserRole(authz)
+  semantic_input_decisions:
+  - raw_field: user
+    resource: LdapUsername(identity)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - user
+    reason: LDAP login name.
+  - *id009
+  semantic_output_decisions:
+  - *id010
+  - *id011
+  - *id012
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: &id014
+    anonymous:
+    - 200
+    - 400
+    - 403
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login endpoint (only live when LDAP enabled).
+    black_box_reachable: true
+    reachability_conditions:
+    - ldap.server enabled in admin config
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:409
+      supports: POST /ldap -> SigninResult; escape_filter_chars on bind
+    notes: LDAP bind boundary; filter chars escaped. Live only when LDAP is enabled.
+- key: http://localhost/api/v1/auths/signin
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  - 429
+  content_types:
+  - application/json
+  params: []
+  inputs: &id013
+  - email
+  - password
+  outputs:
+  - token
+  - email
+  - name
+  - role
+  - profile_image_url
+  input_spec:
+    format: json
+    fields: *id013
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - email
+    - password
+    outputs:
+    - token
+    - email
+    - name
+    - role
+    - profile_image_url
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        email: a@b.co
+        password: '***'
+      fields:
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Account email.
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Account password.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: JWT session token (also set as cookie).
+      - name: token_type
+        path: token_type
+        type: string
+        flow: false
+        description: Bearer.
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: Account email.
+      - name: name
+        path: name
+        type: string
+        flow: true
+        description: Name.
+      - name: role
+        path: role
+        type: string
+        flow: true
+        description: Role.
+      - name: profile_image_url
+        path: profile_image_url
+        type: string
+        flow: true
+        description: Image.
+    reason: Password / trusted-header / no-auth signin; issues a session cookie.
+    evidence: backend/open_webui/routers/auths.py:660
+  operation_semantic: signin
+  semantic_inputs:
+  - UserEmail(identity)
+  - Password(credential)
+  semantic_outputs:
+  - SessionToken(credential)
+  - UserEmail(identity)
+  - DisplayName(identity)
+  - UserRole(authz)
+  - ProfileImage(identity)
+  semantic_input_decisions:
+  - *id011
+  - *id009
+  semantic_output_decisions:
+  - *id010
+  - *id011
+  - *id004
+  - *id012
+  - *id003
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id014
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public login endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - ENABLE_PASSWORD_AUTH true for password mode
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:660
+      supports: POST /signin -> create_signin_response(set_cookie=True)
+    - type: source
+      ref: backend/open_webui/routers/auths.py:676
+      supports: 'WEBUI_AUTH_TRUSTED_EMAIL/ROLE_HEADER: proxy header establishes identity+role'
+    notes: 'Auth boundary. Rate-limited (5*3/180s). Alternate modes: trusted-header (proxy header sets
+      identity AND role -> impersonation if header spoofable) and WEBUI_AUTH=false (admin@localhost/admin
+      bootstrap).'
+- key: http://localhost/api/v1/auths/signup
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id015
+  - name
+  - email
+  - password
+  - profile_image_url
+  outputs:
+  - token
+  - email
+  - role
+  - name
+  input_spec:
+    format: json
+    fields: *id015
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - email
+    - password
+    - profile_image_url
+    outputs:
+    - token
+    - email
+    - role
+    - name
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: Alice
+        email: a@b.co
+        password: '***'
+        profile_image_url: /user.png
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Display name.
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Email.
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Password.
+      - name: profile_image_url
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Avatar URL (validate_image_url).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: Session token (first user becomes admin).
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: Email.
+      - name: role
+        path: role
+        type: string
+        flow: true
+        description: Assigned role.
+      - name: name
+        path: name
+        type: string
+        flow: true
+        description: Name.
+    reason: Registers a new account; first user becomes admin, others get default role.
+    evidence: backend/open_webui/routers/auths.py:849
+  operation_semantic: signup
+  semantic_inputs:
+  - DisplayName(identity)
+  - UserEmail(identity)
+  - Password(credential)
+  - ProfileImage(identity)
+  semantic_outputs:
+  - SessionToken(credential)
+  - UserEmail(identity)
+  - UserRole(authz)
+  - DisplayName(identity)
+  semantic_input_decisions:
+  - *id004
+  - *id011
+  - *id009
+  - *id003
+  semantic_output_decisions:
+  - *id010
+  - *id011
+  - *id012
+  - *id004
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id014
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public registration endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - ui.enable_signup true (or first-ever user bootstrap)
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:849
+      supports: POST /signup -> signup_handler; first user -> admin
+    notes: Registration boundary; gated by ui.enable_signup except the initial-admin bootstrap.
+- key: http://localhost/api/v1/auths/signout
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  content_types:
+  - application/json
+  params: []
+  inputs: &id016 []
+  outputs: []
+  input_spec:
+    format: ''
+    fields: *id016
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs: []
+    outputs: []
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: status
+        path: status
+        type: boolean
+        flow: false
+        description: Signed out.
+      - name: redirect_url
+        path: redirect_url
+        type: string
+        flow: false
+        description: Optional redirect.
+    reason: Invalidates the token and clears session/oauth cookies.
+    evidence: backend/open_webui/routers/auths.py:905
+  operation_semantic: signout
+  semantic_inputs: []
+  semantic_outputs: []
+  semantic_input_decisions: []
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id006
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Any caller may end their session.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:905
+      supports: POST /signout -> invalidate_token + delete_cookie
+    notes: Clears token/oauth cookies; may 302 to WEBUI_AUTH_SIGNOUT_REDIRECT_URL.
+- key: http://localhost/api/v1/auths/oauth/sessions/{provider}
+  kind: api
+  methods:
+  - DELETE
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params:
+  - name: provider
+    in: path
+    type: string
+    required: true
+    flow: true
+    description: OAuth provider id (path:path).
+  inputs: &id017 []
+  outputs:
+  - result
+  input_spec:
+    format: ''
+    fields: *id017
+  io_variants:
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - result
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: scalar
+      scalar_type: boolean
+      value_name: result
+      value_type: boolean
+      value_flow: true
+      value_description: True if removed.
+      fields: []
+    reason: Deletes the caller's stored OAuth session for a provider.
+    evidence: backend/open_webui/routers/auths.py:1019
+  operation_semantic: delete_oauth_session
+  semantic_inputs:
+  - OAuthProvider(auth)
+  semantic_outputs: []
+  semantic_input_decisions:
+  - raw_field: provider
+    resource: OAuthProvider(auth)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - provider
+    reason: Which provider session to drop.
+  semantic_output_decisions: []
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id018
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Verified caller manages own OAuth links.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1019
+      supports: DELETE /oauth/sessions/{provider:path} [get_verified_user]
+    notes: Scoped to the caller's own OAuth sessions.
+- key: http://localhost/api/v1/auths/oauth/{provider}/token/exchange
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 401
+  - 403
+  - 429
+  content_types:
+  - application/json
+  params:
+  - name: provider
+    in: path
+    type: string
+    required: true
+    flow: true
+    description: OAuth provider id.
+  inputs: &id019
+  - token
+  outputs:
+  - token
+  - email
+  - role
+  input_spec:
+    format: json
+    fields: *id019
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - token
+    outputs:
+    - token
+    - email
+    - role
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        token: <external-idp-token>
+      fields:
+      - name: token
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: External IdP access/ID token to exchange.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: Open WebUI session token.
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: Resolved email.
+      - name: role
+        path: role
+        type: string
+        flow: true
+        description: Role.
+    reason: Exchanges a trusted external IdP token for an Open WebUI session.
+    evidence: backend/open_webui/routers/auths.py:1605
+  operation_semantic: oauth_token_exchange
+  semantic_inputs:
+  - OAuthProvider(auth)
+  - ExternalIdpToken(credential)
+  semantic_outputs:
+  - SessionToken(credential)
+  - UserEmail(identity)
+  - UserRole(authz)
+  semantic_input_decisions:
+  - raw_field: provider
+    resource: OAuthProvider(auth)
+    mergeable: true
+    value_kind: identifier
+    reference_capable: true
+    reference_fields:
+    - provider
+    reason: Provider to validate the token against.
+  - raw_field: token
+    resource: ExternalIdpToken(credential)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: Bearer token minted by the external IdP.
+  semantic_output_decisions:
+  - *id010
+  - *id011
+  - *id012
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id014
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Public token-exchange endpoint when enabled.
+    black_box_reachable: true
+    reachability_conditions:
+    - ENABLE_OAUTH_TOKEN_EXCHANGE true
+    - client_id in OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1605
+      supports: POST /oauth/{provider}/token/exchange -> SigninResult; trusted client ids + rate limit
+    notes: 'Federated auth boundary: mints a local session from an external token. Best-effort rate limit
+      (no caller identity pre-validation); trusts configured client ids.'
+- key: http://localhost/api/v1/auths/add
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  - 400
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id020
+  - name
+  - email
+  - password
+  - profile_image_url
+  - role
+  outputs:
+  - id
+  - email
+  - name
+  - role
+  - token
+  input_spec:
+    format: json
+    fields: *id020
+  io_variants:
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - name
+    - email
+    - password
+    - profile_image_url
+    - role
+    outputs:
+    - id
+    - email
+    - name
+    - role
+    - token
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        name: Bob
+        email: b@c.co
+        password: '***'
+        role: user
+      fields:
+      - name: name
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Name.
+      - name: email
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Email.
+      - name: password
+        location: body
+        path: ''
+        type: string
+        required: true
+        flow: true
+        description: Initial password.
+      - name: profile_image_url
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Avatar.
+      - name: role
+        location: body
+        path: ''
+        type: string
+        required: false
+        flow: true
+        description: Role (default pending).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: id
+        path: id
+        type: string
+        flow: true
+        description: New user id.
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: Email.
+      - name: name
+        path: name
+        type: string
+        flow: true
+        description: Name.
+      - name: role
+        path: role
+        type: string
+        flow: true
+        description: Assigned role.
+      - name: token
+        path: token
+        type: string
+        flow: true
+        description: Session token for the created user.
+    reason: Admin directly provisions an account with a chosen role.
+    evidence: backend/open_webui/routers/auths.py:1051
+  operation_semantic: admin_add_user
+  semantic_inputs:
+  - DisplayName(identity)
+  - UserEmail(identity)
+  - Password(credential)
+  - ProfileImage(identity)
+  - UserRole(authz)
+  semantic_outputs:
+  - UserId(identity)
+  - UserEmail(identity)
+  - DisplayName(identity)
+  - UserRole(authz)
+  - SessionToken(credential)
+  semantic_input_decisions:
+  - *id004
+  - *id011
+  - *id009
+  - *id003
+  - *id012
+  semantic_output_decisions:
+  - *id021
+  - *id011
+  - *id004
+  - *id012
+  - *id010
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: &id025
+    anonymous:
+    - 401
+    pending:
+    - 401
+    user:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only provisioning.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1051
+      supports: POST /add [get_admin_user] -> AddUserResponse (returns a token)
+    notes: Admin sets role at creation (privilege assignment); response carries a session token for the
+      new user.
+- key: http://localhost/api/v1/auths/admin/details
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id022 []
+  outputs:
+  - name
+  - email
+  input_spec:
+    format: ''
+    fields: *id022
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - name
+    - email
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: name
+        path: name
+        type: string
+        flow: true
+        description: Admin display name.
+      - name: email
+        path: email
+        type: string
+        flow: true
+        description: Admin contact email.
+    reason: Returns the admin contact details (if ui show-admin-details enabled).
+    evidence: backend/open_webui/routers/auths.py:1124
+  operation_semantic: get_admin_details
+  semantic_inputs: []
+  semantic_outputs:
+  - DisplayName(identity)
+  - UserEmail(identity)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - *id004
+  - *id011
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id006
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Any authenticated caller can read admin contact.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1124
+      supports: GET /admin/details [get_current_user]
+    notes: Discloses the admin's name/email to any authenticated user when SHOW_ADMIN_DETAILS is on.
+- key: http://localhost/api/v1/auths/admin/config
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id023
+  - config
+  outputs:
+  - config
+  input_spec:
+    format: json
+    fields: *id023
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - config
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: config
+        path: config
+        type: object
+        flow: true
+        description: Current admin/auth config.
+    reason: Reads the instance auth/admin configuration.
+    evidence: backend/open_webui/routers/auths.py:1155
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - config
+    outputs:
+    - config
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        ENABLE_SIGNUP: true
+        DEFAULT_USER_ROLE: pending
+      fields:
+      - name: config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: Admin config key/values (AdminConfig).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: config
+        path: config
+        type: object
+        flow: true
+        description: Applied config.
+    reason: Writes auth/admin configuration (signup, default role, api-key policy, JWT expiry...).
+    evidence: backend/open_webui/routers/auths.py:1228
+  operation_semantic: admin_auth_config
+  semantic_inputs:
+  - AdminConfig(system)
+  semantic_outputs:
+  - AdminConfig(system)
+  semantic_input_decisions:
+  - &id024
+    raw_field: config
+    resource: AdminConfig(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: Instance auth/admin configuration blob (includes secret config such as ldap app password /
+      OAuth client secrets -- recorded as location, not value).
+  semantic_output_decisions:
+  - *id024
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id025
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only configuration surface.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1155
+      supports: GET /admin/config [get_admin_user]
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1228
+      supports: POST /admin/config [get_admin_user] AdminConfig
+    notes: Controls signup/default-role/api-key policy/JWT expiry; changing these reshapes the auth boundary.
+- key: http://localhost/api/v1/auths/admin/config/ldap/server
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id026
+  - ldap_config
+  outputs:
+  - ldap_config
+  input_spec:
+    format: json
+    fields: *id026
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - ldap_config
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: ldap_config
+        path: ldap_config
+        type: object
+        flow: true
+        description: LDAP server config (app_dn_password returned/stored as secret).
+    reason: Reads LDAP server/bind config.
+    evidence: backend/open_webui/routers/auths.py:1297
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - ldap_config
+    outputs:
+    - ldap_config
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        host: ldap.local
+        port: 389
+        app_dn: cn=svc
+        use_tls: true
+      fields:
+      - name: ldap_config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: LdapServerConfig (host/port/app_dn/app_dn_password/tls...).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: ldap_config
+        path: ldap_config
+        type: object
+        flow: true
+        description: Applied LDAP config.
+    reason: Writes LDAP server/bind config incl. the bind password.
+    evidence: backend/open_webui/routers/auths.py:1303
+  operation_semantic: admin_ldap_server_config
+  semantic_inputs:
+  - LdapServerConfig(system)
+  semantic_outputs:
+  - LdapServerConfig(system)
+  semantic_input_decisions:
+  - &id027
+    raw_field: ldap_config
+    resource: LdapServerConfig(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: LDAP bind/server configuration (app_dn_password is a stored secret -- location only).
+  semantic_output_decisions:
+  - *id027
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id025
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only LDAP configuration.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1297
+      supports: GET /admin/config/ldap/server [get_admin_user]
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1303
+      supports: POST /admin/config/ldap/server [get_admin_user] LdapServerConfig
+    notes: Carries the LDAP bind secret (app_dn_password) -- a stored credential location; GT records
+      location, not value.
+- key: http://localhost/api/v1/auths/admin/config/ldap
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id028
+  - enable_ldap
+  outputs:
+  - ENABLE_LDAP
+  input_spec:
+    format: json
+    fields: *id028
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - ENABLE_LDAP
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: ENABLE_LDAP
+        path: ENABLE_LDAP
+        type: boolean
+        flow: true
+        description: Whether LDAP auth is on.
+    reason: Reads the LDAP enable flag.
+    evidence: backend/open_webui/routers/auths.py:1328
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - enable_ldap
+    outputs:
+    - ENABLE_LDAP
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        enable_ldap: true
+      fields:
+      - name: enable_ldap
+        location: body
+        path: ''
+        type: boolean
+        required: true
+        flow: true
+        description: Toggle LDAP auth.
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: ENABLE_LDAP
+        path: ENABLE_LDAP
+        type: boolean
+        flow: true
+        description: New state.
+    reason: Toggles the LDAP auth method.
+    evidence: backend/open_webui/routers/auths.py:1338
+  operation_semantic: admin_ldap_toggle
+  semantic_inputs:
+  - LdapEnabled(authz)
+  semantic_outputs:
+  - LdapEnabled(authz)
+  semantic_input_decisions:
+  - raw_field: enable_ldap
+    resource: LdapEnabled(authz)
+    mergeable: true
+    value_kind: state
+    reference_capable: false
+    reference_fields: []
+    reason: Enable/disable LDAP auth method.
+  semantic_output_decisions:
+  - raw_field: ENABLE_LDAP
+    resource: LdapEnabled(authz)
+    mergeable: true
+    value_kind: state
+    reference_capable: false
+    reference_fields: []
+    reason: LDAP auth method state.
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id025
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only auth-method toggle.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1328
+      supports: GET /admin/config/ldap [get_admin_user]
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1338
+      supports: POST /admin/config/ldap [get_admin_user]
+    notes: Enables/disables an entire authentication path.
+- key: http://localhost/api/v1/auths/admin/config/oauth
+  kind: api
+  methods:
+  - GET
+  - POST
+  statuses:
+  - 200
+  - 401
+  content_types:
+  - application/json
+  params: []
+  inputs: &id029
+  - oauth_config
+  outputs:
+  - oauth_config
+  input_spec:
+    format: json
+    fields: *id029
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - oauth_config
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: oauth_config
+        path: oauth_config
+        type: object
+        flow: true
+        description: OAuth providers config (client_secret stored as secret).
+    reason: Reads OAuth provider configuration.
+    evidence: backend/open_webui/routers/auths.py:1483
+  - method: POST
+    content_types:
+    - application/json
+    inputs:
+    - oauth_config
+    outputs:
+    - oauth_config
+    input: {}
+    request:
+      body_format: json
+      body_example:
+        google:
+          client_id: '...'
+          client_secret: '...'
+      fields:
+      - name: oauth_config
+        location: body
+        path: ''
+        type: object
+        required: true
+        flow: true
+        description: OAuthConfigForm (per-provider client_id/client_secret/scopes).
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: oauth_config
+        path: oauth_config
+        type: object
+        flow: true
+        description: Applied OAuth config.
+    reason: Writes OAuth provider configuration incl. client secrets.
+    evidence: backend/open_webui/routers/auths.py:1489
+  operation_semantic: admin_oauth_config
+  semantic_inputs:
+  - OAuthConfig(system)
+  semantic_outputs:
+  - OAuthConfig(system)
+  semantic_input_decisions:
+  - &id030
+    raw_field: oauth_config
+    resource: OAuthConfig(system)
+    mergeable: true
+    value_kind: content
+    reference_capable: false
+    reference_fields: []
+    reason: OAuth provider configuration (client_secret is a stored secret -- location only).
+  semantic_output_decisions:
+  - *id030
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id025
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Admin-only OAuth configuration.
+    black_box_reachable: true
+    reachability_conditions: []
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1483
+      supports: GET /admin/config/oauth [get_admin_user] -> OAuthConfigResponse
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1489
+      supports: POST /admin/config/oauth [get_admin_user] OAuthConfigForm
+    notes: Carries OAuth client secrets (stored-credential location); controls federated auth providers.
+- key: http://localhost/api/v1/auths/api_key
+  kind: api
+  methods:
+  - GET
+  - POST
+  - DELETE
+  statuses:
+  - 200
+  - 401
+  - 403
+  content_types:
+  - application/json
+  params: []
+  inputs: &id031 []
+  outputs:
+  - api_key
+  - result
+  input_spec:
+    format: ''
+    fields: *id031
+  io_variants:
+  - method: GET
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - api_key
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: api_key
+        path: api_key
+        type: string
+        flow: true
+        description: The caller's current API key.
+    reason: Returns the caller's existing API key.
+    evidence: backend/open_webui/routers/auths.py:1553
+  - method: POST
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - api_key
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: json
+      scalar_type: null
+      value_name: null
+      value_type: null
+      value_flow: false
+      value_description: null
+      fields:
+      - name: api_key
+        path: api_key
+        type: string
+        flow: true
+        description: Newly minted sk- API key.
+    reason: Generates (and stores) a new personal API key.
+    evidence: backend/open_webui/routers/auths.py:1510
+  - method: DELETE
+    content_types:
+    - application/json
+    inputs: []
+    outputs:
+    - result
+    input: {}
+    request:
+      body_format: none
+      body_example: {}
+      fields: []
+    response:
+      format: scalar
+      scalar_type: boolean
+      value_name: result
+      value_type: boolean
+      value_flow: true
+      value_description: True if revoked.
+      fields: []
+    reason: Revokes the caller's API key.
+    evidence: backend/open_webui/routers/auths.py:1535
+  operation_semantic: manage_api_key
+  semantic_inputs: []
+  semantic_outputs:
+  - ApiKey(credential)
+  semantic_input_decisions: []
+  semantic_output_decisions:
+  - raw_field: api_key
+    resource: ApiKey(credential)
+    mergeable: true
+    value_kind: credential
+    reference_capable: false
+    reference_fields: []
+    reason: api_key denotes ApiKey(credential).
+  samples: []
+  sources:
+  - source
+  referrers: []
+  resource_types:
+  - fetch
+  - xhr
+  js_sources: []
+  identity_statuses: *id006
+  route_confirmed: true
+  runtime_api_prefixes:
+  - http://localhost/api/v1
+  - http://localhost/ollama
+  - http://localhost/openai
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Authenticated caller manages own API key.
+    black_box_reachable: true
+    reachability_conditions:
+    - auth.enable_api_keys true
+    - features.api_keys permission (admins exempt)
+    evidence:
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1510
+      supports: POST /api_key [_check_api_key_permission]
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1535
+      supports: DELETE /api_key
+    - type: source
+      ref: backend/open_webui/routers/auths.py:1553
+      supports: GET /api_key
+    notes: Mints/reads/revokes a long-lived `sk-` credential; gated by enable_api_keys + features.api_keys
+      permission.
+edges: []
+excluded_items:
+- item: WebSocket transport (/ws, socket.io) and static mounts (/static, /pyodide, SPA fallback)
+  reason: Not HTTP request/response attack-surface nodes in the pengent-web-gt-v1 sense; the realtime
+    channel is covered by the agentic layer. Out of scope for L1/L2.
+- item: 'Open WebUI routers not yet modeled (34 of 36): users, chats, models, files, knowledge, folders,
+    groups, prompts, tools, functions, memories, notes, channels, comments, retrieval, images, audio,
+    ollama, openai, pipelines, tasks, configs, evaluations, mfa, sessions, scim, skills, apps, automations,
+    calendar, notifications, analytics, terminals, utils, search, tether'
+  reason: In-progress, module by module. This checkpoint models the Authentication + Account router (/api/v1/auths).
+    Remaining routers + route counts are tracked in environment.yaml web_gt:.

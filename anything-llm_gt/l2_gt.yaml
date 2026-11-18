@@ -1,0 +1,6598 @@
+schema_version: pengent-web-gt-v1
+environment_id: anything-llm-local
+scope: 'AnythingLLM Developer API (/api/v1) -- module: System Settings + Authentication'
+nodes:
+- id: gt-action-001
+  name: Verify API key
+  kind: normal
+  description: A developer confirms their API key is accepted.
+  action_key: dev_verify_api_key
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: verify_api_key
+    crud: Read
+  object:
+    kind: entity
+    id: auth
+    type: ApiKeyAuth
+    name: ApiKeyAuth
+    entity: ApiKeyAuth
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: &id002
+      predicate: Authenticated
+      arguments:
+      - &id001
+        kind: subject
+        id: actor
+        type: User
+        relative_role: SELF
+      - ApiKey
+    reason: validApiKey verifies the Authorization Bearer key.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthStatus
+          target:
+            kind: entity
+            id: auth
+            type: ApiKeyAuth
+            role: target
+      basis: implicit_context
+      reason: Response confirms the API key is valid (authenticated:true).
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/auth
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.98
+  reasoning: Fixed status endpoint behind validApiKey.
+  l1_keys:
+  - http://localhost/api/v1/auth
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],AuthStatus(auth:ApiKeyAuth{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Probe the API key by calling the endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/auth/index.js:6
+      supports: validApiKey gate + fixed response
+    notes: null
+- id: gt-action-002
+  name: Flush settings to .env
+  kind: normal
+  description: Any caller triggers a flush of in-memory configuration to the .env file (production only).
+  action_key: dev_dump_settings_to_env
+  subject:
+    id: actor
+    identity: Anonymous
+    role: Public
+    auth_context: None
+  operation:
+    business: dump_settings_to_env
+    crud: Update
+  object:
+    kind: entity
+    id: system_config
+    type: SystemConfig
+    name: SystemConfig
+    entity: SystemConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements: []
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: system_config
+          type: SystemConfig
+          role: target
+        - env_file
+        - flushed
+      basis: action_semantics
+      reason: In production, flushes in-memory settings to the .env file.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/system/env-dump
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: GET with a write side effect, guarded only by NODE_ENV===production.
+  l1_keys:
+  - http://localhost/api/v1/system/env-dump
+  consumes: []
+  produces:
+  - State(system_config:SystemConfig{target},env_file,flushed)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Unauthenticated endpoint; any caller can hit it.
+    black_box_reachable: true
+    reachability_conditions:
+    - None (intentionally unauthenticated)
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:16
+      supports: no auth middleware; dumpENV() in production
+    notes: Unauthenticated by design (SECURITY.md); no secret values returned, but it persists config
+      state.
+- id: gt-action-003
+  name: Read system settings
+  kind: normal
+  description: A developer reads the instance's system settings (provider/vector-DB/flags + secret presence).
+  action_key: dev_read_system_settings
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_system_settings
+    crud: Read
+  object:
+    kind: entity
+    id: system
+    type: System
+    name: System
+    entity: System
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: settings
+      resource: SystemSettings(system)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SystemSettings
+          target:
+            kind: entity
+            id: system
+            type: System
+            role: target
+      basis: io_reference
+      reason: Response returns the full settings snapshot.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: settings / SystemSettings(system)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],SystemSettings(system:System{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/system
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Read of instance configuration; secrets masked to presence booleans.
+  l1_keys:
+  - http://localhost/api/v1/system
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],SystemSettings(system:System{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:39
+      supports: SystemSettings.currentSettings()
+    notes: Discloses which provider credentials are configured (as booleans) and non-secret config values.
+- id: gt-action-004
+  name: Read vector count
+  kind: normal
+  description: A developer reads the total number of vectors in the connected vector database.
+  action_key: dev_read_vector_count
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_vector_count
+    crud: Read
+  object:
+    kind: entity
+    id: vectordb
+    type: VectorDB
+    name: VectorDB
+    entity: VectorDB
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: vectorCount
+      resource: VectorCount(vectordb)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: VectorCount
+          target:
+            kind: entity
+            id: vectordb
+            type: VectorDB
+            role: target
+      basis: io_reference
+      reason: Response returns the total vector count.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: vectorCount / VectorCount(vectordb)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],VectorCount(vectordb:VectorDB{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/system/vector-count
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Aggregate read of the connected vector DB.
+  l1_keys:
+  - http://localhost/api/v1/system/vector-count
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],VectorCount(vectordb:VectorDB{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Vector DB connected
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:76
+      supports: VectorDb.totalVectors()
+    notes: null
+- id: gt-action-005
+  name: Update system settings
+  kind: normal
+  description: A developer updates instance settings (can switch LLM provider, vector DB, or embedded
+    keys).
+  action_key: dev_update_system_settings
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: update_system_settings
+    crud: Update
+  object:
+    kind: entity
+    id: system_config
+    type: SystemConfig
+    name: SystemConfig
+    entity: SystemConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: env
+      resource: EnvConfig(system)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: system_config
+          type: SystemConfig
+          role: target
+        - settings
+        - updated
+      basis: state_transition
+      reason: Applies the submitted configuration values.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: system_config
+          type: SystemConfig
+          role: target
+        - settings
+        - previous
+      basis: state_transition
+      reason: Previous configuration values replaced.
+  io_accounting:
+  - direction: input
+    field: env / EnvConfig(system)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New configuration values submitted for update; not a precondition reference.
+  - direction: output
+    field: newValues / EnvValues(system)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Echo of the applied values; not a stable object reference.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/system/update-env
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Writes instance configuration from a caller-supplied key/value map.
+  l1_keys:
+  - http://localhost/api/v1/system/update-env
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - State(system_config:SystemConfig{target},settings,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:108
+      supports: updateENV(body) persists settings
+    notes: High-impact reconfiguration via one authenticated call.
+- id: gt-action-006
+  name: Export all chats
+  kind: normal
+  description: A developer exports every workspace chat in a chosen format (jsonl/json/csv/jsonAlpaca).
+  action_key: dev_export_all_chats
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: export_all_chats
+    crud: Read
+  object:
+    kind: entity
+    id: chats
+    type: ChatCollection
+    name: ChatCollection
+    entity: ChatCollection
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatExport
+          target:
+            kind: entity
+            id: chats
+            type: ChatCollection
+            role: collection
+      basis: io_reference
+      reason: Returns all workspace chats serialized in the requested format.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: type / ExportType(export)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Export format discriminator; not a precondition.
+  - direction: output
+    field: (serialized chats)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Raw exported chat content; format varies, not a stable reference.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/system/export-chats
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Bulk read/serialization of all chats across workspaces.
+  l1_keys:
+  - http://localhost/api/v1/system/export-chats
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],ChatExport(chats:ChatCollection{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:157
+      supports: exportChatsAsType(type,'workspace')
+    notes: Bulk cross-workspace data exposure surface.
+- id: gt-action-007
+  name: Remove documents
+  kind: normal
+  description: A developer permanently removes documents by their storage location.
+  action_key: dev_remove_documents
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: remove_documents
+    crud: Delete
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: names
+      resource: DocumentLocation(document)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: DocumentLocation
+        target:
+          kind: entity
+          id: document
+          type: Document
+          role: target
+    reason: Caller supplies the document storage locations.
+  effects:
+    gen: []
+    kill:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: document
+          type: Document
+          role: target
+      basis: state_transition
+      reason: Named documents are permanently removed from storage.
+  io_accounting:
+  - direction: input
+    field: names / DocumentLocation(document)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/system/remove-documents
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Permanent deletion keyed by caller-supplied storage path.
+  l1_keys:
+  - http://localhost/api/v1/system/remove-documents
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known document storage paths
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/system/index.js:219
+      supports: purgeDocument(name) per name
+    notes: null
+- id: gt-action-008
+  name: Create workspace
+  kind: normal
+  description: A developer creates a new workspace.
+  action_key: dev_create_workspace
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: create_workspace
+    crud: Create
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - &id003
+          kind: entity
+          id: workspace
+          type: Workspace
+          role: created
+      basis: action_semantics
+      reason: A new workspace is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: WorkspaceSlug
+          target: *id003
+      basis: io_reference
+      reason: Response returns the new workspace slug.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: name / WorkspaceName(workspace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New workspace name.
+  - direction: input
+    field: config / WorkspaceConfig(workspace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New workspace settings.
+  - direction: output
+    field: workspace.slug / WorkspaceSlug(workspace)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/new
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Creates a workspace from caller settings.
+  l1_keys:
+  - http://localhost/api/v1/workspace/new
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(workspace:Workspace{created})
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:28
+      supports: Workspace.new()
+    notes: null
+- id: gt-action-009
+  name: List workspaces
+  kind: normal
+  description: A developer lists all workspaces.
+  action_key: dev_list_workspaces
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: list_workspaces
+    crud: Read
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: &id004
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: WorkspaceSlug
+          target: &id005
+            kind: entity
+            id: workspace
+            type: Workspace
+            role: target
+      basis: io_reference
+      reason: Response returns workspace slugs.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: workspaces[].slug / WorkspaceSlug(workspace)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspaces
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists all workspaces and their slugs.
+  l1_keys:
+  - http://localhost/api/v1/workspaces
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:109
+      supports: Workspace._findMany
+    notes: null
+- id: gt-action-010
+  name: Read workspace
+  kind: normal
+  description: A developer reads a workspace by its slug.
+  action_key: dev_read_workspace
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_workspace
+    crud: Read
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  effects:
+    gen:
+    - fact: *id004
+      basis: io_reference
+      reason: Response returns the workspace config, documents and threads.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: output
+    field: workspace / WorkspaceConfig(workspace)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Config snapshot; not a stable reference beyond the slug.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reads one workspace by slug.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:163
+      supports: Workspace._findMany by slug
+    notes: null
+- id: gt-action-011
+  name: Delete workspace
+  kind: normal
+  description: A developer deletes a workspace by its slug.
+  action_key: dev_delete_workspace
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: delete_workspace
+    crud: Delete
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: existence
+    fact: &id006
+      predicate: Exists
+      arguments:
+      - *id005
+    reason: Target workspace must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id006
+      basis: state_transition
+      reason: Workspace and its chats, vectors and documents are removed.
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Deletes a workspace and cascades to its data.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Exists(workspace:Workspace{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:228
+      supports: cascade delete + delete-namespace
+    notes: Guarded by workspaceDeletionProtection middleware.
+- id: gt-action-012
+  name: Update workspace
+  kind: normal
+  description: A developer updates a workspace's settings.
+  action_key: dev_update_workspace
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: update_workspace
+    crud: Update
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: existence
+    fact: *id006
+    reason: Target workspace must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id005
+        - settings
+        - updated
+      basis: state_transition
+      reason: New settings applied.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id005
+        - settings
+        - previous
+      basis: state_transition
+      reason: Previous settings replaced.
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: config / WorkspaceConfig(workspace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New settings values.
+  - direction: output
+    field: workspace / WorkspaceConfig(workspace)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Echo of updated workspace.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/update
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Updates workspace settings (incl. LLM prompt/params).
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/update
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Exists(workspace:Workspace{target})
+  produces:
+  - State(workspace:Workspace{target},settings,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:279
+      supports: Workspace.update(id, data)
+    notes: null
+- id: gt-action-013
+  name: Read workspace chats
+  kind: normal
+  description: A developer reads a workspace's chat history.
+  action_key: dev_read_workspace_chats
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_workspace_chats
+    crud: Read
+  object:
+    kind: entity
+    id: chats
+    type: WorkspaceChat
+    name: WorkspaceChat
+    entity: WorkspaceChat
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatHistory
+          target:
+            kind: entity
+            id: chats
+            type: WorkspaceChat
+            role: collection
+      basis: io_reference
+      reason: Response returns the workspace chat history.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: apiSessionId / SessionID(session)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Optional session filter.
+  - direction: output
+    field: history / ChatHistory(chats)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Chat content across all users of the workspace.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/chats
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Reads all chats in the workspace regardless of user.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/chats
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Know(actor:User[SELF],ChatHistory(chats:WorkspaceChat{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:360
+      supports: WorkspaceChats.forWorkspace
+    notes: Returns chats for ALL users of the workspace.
+- id: gt-action-014
+  name: Update workspace documents
+  kind: normal
+  description: A developer adds or removes a workspace's embedded documents.
+  action_key: dev_update_workspace_embeddings
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: update_workspace_embeddings
+    crud: Update
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants:
+    - id: document
+      type: Document
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: existence
+    fact: *id006
+    reason: Target workspace must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id005
+        - &id007
+          kind: entity
+          id: document
+          type: Document
+          role: target
+        - embeds
+      basis: relation_transition
+      reason: Added documents are embedded into the workspace.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: adds / DocumentLocation(document)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Documents to embed.
+  - direction: input
+    field: deletes / DocumentLocation(document)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Documents to remove.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/update-embeddings
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Adds/removes embedded documents in a workspace.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/update-embeddings
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Exists(workspace:Workspace{target})
+  produces:
+  - Relation(workspace:Workspace{target},document:Document{target},embeds)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:457
+      supports: Document.addDocuments/removeDocuments
+    notes: null
+- id: gt-action-015
+  name: Pin workspace document
+  kind: normal
+  description: A developer pins or unpins a document in a workspace.
+  action_key: dev_pin_workspace_document
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: pin_workspace_document
+    crud: Update
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: docPath
+      resource: DocumentLocation(document)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: knowledge
+    fact: &id013
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: DocumentLocation
+        target: *id007
+    reason: Caller supplies the document path.
+  - type: existence
+    fact:
+      predicate: Exists
+      arguments:
+      - *id007
+    reason: Target document must exist in the workspace.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id007
+        - pinned
+        - updated
+      basis: state_transition
+      reason: Document pin status updated.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: docPath / DocumentLocation(document)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+    ignored_reason: ''
+  - direction: input
+    field: pinStatus
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New pin state.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/update-pin
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Pins/unpins a document in a workspace.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/update-pin
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+  - Exists(document:Document{target})
+  produces:
+  - State(document:Document{target},pinned,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug + document path
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:534
+      supports: Document.update(id, {pinned})
+    notes: null
+- id: gt-action-016
+  name: Chat with workspace
+  kind: normal
+  description: A developer chats with a workspace (sync or streaming).
+  action_key: dev_chat_with_workspace
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: chat_with_workspace
+    crud: Create
+  object:
+    kind: entity
+    id: chat
+    type: WorkspaceChat
+    name: WorkspaceChat
+    entity: WorkspaceChat
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: chat
+          type: WorkspaceChat
+          role: created
+      basis: action_semantics
+      reason: A chat turn is recorded.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatResponse
+          target:
+            kind: entity
+            id: chat
+            type: WorkspaceChat
+            role: created
+      basis: io_reference
+      reason: Model-authored answer returned to the caller.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: message / ChatMessage(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Untrusted user prompt to the LLM.
+  - direction: input
+    field: mode / ChatMode(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Chat mode discriminator.
+  - direction: input
+    field: sessionId / SessionID(session)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: External session partition id.
+  - direction: input
+    field: attachments / ChatAttachment(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Attached images/documents.
+  - direction: output
+    field: textResponse / ChatResponse(chat)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ChatResponse(chat:WorkspaceChat{created}))
+    ignored_reason: ''
+  - direction: output
+    field: sources
+    disposition: observed_only
+    facts: []
+    ignored_reason: RAG sources; not a stable reference.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/chat
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  - l1_key: http://localhost/api/v1/workspace/{slug}/stream-chat
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Untrusted prompt drives the LLM; output is model-authored.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/chat
+  - http://localhost/api/v1/workspace/{slug}/stream-chat
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Exists(chat:WorkspaceChat{created})
+  - Know(actor:User[SELF],ChatResponse(chat:WorkspaceChat{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:603
+      supports: ApiChatHandler.chatSync/streamChat
+    notes: Untrusted prompt -> LLM -> model-authored output (streaming-phase XSS to RCE via LLM response
+      injection).
+- id: gt-action-017
+  name: Vector search workspace
+  kind: normal
+  description: A developer runs a vector similarity search in a workspace.
+  action_key: dev_vector_search_workspace
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: vector_search_workspace
+    crud: Read
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants:
+    - id: search
+      type: VectorSearch
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: SearchResults
+          target:
+            kind: entity
+            id: search
+            type: VectorSearch
+            role: target
+      basis: io_reference
+      reason: Response returns matching document chunks.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: query / SearchQuery(search)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Search query.
+  - direction: output
+    field: results
+    disposition: observed_only
+    facts: []
+    ignored_reason: Matching chunks; not a stable reference.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/vector-search
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Similarity search over the workspace namespace.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/vector-search
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Know(actor:User[SELF],SearchResults(search:VectorSearch{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspace/index.js:899
+      supports: vector similarity search
+    notes: null
+- id: gt-action-018
+  name: Create thread
+  kind: normal
+  description: A developer creates a new thread in a workspace.
+  action_key: dev_create_thread
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: create_thread
+    crud: Create
+  object:
+    kind: entity
+    id: thread
+    type: WorkspaceThread
+    name: WorkspaceThread
+    entity: WorkspaceThread
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: slug
+      resource: ThreadSlug(thread)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - &id008
+          kind: entity
+          id: thread
+          type: WorkspaceThread
+          role: created
+      basis: action_semantics
+      reason: A new thread is created in the workspace.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ThreadSlug
+          target: *id008
+      basis: io_reference
+      reason: Response returns the new thread slug.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: name / ThreadName(thread)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New thread name.
+  - direction: output
+    field: thread.slug / ThreadSlug(thread)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/thread/new
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Creates a thread under a workspace.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/thread/new
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Exists(thread:WorkspaceThread{created})
+  - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:21
+      supports: WorkspaceThread.new
+    notes: null
+- id: gt-action-019
+  name: Update thread
+  kind: normal
+  description: A developer renames a thread.
+  action_key: dev_update_thread
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: update_thread
+    crud: Update
+  object:
+    kind: entity
+    id: thread
+    type: WorkspaceThread
+    name: WorkspaceThread
+    entity: WorkspaceThread
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: threadSlug
+      resource: ThreadSlug(thread)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: knowledge
+    fact: &id010
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ThreadSlug
+        target: &id009
+          kind: entity
+          id: thread
+          type: WorkspaceThread
+          role: target
+    reason: Caller supplies the thread slug.
+  - type: existence
+    fact: &id011
+      predicate: Exists
+      arguments:
+      - *id009
+    reason: Target thread must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - name
+        - updated
+      basis: state_transition
+      reason: Thread name updated.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id009
+        - name
+        - previous
+      basis: state_transition
+      reason: Previous name replaced.
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: threadSlug / ThreadSlug(thread)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+    ignored_reason: ''
+  - direction: input
+    field: name / ThreadName(thread)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New thread name.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/update
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Renames a thread.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/update
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+  - Exists(thread:WorkspaceThread{target})
+  produces:
+  - State(thread:WorkspaceThread{target},name,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace + thread slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:111
+      supports: WorkspaceThread.update
+    notes: null
+- id: gt-action-020
+  name: Delete thread
+  kind: normal
+  description: A developer deletes a thread.
+  action_key: dev_delete_thread
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: delete_thread
+    crud: Delete
+  object:
+    kind: entity
+    id: thread
+    type: WorkspaceThread
+    name: WorkspaceThread
+    entity: WorkspaceThread
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: threadSlug
+      resource: ThreadSlug(thread)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: knowledge
+    fact: *id010
+    reason: Caller supplies the thread slug.
+  - type: existence
+    fact: *id011
+    reason: Target thread must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id011
+      basis: state_transition
+      reason: Thread and its chats are removed.
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: threadSlug / ThreadSlug(thread)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Deletes a thread.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+  - Exists(thread:WorkspaceThread{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace + thread slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:197
+      supports: WorkspaceThread.delete
+    notes: null
+- id: gt-action-021
+  name: Read thread chats
+  kind: normal
+  description: A developer reads a thread's chat history.
+  action_key: dev_read_thread_chats
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_thread_chats
+    crud: Read
+  object:
+    kind: entity
+    id: chats
+    type: WorkspaceThreadChat
+    name: WorkspaceThreadChat
+    entity: WorkspaceThreadChat
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: threadSlug
+      resource: ThreadSlug(thread)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    - id: thread
+      type: WorkspaceThread
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: knowledge
+    fact: *id010
+    reason: Caller supplies the thread slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatHistory
+          target:
+            kind: entity
+            id: chats
+            type: WorkspaceThreadChat
+            role: collection
+      basis: io_reference
+      reason: Response returns the thread chat history.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: threadSlug / ThreadSlug(thread)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+    ignored_reason: ''
+  - direction: output
+    field: history / ChatHistory(chats)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Thread chat content.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chats
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Reads a thread's chat history.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chats
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+  produces:
+  - Know(actor:User[SELF],ChatHistory(chats:WorkspaceThreadChat{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace + thread slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:246
+      supports: WorkspaceChats for thread
+    notes: null
+- id: gt-action-022
+  name: Chat in thread
+  kind: normal
+  description: A developer chats within a thread (sync or streaming).
+  action_key: dev_chat_in_thread
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: chat_in_thread
+    crud: Create
+  object:
+    kind: entity
+    id: chat
+    type: WorkspaceThreadChat
+    name: WorkspaceThreadChat
+    entity: WorkspaceThreadChat
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: threadSlug
+      resource: ThreadSlug(thread)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    - id: thread
+      type: WorkspaceThread
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  - type: knowledge
+    fact: *id010
+    reason: Caller supplies the thread slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: chat
+          type: WorkspaceThreadChat
+          role: created
+      basis: action_semantics
+      reason: A chat turn is recorded in the thread.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatResponse
+          target:
+            kind: entity
+            id: chat
+            type: WorkspaceThreadChat
+            role: created
+      basis: io_reference
+      reason: Model-authored answer returned to the caller.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: threadSlug / ThreadSlug(thread)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+    ignored_reason: ''
+  - direction: input
+    field: message / ChatMessage(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Untrusted user prompt.
+  - direction: input
+    field: mode / ChatMode(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Chat mode discriminator.
+  - direction: input
+    field: attachments / ChatAttachment(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Attached images/documents.
+  - direction: output
+    field: textResponse / ChatResponse(chat)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ChatResponse(chat:WorkspaceThreadChat{created}))
+    ignored_reason: ''
+  - direction: output
+    field: sources
+    disposition: observed_only
+    facts: []
+    ignored_reason: RAG sources; not a stable reference.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chat
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  - l1_key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/stream-chat
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Thread-scoped chat; untrusted prompt drives the LLM.
+  l1_keys:
+  - http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chat
+  - http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/stream-chat
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  - Know(actor:User[SELF],ThreadSlug(thread:WorkspaceThread{target}))
+  produces:
+  - Exists(chat:WorkspaceThreadChat{created})
+  - Know(actor:User[SELF],ChatResponse(chat:WorkspaceThreadChat{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace + thread slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/workspaceThread/index.js:330
+      supports: ApiChatHandler.chatSync/streamChat
+    notes: Untrusted prompt -> LLM -> model-authored output.
+- id: gt-action-023
+  name: Upload document
+  kind: normal
+  description: A developer uploads a file (optionally into a folder) for parsing and embedding.
+  action_key: dev_upload_document
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: upload_document
+    crud: Create
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: documents
+      resource: DocumentLocation(document)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: document
+          type: Document
+          role: created
+      basis: action_semantics
+      reason: A new document is parsed and stored.
+    - fact: &id012
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: DocumentLocation
+          target:
+            kind: entity
+            id: document
+            type: Document
+            role: created
+      basis: io_reference
+      reason: Response returns the stored document locations.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: file / DocumentFile(document)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Uploaded file content.
+  - direction: input
+    field: metadata
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Optional document metadata.
+  - direction: input
+    field: addToWorkspaces / WorkspaceSlug(workspace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Target workspaces to embed into.
+  - direction: output
+    field: documents / DocumentLocation(document)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/upload
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  - l1_key: http://localhost/api/v1/document/upload/{folderName}
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Parses and stores an uploaded file.
+  l1_keys:
+  - http://localhost/api/v1/document/upload
+  - http://localhost/api/v1/document/upload/{folderName}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(document:Document{created})
+  - Know(actor:User[SELF],DocumentLocation(document:Document{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Collector online
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:52
+      supports: multipart upload -> collector
+    notes: null
+- id: gt-action-024
+  name: Upload document from link
+  kind: normal
+  description: A developer submits a URL for the server to fetch, scrape and embed.
+  action_key: dev_upload_document_from_link
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: upload_document_from_link
+    crud: Create
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: documents
+      resource: DocumentLocation(document)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: document
+          type: Document
+          role: created
+      basis: action_semantics
+      reason: The scraped page is stored as a document.
+    - fact: *id012
+      basis: io_reference
+      reason: Response returns the stored document locations.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: link / ExternalURL(url)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Caller-supplied URL the server fetches (SSRF surface).
+  - direction: input
+    field: addToWorkspaces / WorkspaceSlug(workspace)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Target workspaces.
+  - direction: output
+    field: documents / DocumentLocation(document)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/upload-link
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Server fetches a caller-supplied URL to scrape.
+  l1_keys:
+  - http://localhost/api/v1/document/upload-link
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(document:Document{created})
+  - Know(actor:User[SELF],DocumentLocation(document:Document{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Collector online
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:338
+      supports: collector fetches the URL
+    notes: 'SSRF surface: the server-side collector fetches a caller-controlled URL.'
+- id: gt-action-025
+  name: Upload raw text
+  kind: normal
+  description: A developer creates a document from raw text and metadata.
+  action_key: dev_upload_raw_text
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: upload_raw_text
+    crud: Create
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: documents
+      resource: DocumentLocation(document)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: document
+          type: Document
+          role: created
+      basis: action_semantics
+      reason: A document is created from raw text.
+    - fact: *id012
+      basis: io_reference
+      reason: Response returns the stored document locations.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: textContent / DocumentText(document)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Raw document text.
+  - direction: input
+    field: metadata / DocumentMetadata(document)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Document metadata (title required).
+  - direction: output
+    field: documents / DocumentLocation(document)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/raw-text
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Creates a document from caller-supplied text.
+  l1_keys:
+  - http://localhost/api/v1/document/raw-text
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(document:Document{created})
+  - Know(actor:User[SELF],DocumentLocation(document:Document{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Collector online
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:520
+      supports: raw-text -> collector
+    notes: null
+- id: gt-action-026
+  name: List documents
+  kind: normal
+  description: A developer lists locally-stored documents.
+  action_key: dev_list_documents
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: list_documents
+    crud: Read
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: *id013
+      basis: io_reference
+      reason: Response returns stored document locations.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: folder / FolderName(folder)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Optional folder filter.
+  - direction: output
+    field: localFiles / DocumentLocation(document)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/documents
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists stored documents.
+  l1_keys:
+  - http://localhost/api/v1/documents
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:669
+      supports: list local documents
+    notes: null
+- id: gt-action-027
+  name: List folder documents
+  kind: normal
+  description: A developer lists the documents in a folder.
+  action_key: dev_list_folder_documents
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: list_folder_documents
+    crud: Read
+  object:
+    kind: entity
+    id: folder
+    type: Folder
+    name: Folder
+    entity: Folder
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: folderName
+      resource: FolderName(folder)
+    participants:
+    - id: document
+      type: Document
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: &id015
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: FolderName
+        target: &id016
+          kind: entity
+          id: folder
+          type: Folder
+          role: target
+    reason: Caller supplies the folder name.
+  effects:
+    gen:
+    - fact: *id013
+      basis: io_reference
+      reason: Response returns the folder's document locations.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: folderName / FolderName(folder)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],FolderName(folder:Folder{target}))
+    ignored_reason: ''
+  - direction: output
+    field: documents / DocumentLocation(document)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/documents/folder/{folderName}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists one folder's documents.
+  l1_keys:
+  - http://localhost/api/v1/documents/folder/{folderName}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],FolderName(folder:Folder{target}))
+  produces:
+  - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known folder
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:725
+      supports: list folder documents
+    notes: null
+- id: gt-action-028
+  name: Read accepted file types
+  kind: normal
+  description: A developer reads which file types can be uploaded.
+  action_key: dev_read_accepted_file_types
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_accepted_file_types
+    crud: Read
+  object:
+    kind: entity
+    id: upload_config
+    type: UploadConfig
+    name: UploadConfig
+    entity: UploadConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AcceptedFileTypes
+          target:
+            kind: entity
+            id: upload_config
+            type: UploadConfig
+            role: target
+      basis: io_reference
+      reason: Response lists accepted upload types.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: types / AcceptedFileTypes
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AcceptedFileTypes(upload_config:UploadConfig{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/accepted-file-types
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reports supported upload types.
+  l1_keys:
+  - http://localhost/api/v1/document/accepted-file-types
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],AcceptedFileTypes(upload_config:UploadConfig{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:810
+      supports: accepted types
+    notes: null
+- id: gt-action-029
+  name: Read metadata schema
+  kind: normal
+  description: A developer reads the accepted metadata schema for raw-text uploads.
+  action_key: dev_read_metadata_schema
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_metadata_schema
+    crud: Read
+  object:
+    kind: entity
+    id: metadata_schema
+    type: MetadataSchema
+    name: MetadataSchema
+    entity: MetadataSchema
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MetadataSchema
+          target:
+            kind: entity
+            id: metadata_schema
+            type: MetadataSchema
+            role: target
+      basis: io_reference
+      reason: Response returns the raw-text metadata schema.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: schema / MetadataSchema
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],MetadataSchema(metadata_schema:MetadataSchema{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/metadata-schema
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reports the metadata schema.
+  l1_keys:
+  - http://localhost/api/v1/document/metadata-schema
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],MetadataSchema(metadata_schema:MetadataSchema{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:867
+      supports: metadata schema
+    notes: null
+- id: gt-action-030
+  name: Read document
+  kind: normal
+  description: A developer reads a single document by its name.
+  action_key: dev_read_document
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_document
+    crud: Read
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: docName
+      resource: DocumentName(document)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: &id014
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: DocumentName
+        target: *id007
+    reason: Caller supplies the document name.
+  effects:
+    gen:
+    - fact: *id014
+      basis: io_reference
+      reason: Response returns the document record.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: docName / DocumentName(document)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DocumentName(document:Document{target}))
+    ignored_reason: ''
+  - direction: output
+    field: document
+    disposition: observed_only
+    facts: []
+    ignored_reason: Document record content.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/{docName}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reads one document by name.
+  l1_keys:
+  - http://localhost/api/v1/document/{docName}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],DocumentName(document:Document{target}))
+  produces:
+  - Know(actor:User[SELF],DocumentName(document:Document{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known document name
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:919
+      supports: get single document
+    notes: null
+- id: gt-action-031
+  name: Create folder
+  kind: normal
+  description: A developer creates a documents storage folder.
+  action_key: dev_create_folder
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: create_folder
+    crud: Create
+  object:
+    kind: entity
+    id: folder
+    type: Folder
+    name: Folder
+    entity: Folder
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: FolderName(folder)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: folder
+          type: Folder
+          role: created
+      basis: action_semantics
+      reason: A new storage folder is created.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: name / FolderName(folder)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New folder name.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/create-folder
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Creates a storage folder.
+  l1_keys:
+  - http://localhost/api/v1/document/create-folder
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(folder:Folder{created})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:974
+      supports: create folder
+    notes: null
+- id: gt-action-032
+  name: Remove folder
+  kind: normal
+  description: A developer removes a folder and all its documents.
+  action_key: dev_remove_folder
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: remove_folder
+    crud: Delete
+  object:
+    kind: entity
+    id: folder
+    type: Folder
+    name: Folder
+    entity: Folder
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: FolderName(folder)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id015
+    reason: Caller supplies the folder name.
+  - type: existence
+    fact: &id017
+      predicate: Exists
+      arguments:
+      - *id016
+    reason: Target folder must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id017
+      basis: state_transition
+      reason: Folder and all its contents are removed.
+  io_accounting:
+  - direction: input
+    field: name / FolderName(folder)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],FolderName(folder:Folder{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/remove-folder
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Deletes a folder and its contents.
+  l1_keys:
+  - http://localhost/api/v1/document/remove-folder
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],FolderName(folder:Folder{target}))
+  - Exists(folder:Folder{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known folder
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:1048
+      supports: remove folder + contents
+    notes: null
+- id: gt-action-033
+  name: Move documents
+  kind: normal
+  description: A developer moves documents within storage.
+  action_key: dev_move_files
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: move_files
+    crud: Update
+  object:
+    kind: entity
+    id: document
+    type: Document
+    name: Document
+    entity: Document
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: files
+      resource: DocumentLocation(document)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id013
+    reason: Caller supplies the document from/to paths.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id007
+        - location
+        - updated
+      basis: state_transition
+      reason: Documents moved to new storage locations.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id007
+        - location
+        - previous
+      basis: state_transition
+      reason: Previous locations no longer hold.
+  io_accounting:
+  - direction: input
+    field: files / DocumentLocation(document)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/move-files
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Moves documents between folders; destinations validated.
+  l1_keys:
+  - http://localhost/api/v1/document/move-files
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],DocumentLocation(document:Document{target}))
+  produces:
+  - State(document:Document{target},location,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known document paths
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:1107
+      supports: move files (traversal-guarded)
+    notes: null
+- id: gt-action-034
+  name: Download generated file
+  kind: normal
+  description: A developer downloads an agent-generated file by its storage filename.
+  action_key: dev_download_generated_file
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: download_generated_file
+    crud: Read
+  object:
+    kind: entity
+    id: file
+    type: GeneratedFile
+    name: GeneratedFile
+    entity: GeneratedFile
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: filename
+      resource: GeneratedFileName(file)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: GeneratedFileName
+        target:
+          kind: entity
+          id: file
+          type: GeneratedFile
+          role: target
+    reason: Caller supplies the generated file name.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: GeneratedFile
+          target:
+            kind: entity
+            id: file
+            type: GeneratedFile
+            role: target
+      basis: io_reference
+      reason: Response streams the generated file bytes.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: filename / GeneratedFileName(file)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],GeneratedFileName(file:GeneratedFile{target}))
+    ignored_reason: ''
+  - direction: output
+    field: (file bytes)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Binary file content.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/document/generated-files/{filename}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Downloads an agent-generated file by name; format validated.
+  l1_keys:
+  - http://localhost/api/v1/document/generated-files/{filename}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],GeneratedFileName(file:GeneratedFile{target}))
+  produces:
+  - Know(actor:User[SELF],GeneratedFile(file:GeneratedFile{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known generated filename
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/document/index.js:1219
+      supports: download generated file
+    notes: Filename is format-validated to reject path traversal.
+- id: gt-action-035
+  name: List OpenAI models
+  kind: normal
+  description: A developer lists workspaces exposed as OpenAI models.
+  action_key: dev_openai_list_models
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: openai_list_models
+    crud: Read
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: *id004
+      basis: io_reference
+      reason: Response lists workspace slugs as OpenAI models.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: data[].id / WorkspaceSlug(workspace)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/openai/models
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists workspaces as OpenAI models.
+  l1_keys:
+  - http://localhost/api/v1/openai/models
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:19
+      supports: workspaces as models
+    notes: null
+- id: gt-action-036
+  name: OpenAI chat completion
+  kind: normal
+  description: A developer runs an OpenAI-compatible chat completion against a workspace.
+  action_key: dev_openai_chat_completion
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: openai_chat_completion
+    crud: Create
+  object:
+    kind: entity
+    id: chat
+    type: OpenAIChat
+    name: OpenAIChat
+    entity: OpenAIChat
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: model
+      resource: WorkspaceSlug(workspace)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug as the model.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: chat
+          type: OpenAIChat
+          role: created
+      basis: action_semantics
+      reason: A chat turn is recorded.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatResponse
+          target:
+            kind: entity
+            id: chat
+            type: OpenAIChat
+            role: created
+      basis: io_reference
+      reason: Model-authored completion returned.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: model / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: messages / ChatMessage(chat)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Untrusted chat messages.
+  - direction: output
+    field: choices / ChatResponse(chat)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],ChatResponse(chat:OpenAIChat{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/openai/chat/completions
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: OpenAI-compatible chat over a workspace; untrusted messages drive the LLM.
+  l1_keys:
+  - http://localhost/api/v1/openai/chat/completions
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Exists(chat:OpenAIChat{created})
+  - Know(actor:User[SELF],ChatResponse(chat:OpenAIChat{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:76
+      supports: OpenAI-compatible chat
+    notes: Untrusted messages -> LLM -> model-authored output.
+- id: gt-action-037
+  name: Generate image
+  kind: normal
+  description: A developer generates or edits an image.
+  action_key: dev_openai_generate_image
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: openai_generate_image
+    crud: Create
+  object:
+    kind: entity
+    id: image
+    type: GeneratedImage
+    name: GeneratedImage
+    entity: GeneratedImage
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: data
+      resource: GeneratedImage(image)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: image
+          type: GeneratedImage
+          role: created
+      basis: action_semantics
+      reason: An image is generated.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: GeneratedImage
+          target:
+            kind: entity
+            id: image
+            type: GeneratedImage
+            role: created
+      basis: io_reference
+      reason: Generated image returned as base64.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: prompt / ImagePrompt(image)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Image prompt.
+  - direction: input
+    field: image_references / ImageReference(image)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Reference images for editing.
+  - direction: output
+    field: data / GeneratedImage(image)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],GeneratedImage(image:GeneratedImage{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/openai/images/generations
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Generates/edits an image via the configured provider.
+  l1_keys:
+  - http://localhost/api/v1/openai/images/generations
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(image:GeneratedImage{created})
+  - Know(actor:User[SELF],GeneratedImage(image:GeneratedImage{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Image provider configured
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:195
+      supports: image generation/editing
+    notes: null
+- id: gt-action-038
+  name: OpenAI embeddings
+  kind: normal
+  description: A developer gets embeddings for arbitrary text.
+  action_key: dev_openai_embeddings
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: openai_embeddings
+    crud: Read
+  object:
+    kind: entity
+    id: text
+    type: EmbedResult
+    name: EmbedResult
+    entity: EmbedResult
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: input
+      resource: EmbedInput(text)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Embedding
+          target:
+            kind: entity
+            id: text
+            type: EmbedResult
+            role: target
+      basis: io_reference
+      reason: Response returns embedding vectors for the input.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: input / EmbedInput(text)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Text(s) to embed.
+  - direction: output
+    field: data / Embedding(text)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Embedding(text:EmbedResult{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/openai/embeddings
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Embeds caller-supplied text with the system embedder.
+  l1_keys:
+  - http://localhost/api/v1/openai/embeddings
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],Embedding(text:EmbedResult{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Embedder configured
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:290
+      supports: Embedder.embedChunks
+    notes: null
+- id: gt-action-039
+  name: List vector stores
+  kind: normal
+  description: A developer lists workspaces exposed as vector stores.
+  action_key: dev_openai_list_vector_stores
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: openai_list_vector_stores
+    crud: Read
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: *id004
+      basis: io_reference
+      reason: Response lists workspace slugs as vector stores.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: data[].id / WorkspaceSlug(workspace)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/openai/vector_stores
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists workspaces as vector stores.
+  l1_keys:
+  - http://localhost/api/v1/openai/vector_stores
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented OpenAI-compatible endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/openai/index.js:357
+      supports: workspaces as vector stores
+    notes: null
+- id: gt-action-040
+  name: List users
+  kind: normal
+  description: A developer lists all users.
+  action_key: dev_list_users_simple
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: list_users
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: &id019
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: Username
+          target: &id018
+            kind: entity
+            id: user
+            type: User
+            role: target
+      basis: io_reference
+      reason: Response lists usernames.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: users[].username / Username(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/users
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Lists all users.
+  l1_keys:
+  - http://localhost/api/v1/users
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],Username(user:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/userManagement/index.js:12
+      supports: list users
+    notes: Requires multi-user mode.
+- id: gt-action-041
+  name: Issue user auth token
+  kind: normal
+  description: A developer issues a temporary login token for a user.
+  action_key: dev_issue_user_auth_token
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: issue_user_auth_token
+    crud: Create
+  object:
+    kind: entity
+    id: token
+    type: AuthToken
+    name: AuthToken
+    entity: AuthToken
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: token
+      resource: AuthToken(session)
+    participants:
+    - id: user
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: &id020
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: UserID
+        target: *id018
+    reason: Caller supplies the target user id.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: token
+          type: AuthToken
+          role: created
+      basis: action_semantics
+      reason: A temporary login token is issued.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: AuthToken
+          target:
+            kind: entity
+            id: token
+            type: AuthToken
+            role: created
+      basis: io_reference
+      reason: Response returns the token.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{target}))
+    ignored_reason: ''
+  - direction: output
+    field: token / AuthToken(session)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],AuthToken(token:AuthToken{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/users/{id}/issue-auth-token
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Issues a login token for an arbitrary user (impersonation).
+  l1_keys:
+  - http://localhost/api/v1/users/{id}/issue-auth-token
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],UserID(user:User{target}))
+  produces:
+  - Exists(token:AuthToken{created})
+  - Know(actor:User[SELF],AuthToken(token:AuthToken{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/userManagement/index.js:68
+      supports: issue temp auth token
+    notes: 'Impersonation surface: mints a login token for ANY user id.'
+- id: gt-action-042
+  name: Check multi-user mode
+  kind: normal
+  description: A developer checks if multi-user mode is enabled.
+  action_key: dev_check_multi_user_mode
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: check_multi_user_mode
+    crud: Read
+  object:
+    kind: entity
+    id: system
+    type: System
+    name: System
+    entity: System
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MultiUserMode
+          target:
+            kind: entity
+            id: system
+            type: System
+            role: target
+      basis: io_reference
+      reason: Response reports multi-user mode status.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/is-multi-user-mode
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Reports instance mode.
+  l1_keys:
+  - http://localhost/api/v1/admin/is-multi-user-mode
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],MultiUserMode(system:System{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:15
+      supports: multi-user mode flag
+    notes: null
+- id: gt-action-043
+  name: Admin list users
+  kind: normal
+  description: An admin lists all users.
+  action_key: dev_admin_list_users
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_list_users
+    crud: Read
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: *id019
+      basis: io_reference
+      reason: Response lists usernames.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: users[].username / Username(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/users
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Admin user list.
+  l1_keys:
+  - http://localhost/api/v1/admin/users
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],Username(user:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:41
+      supports: admin list users
+    notes: Requires multi-user mode.
+- id: gt-action-044
+  name: Admin create user
+  kind: normal
+  description: An admin creates a user.
+  action_key: dev_admin_create_user
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_create_user
+    crud: Create
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: username
+      resource: Username(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: user
+          type: User
+          role: created
+      basis: action_semantics
+      reason: A new user is created.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: username / Username(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New username.
+  - direction: input
+    field: password / Password(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New password (credential).
+  - direction: input
+    field: role / UserRole(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: User role.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/users/new
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Creates a user with a role.
+  l1_keys:
+  - http://localhost/api/v1/admin/users/new
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(user:User{created})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:85
+      supports: create user
+    notes: Requires multi-user mode.
+- id: gt-action-045
+  name: Admin update user
+  kind: normal
+  description: An admin updates a user's settings/role.
+  action_key: dev_admin_update_user
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_update_user
+    crud: Update
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: id
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id020
+    reason: Caller supplies the user id.
+  - type: existence
+    fact: &id021
+      predicate: Exists
+      arguments:
+      - *id018
+    reason: Target user must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id018
+        - settings
+        - updated
+      basis: state_transition
+      reason: User settings/role updated.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id018
+        - settings
+        - previous
+      basis: state_transition
+      reason: Previous settings replaced.
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{target}))
+    ignored_reason: ''
+  - direction: input
+    field: role / UserRole(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: New role/settings.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/users/{id}
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Updates a user (incl. role escalation surface).
+  l1_keys:
+  - http://localhost/api/v1/admin/users/{id}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],UserID(user:User{target}))
+  - Exists(user:User{target})
+  produces:
+  - State(user:User{target},settings,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:143
+      supports: update user
+    notes: null
+- id: gt-action-046
+  name: Admin delete user
+  kind: normal
+  description: An admin deletes a user.
+  action_key: dev_admin_delete_user
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_delete_user
+    crud: Delete
+  object:
+    kind: entity
+    id: user
+    type: User
+    name: User
+    entity: User
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: id
+      resource: UserID(user)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id020
+    reason: Caller supplies the user id.
+  - type: existence
+    fact: *id021
+    reason: Target user must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id021
+      basis: state_transition
+      reason: User removed.
+  io_accounting:
+  - direction: input
+    field: id / UserID(user)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],UserID(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/users/{id}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Deletes a user.
+  l1_keys:
+  - http://localhost/api/v1/admin/users/{id}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],UserID(user:User{target}))
+  - Exists(user:User{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:216
+      supports: delete user
+    notes: null
+- id: gt-action-047
+  name: Admin list invites
+  kind: normal
+  description: An admin lists all invites.
+  action_key: dev_admin_list_invites
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_list_invites
+    crud: Read
+  object:
+    kind: entity
+    id: invite
+    type: Invite
+    name: Invite
+    entity: Invite
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: InviteCode
+          target: &id022
+            kind: entity
+            id: invite
+            type: Invite
+            role: target
+      basis: io_reference
+      reason: Response lists invite codes.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: invites[].code / InviteCode(invite)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],InviteCode(invite:Invite{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/invites
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Lists invite codes.
+  l1_keys:
+  - http://localhost/api/v1/admin/invites
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],InviteCode(invite:Invite{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:270
+      supports: list invites
+    notes: null
+- id: gt-action-048
+  name: Admin create invite
+  kind: normal
+  description: An admin creates an invite code.
+  action_key: dev_admin_create_invite
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_create_invite
+    crud: Create
+  object:
+    kind: entity
+    id: invite
+    type: Invite
+    name: Invite
+    entity: Invite
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: code
+      resource: InviteCode(invite)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: invite
+          type: Invite
+          role: created
+      basis: action_semantics
+      reason: A new invite is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: InviteCode
+          target:
+            kind: entity
+            id: invite
+            type: Invite
+            role: created
+      basis: io_reference
+      reason: Response returns the invite code.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: workspaceIds
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Workspaces to auto-add the invitee to.
+  - direction: output
+    field: invite.code / InviteCode(invite)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],InviteCode(invite:Invite{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/invite/new
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Mints an invite code.
+  l1_keys:
+  - http://localhost/api/v1/admin/invite/new
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(invite:Invite{created})
+  - Know(actor:User[SELF],InviteCode(invite:Invite{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:316
+      supports: create invite
+    notes: null
+- id: gt-action-049
+  name: Admin delete invite
+  kind: normal
+  description: An admin deactivates an invite.
+  action_key: dev_admin_delete_invite
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_delete_invite
+    crud: Delete
+  object:
+    kind: entity
+    id: invite
+    type: Invite
+    name: Invite
+    entity: Invite
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: id
+      resource: InviteID(invite)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: InviteID
+        target: *id022
+    reason: Caller supplies the invite id.
+  - type: existence
+    fact: &id023
+      predicate: Exists
+      arguments:
+      - *id022
+    reason: Target invite must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id023
+      basis: state_transition
+      reason: Invite deactivated.
+  io_accounting:
+  - direction: input
+    field: id / InviteID(invite)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],InviteID(invite:Invite{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/invite/{id}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Deactivates an invite.
+  l1_keys:
+  - http://localhost/api/v1/admin/invite/{id}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],InviteID(invite:Invite{target}))
+  - Exists(invite:Invite{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:375
+      supports: deactivate invite
+    notes: null
+- id: gt-action-050
+  name: Admin list workspace users
+  kind: normal
+  description: An admin lists the users who can access a workspace.
+  action_key: dev_admin_list_workspace_users
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_list_workspace_users
+    crud: Read
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: workspaceId
+      resource: WorkspaceID(workspace)
+    participants:
+    - id: user
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: &id024
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: WorkspaceID
+        target: *id005
+    reason: Caller supplies the workspace id.
+  effects:
+    gen:
+    - fact: *id019
+      basis: io_reference
+      reason: Response lists the workspace's users.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: workspaceId / WorkspaceID(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceID(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: output
+    field: users[].username / Username(user)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],Username(user:User{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/workspaces/{workspaceId}/users
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Lists a workspace's authorized users.
+  l1_keys:
+  - http://localhost/api/v1/admin/workspaces/{workspaceId}/users
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceID(workspace:Workspace{target}))
+  produces:
+  - Know(actor:User[SELF],Username(user:User{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:442
+      supports: workspace users
+    notes: null
+- id: gt-action-051
+  name: Admin overwrite workspace users
+  kind: normal
+  description: An admin overwrites a workspace's access list.
+  action_key: dev_admin_overwrite_workspace_users
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_overwrite_workspace_users
+    crud: Update
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: workspaceId
+      resource: WorkspaceID(workspace)
+    participants:
+    - id: user
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id024
+    reason: Caller supplies the workspace id.
+  effects:
+    gen:
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id005
+        - *id018
+        - access
+      basis: relation_transition
+      reason: Workspace access list overwritten to the given users.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: workspaceId / WorkspaceID(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceID(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: userIds / UserID(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Users granted access.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/workspaces/{workspaceId}/update-users
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Overwrites workspace access control.
+  l1_keys:
+  - http://localhost/api/v1/admin/workspaces/{workspaceId}/update-users
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceID(workspace:Workspace{target}))
+  produces:
+  - Relation(workspace:Workspace{target},user:User{target},access)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:497
+      supports: overwrite workspace perms
+    notes: null
+- id: gt-action-052
+  name: Admin manage workspace users
+  kind: normal
+  description: An admin sets a workspace's access list.
+  action_key: dev_admin_manage_workspace_users
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_manage_workspace_users
+    crud: Update
+  object:
+    kind: entity
+    id: workspace
+    type: Workspace
+    name: Workspace
+    entity: Workspace
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: slug
+      resource: WorkspaceSlug(workspace)
+    participants:
+    - id: user
+      type: User
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug.
+  effects:
+    gen:
+    - fact:
+        predicate: Relation
+        arguments:
+        - *id005
+        - *id018
+        - access
+      basis: relation_transition
+      reason: Workspace access list set to the given users.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: userIds / UserID(user)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Users granted access.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/workspaces/{workspaceSlug}/manage-users
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Sets workspace access control by slug.
+  l1_keys:
+  - http://localhost/api/v1/admin/workspaces/{workspaceSlug}/manage-users
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Relation(workspace:Workspace{target},user:User{target},access)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:564
+      supports: set workspace perms
+    notes: null
+- id: gt-action-053
+  name: Admin read all chats
+  kind: normal
+  description: An admin reads all chats across the instance.
+  action_key: dev_admin_read_workspace_chats
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_read_workspace_chats
+    crud: Read
+  object:
+    kind: entity
+    id: chats
+    type: SystemChat
+    name: SystemChat
+    entity: SystemChat
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatHistory
+          target:
+            kind: entity
+            id: chats
+            type: SystemChat
+            role: collection
+      basis: io_reference
+      reason: Response returns all chats across the instance.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: chats / ChatHistory(system)
+    disposition: observed_only
+    facts: []
+    ignored_reason: All chats across every workspace and user.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/workspace-chats
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Reads every chat in the instance.
+  l1_keys:
+  - http://localhost/api/v1/admin/workspace-chats
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],ChatHistory(chats:SystemChat{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:679
+      supports: all system chats
+    notes: Instance-wide chat data exposure.
+- id: gt-action-054
+  name: Admin update preferences
+  kind: normal
+  description: An admin updates multi-user preferences.
+  action_key: dev_admin_update_preferences
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: admin_update_preferences
+    crud: Update
+  object:
+    kind: entity
+    id: system_config
+    type: SystemConfig
+    name: SystemConfig
+    entity: SystemConfig
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: preferences
+      resource: SystemSettings(system)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: system_config
+          type: SystemConfig
+          role: target
+        - preferences
+        - updated
+      basis: state_transition
+      reason: Multi-user preferences applied.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: system_config
+          type: SystemConfig
+          role: target
+        - preferences
+        - previous
+      basis: state_transition
+      reason: Previous preferences replaced.
+  io_accounting:
+  - direction: input
+    field: preferences / SystemSettings(system)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Preference values.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/admin/preferences
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Updates multi-user preferences.
+  l1_keys:
+  - http://localhost/api/v1/admin/preferences
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - State(system_config:SystemConfig{target},preferences,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Multi-user mode
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/admin/index.js:735
+      supports: update preferences
+    notes: null
+- id: gt-action-055
+  name: List embeds
+  kind: normal
+  description: A developer lists active embed widgets.
+  action_key: dev_list_embeds
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: list_embeds
+    crud: Read
+  object:
+    kind: entity
+    id: embed
+    type: Embed
+    name: Embed
+    entity: Embed
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: &id025
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: EmbedUUID
+          target: &id027
+            kind: entity
+            id: embed
+            type: Embed
+            role: target
+      basis: io_reference
+      reason: Response lists embed uuids.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: embeds[].uuid / EmbedUUID(embed)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/embed
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists embed widgets.
+  l1_keys:
+  - http://localhost/api/v1/embed
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:10
+      supports: list embeds
+    notes: null
+- id: gt-action-056
+  name: Read embed chats
+  kind: normal
+  description: A developer reads all chats for an embed.
+  action_key: dev_read_embed_chats
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_embed_chats
+    crud: Read
+  object:
+    kind: entity
+    id: embed
+    type: Embed
+    name: Embed
+    entity: Embed
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: embedUuid
+      resource: EmbedUUID(embed)
+    participants:
+    - id: chats
+      type: EmbedChat
+      role: collection
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id025
+    reason: Caller supplies the embed uuid.
+  effects:
+    gen:
+    - fact: &id026
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: ChatHistory
+          target:
+            kind: entity
+            id: chats
+            type: EmbedChat
+            role: collection
+      basis: io_reference
+      reason: Response returns the embed's chats.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: embedUuid / EmbedUUID(embed)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+    ignored_reason: ''
+  - direction: output
+    field: chats / ChatHistory(embed)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Embed chat content.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/embed/{embedUuid}/chats
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Reads an embed's chats.
+  l1_keys:
+  - http://localhost/api/v1/embed/{embedUuid}/chats
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+  produces:
+  - Know(actor:User[SELF],ChatHistory(chats:EmbedChat{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known embed uuid
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:79
+      supports: embed chats
+    notes: null
+- id: gt-action-057
+  name: Read embed session chats
+  kind: normal
+  description: A developer reads an embed session's chats.
+  action_key: dev_read_embed_session_chats
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: read_embed_session_chats
+    crud: Read
+  object:
+    kind: entity
+    id: embed
+    type: Embed
+    name: Embed
+    entity: Embed
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: embedUuid
+      resource: EmbedUUID(embed)
+    participants:
+    - id: session
+      type: EmbedSession
+      role: target
+      binding: {}
+    - id: chats
+      type: EmbedChat
+      role: collection
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id025
+    reason: Caller supplies the embed uuid.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: SessionUUID
+        target:
+          kind: entity
+          id: session
+          type: EmbedSession
+          role: target
+    reason: Caller supplies the session uuid.
+  effects:
+    gen:
+    - fact: *id026
+      basis: io_reference
+      reason: Response returns the embed session's chats.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: embedUuid / EmbedUUID(embed)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+    ignored_reason: ''
+  - direction: input
+    field: sessionUuid / SessionUUID(session)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],SessionUUID(session:EmbedSession{target}))
+    ignored_reason: ''
+  - direction: output
+    field: chats / ChatHistory(embed)
+    disposition: observed_only
+    facts: []
+    ignored_reason: Embed session chat content.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/embed/{embedUuid}/chats/{sessionUuid}
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Reads one embed session's chats.
+  l1_keys:
+  - http://localhost/api/v1/embed/{embedUuid}/chats/{sessionUuid}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+  - Know(actor:User[SELF],SessionUUID(session:EmbedSession{target}))
+  produces:
+  - Know(actor:User[SELF],ChatHistory(chats:EmbedChat{collection}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known embed + session uuid
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:141
+      supports: embed session chats
+    notes: null
+- id: gt-action-058
+  name: Create embed
+  kind: normal
+  description: A developer creates a public embed chat widget.
+  action_key: dev_create_embed
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: create_embed
+    crud: Create
+  object:
+    kind: entity
+    id: embed
+    type: Embed
+    name: Embed
+    entity: Embed
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: response
+      field: uuid
+      resource: EmbedUUID(embed)
+    participants:
+    - id: workspace
+      type: Workspace
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id004
+    reason: Caller supplies the workspace slug the embed serves.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: embed
+          type: Embed
+          role: created
+      basis: action_semantics
+      reason: A public embed widget is created.
+    - fact:
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: EmbedUUID
+          target:
+            kind: entity
+            id: embed
+            type: Embed
+            role: created
+      basis: io_reference
+      reason: Response returns the embed uuid.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: workspace_slug / WorkspaceSlug(workspace)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+    ignored_reason: ''
+  - direction: input
+    field: config / EmbedConfig(embed)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Embed config (allowlist/prompt-override).
+  - direction: output
+    field: embed.uuid / EmbedUUID(embed)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],EmbedUUID(embed:Embed{created}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/embed/new
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Creates a public chat widget bound to a workspace.
+  l1_keys:
+  - http://localhost/api/v1/embed/new
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],WorkspaceSlug(workspace:Workspace{target}))
+  produces:
+  - Exists(embed:Embed{created})
+  - Know(actor:User[SELF],EmbedUUID(embed:Embed{created}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known workspace slug
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:201
+      supports: create embed
+    notes: 'Public exposure surface: allowlist_domains / allow_prompt_override govern who/what can drive
+      the widget.'
+- id: gt-action-059
+  name: Update embed
+  kind: normal
+  description: A developer updates an embed widget.
+  action_key: dev_update_embed
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: update_embed
+    crud: Update
+  object:
+    kind: entity
+    id: embed
+    type: Embed
+    name: Embed
+    entity: Embed
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: embedUuid
+      resource: EmbedUUID(embed)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id025
+    reason: Caller supplies the embed uuid.
+  - type: existence
+    fact: &id028
+      predicate: Exists
+      arguments:
+      - *id027
+    reason: Target embed must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id027
+        - config
+        - updated
+      basis: state_transition
+      reason: Embed config updated.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id027
+        - config
+        - previous
+      basis: state_transition
+      reason: Previous config replaced.
+  io_accounting:
+  - direction: input
+    field: embedUuid / EmbedUUID(embed)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+    ignored_reason: ''
+  - direction: input
+    field: config / EmbedConfig(embed)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Updated embed config.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/embed/{embedUuid}
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Updates an embed widget's config.
+  l1_keys:
+  - http://localhost/api/v1/embed/{embedUuid}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+  - Exists(embed:Embed{target})
+  produces:
+  - State(embed:Embed{target},config,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known embed uuid
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:287
+      supports: update embed
+    notes: null
+- id: gt-action-060
+  name: Delete embed
+  kind: normal
+  description: A developer deletes an embed widget.
+  action_key: dev_delete_embed
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: delete_embed
+    crud: Delete
+  object:
+    kind: entity
+    id: embed
+    type: Embed
+    name: Embed
+    entity: Embed
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: embedUuid
+      resource: EmbedUUID(embed)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id025
+    reason: Caller supplies the embed uuid.
+  - type: existence
+    fact: *id028
+    reason: Target embed must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id028
+      basis: state_transition
+      reason: Embed removed.
+  io_accounting:
+  - direction: input
+    field: embedUuid / EmbedUUID(embed)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/embed/{embedUuid}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Deletes an embed widget.
+  l1_keys:
+  - http://localhost/api/v1/embed/{embedUuid}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],EmbedUUID(embed:Embed{target}))
+  - Exists(embed:Embed{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known embed uuid
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/embed/index.js:358
+      supports: delete embed
+    notes: null
+- id: gt-action-061
+  name: List MCP servers
+  kind: normal
+  description: A developer lists MCP servers.
+  action_key: dev_list_mcp_servers
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: list_mcp_servers
+    crud: Read
+  object:
+    kind: entity
+    id: server
+    type: MCPServer
+    name: MCPServer
+    entity: MCPServer
+    role: collection
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact: &id029
+        predicate: Know
+        arguments:
+        - *id001
+        - kind: reference
+          type: MCPServerName
+          target: &id030
+            kind: entity
+            id: server
+            type: MCPServer
+            role: target
+      basis: io_reference
+      reason: Response lists MCP server names.
+    kill: []
+  io_accounting:
+  - direction: output
+    field: servers[].name / MCPServerName(server)
+    disposition: gen
+    facts:
+    - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers
+    methods:
+    - GET
+    selector:
+      field: ''
+      values: []
+  confidence: 0.95
+  reasoning: Lists MCP servers.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:8
+      supports: list MCP servers
+    notes: null
+- id: gt-action-062
+  name: Add MCP server
+  kind: normal
+  description: A developer adds and starts an MCP server.
+  action_key: dev_add_mcp_server
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: add_mcp_server
+    crud: Create
+  object:
+    kind: entity
+    id: server
+    type: MCPServer
+    name: MCPServer
+    entity: MCPServer
+    role: created
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: MCPServerName(server)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: Exists
+        arguments:
+        - kind: entity
+          id: server
+          type: MCPServer
+          role: created
+      basis: action_semantics
+      reason: A new MCP server is registered and started.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: name / MCPServerName(server)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: MCP server name.
+  - direction: input
+    field: config / MCPConfig(server)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: MCP config (command executed / URL contacted).
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers/new
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Registers an MCP server whose config can execute a command.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers/new
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - Exists(server:MCPServer{created})
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:48
+      supports: add + start MCP server
+    notes: MCP config can define a local command -> code execution / agent tool surface.
+- id: gt-action-063
+  name: Reload MCP servers
+  kind: normal
+  description: A developer reloads all MCP servers.
+  action_key: dev_reload_mcp_servers
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: reload_mcp_servers
+    crud: Update
+  object:
+    kind: entity
+    id: mcp_runtime
+    type: MCPRuntime
+    name: MCPRuntime
+    entity: MCPRuntime
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: implicit
+      field: ''
+      resource: ''
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: mcp_runtime
+          type: MCPRuntime
+          role: target
+        - servers
+        - reloaded
+      basis: state_transition
+      reason: All MCP servers restarted.
+    kill: []
+  io_accounting: []
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers/reload
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Restarts all MCP servers.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers/reload
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  produces:
+  - State(mcp_runtime:MCPRuntime{target},servers,reloaded)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:108
+      supports: reload MCP servers
+    notes: null
+- id: gt-action-064
+  name: Update MCP server
+  kind: normal
+  description: A developer replaces an MCP server's config.
+  action_key: dev_update_mcp_server
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: update_mcp_server
+    crud: Update
+  object:
+    kind: entity
+    id: server
+    type: MCPServer
+    name: MCPServer
+    entity: MCPServer
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: MCPServerName(server)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id029
+    reason: Caller supplies the MCP server name.
+  - type: existence
+    fact: &id031
+      predicate: Exists
+      arguments:
+      - *id030
+    reason: Target server must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id030
+        - config
+        - updated
+      basis: state_transition
+      reason: MCP server config replaced and restarted.
+    kill:
+    - fact:
+        predicate: State
+        arguments:
+        - *id030
+        - config
+        - previous
+      basis: state_transition
+      reason: Previous config replaced.
+  io_accounting:
+  - direction: input
+    field: name / MCPServerName(server)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+    ignored_reason: ''
+  - direction: input
+    field: config / MCPConfig(server)
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Replacement config.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers/{name}/update
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Replaces an MCP server definition.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers/{name}/update
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+  - Exists(server:MCPServer{target})
+  produces:
+  - State(server:MCPServer{target},config,updated)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known server name
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:139
+      supports: replace MCP server
+    notes: null
+- id: gt-action-065
+  name: Toggle MCP server
+  kind: normal
+  description: A developer starts or stops an MCP server.
+  action_key: dev_toggle_mcp_server
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: toggle_mcp_server
+    crud: Update
+  object:
+    kind: entity
+    id: server
+    type: MCPServer
+    name: MCPServer
+    entity: MCPServer
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: MCPServerName(server)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id029
+    reason: Caller supplies the MCP server name.
+  - type: existence
+    fact: *id031
+    reason: Target server must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - *id030
+        - running
+        - toggled
+      basis: state_transition
+      reason: MCP server started/stopped.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: name / MCPServerName(server)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers/{name}/toggle
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Starts/stops an MCP server.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers/{name}/toggle
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+  - Exists(server:MCPServer{target})
+  produces:
+  - State(server:MCPServer{target},running,toggled)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known server name
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:209
+      supports: toggle MCP server
+    notes: null
+- id: gt-action-066
+  name: Toggle MCP tool
+  kind: normal
+  description: A developer enables or disables a single MCP tool.
+  action_key: dev_toggle_mcp_tool
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: toggle_mcp_tool
+    crud: Update
+  object:
+    kind: entity
+    id: server
+    type: MCPServer
+    name: MCPServer
+    entity: MCPServer
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: MCPServerName(server)
+    participants:
+    - id: tool
+      type: MCPTool
+      role: target
+      binding: {}
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id029
+    reason: Caller supplies the MCP server name.
+  - type: knowledge
+    fact:
+      predicate: Know
+      arguments:
+      - *id001
+      - kind: reference
+        type: ToolName
+        target:
+          kind: entity
+          id: tool
+          type: MCPTool
+          role: target
+    reason: Caller supplies the tool name.
+  - type: existence
+    fact: *id031
+    reason: Target server must exist.
+  effects:
+    gen:
+    - fact:
+        predicate: State
+        arguments:
+        - kind: entity
+          id: tool
+          type: MCPTool
+          role: target
+        - enabled
+        - toggled
+      basis: state_transition
+      reason: MCP tool enabled/disabled for agents.
+    kill: []
+  io_accounting:
+  - direction: input
+    field: name / MCPServerName(server)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+    ignored_reason: ''
+  - direction: input
+    field: toolName / ToolName(tool)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],ToolName(tool:MCPTool{target}))
+    ignored_reason: ''
+  - direction: input
+    field: enabled
+    disposition: object_attribute
+    facts: []
+    ignored_reason: Enable flag.
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers/{name}/toggle-tool
+    methods:
+    - POST
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Enables/disables one MCP tool for agents.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers/{name}/toggle-tool
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+  - Know(actor:User[SELF],ToolName(tool:MCPTool{target}))
+  - Exists(server:MCPServer{target})
+  produces:
+  - State(tool:MCPTool{target},enabled,toggled)
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known server + tool name
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:252
+      supports: toggle MCP tool
+    notes: Controls which MCP tools are exposed to agents (agent tool-surface control).
+- id: gt-action-067
+  name: Delete MCP server
+  kind: normal
+  description: A developer stops and removes an MCP server.
+  action_key: dev_delete_mcp_server
+  subject:
+    id: actor
+    identity: ApiKeyHolder
+    role: Developer
+    auth_context: ApiKey
+  operation:
+    business: delete_mcp_server
+    crud: Delete
+  object:
+    kind: entity
+    id: server
+    type: MCPServer
+    name: MCPServer
+    entity: MCPServer
+    role: target
+    attribute: ''
+    state_field: ''
+    binding:
+      source: request
+      field: name
+      resource: MCPServerName(server)
+    participants: []
+    constraints: []
+  requirements:
+  - type: authentication
+    fact: *id002
+    reason: validApiKey.
+  - type: knowledge
+    fact: *id029
+    reason: Caller supplies the MCP server name.
+  - type: existence
+    fact: *id031
+    reason: Target server must exist.
+  effects:
+    gen: []
+    kill:
+    - fact: *id031
+      basis: state_transition
+      reason: MCP server stopped and removed.
+  io_accounting:
+  - direction: input
+    field: name / MCPServerName(server)
+    disposition: req
+    facts:
+    - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+    ignored_reason: ''
+  l1_bindings:
+  - l1_key: http://localhost/api/v1/mcp-servers/{name}
+    methods:
+    - DELETE
+    selector:
+      field: ''
+      values: []
+  confidence: 0.9
+  reasoning: Removes an MCP server.
+  l1_keys:
+  - http://localhost/api/v1/mcp-servers/{name}
+  consumes:
+  - Authenticated(actor:User[SELF],ApiKey)
+  - Know(actor:User[SELF],MCPServerName(server:MCPServer{target}))
+  - Exists(server:MCPServer{target})
+  produces: []
+  object_type: entity
+  lifecycle: ''
+  operations: []
+  secondary_objects: []
+  gt:
+    visibility:
+      minimum: black_box
+      reason: Documented developer endpoint.
+    black_box_reachable: true
+    reachability_conditions:
+    - Valid instance API key
+    - Known server name
+    observable_evidence: []
+    evidence:
+    - type: source
+      ref: server/endpoints/api/mcpServers/index.js:322
+      supports: remove MCP server
+    notes: null
+edges: []
+annotation_issues: []

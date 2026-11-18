@@ -20,7 +20,9 @@ deliverables:
   output: agentic_gt.yaml
 
 phase_status: {A_locate: complete, B_extract: complete, C_trust_authority: complete,
-               D_lineage_closure: complete, E_runtime_grounding: pending, F_link_l1_l2: partial, G_validate: complete, H_export: pending}
+               D_lineage_closure: complete, E_runtime_grounding: pending,
+               F_link_l1_l2: linked,   # agentic_links.yaml stubs all 14 L1 + 1 L2 ids referenced by agentic_gt.yaml; 7 cross-ref real Developer-API web-GT nodes via web_gt_key
+               G_validate: complete, H_export: pending}
 
 runtime_grounding_plan:
   image: mintplexlabs/anythingllm (pin to the checked-out version)
@@ -32,3 +34,53 @@ key_authority_note: >
   External skills (gmail/outlook/gcal/sql/mcp/imported) execute under INSTANCE-level stored
   credentials, not the invoking user's. Any user who can reach @agent in a workspace wields the
   instance's connected accounts -- the central confused-deputy axis to confirm at runtime.
+
+# ===========================================================================
+# Traditional Web GT (L1/L2, pengent-web-gt-v1) -- added on top of the agentic layer
+# ===========================================================================
+web_gt:
+  schema: pengent-web-gt-v1
+  generators: generators/{common.py, l2lib.py, l1_data.py, l2_data.py, build_l1.py, build_l2.py}
+  output: {l1: l1_gt.yaml, l2: l2_gt.yaml}
+  build: "PYTHONIOENCODING=utf-8 python build_l1.py && python build_l2.py"
+  validate: "python ../../validate_gt.py --l1 l1_gt.yaml --l2 l2_gt.yaml   (passes)"
+  export: "python ../../export_to_pengent.py --l1 l1_gt.yaml --l2 l2_gt.yaml --out <file>  (succeeds)"
+
+  evidence_basis: SOURCE-ONLY
+  evidence_note: >
+    Built source-first from the Express route handlers + inline #swagger request/response
+    contracts. No runtime capture is possible in this environment (no Docker/network), so
+    samples=[] and black_box_reachable is derived from source gating (validApiKey etc.).
+    Runtime verification (HAR/probe on a pinned mintplexlabs/anythingllm container) is the
+    documented follow-up on a real host.
+
+  scope_decision: >
+    Target is the Developer API (/api/v1/*, validApiKey, Swagger-documented) -- a bounded,
+    externally-reachable surface. The internal UI API (/api/* non-v1, session/JWT-auth,
+    ~400 routes) is a separate large surface tracked below as remaining.
+
+  status: "Developer API (/api/v1) COMPLETE -- 67 L1 nodes / 67 L2 actions, validator green + export OK."
+  modules:
+    done:   # all /api/v1 developer-API modules
+      - "System Settings + Authentication (7 nodes)"
+      - "Workspaces (10 nodes): new, list, :slug [GET+DELETE], update, chats, update-embeddings,
+         update-pin, chat, stream-chat, vector-search"
+      - "Workspace Threads (6 nodes): new, :threadSlug [update/DELETE], chats, chat, stream-chat"
+      - "Documents (13 nodes): upload[/:folderName], upload-link (SSRF), raw-text, documents[/folder/:folderName],
+         accepted-file-types, metadata-schema, :docName, create/remove-folder, move-files + generated-files (traversal-guarded)"
+      - "OpenAI-compatible (5 nodes): models, chat/completions, images/generations, embeddings, vector_stores"
+      - "User Management (2 nodes): /v1/users, /v1/users/:id/issue-auth-token (impersonation)"
+      - "Admin (12 nodes): is-multi-user-mode, users[/new, /:id POST+DELETE], invites[/new, /:id],
+         workspaces/:id/users[+update-users], :slug/manage-users, workspace-chats (instance-wide), preferences"
+      - "Embeds (5 nodes): list, :embedUuid/chats[/:sessionUuid], new (public widget), :embedUuid [POST+DELETE]"
+      - "MCP Servers (7 nodes): list, new (code-exec config), reload, :name/update, :name/toggle,
+         :name/toggle-tool (agent tool control), :name [DELETE]"
+    remaining_internal_api: "/api/* non-v1 UI API (session/JWT, ~400 routes) -- separate module set, not started."
+
+  cross_app_status:   # overall task: full L1/L2 for the LLM-integrated REST apps
+    anything-llm: "Developer API COMPLETE (67 nodes / 67 actions). Internal UI API (~400) remaining."
+    open-webui: "not started (~590 FastAPI routes)"
+    LibreChat: "not started (~429 Express routes)"
+    lobe-chat: "not started (22 route files + tRPC surface)"
+    openclaw: "web-GT intentionally skipped -- its control plane is the agentic surface
+               (agentic_gt.yaml); only the focused HTTP link-layer (l1_gt/l2_gt) is kept."

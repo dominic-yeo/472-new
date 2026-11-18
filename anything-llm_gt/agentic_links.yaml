@@ -1,0 +1,123 @@
+# AnythingLLM -- agentic link layer (Phase F).
+# Focused L1/L2 STUBS for the surfaces the agentic GT forward-references by id
+# (agentic_gt.yaml: l1_id / l1_ids / l2_id / related_l2_ids). The full validated
+# Developer-API web-GT lives in l1_gt.yaml / l2_gt.yaml (67 nodes / 67 actions);
+# where an agentic surface maps onto one of those nodes, web_gt_key cross-refs it.
+# Agentic surfaces with no Developer-API route (ws/* realtime, internal UI API,
+# docker skill runtime) are source-grounded stubs. Source-only; no runtime capture.
+schema_version: pengent-web-gt-v1
+environment_id: anything-llm-local
+scope: "agentic link layer: L1/L2 ids referenced by agentic_gt.yaml (stubs + cross-refs to the web-GT)"
+
+l1_nodes:
+# --- invocation (agent turns) ---
+- {id: l1.api.workspace_agent, key: "POST /api/v1/workspace/{slug}/chat (@agent)", kind: api, surface_class: invocation,
+   inputs: [message, mode], outputs: [agent_reply, tool_calls],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/workspace/{slug}/chat",
+   source_ref: "server/utils/agents/index.js (@agent invocation); endpoints/api/workspace chat",
+   gt: {visibility: {minimum: grey_box, reason: "PRIMARY untrusted entry; @agent message drives the AIbitat tool loop."},
+        black_box_reachable: true, notes: "Prompt-injection source steering instance-credentialed tools."}}
+- {id: l1.ws.agent_invocation, key: "ws:/api/agent-invocation/{uuid}", kind: ws, surface_class: invocation,
+   inputs: [prompt], outputs: [agent_stream],
+   auth_context: workspace membership; multi-user role (admin|manager|default),
+   source_ref: "server/endpoints/agentWebsocket.js; utils/agents/index.js",
+   gt: {visibility: {minimum: grey_box, reason: "Realtime agent invocation over WebSocket (browser UI path)."},
+        black_box_reachable: true, notes: "Internal UI realtime channel; not part of the /api/v1 Developer API."}}
+- {id: l1.ws.clarify_response, key: "ws:agent clarification response", kind: ws, surface_class: invocation,
+   inputs: [human_answer], outputs: [resumed_turn],
+   auth_context: workspace membership,
+   source_ref: "utils/agents/aibitat (USER interrupt / clarify oversight)",
+   gt: {visibility: {minimum: grey_box, reason: "Human-in-the-loop oversight channel resuming an agent turn."},
+        black_box_reachable: true, notes: "Operator answer re-enters the tool loop (oversight bypass surface)."}}
+- {id: l1.api.ephemeral_agent, key: "ephemeral agent (scheduled/one-shot)", kind: api, surface_class: invocation,
+   inputs: [prompt, workspace], outputs: [agent_result],
+   auth_context: API key or system (scheduled),
+   source_ref: "server/utils/agents ephemeral; jobs runner",
+   gt: {visibility: {minimum: grey_box, reason: "Headless agent run (no live user) for scheduled/automation jobs."},
+        black_box_reachable: true, notes: "Autonomous invocation under instance/system identity."}}
+# --- tool-backing surfaces (execute under INSTANCE-level credentials) ---
+- {id: l1.api.agent_skill.import, key: "imported skill (docker runtime)", kind: api, surface_class: tool_backing,
+   inputs: [skill_package], outputs: [tool_result],
+   auth_context: instance; imported-plugin docker runtime,
+   source_ref: "server/utils/agents/imported.js (runtime: 'docker'; handler.js)",
+   gt: {visibility: {minimum: grey_box, reason: "code_execution effect class; community/imported plugin runs in docker."},
+        black_box_reachable: true, notes: "Imported skill executes arbitrary handler code."}}
+- {id: l1.api.sql_connection, key: "sql-agent connection", kind: api, surface_class: tool_backing,
+   inputs: [sql_query, connection_id], outputs: [rows],
+   auth_context: instance; stored DB connection,
+   source_ref: "server/utils/agents/aibitat/plugins/sql-agent/*",
+   gt: {visibility: {minimum: grey_box, reason: "mixed effect class; SQL agent runs queries on a stored connection."},
+        black_box_reachable: true, notes: "Model-authored SQL executed against configured databases."}}
+- {id: l1.api.workspace.vector_search, key: "POST /api/v1/workspace/{slug}/vector-search", kind: api, surface_class: tool_backing,
+   inputs: [query], outputs: [chunks],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/workspace/{slug}/vector-search",
+   source_ref: "server/utils/agents/aibitat/plugins/summarize.js; workspace vector search",
+   gt: {visibility: {minimum: grey_box, reason: "read effect class; RAG retrieval into agent context."},
+        black_box_reachable: true, notes: "Indirect-injection source (indexed document content)."}}
+# --- config surfaces that shape the agent / its tools ---
+- {id: l1.api.mcp_servers.config, key: "POST /api/v1/mcp-servers/new", kind: api, surface_class: config,
+   inputs: [mcp_server_def], outputs: [mcp_server],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/mcp-servers/new",
+   source_ref: "server/utils/MCP/index.js; endpoints/api/mcpServers",
+   gt: {visibility: {minimum: grey_box, reason: "MCP server config can define an executed command (code-exec)."},
+        black_box_reachable: true, notes: "Adds MCP tool provider; config carries a runnable command."}}
+- {id: l1.api.agent_flows.save, key: "agent-flows save", kind: api, surface_class: config,
+   inputs: [flow_definition], outputs: [flow],
+   auth_context: admin/manager (internal UI API),
+   source_ref: "server agent-flows; utils/agentFlows",
+   gt: {visibility: {minimum: grey_box, reason: "Defines a no-code agent flow (sequence of tool steps)."},
+        black_box_reachable: true, notes: "Stored flow later executed as an agent program."}}
+- {id: l1.api.scheduled_job.create, key: "scheduled job create", kind: api, surface_class: config,
+   inputs: [schedule, workspace, prompt], outputs: [job],
+   auth_context: admin/manager,
+   source_ref: "server background jobs / scheduler",
+   gt: {visibility: {minimum: grey_box, reason: "Schedules autonomous agent runs."},
+        black_box_reachable: true, notes: "Triggers ephemeral agent turns on a cron."}}
+- {id: l1.api.workspace.update, key: "POST /api/v1/workspace/{slug}/update", kind: api, surface_class: config,
+   inputs: [openAiPrompt, agentModel, settings], outputs: [workspace],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/workspace/{slug}/update",
+   source_ref: "server/endpoints/api/workspace update",
+   gt: {visibility: {minimum: grey_box, reason: "Sets the workspace system prompt + agent model/tool settings."},
+        black_box_reachable: true, notes: "Workspace-scoped system-prompt + agent configuration."}}
+- {id: l1.api.workspace.embed, key: "POST /api/v1/workspace/{slug}/update-embeddings", kind: api, surface_class: config,
+   inputs: [adds, deletes], outputs: [workspace],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/workspace/{slug}/update-embeddings",
+   source_ref: "server/endpoints/api/workspace update-embeddings",
+   gt: {visibility: {minimum: grey_box, reason: "Attaches/detaches documents embedded into the workspace corpus."},
+        black_box_reachable: true, notes: "Controls what RAG content the agent can retrieve."}}
+- {id: l1.api.system_settings, key: "GET/POST /api/v1/system (settings)", kind: api, surface_class: config,
+   inputs: [settings], outputs: [settings],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/system",
+   source_ref: "server/endpoints/api/system",
+   gt: {visibility: {minimum: grey_box, reason: "Instance settings incl. provider/agent config (secret presence)."},
+        black_box_reachable: true, notes: "Global config shaping every agent turn."}}
+# --- context source ---
+- {id: l1.api.document.upload, key: "POST /api/v1/document/upload", kind: api, surface_class: context_source,
+   inputs: [file], outputs: [document],
+   auth_context: API key, web_gt_key: "http://localhost/api/v1/document/upload",
+   source_ref: "server/endpoints/api/document upload",
+   gt: {visibility: {minimum: grey_box, reason: "Uploaded documents become retrievable agent context."},
+        black_box_reachable: true, notes: "Indirect-injection source via embedded document content."}}
+
+l2_nodes:
+- id: l2.workspace.agent_chat
+  name: Workspace @agent turn
+  kind: normal
+  action_key: allm_workspace_agent_turn
+  description: >
+    A workspace message invoking @agent drives an AIbitat turn: workspace system prompt + RAG
+    context assembled -> model -> model-selected skills/tools (web-scrape, SQL agent, imported
+    docker plugins, MCP) that execute under INSTANCE-level stored credentials -> reply.
+  subject: {id: caller, identity: ApiKeyHolder or workspace member, role: Developer, auth_context: ApiKey}
+  operation: {business: agent_turn, crud: Execute}
+  object: {kind: process, id: agent_turn, type: AgentTurn, name: Agent turn, entity: AgentTurn, role: executed}
+  requirements:
+  - {type: authentication, fact: "Authenticated(caller, ApiKey)", reason: validApiKey (or workspace session) gates invocation}
+  - {type: authorization, fact: "Can(caller, Invoke, Workspace)", reason: workspace membership / API-key scope}
+  effects:
+  - {fact: "agent tools execute under INSTANCE-level connected credentials (confused-deputy axis)",
+     basis: action_semantics, reason: "external skills use instance-stored creds, not the caller's"}
+  - {fact: "model-composed reply returned", basis: action_semantics, reason: turn output}
+  related_l1_ids: [l1.api.workspace_agent, l1.ws.agent_invocation, l1.ws.clarify_response, l1.api.ephemeral_agent,
+    l1.api.agent_skill.import, l1.api.sql_connection, l1.api.workspace.vector_search, l1.api.mcp_servers.config,
+    l1.api.workspace.update, l1.api.workspace.embed, l1.api.document.upload]
