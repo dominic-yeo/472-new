@@ -83,16 +83,26 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: JWT session token set as the 'token' cookie.
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/internal/v1/users/login
+    identity: admin
+    status: 400
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Bad Request","status":400,"detail":"\"email\" is required","code":"validation","traceId":"18e9772527df560c1748'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -106,6 +116,9 @@ nodes:
     - type: source
       ref: org/user_handler.go:Login
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->400'
+      supports: 'runtime: handler/router reached'
     notes: Token travels in a Set-Cookie (name 'token'), not the JSON body.
 - key: http://localhost:14318/internal/v1/users/logout
   kind: api
@@ -242,16 +255,28 @@ nodes:
     reference_fields:
     - projects
     reason: All projects (OSS single-tenant lists every project).
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/users/current
+    identity: anonymous
+    status: 200
+    content_type: application/json
+    body_excerpt: '{"user":{"id":0,"name":"Guest","kind":"","email":"","phone":"","emailConfirmed":false,"avatar":"","emailsMutedUntil":0,"'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -265,6 +290,9 @@ nodes:
     - type: source
       ref: org/user_handler.go:registerUserHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/projects/:project_id
   kind: api
@@ -351,9 +379,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Ingest DSN embedding the project token -- credential disclosure surface.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/projects/1
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -362,6 +398,8 @@ nodes:
   identity_statuses:
     anonymous:
     - 401
+    admin:
+    - 200
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
@@ -376,6 +414,9 @@ nodes:
     - type: source
       ref: org/project_handler.go:Show
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler/router reached; anon 401/admin 200 auth-gated'
     notes: DSN embeds the project token; any logged-in user can read ANY project's DSN (no ACL).
 - key: http://localhost:14318/internal/v1/data-usage
   kind: api
@@ -456,7 +497,11 @@ nodes:
     - type: source
       ref: org/usage_handler.go:Show
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/traces/search
   kind: api
   methods:
@@ -556,9 +601,17 @@ nodes:
     reference_fields:
     - span_id
     reason: Root span id.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/traces/search
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -568,6 +621,8 @@ nodes:
     anonymous:
     - 401
     authenticated:
+    - 400
+    admin:
     - 400
   route_confirmed: true
   runtime_api_prefixes:
@@ -583,6 +638,9 @@ nodes:
     - type: source
       ref: tracing/trace_handler.go:registerTraceHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: 'Gated by m.User only (NOT UserAndProject): a cross-project trace-id oracle.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/systems
   kind: api
@@ -716,7 +774,11 @@ nodes:
     - type: source
       ref: tracing/system_handler.go:ListSystems
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/spans
   kind: api
   methods:
@@ -826,7 +888,11 @@ nodes:
     - type: source
       ref: tracing/span_handler.go:ListSpans
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/groups
   kind: api
   methods:
@@ -931,7 +997,11 @@ nodes:
     - type: source
       ref: tracing/span_handler.go:ListGroups
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/groups/:group_id
   kind: api
   methods:
@@ -1010,16 +1080,28 @@ nodes:
     - group_id
     reason: Group being summarized.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/tracing/1/groups/0
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1033,6 +1115,9 @@ nodes:
     - type: source
       ref: tracing/group_handler.go:ShowSummary
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id
   kind: api
@@ -1151,7 +1236,11 @@ nodes:
     - type: source
       ref: tracing/trace_handler.go:ShowTrace
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/attributes
   kind: api
   methods:
@@ -1233,16 +1322,28 @@ nodes:
     reference_fields:
     - keys
     reason: Span attribute keys.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/tracing/1/attributes
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1256,6 +1357,9 @@ nodes:
     - type: source
       ref: tracing/attr_handler.go:AttrKeys
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/tracing/:project_id/attributes/:attr
   kind: api
@@ -1276,16 +1380,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/tracing/1/attributes/service.name
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1299,6 +1415,9 @@ nodes:
     - type: source
       ref: tracing/attr_handler.go:AttrValues
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/tracing/:project_id/percentiles
   kind: api
@@ -1341,7 +1460,11 @@ nodes:
     - type: source
       ref: tracing/span_handler.go:Percentiles
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/group-stats
   kind: api
   methods:
@@ -1383,7 +1506,11 @@ nodes:
     - type: source
       ref: tracing/span_handler.go:GroupStats
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/timeseries
   kind: api
   methods:
@@ -1425,7 +1552,11 @@ nodes:
     - type: source
       ref: tracing/span_handler.go:Timeseries
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id/:span_id
   kind: api
   methods:
@@ -1467,7 +1598,11 @@ nodes:
     - type: source
       ref: tracing/trace_handler.go:ShowSpan
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/metrics/:project_id
   kind: api
   methods:
@@ -1546,16 +1681,28 @@ nodes:
     reference_fields:
     - metrics
     reason: Metric names.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1569,6 +1716,9 @@ nodes:
     - type: source
       ref: metrics/metric_handler.go:List
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/table
   kind: api
@@ -1639,16 +1789,28 @@ nodes:
     - project_id
     reason: Target project; middleware loads it by id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/table
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1662,6 +1824,9 @@ nodes:
     - type: source
       ref: metrics/query_handler.go:Table
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/attributes
   kind: api
@@ -1741,16 +1906,28 @@ nodes:
     reference_fields:
     - keys
     reason: Metric attribute keys.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/attributes
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1764,6 +1941,9 @@ nodes:
     - type: source
       ref: metrics/attr_handler.go:AttrKeys
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler/router reached; anon 401/admin 200 auth-gated'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/describe
   kind: api
@@ -1784,16 +1964,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/describe
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1806,6 +1998,9 @@ nodes:
     - type: source
       ref: metrics/metric_handler.go:Describe
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/stats
   kind: api
@@ -1848,7 +2043,11 @@ nodes:
     - type: source
       ref: metrics/metric_handler.go:Stats
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/metrics/:project_id/attributes/:attr
   kind: api
   methods:
@@ -1868,16 +2067,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/attributes/service.name
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1890,6 +2101,9 @@ nodes:
     - type: source
       ref: metrics/attr_handler.go:AttrValues
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/timeseries
   kind: api
@@ -1910,16 +2124,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/timeseries
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -1932,6 +2158,9 @@ nodes:
     - type: source
       ref: metrics/query_handler.go:Timeseries
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/gauge
   kind: api
@@ -1974,7 +2203,11 @@ nodes:
     - type: source
       ref: metrics/query_handler.go:Gauge
       supports: route + middleware
-    notes: null
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
+      read route not dispatch-confirmed (version/route drift); recheck route name/method.'
 - key: http://localhost:14318/internal/v1/metrics/:project_id/heatmap
   kind: api
   methods:
@@ -1994,16 +2227,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/heatmap
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2016,6 +2261,9 @@ nodes:
     - type: source
       ref: metrics/query_handler.go:Heatmap
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards
   kind: api
@@ -2142,16 +2390,29 @@ nodes:
     reference_fields:
     - dashboards
     reason: Dashboard ids in the project.
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 200
+    - 405
+    anonymous:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2168,6 +2429,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:List
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405; anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/yaml
   kind: api
@@ -2247,16 +2511,26 @@ nodes:
     reference_fields:
     - dashboard
     reason: Created dashboard id.
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/yaml
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2270,6 +2544,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:CreateFromYAML
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
   kind: api
@@ -2472,16 +2749,30 @@ nodes:
     reference_fields:
     - dashboard
     reason: Cloned dashboard id.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" href=\"\
+      /favicon.svg\" />\n    <"
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2504,6 +2795,10 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:Delete
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->200; admin GET->200; admin POST->405; admin
+        PUT->405; admin DELETE->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/pinned
   kind: api
@@ -2568,16 +2863,26 @@ nodes:
     - dash_id
     reason: Target dashboard; m.Dashboard checks it belongs to the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/pinned
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2591,6 +2896,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:Pin
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/yaml
   kind: api
@@ -2612,16 +2920,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/yaml
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <link rel=\"icon\" href=\"\
+      /favicon.svg\" />\n    <"
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2637,6 +2959,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:UpdateYAML
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->200; admin GET->200; admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/table
   kind: api
@@ -2657,16 +2982,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/table
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2679,6 +3014,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:UpdateTable
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid
   kind: api
@@ -2771,16 +3109,26 @@ nodes:
     reference_fields:
     - gridItem
     reason: Created grid item id.
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/grid
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2797,6 +3145,9 @@ nodes:
     - type: source
       ref: metrics/grid_item_handler.go:Create
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/reset
   kind: api
@@ -2817,16 +3168,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/reset
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2839,6 +3200,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:Reset
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/unpinned
   kind: api
@@ -2859,16 +3223,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/unpinned
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2881,6 +3255,9 @@ nodes:
     - type: source
       ref: metrics/dash_handler.go:Unpin
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/:row_id
   kind: api
@@ -2964,16 +3341,26 @@ nodes:
     - row_id
     reason: Grid item being deleted.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/grid/1
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -2990,6 +3377,9 @@ nodes:
     - type: source
       ref: metrics/grid_item_handler.go:Update
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin DELETE->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows
   kind: api
@@ -3081,16 +3471,26 @@ nodes:
     reference_fields:
     - gridRow
     reason: Created grid row id.
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/rows
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3104,6 +3504,9 @@ nodes:
     - type: source
       ref: metrics/grid_row_handler.go:Create
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id
   kind: api
@@ -3188,16 +3591,26 @@ nodes:
     - row_id
     reason: Grid row being deleted.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/rows/1
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3217,6 +3630,9 @@ nodes:
     - type: source
       ref: metrics/grid_row_handler.go:Update
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin DELETE->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/layout
   kind: api
@@ -3237,16 +3653,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/grid/layout
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3259,6 +3685,9 @@ nodes:
     - type: source
       ref: metrics/grid_item_handler.go:UpdateLayout
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id/up
   kind: api
@@ -3279,16 +3708,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/rows/1/up
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3301,6 +3740,9 @@ nodes:
     - type: source
       ref: metrics/grid_row_handler.go:MoveUp
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id/down
   kind: api
@@ -3321,16 +3763,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    url: http://localhost:14318/internal/v1/metrics/1/dashboards/1/rows/1/down
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3343,6 +3795,9 @@ nodes:
     - type: source
       ref: metrics/grid_row_handler.go:MoveDown
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/api/v1/tracing/:project_id/spans
   kind: api
@@ -3427,9 +3882,17 @@ nodes:
     reference_fields:
     - spans
     reason: Span rows.
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/api/v1/tracing/1/spans
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3441,6 +3904,8 @@ nodes:
     dsn:
     - 401
     authenticated:
+    - 400
+    admin:
     - 400
   route_confirmed: true
   runtime_api_prefixes:
@@ -3456,6 +3921,9 @@ nodes:
     - type: source
       ref: tracing/public_handler.go:registerPublicHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/api/v1/tracing/:project_id/groups
   kind: api
@@ -3529,16 +3997,28 @@ nodes:
     - project_id
     reason: Target project; middleware loads it by id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    url: http://localhost:14318/api/v1/tracing/1/groups
+    identity: anonymous
+    status: 401
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Unauthorized","status":401,"detail":"you must be authenticated to access this resource","code":"unauthorized",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3552,6 +4032,9 @@ nodes:
     - type: source
       ref: tracing/public_handler.go:registerPublicHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/v1/traces
   kind: api
@@ -3620,9 +4103,17 @@ nodes:
     reference_fields: []
     reason: DSN selects + authorizes the destination project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/v1/traces
+    identity: dsn
+    status: 200
+    content_type: application/json
+    body_excerpt: '{}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3647,6 +4138,9 @@ nodes:
     - type: source
       ref: tracing/init.go:initOTLP
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
+      supports: 'runtime: handler/router reached'
     notes: protobuf/json OTLP body; project resolved from DSN, not user session.
 - key: http://localhost:14318/v1/logs
   kind: api
@@ -3715,9 +4209,17 @@ nodes:
     reference_fields: []
     reason: DSN authorizes the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/v1/logs
+    identity: dsn
+    status: 200
+    content_type: application/json
+    body_excerpt: '{}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3742,6 +4244,9 @@ nodes:
     - type: source
       ref: tracing/init.go:initOTLP
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/v1/metrics
   kind: api
@@ -3810,9 +4315,17 @@ nodes:
     reference_fields: []
     reason: DSN authorizes the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/v1/metrics
+    identity: dsn
+    status: 200
+    content_type: application/json
+    body_excerpt: '{}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3837,6 +4350,9 @@ nodes:
     - type: source
       ref: metrics/init.go:initOTLP
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/api/v1/vector-logs
   kind: api
@@ -3903,16 +4419,26 @@ nodes:
     reference_fields: []
     reason: DSN authorizes the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/api/v1/vector-logs
+    identity: admin
+    status: 403
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Forbidden","status":403,"detail":"DSN=\"user1_secret\" does not have a token","code":"forbidden","traceId":"18'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -3926,6 +4452,9 @@ nodes:
     - type: source
       ref: tracing/vector_handler.go:registerVectorHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->403'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/api/v1/prometheus/write
   kind: api
@@ -4081,16 +4610,26 @@ nodes:
     reference_fields: []
     reason: DSN authorizes the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/api/v1/prometheus/read
+    identity: admin
+    status: 405
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -4104,6 +4643,9 @@ nodes:
     - type: source
       ref: metrics/prom_remote_storage.go:registerPrometheusHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
+      supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
 - key: http://localhost:14318/api/v1/cloudwatch/metrics
   kind: api
@@ -4170,16 +4712,26 @@ nodes:
     reference_fields: []
     reason: DSN authorizes the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/api/v1/cloudwatch/metrics
+    identity: admin
+    status: 400
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Bad Request","status":400,"detail":"X-Amz-Firehose-Access-Key header is empty or missing","code":"validation",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -4193,6 +4745,9 @@ nodes:
     - type: source
       ref: metrics/cloudwatch_handler.go:registerKinesisHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->400'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/api/v1/vector/logs
   kind: api
@@ -4213,16 +4768,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    url: http://localhost:14318/api/v1/vector/logs
+    identity: admin
+    status: 403
+    content_type: application/problem+json
+    body_excerpt: '{"title":"Forbidden","status":403,"detail":"DSN=\"user1_secret\" does not have a token","code":"forbidden","traceId":"18'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:14318
   gt:
@@ -4236,6 +4801,9 @@ nodes:
     - type: source
       ref: tracing/vector_handler.go:registerVectorHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->403'
+      supports: 'runtime: handler/router reached'
     notes: null
 - key: http://localhost:14318/debug/pprof/
   kind: page
@@ -4259,6 +4827,7 @@ nodes:
   samples: []
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
@@ -4277,6 +4846,9 @@ nodes:
     - type: source
       ref: bunapp/router.go:initRouter
       supports: route
+    - type: runtime
+      ref: '2026-11-19 probe: GET / ->200 text/html'
+      supports: 'runtime: SPA page served'
     notes: Mounted only when Debug=true; not present in production config.
 - key: http://localhost:14318/debug/pprof/:name
   kind: page
@@ -4300,6 +4872,7 @@ nodes:
   samples: []
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
@@ -4318,6 +4891,9 @@ nodes:
     - type: source
       ref: bunapp/router.go:initRouter
       supports: route
+    - type: runtime
+      ref: '2026-11-19 probe: GET / ->200 text/html'
+      supports: 'runtime: SPA page served'
     notes: null
 - key: http://localhost:14318/
   kind: static
@@ -4358,7 +4934,12 @@ nodes:
     - type: source
       ref: bunapp (Vue SPA FS)
       supports: route
-    notes: SPA shell + client bundle; JSON APIs above are the real surface.
+    - type: runtime
+      ref: '2026-11-19 probe: GET ->200 SPA; POST ->n/a'
+      supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
+    notes: 'SPA shell + client bundle; JSON APIs above are the real surface. | RUNTIME 2026-11-19: GET returns SPA shell and
+      other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled read route not dispatch-confirmed (version/route
+      drift); recheck route name/method.'
 edges:
 - src: http://localhost:14318/
   dst: http://localhost:14318/internal/v1/users/login
@@ -4374,14 +4955,10 @@ edges:
   - xhr
 excluded_items:
 - item: OTLP/gRPC services on :14317 (TraceService/LogsService/MetricsService via grpc.Server)
-  reason: gRPC transport, not the HTTP attack surface; the HTTP OTLP mirrors (/v1/traces,/v1/logs,/v1/metrics)
-    ARE modeled.
+  reason: gRPC transport, not the HTTP attack surface; the HTTP OTLP mirrors (/v1/traces,/v1/logs,/v1/metrics) ARE modeled.
 - item: /debug/pprof/* (only mounted when conf.Debug=true)
-  reason: Debug-only profiler endpoints; not present in a production config. Enumerated here as a note,
-    not a candidate.
+  reason: Debug-only profiler endpoints; not present in a production config. Enumerated here as a note, not a candidate.
 - item: Vue SPA static assets + index.html fallback (embedded FS)
-  reason: Client bundle / SPA shell; no server business-data flow. The JSON APIs it calls are the real
-    surface.
+  reason: Client bundle / SPA shell; no server business-data flow. The JSON APIs it calls are the real surface.
 - item: SSO/OIDC + Cloudflare Access providers (config-gated user_providers)
-  reason: External IdP dependency; reachability depends on auth.oidc / auth.cloudflare config blocks being
-    set.
+  reason: External IdP dependency; reachability depends on auth.oidc / auth.cloudflare config blocks being set.

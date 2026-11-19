@@ -124,6 +124,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/../ApiClass.ts
       supports: login
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/login)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-002
   name: Log out
@@ -289,6 +293,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: me
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/me)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-004
   name: Self-register
@@ -402,6 +410,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: register
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.register)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-005
   name: Generate personal access token
@@ -510,6 +522,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: generatePersonalAccessToken
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.generatePersonalAccessToken)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-006
   name: Create user
@@ -619,6 +635,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/create_user.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: roles[] in the body assigns privileges at creation -> escalation if 'admin'.
 - id: gt-action-007
   name: Update user
@@ -732,6 +752,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/update_user.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Can set another user's password/roles -> takeover + escalation.
 - id: gt-action-008
   name: Delete user
@@ -842,6 +866,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/delete_user.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-009
   name: Set user active status
@@ -955,6 +983,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/set_user_active.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.setActiveStatus)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-010
   name: Read user info
@@ -1066,6 +1098,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/read_user.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-011
   name: Reset avatar
@@ -1179,6 +1215,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/reset_avatar.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.resetAvatar)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-012
   name: List users
@@ -1278,6 +1318,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_users.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-013
   name: Create channel
@@ -1387,6 +1431,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/create_channel.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-014
   name: Delete channel
@@ -1497,6 +1545,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/delete_channel.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-015
   name: Read channel info
@@ -1608,6 +1660,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/read_channel.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-016
   name: List channels
@@ -1707,6 +1763,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_channels.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-017
   name: Invite to channel
@@ -1820,6 +1880,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/invite_channel.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.invite)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-018
   name: Kick from channel
@@ -1933,6 +1997,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/kick_channel.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.kick)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-019
   name: Grant channel owner
@@ -2046,6 +2114,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/add_channel_owner.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.addOwner)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Room-level privilege escalation.
 - id: gt-action-020
   name: Set channel type
@@ -2159,6 +2231,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/set_channel_type.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.setType)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: public<->private visibility boundary change.
 - id: gt-action-021
   name: List channel members
@@ -2270,6 +2346,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_channel_members.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.members)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-022
   name: Create private group
@@ -2379,6 +2459,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/create_group.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/groups.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-023
   name: List groups
@@ -2466,6 +2550,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_groups.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/groups.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-024
   name: Post message
@@ -2604,6 +2692,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.postMessage)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-025
   name: Send message
@@ -2742,6 +2834,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.sendMessage)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-026
   name: Edit message
@@ -2855,6 +2951,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/update_message.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-027
   name: Delete message
@@ -2965,6 +3065,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/delete_message.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-028
   name: React to message
@@ -3078,6 +3182,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/react_message.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.react)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-029
   name: Read message
@@ -3189,6 +3297,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/read_message.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.getMessage)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-030
   name: Upload file to room
@@ -3322,6 +3434,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/upload_file.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/rooms.media/:rid)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: File upload (type/size validation, storage).
 - id: gt-action-031
   name: Admin list all rooms
@@ -3421,6 +3537,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/admin_list_rooms.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/rooms.adminRooms)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-032
   name: Save room settings
@@ -3534,6 +3654,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/save_room_settings.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/rooms.saveRoomSettings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-033
   name: Clean room history
@@ -3644,6 +3768,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/clean_history.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/rooms.cleanHistory)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Bulk destructive message deletion.
 - id: gt-action-034
   name: Export room
@@ -3763,6 +3891,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/rooms.export)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-035
   name: Read public settings
@@ -3846,6 +3978,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/settings.ts
       supports: public
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/settings.public)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-036
   name: List settings
@@ -3945,6 +4081,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_settings.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/settings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-037
   name: Read a setting
@@ -4069,6 +4209,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/read_setting.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/settings/:_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-038
   name: Change a setting
@@ -4183,6 +4327,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/manage_setting.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/settings/:_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Setting writes reconfigure auth/uploads/integrations -> workspace takeover.
 - id: gt-action-039
   name: List permissions
@@ -4270,6 +4418,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_permissions.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/permissions.listAll)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-040
   name: Rewrite permissions
@@ -4359,6 +4511,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/update_permissions.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/permissions.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Granting a permission to a low role = global escalation.
 - id: gt-action-041
   name: Assign role to user
@@ -4479,6 +4635,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/roles.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/roles.addUserToRole)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-042
   name: List roles
@@ -4566,6 +4726,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_roles.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/roles.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-043
   name: Create integration/webhook
@@ -4675,6 +4839,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/create_integration.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/integrations.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Outgoing-webhook 'script' runs in a server VM; 'urls' = SSRF. Code/SSRF-adjacent.
 - id: gt-action-044
   name: List integrations
@@ -4774,6 +4942,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/list_integrations.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/integrations.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-045
   name: Call server method (DDP bridge)
@@ -4851,6 +5023,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: method.call
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/method.call/:method)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-046
   name: Read statistics
@@ -4950,6 +5126,10 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/read_statistics.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/statistics)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

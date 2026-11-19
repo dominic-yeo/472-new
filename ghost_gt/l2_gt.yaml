@@ -111,6 +111,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/posts)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-002
   name: 'Content: pages'
@@ -208,6 +212,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/pages)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-003
   name: 'Content: authors'
@@ -305,6 +313,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/authors)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-004
   name: 'Content: tags'
@@ -402,6 +414,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/tags)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-005
   name: 'Content: settings'
@@ -499,6 +515,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/settings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-006
   name: 'Content: tiers'
@@ -596,6 +616,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/tiers)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-007
   name: Admin log in
@@ -717,6 +741,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/session
       supports: verify + set cookie
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/session)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-008
   name: Admin log out
@@ -796,6 +824,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/session
       supports: destroy session
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/session)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-009
   name: Initial owner setup
@@ -913,6 +945,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: create owner
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/setup)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-010
   name: Check setup status
@@ -982,6 +1018,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: isSetup
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/setup)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-011
   name: Request password reset
@@ -1066,6 +1106,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: generateResetToken
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/password_reset)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-012
   name: Reset password via token
@@ -1167,6 +1211,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: resetPassword
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/password_reset)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-013
   name: Accept staff invite
@@ -1283,6 +1331,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: acceptInvitation
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/invitation)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-014
   name: Check invite
@@ -1357,6 +1409,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: isInvitation
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/invitation)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-015
   name: Verify 2FA code
@@ -1449,6 +1505,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/session
       supports: verify 2FA
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/session/verify)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-016
   name: Read SSO identity token
@@ -1536,6 +1596,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/identities
       supports: mint token
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/identities)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-017
   name: Read site info
@@ -1604,6 +1668,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/site
       supports: publicAdminApi
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/site)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-018
   name: List posts
@@ -1692,6 +1760,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: posts.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/posts)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-019
   name: Create post
@@ -1802,6 +1874,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: posts.add
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/posts)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-020
   name: Edit post
@@ -1914,6 +1990,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: post.edit
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/posts/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-021
   name: Delete post
@@ -2023,6 +2103,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: post.destroy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/posts/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-022
   name: List tags
@@ -2111,6 +2195,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: tags.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/tags)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-023
   name: Create tag
@@ -2221,6 +2309,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: tags.add
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/tags)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-024
   name: Edit tag
@@ -2333,6 +2425,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: tag.edit
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/tags/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-025
   name: List members
@@ -2421,6 +2517,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: members.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/members)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-026
   name: Create member
@@ -2531,6 +2631,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: members.add
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/members)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-027
   name: Edit member
@@ -2643,6 +2747,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: member.edit
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/members/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-028
   name: Delete member
@@ -2752,6 +2860,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: member.destroy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/members/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-029
   name: List integrations
@@ -2840,6 +2952,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: integrations.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/integrations)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-030
   name: Create integration
@@ -2950,6 +3066,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: integrations.add
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/integrations)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Creating an integration mints a new Admin API key -> persistent credential.
 - id: gt-action-031
   name: Delete integration
@@ -3059,6 +3179,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: integration.destroy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/integrations/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-032
   name: List pages
@@ -3147,6 +3271,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: pages.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/pages)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-033
   name: List users
@@ -3235,6 +3363,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: users.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/users)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-034
   name: List roles
@@ -3323,6 +3455,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: roles.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/roles)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-035
   name: Edit staff user
@@ -3435,6 +3571,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/users
       supports: edit
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/users/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-036
   name: Delete staff user
@@ -3544,6 +3684,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/users
       supports: destroy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/users/:id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-037
   name: Change password
@@ -3628,6 +3772,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/users
       supports: changePassword
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/users/password)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-038
   name: Transfer ownership
@@ -3743,6 +3891,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/users
       supports: transferOwnership
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/users/owner)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-039
   name: Mint member sign-in URL
@@ -3850,6 +4002,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/members
       supports: signin_urls
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/members/:id/signin_urls)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-040
   name: Read settings
@@ -3938,6 +4094,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/settings
       supports: browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/settings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-041
   name: Edit settings
@@ -4035,6 +4195,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/settings
       supports: edit
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/settings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-042
   name: Export all content
@@ -4123,6 +4287,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/db
       supports: exportContent
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/db)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-043
   name: Import content
@@ -4222,6 +4390,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/db
       supports: importContent
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/db)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-044
   name: Delete all content
@@ -4315,6 +4487,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/db
       supports: deleteAllContent
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/db)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-045
   name: Upload theme ZIP
@@ -4409,6 +4585,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/themes
       supports: upload
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/themes/upload)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-046
   name: Install theme from source
@@ -4503,6 +4683,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/themes
       supports: install
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/themes/install)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-047
   name: Activate theme
@@ -4602,6 +4786,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/themes
       supports: activate
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/themes/:name/activate)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-048
   name: Upload image
@@ -4694,6 +4882,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/images
       supports: upload
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/images/upload)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-049
   name: Create webhook
@@ -4809,6 +5001,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/webhooks
       supports: add
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/webhooks)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-050
   name: Invite staff
@@ -4909,6 +5105,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin/invites
       supports: add
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/invites)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-051
   name: List invites
@@ -4997,6 +5197,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: invites.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/invites)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-052
   name: List webhooks
@@ -5085,6 +5289,10 @@ nodes:
     - type: source
       ref: ghost/core/server/api/endpoints/admin
       supports: webhooks.browse
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/webhooks)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-053
   name: Request magic link
@@ -5168,6 +5376,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: send-magic-link
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/send-magic-link)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-054
   name: Verify one-time code
@@ -5263,6 +5475,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: verify-otc
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/verify-otc)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-055
   name: Member identity token
@@ -5517,6 +5733,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/account
       supports: read self
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/member)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-058
   name: Create Stripe checkout
@@ -5594,6 +5814,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: create-stripe-checkout-session
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/create-stripe-checkout-session)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-059
   name: Member site info
@@ -5662,6 +5886,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: site.read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/site)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

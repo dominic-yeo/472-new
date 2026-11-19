@@ -124,6 +124,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/org/user_handler.go:Login
       supports: verify + set cookie
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/users/login)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-002
   name: Log out
@@ -313,6 +317,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/org/user_handler.go:Current
       supports: self + projects
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/users/current)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-004
   name: Read project + DSN
@@ -421,6 +429,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/org/project_handler.go:Show
       supports: project + BuildDSN
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/projects/:project_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-005
   name: Read data usage
@@ -498,6 +510,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/org/usage_handler.go:Show
       supports: usage
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/data-usage)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-006
   name: Search trace by id
@@ -594,6 +610,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/trace_handler.go:FindTrace
       supports: m.User only
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/traces/search)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-007
   name: List span systems
@@ -700,6 +720,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/*_handler.go
       supports: project-scoped read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/tracing/:project_id/systems)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-008
   name: List spans
@@ -806,6 +830,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/*_handler.go
       supports: project-scoped read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/tracing/:project_id/spans)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-009
   name: List span groups
@@ -912,6 +940,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/*_handler.go
       supports: project-scoped read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/tracing/:project_id/groups)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-010
   name: List span attribute keys
@@ -1018,6 +1050,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/*_handler.go
       supports: project-scoped read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/tracing/:project_id/attributes)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-011
   name: Read span group
@@ -1109,6 +1145,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/group_handler.go:ShowSummary
       supports: group summary
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/tracing/:project_id/groups/:group_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-012
   name: Read trace
@@ -1219,6 +1259,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/trace_handler.go:ShowTrace
       supports: trace detail
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/tracing/:project_id/traces/:trace_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-013
   name: List metrics
@@ -1325,6 +1369,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/*_handler.go
       supports: project-scoped read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-014
   name: List metric attribute keys
@@ -1431,6 +1479,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/*_handler.go
       supports: project-scoped read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/attributes)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-015
   name: Query metrics table
@@ -1522,6 +1574,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/query_handler.go:Table
       supports: MQL table
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/table)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-016
   name: Create dashboard
@@ -1651,6 +1707,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:Create
       supports: create dashboard
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-017
   name: List dashboards
@@ -1753,6 +1813,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:List
       supports: list dashboards
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-018
   name: Create dashboard from YAML
@@ -1881,6 +1945,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:CreateFromYAML
       supports: yaml -> dashboard
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/yaml)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-019
   name: Read dashboard
@@ -1989,6 +2057,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:Show
       supports: dashboard detail
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-020
   name: Clone dashboard
@@ -2123,6 +2195,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:Clone
       supports: clone dashboard
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-021
   name: Update dashboard
@@ -2244,6 +2320,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:Update
       supports: update dashboard
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-022
   name: Delete dashboard
@@ -2357,6 +2437,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:Delete
       supports: delete dashboard
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-023
   name: Pin dashboard
@@ -2472,6 +2556,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/dash_handler.go:Pin
       supports: pin
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id/pinned)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-024
   name: Create grid item
@@ -2610,6 +2698,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/grid_item_handler.go:Create
       supports: create grid item
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id/grid)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-025
   name: Delete grid item
@@ -2732,6 +2824,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/grid_item_handler.go:Delete
       supports: delete grid item
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/:row_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-026
   name: Create grid row
@@ -2869,6 +2965,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/grid_row_handler.go:Create
       supports: create grid row
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id/rows)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-027
   name: Delete grid row
@@ -2991,6 +3091,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/grid_row_handler.go:Delete
       supports: delete grid row
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-028
   name: Public span query
@@ -3093,6 +3197,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/public_handler.go:Spans
       supports: public spans
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/tracing/:project_id/spans)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-029
   name: Public group query
@@ -3179,6 +3287,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/public_handler.go:Groups
       supports: public groups
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/tracing/:project_id/groups)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-030
   name: Ingest OTLP traces
@@ -3289,6 +3401,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/init.go:initOTLP
       supports: DSN ingest
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/v1/traces)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-031
   name: Ingest OTLP logs
@@ -3385,6 +3501,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/init.go:initOTLP
       supports: DSN ingest
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/v1/logs)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-032
   name: Ingest OTLP metrics
@@ -3481,6 +3601,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/init.go:initOTLP
       supports: DSN ingest
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/v1/metrics)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-033
   name: Ingest Vector logs
@@ -3577,6 +3701,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/tracing/vector_handler.go:Create
       supports: DSN ingest
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/vector-logs)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-034
   name: Prometheus remote write
@@ -3769,6 +3897,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/cloudwatch_handler.go:Metrics
       supports: DSN ingest
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/cloudwatch/metrics)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-036
   name: Prometheus remote read
@@ -3860,6 +3992,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/prom_remote_storage.go:Read
       supports: DSN read
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/prometheus/read)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

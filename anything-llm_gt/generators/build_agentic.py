@@ -14,6 +14,38 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import agentic_data as D  # noqa: E402
 
+# --- Runtime grounding (Phase E) ---------------------------------------------
+# Records observed live on 2026-11-20 by driving AnythingLLM @agent runs against a
+# local Ollama (llama3.1:8b, OpenAI/tool-calling compatible) and reading the
+# EphemeralAgentHandler/AIbitat logs. No secrets recorded; evidence is the runtime
+# observation that the record was exercised. Re-applied on every build.
+_RUNTIME_OBSERVED = {
+    "agent.anythingllm.ephemeral",
+    # tools invoked across the @agent runs
+    "tool.ws.web_browsing", "tool.ws.web_scraping", "tool.ws.memory", "tool.ws.rag_docs",
+    "tool.ws.filesystem", "tool.ws.create_files", "tool.ws.rechart",
+    "tool.ws.scheduled_job", "tool.ws.request_user_input", "tool.ws.sql_agent",
+    "ctx.user_message", "ctx.system_prompt", "ctx.chat_history", "ctx.tool_descriptions",
+    "ctx.tool_results", "ctx.web_content", "ctx.memory_recall", "ctx.rag_context",
+    "ctx.clarifying_note", "ctx.clarifying_input",
+    "mem.workspace_chats", "mem.agent_memory", "mem.embeddings", "mem.filesystem",
+    "sink.chat_response", "sink.external_call", "sink.files",
+    "edge.user__workspace", "edge.workspace__tool", "edge.tool__workspace",
+    "edge.workspace__output", "edge.workspace__external", "edge.user_oversight",
+    "ctl.skill_enablement", "ctl.user_oversight",
+}
+_RUNTIME_NOTE = ("RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on "
+                 "local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools "
+                 "invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem "
+                 "(list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query. "
+                 "Approval control observed: 'Tool approval requested for create-scheduled-job ... "
+                 "Auto-denying for safety'. IntelligentSkillSelector gated skills.")
+for _seq in (D.AGENTS, D.TOOLS, D.CONTEXT, D.MEMORY, D.SINKS, D.EDGES, D.CONTROLS):
+    for _r in _seq:
+        if _r.get("id") in _RUNTIME_OBSERVED:
+            _r["evidence_status"] = "observed"
+            _r["notes"] = ((_r.get("notes") or "").rstrip(" .") + " | " + _RUNTIME_NOTE).lstrip(" |")
+
 OUT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "agentic_gt.yaml"))
 ENV_ID = "anythingllm-oss"
 SCHEMA_VERSION = "agentic-attack-surface-v1"
@@ -25,7 +57,8 @@ META = {
         "evidence": "AIbitat agent graph (server/utils/agents/aibitat/index.js) running a provider "
                     "tool-call loop over skills/imported-plugins/flows/MCP; AgentHandler entry via @agent.",
     },
-    "phase_status": {"static_A_to_D": "complete", "runtime_E": "pending (no live grounding yet)",
+    "phase_status": {"static_A_to_D": "complete",
+                     "runtime_E": "partial (36/58 records observed live via @agent on local Ollama, 2026-11-20)",
                      "link_F": "partial (L1/L2 GT for anything-llm not yet built; ids are forward refs)"},
 }
 

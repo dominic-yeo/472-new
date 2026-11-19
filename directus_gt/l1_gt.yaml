@@ -134,9 +134,22 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Refresh token (long-lived).
-  samples: []
+  samples:
+  - method: POST
+    path: /auth/login
+    identity: anon
+    status: 200
+    body_excerpt: '{"data":{"expires":900000,"refresh_token":"cId2sO-c32ex_FOHJXEroK4penz9XewHQd5iF_tVGRWnwRNnT4Ht1IsA-iweXcGq","access_token":"eyJhbGciOiJIUzI'
+  - method: POST
+    path: /auth/login
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"email\" is required.","extensions":{"reason":"\"email\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -146,6 +159,11 @@ nodes:
     anonymous:
     - 200
     - 401
+    anon:
+    - 200
+    - 401
+    admin:
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -160,6 +178,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /auth/login->200; anon POST /auth/login->401'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Default local provider at /auth/login; SSO providers at /auth/login/:provider.
 - key: http://localhost:8055/auth/refresh
   kind: api
@@ -249,16 +273,26 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Session access token.
-  samples: []
+  samples:
+  - method: POST
+    path: /auth/refresh
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. The refresh token is required in either the payload or cookie.","extensions":{"r'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -272,6 +306,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/auth/password/request
   kind: api
@@ -339,16 +376,27 @@ nodes:
     - email
     reason: User email.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /auth/password/request
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"email\" field is required.","extensions":{"reason":"\"email\"
+      field is require'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -362,6 +410,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: reset_url open-redirect/token-leak surface if allow-list is mis-set.
 - key: http://localhost:8055/auth/password/reset
   kind: api
@@ -436,16 +487,27 @@ nodes:
     reference_fields: []
     reason: Account password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /auth/password/reset
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"token\" field is required.","extensions":{"reason":"\"token\"
+      field is require'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -459,6 +521,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/auth/logout
   kind: api
@@ -517,16 +582,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /auth/logout
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. The refresh token is required in either the payload or cookie.","extensions":{"r'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -540,6 +615,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/auth
   kind: api
@@ -590,9 +668,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /auth
+    identity: anon
+    status: 200
+    body_excerpt: '{"data":[],"disableDefault":false}'
+  - method: GET
+    path: /auth
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"data":[],"disableDefault":false}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -600,6 +691,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -615,6 +710,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /auth->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/auth/login/:provider
   kind: api
@@ -636,16 +737,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /auth/login/default
+    identity: admin
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /auth/login/default doesn''t exist.","extensions":{"path":"/auth/login/default","code":"ROUT'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 404
+    anonymous:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -659,6 +772,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->404; anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-provider router: /login, /callback. Open-redirect + account-linking surface.'
 - key: http://localhost:8055/server/setup
   kind: api
@@ -735,9 +851,21 @@ nodes:
     reference_fields: []
     reason: Account password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /server/setup
+    identity: anon
+    status: 403
+  - method: POST
+    path: /server/setup
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -745,6 +873,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 403
+    anon:
+    - 403
+    admin:
     - 403
   route_confirmed: true
   runtime_api_prefixes:
@@ -760,6 +892,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /server/setup->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Directus bootstrap: seizes an admin on an un-provisioned instance.'
 - key: http://localhost:8055/server/specs/oas
   kind: api
@@ -810,9 +948,24 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /server/specs/oas
+    identity: admin
+    status: 200
+    body_excerpt: '{"openapi":"3.0.1","info":{"title":"Dynamic API Specification","description":"This is a dynamically generated
+      API specification for all endp'
+  - method: GET
+    path: /server/specs/oas
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"openapi":"3.0.1","info":{"title":"Dynamic API Specification","description":"This is a dynamically generated
+      API specif'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -820,6 +973,8 @@ nodes:
   js_sources: []
   identity_statuses:
     admin:
+    - 200
+    anonymous:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -835,6 +990,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /server/specs/oas->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/server/info
   kind: api
@@ -885,9 +1046,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /server/info
+    identity: anon
+    status: 200
+    body_excerpt: '{"data":{"project":{"project_name":"Directus","project_descriptor":null,"project_logo":null,"project_color":"#6644FF","default_appearance":"'
+  - method: GET
+    path: /server/info
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"data":{"project":{"project_name":"Directus","project_descriptor":null,"project_logo":null,"project_color":"#6644FF","d'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -895,6 +1069,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -910,6 +1088,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /server/info->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/server/health
   kind: api
@@ -931,9 +1115,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /server/health
+    identity: anon
+    status: 200
+    body_excerpt: '{"status":"ok"}'
+  - method: GET
+    path: /server/health
+    identity: anonymous
+    status: 200
+    content_type: application/health+json; charset=utf-8
+    body_excerpt: '{"status":"ok"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -941,6 +1138,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -956,6 +1157,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /server/health->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/server/specs/graphql/:scope
   kind: api
@@ -1310,9 +1517,23 @@ nodes:
     reference_fields:
     - data
     reason: Items.
-  samples: []
+  samples:
+  - method: POST
+    path: /items/gtnotes
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"title":"alpha"}}'
+  - method: GET
+    path: /items/gt_probe
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1320,10 +1541,14 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
-    - 403
     - 200
+    - 403
     admin:
     - 200
+    - 400
+    - 403
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -1333,15 +1558,23 @@ nodes:
       reason: Dynamic collection CRUD.
     black_box_reachable: true
     reachability_conditions:
-    - Caller's policy permission for <collection>.{create,read,update,delete}. Public role if no token.
-      'fields'/'deep' traverse relations and can over-expose related data; filters are a powerful query
-      surface. System collections (directus_*) are 403 here (use the dedicated controllers).
+    - Caller's policy permission for <collection>.{create,read,update,delete}. Public role if no token. 'fields'/'deep' traverse
+      relations and can over-expose related data; filters are a powerful query surface. System collections (directus_*) are
+      403 here (use the dedicated controllers).
     evidence:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
-    notes: Primary data surface. Permission-filtered per policy; over-permissive Public read + deep field
-      traversal = data exposure; batch update/delete by query are high-blast-radius.
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin POST /items/gtnotes->200; anon GET /items/gtnotes->403;
+        anon POST /items/gtnotes->403; admin GET /items/directus_users->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->200; admin PATCH->400;
+        admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: Primary data surface. Permission-filtered per policy; over-permissive Public read + deep field traversal = data
+      exposure; batch update/delete by query are high-blast-radius.
 - key: http://localhost:8055/items/:collection/:pk
   kind: api
   methods:
@@ -1528,9 +1761,22 @@ nodes:
     - pk
     reason: Item primary key.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /items/gtnotes/1
+    identity: anon
+    status: 403
+  - method: GET
+    path: /items/gt_probe/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1542,6 +1788,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 204
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -1551,12 +1800,18 @@ nodes:
       reason: Per-item CRUD.
     black_box_reachable: true
     reachability_conditions:
-    - Policy permission for the collection+action. Item-level access is enforced by permission filters;
-      a permission without a row filter exposes every item by pk (IDOR surface to validate per policy).
+    - Policy permission for the collection+action. Item-level access is enforced by permission filters; a permission without
+      a row filter exposes every item by pk (IDOR surface to validate per policy).
     evidence:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /items/gtnotes/1->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin PATCH->200; admin DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Row-level authorization depends on each permission's filter -- a missing filter = IDOR.
 - key: http://localhost:8055/users
   kind: api
@@ -1793,9 +2048,23 @@ nodes:
     reference_fields:
     - data
     reason: User records.
-  samples: []
+  samples:
+  - method: GET
+    path: /users
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[{"id":"6108f8c0-a8d0-4286-9b29-374a7defcd0b","first_name":"Admin","last_name":"User","email":"gtadmin@example.com","password":"****'
+  - method: GET
+    path: /users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_users\" or it does not
+      exist. Queried i'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1806,6 +2075,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 400
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -1815,12 +2087,19 @@ nodes:
       reason: User directory + management.
     black_box_reachable: true
     reachability_conditions:
-    - Policy permission for directus_users.{read,create,update,delete}. 'role' in create/update assigns
-      privileges -> escalation if an admin-access role is set. PII exposure if read is over-granted.
+    - Policy permission for directus_users.{read,create,update,delete}. 'role' in create/update assigns privileges -> escalation
+      if an admin-access role is set. PII exposure if read is over-granted.
     evidence:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /users->200; anon GET /users->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->200; admin PATCH->400;
+        admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Role assignment here is the escalation primitive; password can be set on update.
 - key: http://localhost:8055/users/:pk
   kind: api
@@ -1963,16 +2242,36 @@ nodes:
     - pk
     reason: Target user.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /users/me
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"6108f8c0-a8d0-4286-9b29-374a7defcd0b","first_name":"Admin","last_name":"User","email":"gtadmin@example.com","password":"*****'
+  - method: GET
+    path: /users/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 200
+    - 403
+    anon:
+    - 401
+    anonymous:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -1981,12 +2280,18 @@ nodes:
       reason: Per-user management.
     black_box_reachable: true
     reachability_conditions:
-    - directus_users.{read,update,delete} permission. PATCH role/password on another user (if no row filter)
-      = account takeover / privilege escalation.
+    - directus_users.{read,update,delete} permission. PATCH role/password on another user (if no row filter) = account takeover
+      / privilege escalation.
     evidence:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /users/me->200; anon GET /users/me->401'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/me
   kind: api
@@ -2076,9 +2381,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /users/me
+    identity: anonymous
+    status: 401
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid user credentials.","extensions":{"code":"INVALID_CREDENTIALS"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2103,6 +2416,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; admin PATCH->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Self-update must not allow editing role/policies -- verify the editable-field set.
 - key: http://localhost:8055/users/invite
   kind: api
@@ -2188,16 +2504,26 @@ nodes:
     - role
     reason: Invite role.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/invite
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"email\" is required.","extensions":{"reason":"\"email\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2211,6 +2537,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: invite_url is allow-listed (USER_INVITE_URL_ALLOW_LIST).
 - key: http://localhost:8055/users/invite/accept
   kind: api
@@ -2285,16 +2614,26 @@ nodes:
     reference_fields: []
     reason: Account password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/invite/accept
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"token\" is required.","extensions":{"reason":"\"token\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2308,6 +2647,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/register
   kind: api
@@ -2402,9 +2744,21 @@ nodes:
     reference_fields: []
     reason: Account password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/register
+    identity: anon
+    status: 403
+  - method: POST
+    path: /users/register
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"email\" is required.","extensions":{"reason":"\"email\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2413,6 +2767,10 @@ nodes:
   identity_statuses:
     anonymous:
     - 403
+    anon:
+    - 403
+    admin:
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -2422,12 +2780,18 @@ nodes:
       reason: Public self-registration.
     black_box_reachable: true
     reachability_conditions:
-    - Public IF AUTH_* registration is enabled (settings). Rate-limited (rate-limiter-registration). New
-      user lands in the configured default registration role.
+    - Public IF AUTH_* registration is enabled (settings). Rate-limited (rate-limiter-registration). New user lands in the
+      configured default registration role.
     evidence:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /users/register->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Open registration + a powerful default role = self-service privilege.
 - key: http://localhost:8055/users/:pk/tfa/disable
   kind: api
@@ -2486,16 +2850,26 @@ nodes:
     - pk
     reason: Target user.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/1/tfa/disable
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2509,6 +2883,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/me/track/page
   kind: api
@@ -2529,16 +2906,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PATCH
+    path: /users/me/track/page
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"last_page\" key is required.","extensions":{"reason":"\"last_page\"
+      key is req'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2552,6 +2940,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PATCH->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/me/tfa/generate
   kind: api
@@ -2572,16 +2963,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/me/tfa/generate
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"password\" is required.","extensions":{"reason":"\"password\"
+      is required","co'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2595,6 +2997,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/me/tfa/enable
   kind: api
@@ -2615,16 +3020,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/me/tfa/enable
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"secret\" is required.","extensions":{"reason":"\"secret\" is
+      required","code":'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2638,6 +3054,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/me/tfa/disable
   kind: api
@@ -2658,16 +3077,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /users/me/tfa/disable
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"otp\" is required.","extensions":{"reason":"\"otp\" is required","code":"INVAL'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2681,6 +3110,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/users/register/verify-email
   kind: api
@@ -2701,16 +3133,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /users/register/verify-email
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid token.","extensions":{"code":"INVALID_TOKEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2724,6 +3168,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/roles
   kind: api
@@ -2834,9 +3281,23 @@ nodes:
     reference_fields:
     - data
     reason: Roles.
-  samples: []
+  samples:
+  - method: GET
+    path: /roles
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[{"id":"ceda9750-13b4-464d-89a2-05a4e9f18f73","name":"Administrator","icon":"verified","description":"$t:admin_description","parent"'
+  - method: GET
+    path: /roles
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_roles\" or it does not
+      exist. Queried i'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2847,6 +3308,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 400
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -2861,6 +3325,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /roles->200; anon GET /roles->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/roles/:pk
   kind: api
@@ -2939,16 +3409,26 @@ nodes:
     - pk
     reason: Target role.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PATCH
+    path: /roles/1
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -2962,6 +3442,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PATCH->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Role<->policy linkage is a privilege-escalation lever.
 - key: http://localhost:8055/policies
   kind: api
@@ -3071,9 +3554,22 @@ nodes:
     reference_fields:
     - data
     reason: Policies.
-  samples: []
+  samples:
+  - method: GET
+    path: /policies
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[{"id":"0343cffd-89e9-446d-abdf-f27591b28b1c","name":"Administrator","icon":"verified","description":"$t:admin_description","ip_acce'
+  - method: POST
+    path: /policies
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Validation failed for field \"name\". Value is required.","extensions":{"field":"name","path":[],'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3084,6 +3580,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 400
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -3093,12 +3592,19 @@ nodes:
       reason: Access policies.
     black_box_reachable: true
     reachability_conditions:
-    - directus_policies permission. A policy with admin_access=true is full superuser -> creating/attaching
-      one is the top escalation primitive.
+    - directus_policies permission. A policy with admin_access=true is full superuser -> creating/attaching one is the top
+      escalation primitive.
     evidence:
     - type: source
       ref: directus/api/src/controllers/policies.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /policies->200; anon GET /policies->403;
+        admin GET /policies->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: admin_access=true bypasses ALL permission checks.
 - key: http://localhost:8055/policies/:pk
   kind: api
@@ -3177,16 +3683,26 @@ nodes:
     - pk
     reason: Target policy.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PATCH
+    path: /policies/1
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3200,6 +3716,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/policies.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PATCH->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/permissions
   kind: api
@@ -3346,9 +3865,23 @@ nodes:
     - policy
     reason: Owning policy.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /permissions
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[{"policy":null,"permissions":{},"validation":null,"presets":null,"fields":["*"],"system":true,"collection":"directus_collections","'
+  - method: GET
+    path: /permissions
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_permissions\" or it does
+      not exist. Que'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3359,6 +3892,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 400
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -3368,12 +3904,18 @@ nodes:
       reason: Permission rules.
     black_box_reachable: true
     reachability_conditions:
-    - directus_permissions permission. Adding a broad rule (e.g. read * on directus_users with no filter)
-      to a low policy opens data to that role.
+    - directus_permissions permission. Adding a broad rule (e.g. read * on directus_users with no filter) to a low policy
+      opens data to that role.
     evidence:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /permissions->200; anon GET /permissions->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Permission rows define the content-API grants; mis-set filters -> exposure.
 - key: http://localhost:8055/permissions/:pk
   kind: api
@@ -3452,16 +3994,26 @@ nodes:
     - pk
     reason: Target rule.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PATCH
+    path: /permissions/1
+    identity: admin
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"data":{"policy":null,"permissions":{},"validation":null,"presets":null,"fields":["*"],"system":true,"collection":"dire'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3475,6 +4027,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PATCH->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/permissions/me
   kind: api
@@ -3524,16 +4079,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /permissions/me
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3547,6 +4114,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/access
   kind: api
@@ -3636,16 +4206,26 @@ nodes:
     - policy
     reason: Linked policy.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /access
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Validation failed for field \"policy\". Value is required.","extensions":{"field":"policy","path"'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3659,6 +4239,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/access.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: directus_access is the user/role <-> policy junction; a direct escalation lever.
 - key: http://localhost:8055/access/:pk
   kind: api
@@ -3681,16 +4264,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /access/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3704,6 +4299,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/policies/me/globals
   kind: api
@@ -3724,16 +4322,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /policies/me/globals
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"data":{"app_access":false}}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3747,6 +4357,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/permissions/me/:collection/:pk?
   kind: api
@@ -3767,16 +4380,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /permissions/me/gt_probe/1?
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -3790,6 +4415,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/files
   kind: api
@@ -3898,9 +4526,22 @@ nodes:
     reference_fields:
     - data
     reason: Stored files.
-  samples: []
+  samples:
+  - method: GET
+    path: /files
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[]}'
+  - method: POST
+    path: /files
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"type\" is required.","extensions":{"reason":"\"type\" is required","code":"INV'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3911,6 +4552,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 400
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -3925,6 +4569,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /files->200; anon GET /files->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400; anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/files/import
   kind: api
@@ -4001,16 +4651,26 @@ nodes:
     - url
     reason: Server-fetched URL.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /files/import
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"url\" is required.","extensions":{"reason":"\"url\" is required","code":"INVAL'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4019,12 +4679,14 @@ nodes:
       reason: Import-from-URL (SSRF).
     black_box_reachable: true
     reachability_conditions:
-    - directus_files create permission. Server GETs an attacker-chosen 'url' = SSRF (cloud metadata /
-      internal services).
+    - directus_files create permission. Server GETs an attacker-chosen 'url' = SSRF (cloud metadata / internal services).
     evidence:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Classic Directus SSRF vector.
 - key: http://localhost:8055/files/:pk
   kind: api
@@ -4131,16 +4793,26 @@ nodes:
     - pk
     reason: Target file.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PATCH
+    path: /files/1
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4154,6 +4826,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/assets/:pk/:filename?
   kind: api
@@ -4250,16 +4925,28 @@ nodes:
     - pk
     reason: File to serve.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /assets/1/x.txt?
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4268,12 +4955,15 @@ nodes:
       reason: Asset download + transform.
     black_box_reachable: true
     reachability_conditions:
-    - Read permission on the file (public if the file's folder/permission allows). Arbitrary 'transforms'
-      params are a CPU/memory DoS surface (ASSETS_TRANSFORM_* limits).
+    - Read permission on the file (public if the file's folder/permission allows). Arbitrary 'transforms' params are a CPU/memory
+      DoS surface (ASSETS_TRANSFORM_* limits).
     evidence:
     - type: source
       ref: directus/api/src/controllers/assets.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Image-transform params = resource-exhaustion surface; also the public file-serving path.
 - key: http://localhost:8055/folders
   kind: api
@@ -4345,16 +5035,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /folders
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Validation failed for field \"name\". Value is required.","extensions":{"field":"name","path":[],'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4368,6 +5068,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/folders.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/assets/folder/:pk
   kind: api
@@ -4388,16 +5091,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /assets/folder/1
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. No files found in the selected folders tree.","extensions":{"reason":"No
+      files f'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4411,6 +5125,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/assets.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/assets/files/
   kind: api
@@ -4431,16 +5148,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /assets/files/
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. Validation error: Invalid input: expected array, received undefined
+      at \"ids\"."'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4454,6 +5182,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/assets.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/folders/:pk
   kind: api
@@ -4476,16 +5207,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /folders/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4499,6 +5242,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/assets.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/flows/trigger/:pk
   kind: api
@@ -4612,16 +5358,28 @@ nodes:
     - pk
     reason: Target flow.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /flows/trigger/1
+    identity: admin
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /flows/trigger/1 doesn''t exist.","extensions":{"path":"/flows/trigger/1","code":"ROUTE_NOT_'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 404
+    anonymous:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4630,13 +5388,16 @@ nodes:
       reason: Flow execution (automation).
     black_box_reachable: true
     reachability_conditions:
-    - 'Reachability per the flow''s trigger config: a ''webhook'' flow can be PUBLIC (no auth). A triggered
-      flow runs its operation chain (request/webhook-url = SSRF, run-script = sandboxed JS, item mutations)
-      with the flow''s configured accountability.'
+    - 'Reachability per the flow''s trigger config: a ''webhook'' flow can be PUBLIC (no auth). A triggered flow runs its
+      operation chain (request/webhook-url = SSRF, run-script = sandboxed JS, item mutations) with the flow''s configured
+      accountability.'
     evidence:
     - type: source
       ref: directus/api/src/controllers/flows.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->404; anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'The automation attack surface: public webhook flows execute server-side operation chains.'
 - key: http://localhost:8055/flows
   kind: api
@@ -4727,9 +5488,22 @@ nodes:
     reference_fields:
     - data
     reason: Flows.
-  samples: []
+  samples:
+  - method: GET
+    path: /flows
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[]}'
+  - method: POST
+    path: /flows
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Validation failed for field \"name\". Value is required.","extensions":{"field":"name","path":[],'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4738,6 +5512,7 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -4747,12 +5522,18 @@ nodes:
       reason: Flow definitions.
     black_box_reachable: true
     reachability_conditions:
-    - directus_flows permission (admin-managed). Defining a flow with a run-script/request operation =
-      server-side code/SSRF by configuration.
+    - directus_flows permission (admin-managed). Defining a flow with a run-script/request operation = server-side code/SSRF
+      by configuration.
     evidence:
     - type: source
       ref: directus/api/src/controllers/flows.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /flows->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Creating flows is effectively server-side automation authoring.
 - key: http://localhost:8055/operations
   kind: api
@@ -4824,16 +5605,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /operations
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Validation failed for field \"key\". Value is required.","extensions":{"field":"key","path":[],"t'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -4847,6 +5638,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/operations.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: operation 'exec' = sandboxed code; 'request' = SSRF -- the flow building blocks.
 - key: http://localhost:8055/schema/snapshot
   kind: api
@@ -4915,9 +5709,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /schema/snapshot
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"version":1,"directus":"11.17.4","vendor":"sqlite","collections":[],"fields":[],"systemFields":[{"collection":"directus_activity","'
+  - method: GET
+    path: /schema/snapshot
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4926,6 +5733,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -4940,6 +5749,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /schema/snapshot->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/schema/apply
   kind: api
@@ -4989,16 +5804,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /schema/apply
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. No data was included in the body.","extensions":{"reason":"No data
+      was included '
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5007,12 +5833,15 @@ nodes:
       reason: Schema mutation.
     black_box_reachable: true
     reachability_conditions:
-    - admin only. Full control of the data model (create/drop tables, change fields) -> destructive +
-      can introduce fields/relations that widen the surface.
+    - admin only. Full control of the data model (create/drop tables, change fields) -> destructive + can introduce fields/relations
+      that widen the surface.
     evidence:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Whole-schema write; highest-impact data-model primitive.
 - key: http://localhost:8055/collections
   kind: api
@@ -5104,9 +5933,23 @@ nodes:
     - collection
     reason: Target collection name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /collections
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[{"collection":"directus_access","meta":{"collection":"directus_access","hidden":false,"singleton":false,"icon":"admin_panel_setting'
+  - method: POST
+    path: /collections
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"collection\" is required.","extensions":{"reason":"\"collection\"
+      is required"'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5117,6 +5960,9 @@ nodes:
     - 403
     admin:
     - 200
+    - 400
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -5131,6 +5977,13 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collections.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /collections->200; anon GET /collections->403;
+        admin POST /collections->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/fields/:collection
   kind: api
@@ -5227,16 +6080,32 @@ nodes:
     - collection
     reason: Target collection name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /fields/gtnotes
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"collection":"gtnotes","field":"title","type":"string","meta":{"id":2,"collection":"gtnotes","field":"title","special":null,"interf'
+  - method: POST
+    path: /fields/gt_probe
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"field\" is required.","extensions":{"reason":"\"field\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5250,6 +6119,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/fields.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin POST /fields/gtnotes->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/schema/diff
   kind: api
@@ -5270,16 +6145,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /schema/diff
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. No data was included in the body.","extensions":{"reason":"No data
+      was included '
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5293,6 +6179,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/collections/:collection
   kind: api
@@ -5315,16 +6204,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /collections/gt_probe
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to perform \"read\" for collection \"gt_probe\" or it
+      does not exist.",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5338,6 +6241,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin PATCH->200; admin DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/fields
   kind: api
@@ -5358,16 +6264,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /fields
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to perform \"read\" for collection \"directus_fields\"
+      or it does not e'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5381,6 +6300,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/fields/:collection/:field
   kind: api
@@ -5403,16 +6325,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /fields/gt_probe/title
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5426,6 +6361,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/relations
   kind: api
@@ -5448,16 +6386,31 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /relations
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to perform \"read\" for collection \"directus_relations\"
+      or it does no'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5471,6 +6424,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->400; admin PATCH->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/relations/:collection
   kind: api
@@ -5491,16 +6447,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /relations/gt_probe
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5514,6 +6483,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/relations/:collection/:field
   kind: api
@@ -5536,16 +6508,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /relations/gt_probe/title
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5559,6 +6544,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/export/:collection
   kind: api
@@ -5635,16 +6623,27 @@ nodes:
     - collection
     reason: Target collection name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/export/gt_probe
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5658,6 +6657,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Permission-scoped, but a convenient bulk-exfil channel.
 - key: http://localhost:8055/utils/import/:collection
   kind: api
@@ -5725,16 +6727,27 @@ nodes:
     - collection
     reason: Target collection name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/import/gt_probe
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5748,6 +6761,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/cache/clear
   kind: api
@@ -5896,16 +6912,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/import
+    identity: admin
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /utils/import doesn''t exist.","extensions":{"path":"/utils/import","code":"ROUTE_NOT_FOUND"'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5919,6 +6945,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: dangerouslyAllowDelete makes this destructive.
 - key: http://localhost:8055/utils/random/string
   kind: api
@@ -5939,16 +6968,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /utils/random/string
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"data":"cRjGfLYnr9wEm9n-6Z2brMQalWz5UWUk"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -5962,6 +7003,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/sort/:collection
   kind: api
@@ -5982,16 +7026,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/sort/gt_probe
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
+      Queried in root'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6005,6 +7060,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/revert/:revision
   kind: api
@@ -6068,16 +7126,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/translations/generate
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. Validation error: Invalid input: expected string, received undefined
+      at \"collec'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6091,6 +7160,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/resolve-redirect
   kind: api
@@ -6111,16 +7183,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/resolve-redirect
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"redirect\" is required.","extensions":{"reason":"\"redirect\"
+      is required","co'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6134,6 +7217,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/registry/install
   kind: api
@@ -6192,16 +7278,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /extensions/registry/install
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6215,6 +7311,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Installing an extension loads untrusted code; marketplace/supply-chain surface.
 - key: http://localhost:8055/extensions/:pk
   kind: api
@@ -6311,16 +7410,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PATCH
+    path: /extensions/1
+    identity: admin
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /extensions/1 doesn''t exist.","extensions":{"path":"/extensions/1","code":"ROUTE_NOT_FOUND"'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6334,6 +7443,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PATCH->404; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions
   kind: api
@@ -6384,9 +7496,23 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /extensions
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[]}'
+  - method: GET
+    path: /extensions
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_extensions\" or it does
+      not exist. Quer'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6395,6 +7521,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -6409,6 +7537,12 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /extensions->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/registry
   kind: api
@@ -6429,16 +7563,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /extensions/registry
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6452,6 +7598,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/registry/account/:pk
   kind: api
@@ -6472,16 +7621,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /extensions/registry/account/1
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /extensions/registry/account/1 doesn''t exist.","extensions":{"path":"/extensions/registry/a'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6495,6 +7656,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/registry/extension/:pk
   kind: api
@@ -6515,16 +7679,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /extensions/registry/extension/1
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /extensions/registry/extension/1 doesn''t exist.","extensions":{"path":"/extensions/registry'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6538,6 +7714,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/registry/reinstall
   kind: api
@@ -6558,16 +7737,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /extensions/registry/reinstall
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6581,6 +7770,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/registry/uninstall/:pk
   kind: api
@@ -6601,16 +7793,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /extensions/registry/uninstall/1
+    identity: admin
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /extensions/registry/uninstall/1 doesn''t exist.","extensions":{"path":"/extensions/registry'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6624,6 +7826,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/extensions/sources/:chunk
   kind: api
@@ -6644,16 +7849,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /extensions/sources/0
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /sources/0 doesn''t exist.","extensions":{"path":"/sources/0","code":"ROUTE_NOT_FOUND"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6667,6 +7884,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/shares/auth
   kind: api
@@ -6782,16 +8002,26 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Session access token.
-  samples: []
+  samples:
+  - method: POST
+    path: /shares/auth
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"share\" is required.","extensions":{"reason":"\"share\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6800,12 +8030,15 @@ nodes:
       reason: Public share login.
     black_box_reachable: true
     reachability_conditions:
-    - Public. Anyone with a share id (+ password if set) gets an access token scoped to the shared item.
-      Share id guessability + weak/absent password = unauthenticated data access.
+    - Public. Anyone with a share id (+ password if set) gets an access token scoped to the shared item. Share id guessability
+      + weak/absent password = unauthenticated data access.
     evidence:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Public auth surface; brute-force on share password / id enumeration.
 - key: http://localhost:8055/shares/info/:pk
   kind: api
@@ -6873,16 +8106,28 @@ nodes:
     - pk
     reason: Share id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /shares/info/1
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /shares/info/1 doesn''t exist.","extensions":{"path":"/shares/info/1","code":"ROUTE_NOT_FOUN'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6896,6 +8141,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Oracle for share existence + password requirement.
 - key: http://localhost:8055/shares
   kind: api
@@ -6994,16 +8242,27 @@ nodes:
     reference_fields:
     - data
     reason: Shares.
-  samples: []
+  samples:
+  - method: POST
+    path: /shares
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"undefined\" or it does not exist.
+      Queried in roo'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7012,12 +8271,15 @@ nodes:
       reason: Share management.
     black_box_reachable: true
     reachability_conditions:
-    - directus_shares + 'share' permission on the item's collection. Creating a share exposes an item
-      to unauthenticated holders of the link.
+    - directus_shares + 'share' permission on the item's collection. Creating a share exposes an item to unauthenticated holders
+      of the link.
     evidence:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Share create = deliberate public-exposure primitive.
 - key: http://localhost:8055/shares/invite
   kind: api
@@ -7038,16 +8300,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /shares/invite
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"share\" is required.","extensions":{"reason":"\"share\" is required","code":"I'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7061,6 +8333,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/shares/:pk
   kind: api
@@ -7083,16 +8358,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /shares/1
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /shares/1 doesn''t exist.","extensions":{"path":"/shares/1","code":"ROUTE_NOT_FOUND"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7106,6 +8393,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404; admin PATCH->404; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/settings
   kind: api
@@ -7196,9 +8486,23 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /settings
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"project_name":"Directus","project_url":null,"project_color":"#6644FF","project_logo":null,"public_foreground":null,"public_'
+  - method: GET
+    path: /settings
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_settings\" or it does
+      not exist. Querie'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -7209,6 +8513,8 @@ nodes:
     - 403
     admin:
     - 200
+    anon:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
@@ -7218,12 +8524,18 @@ nodes:
       reason: Project settings.
     black_box_reachable: true
     reachability_conditions:
-    - 'Read: app users (some public-ish fields drive the login screen). Update: directus_settings permission
-      (admin) -> reconfigure storage/CORS/auth/public registration/default role = workspace takeover-adjacent.'
+    - 'Read: app users (some public-ish fields drive the login screen). Update: directus_settings permission (admin) -> reconfigure
+      storage/CORS/auth/public registration/default role = workspace takeover-adjacent.'
     evidence:
     - type: source
       ref: directus/api/src/controllers/settings.ts
       supports: route + controller
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /settings->200; anon GET /settings->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin PATCH->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Settings writes control registration, default roles, storage and CORS.
 - key: http://localhost:8055/versions/:pk/promote
   kind: api
@@ -7300,16 +8612,27 @@ nodes:
     - pk
     reason: Target version.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /versions/1/promote
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"mainHash\" field is required.","extensions":{"reason":"\"mainHash\"
+      field is r'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7323,6 +8646,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/versions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Draft->live publish path for content versioning.
 - key: http://localhost:8055/versions
   kind: api
@@ -7412,16 +8738,26 @@ nodes:
     - collection
     reason: Target collection name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /versions
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"key\" is required.","extensions":{"reason":"\"key\" is required","code":"INVAL'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7435,6 +8771,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/versions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/comments
   kind: api
@@ -7524,16 +8863,27 @@ nodes:
     - collection
     reason: Target collection name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /comments
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. \"comment\" is required.","extensions":{"reason":"\"comment\" is
+      required","code'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7547,6 +8897,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/comments.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/notifications
   kind: api
@@ -7627,16 +8980,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /notifications
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Validation failed for field \"recipient\". Value is required.","extensions":{"field":"recipient",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7650,6 +9013,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/notifications.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/versions/:pk
   kind: api
@@ -7672,16 +9038,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /versions/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7695,6 +9073,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/versions/:pk/save
   kind: api
@@ -7715,16 +9096,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /versions/1/save
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7738,6 +9129,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/versions/:pk/compare
   kind: api
@@ -7758,16 +9152,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /versions/1/compare
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7781,6 +9187,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/comments/:pk
   kind: api
@@ -7803,16 +9212,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /comments/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7826,6 +9247,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/notifications/:pk
   kind: api
@@ -7848,16 +9272,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /notifications/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_notifications\" or it
+      does not exist. Q'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 204
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7871,6 +9309,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->204; admin DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/presets
   kind: api
@@ -7894,16 +9335,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /presets
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_presets\" or it does
+      not exist. Queried'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7917,6 +9372,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->200; admin PATCH->400;
+        admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/presets/:pk
   kind: api
@@ -7939,16 +9398,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /presets/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_presets\" or it does
+      not exist. Queried'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 204
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7962,6 +9435,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->204; admin DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/revisions
   kind: api
@@ -7983,16 +9459,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /revisions
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_revisions\" or it does
+      not exist. Queri'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8006,6 +9495,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin SEARCH->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/revisions/:pk
   kind: api
@@ -8026,16 +9518,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /revisions/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_revisions\" or it does
+      not exist. Queri'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8049,6 +9554,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/activity
   kind: api
@@ -8070,16 +9578,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /activity
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_activity\" or it does
+      not exist. Querie'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8093,6 +9614,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin SEARCH->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/activity/:pk
   kind: api
@@ -8113,16 +9637,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /activity/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_activity\" or it does
+      not exist. Querie'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8136,6 +9673,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collab
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/graphql
   kind: api
@@ -8211,16 +9751,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /graphql
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. Must provide query string.","extensions":{"reason":"Must provide
+      query string","'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8229,12 +9780,15 @@ nodes:
       reason: GraphQL (items).
     black_box_reachable: true
     reachability_conditions:
-    - Same accountability/permission model as REST, re-exposed as GraphQL. Query depth/complexity = DoS
-      surface; introspection (GRAPHQL_INTROSPECTION) discloses the schema.
+    - Same accountability/permission model as REST, re-exposed as GraphQL. Query depth/complexity = DoS surface; introspection
+      (GRAPHQL_INTROSPECTION) discloses the schema.
     evidence:
     - type: source
       ref: directus/api/src/controllers/graphql.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: GraphQL mirrors the REST permission model; one POST, broad reach.
 - key: http://localhost:8055/graphql/system
   kind: api
@@ -8256,16 +9810,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /graphql/system
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid payload. Must provide query string.","extensions":{"reason":"Must provide
+      query string","'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+    anonymous:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8279,6 +9846,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/graphql.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400; anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/dashboards
   kind: api
@@ -8302,16 +9872,31 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /dashboards
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_dashboards\" or it does
+      not exist. Quer'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8325,6 +9910,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/dashboards.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->400; admin PATCH->400;
+        admin DELETE->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/dashboards/:pk
   kind: api
@@ -8347,16 +9936,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /dashboards/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8370,6 +9971,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/dashboards.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/panels
   kind: api
@@ -8393,16 +9997,31 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /panels
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_panels\" or it does not
+      exist. Queried '
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8416,6 +10035,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/panels.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->400; admin PATCH->400;
+        admin DELETE->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/panels/:pk
   kind: api
@@ -8438,16 +10061,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /panels/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8461,6 +10096,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/panels.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/translations
   kind: api
@@ -8484,16 +10122,31 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /translations
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_translations\" or it
+      does not exist. Qu'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8507,6 +10160,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/translations.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; admin POST->500; admin PATCH->400;
+        admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/translations/:pk
   kind: api
@@ -8529,16 +10186,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /translations/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8552,6 +10221,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/translations.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; admin PATCH->403; admin DELETE->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/metrics
   kind: api
@@ -8572,16 +10244,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /metrics
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Route /metrics doesn''t exist.","extensions":{"path":"/metrics","code":"ROUTE_NOT_FOUND"}}]}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -8595,6 +10279,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/metrics.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/admin
   kind: page
@@ -8696,22 +10383,21 @@ edges:
   triggers:
   - xhr
 excluded_items:
-- item: Per-collection Content API is served by ONE generic controller (/items/:collection[/:pk]); modeled
-    once, not per user-defined collection
-  reason: Directus has no per-collection route files -- /items/:collection dispatches every collection
-    through the same handler + policy engine. A real project's collections multiply the item nodes but
-    share the identical auth model.
-- item: System-collection convenience controllers already modeled (users, roles, policies, permissions,
-    access, files, folders, flows, operations, presets, dashboards, panels, versions, comments, notifications,
-    translations, revisions, activity, settings)
-  reason: These wrap the directus_* system collections with the same policy engine; the security-critical
-    ones are L2-covered, the rest enumerated as L1 nodes.
+- item: Per-collection Content API is served by ONE generic controller (/items/:collection[/:pk]); modeled once, not per user-defined
+    collection
+  reason: Directus has no per-collection route files -- /items/:collection dispatches every collection through the same handler
+    + policy engine. A real project's collections multiply the item nodes but share the identical auth model.
+- item: System-collection convenience controllers already modeled (users, roles, policies, permissions, access, files, folders,
+    flows, operations, presets, dashboards, panels, versions, comments, notifications, translations, revisions, activity,
+    settings)
+  reason: These wrap the directus_* system collections with the same policy engine; the security-critical ones are L2-covered,
+    the rest enumerated as L1 nodes.
 - item: AI routes (/ai, /ai/files), MCP server (/mcp, /mcp-oauth/clients), deployment (/deployments, /deployments/webhooks),
     license (/license), TUS resumable upload (/files/tus)
-  reason: Feature-flagged / edition-specific surfaces (ENABLE_* envs). They share the token+policy auth
-    model already captured; enumerated rather than modeled per-route.
+  reason: Feature-flagged / edition-specific surfaces (ENABLE_* envs). They share the token+policy auth model already captured;
+    enumerated rather than modeled per-route.
 - item: Data Studio SPA bundle (/admin/*) and raw asset bytes served under /assets/:pk
   reason: Client assets / stored file bytes; the REST+GraphQL API that manages them is the modeled surface.
 - item: Realtime (WebSocket/SSE) subscriptions and the GraphQL subscription transport
-  reason: A separate realtime channel carrying the same collections+permissions; out of scope for the
-    REST/GraphQL request GT.
+  reason: A separate realtime channel carrying the same collections+permissions; out of scope for the REST/GraphQL request
+    GT.

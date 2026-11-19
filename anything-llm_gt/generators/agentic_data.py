@@ -125,7 +125,7 @@ TOOLS = [
          notes="Default-enabled; agent-written memory re-injected into context (poisoning loop)."),
 
     tool("tool.ws.rag_docs", A, "doc summarizer / workspace RAG", "native", "read",
-         l1_ids=["l1.api.workspace.vector_search"], capabilities=["search/summarize workspace documents"],
+         l1_ids=["http://localhost/api/v1/workspace/{slug}/vector-search"], capabilities=["search/summarize workspace documents"],
          execution_identity=_ws_ident, output_ids=["ctx.rag_context", "ctx.tool_results"],
          source_ref="aibitat/plugins/summarize.js; workspace vector search"),
 
@@ -144,7 +144,7 @@ TOOLS = [
          notes="Default-enabled; model-composed URL, no host allowlist -> SSRF surface."),
 
     tool("tool.ws.sql_agent", A, "sql-agent", "native", "mixed",
-         l1_ids=["l1.api.sql_connection"], capabilities=["list DBs/tables, read schema, run SQL against configured connectors"],
+         l1_ids=[], capabilities=["list DBs/tables, read schema, run SQL against configured connectors"],
          server_or_provider="configured SQL connectors (Postgres/MySQL/MSSQL)",
          execution_identity={"identity": "configured DB connection", "credential_source": "SQL connector config (stored)"},
          execution_environment=_env("remote DB", "DB host", "n/a", by="external_service"),
@@ -214,7 +214,7 @@ TOOLS = [
          notes="Persistent scheduled re-invocation; blocked in multi-user mode."),
 
     tool("tool.ws.imported_plugin", A, "imported community plugin", "plugin", "code_execution",
-         l1_ids=["l1.api.agent_skill.import"], capabilities=["admin-imported community skill (custom handler.js)"],
+         l1_ids=[], capabilities=["admin-imported community skill (custom handler.js)"],
          description_source={"source_ref": "plugin.json description (imported)",
                            "writers": [writer("admin", "l1.api.agent_skill.import"), writer("external_service", None)]},
          execution_identity={"identity": "plugin (docker runtime)", "credential_source": "skill setup_args (stored secrets)"},

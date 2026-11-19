@@ -88,6 +88,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/auth/auth.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth.config)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-002
   name: Read my session
@@ -180,6 +184,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/auth/auth.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-003
   name: Log out
@@ -255,6 +263,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/auth/auth.ts
       supports: logout
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-004
   name: Bootstrap installation
@@ -385,6 +397,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/installation/installation.ts
       supports: bootstrap
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/installation.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-005
   name: Read server version
@@ -473,6 +489,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/installation/installation.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/installation.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-006
   name: Request email sign-in link
@@ -573,6 +593,10 @@ nodes:
     - type: source
       ref: outline/server/../plugins/email/server/auth/email.ts
       supports: magic link
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/email)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-007
   name: Start SSO sign-in
@@ -657,6 +681,10 @@ nodes:
     - type: source
       ref: outline/server/../plugins/google/server/auth/google.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/:provider)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-008
   name: Complete SSO sign-in
@@ -856,6 +884,10 @@ nodes:
     - type: source
       ref: outline/server/routes/auth/index.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/redirect)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-010
   name: OAuth authorize
@@ -1066,6 +1098,10 @@ nodes:
     - type: source
       ref: outline/server/routes/oauth/index.ts
       supports: token
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/oauth/token)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-012
   name: Revoke OAuth token
@@ -1251,6 +1287,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-014
   name: Read a user
@@ -1363,6 +1403,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-015
   name: Invite users
@@ -1473,6 +1517,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.invite)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-016
   name: Update a user
@@ -1587,6 +1635,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-017
   name: Change user email
@@ -1701,6 +1753,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.updateEmail)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-018
   name: Change a user role
@@ -1815,6 +1871,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.update_role)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-019
   name: Promote to admin
@@ -1929,6 +1989,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.promote)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-020
   name: Demote admin
@@ -2043,6 +2107,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.demote)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-021
   name: Suspend a user
@@ -2157,6 +2225,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.suspend)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-022
   name: Reactivate a user
@@ -2271,6 +2343,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.activate)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-023
   name: Delete a user
@@ -2382,6 +2458,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-024
   name: Create API key
@@ -2492,6 +2572,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/apiKeys/apiKeys.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/apiKeys.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: The created token value is returned once; it is a bearer credential.
 - id: gt-action-025
   name: List API keys
@@ -2580,6 +2664,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/apiKeys/apiKeys.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/apiKeys.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-026
   name: Revoke API key
@@ -2691,6 +2779,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/apiKeys/apiKeys.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/apiKeys.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-027
   name: Create OAuth client
@@ -2801,6 +2893,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthClients/oauthClients.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthClients.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-028
   name: Rotate client secret
@@ -2915,6 +3011,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthClients/oauthClients.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthClients.rotate_secret)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-029
   name: Read OAuth client
@@ -3003,6 +3103,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthClients/oauthClients.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthClients.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-030
   name: Update OAuth client
@@ -3117,6 +3221,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthClients/oauthClients.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthClients.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-031
   name: Delete OAuth client
@@ -3228,6 +3336,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthClients/oauthClients.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthClients.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-032
   name: List authorized apps
@@ -3316,6 +3428,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthAuthentications/oauthAuthentications.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthAuthentications.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-033
   name: Revoke app access
@@ -3417,6 +3533,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/oauthAuthentications/oauthAuthentications.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/oauthAuthentications.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-034
   name: Create collection
@@ -3527,6 +3647,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-035
   name: Read collection
@@ -3651,6 +3775,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-036
   name: List collections
@@ -3739,6 +3867,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-037
   name: Update collection
@@ -3853,6 +3985,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-038
   name: Delete collection
@@ -3964,6 +4100,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-039
   name: Grant collection access
@@ -4078,6 +4218,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.add_user)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-040
   name: Grant collection access to a group
@@ -4192,6 +4336,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.add_group)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-041
   name: Collection document tree
@@ -4316,6 +4464,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.documents)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-042
   name: Export a collection
@@ -4450,6 +4602,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.export)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-043
   name: Export entire workspace
@@ -4560,6 +4716,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.export_all)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-044
   name: Create document
@@ -4694,6 +4854,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-045
   name: Read a document
@@ -4814,6 +4978,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: info
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: The same route also serves shareId reads (documents_info_share).
 - id: gt-action-046
   name: Read a document via a public share
@@ -4915,6 +5083,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: shares.ts
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Core public-read surface; shareId guess/leak => content exposure.
 - id: gt-action-047
   name: List documents
@@ -5003,6 +5175,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-048
   name: Search documents
@@ -5091,6 +5267,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.search)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-049
   name: Edit a document
@@ -5205,6 +5385,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-050
   name: Delete a document
@@ -5316,6 +5500,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-051
   name: Move a document
@@ -5430,6 +5618,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.move)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-052
   name: Import a file as a document
@@ -5564,6 +5756,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.import)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-053
   name: Export a document
@@ -5688,6 +5884,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.export)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-054
   name: Share a document with a user
@@ -5802,6 +6002,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.add_user)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-055
   name: Share a document with a group
@@ -5916,6 +6120,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.add_group)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-056
   name: List document users
@@ -6040,6 +6248,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.users)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-057
   name: Templatize a document
@@ -6154,6 +6366,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.templatize)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-058
   name: Unpublish a document
@@ -6268,6 +6484,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.unpublish)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-059
   name: Empty trash
@@ -6355,6 +6575,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.empty_trash)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-060
   name: Create a public share
@@ -6483,13 +6707,16 @@ nodes:
       reason: Create a public share.
     black_box_reachable: true
     reachability_conditions:
-    - '''published''=internet-readable; ''includeChildDocuments'' widens to the subtree. Core exposure
-      primitive.'
+    - '''published''=internet-readable; ''includeChildDocuments'' widens to the subtree. Core exposure primitive.'
     observable_evidence: []
     evidence:
     - type: source
       ref: outline/server/routes/api/shares/shares.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/shares.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-061
   name: Read share info
@@ -6594,6 +6821,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/shares/shares.ts
       supports: info auth optional
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/shares.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-062
   name: Update a share
@@ -6708,6 +6939,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/shares/shares.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/shares.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-063
   name: Revoke a share
@@ -6907,6 +7142,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/shares/shares.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/shares.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-065
   name: Create a comment
@@ -7041,6 +7280,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/comments/comments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/comments.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-066
   name: Edit a comment
@@ -7155,6 +7398,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/comments/comments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/comments.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-067
   name: Delete a comment
@@ -7266,6 +7513,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/comments/comments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/comments.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-068
   name: Read a comment
@@ -7390,6 +7641,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/comments/comments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/comments.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-069
   name: List comments
@@ -7514,6 +7769,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/comments/comments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/comments.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-070
   name: Create a group
@@ -7624,6 +7883,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-071
   name: Add user to group
@@ -7738,6 +8001,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.add_user)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-072
   name: Update a group
@@ -7852,6 +8119,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-073
   name: Delete a group
@@ -7963,6 +8234,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-074
   name: Pre-sign an upload
@@ -8073,6 +8348,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/attachments/attachments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/attachments.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-075
   name: Fetch a remote URL into storage (SSRF)
@@ -8176,6 +8455,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/attachments/attachments.ts
       supports: createFromUrl
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/attachments.createFromUrl)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: SSRF.
 - id: gt-action-076
   name: Delete an attachment
@@ -8287,6 +8570,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/attachments/attachments.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/attachments.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-077
   name: Read a file operation
@@ -8411,6 +8698,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/fileOperations/fileOperations.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/fileOperations.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-078
   name: Delete a file operation
@@ -8522,6 +8813,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/fileOperations/fileOperations.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/fileOperations.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-079
   name: Start an external import (SSRF-adjacent)
@@ -8637,12 +8932,15 @@ nodes:
     - type: source
       ref: outline/server/routes/api/imports/imports.ts
       supports: create
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/imports.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-080
   name: Server-side URL preview (SSRF)
   kind: normal
-  description: 'A (optionally anonymous) caller makes the server fetch a URL for a link preview (SSRF
-    sink #3).'
+  description: 'A (optionally anonymous) caller makes the server fetch a URL for a link preview (SSRF sink #3).'
   action_key: urls_unfurl
   subject:
     id: actor
@@ -8727,6 +9025,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/urls/urls.ts
       supports: unfurl 'External resources are unfurled with workspace credentials'
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/urls.unfurl)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: SSRF.
 - id: gt-action-081
   name: Check embed match
@@ -8815,6 +9117,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/urls/urls.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/urls.checkEmbed)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-082
   name: Update workspace settings
@@ -8905,6 +9211,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/teams/teams.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/team.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-083
   name: Create a workspace
@@ -9015,6 +9325,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/teams/teams.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/teams.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-084
   name: Delete a workspace
@@ -9126,6 +9440,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/teams/teams.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/teams.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-085
   name: Toggle an SSO provider
@@ -9240,6 +9558,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/authenticationProviders/authenticationProviders.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/authenticationProviders.update)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-086
   name: Create an integration/webhook
@@ -9350,6 +9672,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/integrations/integrations.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/integrations.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-087
   name: Delete an integration
@@ -9461,6 +9787,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/integrations/integrations.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/integrations.delete)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-088
   name: List revisions
@@ -9585,6 +9915,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/revisions/revisions.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/revisions.list)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-089
   name: Read a revision
@@ -9709,6 +10043,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/revisions/revisions.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/revisions.info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-090
   name: Pin a document
@@ -9843,6 +10181,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/pins/pins.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/pins.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-091
   name: Star a document
@@ -9965,6 +10307,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/stars/stars.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/stars.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-092
   name: Subscribe to updates
@@ -10099,6 +10445,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/subscriptions/subscriptions.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/subscriptions.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-093
   name: Email tracking pixel
@@ -10183,6 +10533,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/notifications/notifications.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/notifications.pixel)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-094
   name: Create a template
@@ -10293,6 +10647,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/templates/templates.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/templates.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-095
   name: Request access
@@ -10415,6 +10773,10 @@ nodes:
     - type: source
       ref: outline/server/routes/api/accessRequests/accessRequests.ts
       supports: route + policy
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/accessRequests.create)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

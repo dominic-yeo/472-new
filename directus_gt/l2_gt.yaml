@@ -124,6 +124,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: login
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/login)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-002
   name: Refresh token
@@ -217,6 +221,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: refresh
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/refresh)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-003
   name: Request password reset
@@ -302,6 +310,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: password/request
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/password/request)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-004
   name: Reset password
@@ -407,6 +419,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: password/reset
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/password/reset)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-005
   name: Log out
@@ -487,6 +503,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: logout
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/logout)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-006
   name: List auth providers
@@ -570,6 +590,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-007
   name: Bootstrap first admin
@@ -682,6 +706,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: setup
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/server/setup)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-008
   name: Read OpenAPI spec
@@ -773,6 +801,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/server/specs/oas)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-009
   name: Read server info
@@ -856,6 +888,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/server/info)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-010
   name: Read collection items
@@ -977,13 +1013,17 @@ nodes:
       reason: Dynamic collection read.
     black_box_reachable: true
     reachability_conditions:
-    - Policy read grant on the collection (public role if unauthenticated). 'fields'/'deep' traverse relations
-      and over-expose related data.
+    - Policy read grant on the collection (public role if unauthenticated). 'fields'/'deep' traverse relations and over-expose
+      related data.
     observable_evidence: []
     evidence:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: readHandler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-011
   name: Create collection item
@@ -1123,6 +1163,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: POST
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-012
   name: Update items (batch/query)
@@ -1236,6 +1280,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: updateByQuery mutates every matching row.
 - id: gt-action-013
   name: Delete items (batch/query)
@@ -1346,6 +1394,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-014
   name: Read one item
@@ -1465,6 +1517,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Row-level access = permission filter; missing filter -> IDOR.
 - id: gt-action-015
   name: Update one item
@@ -1578,6 +1634,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-016
   name: Delete one item
@@ -1688,6 +1748,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-017
   name: List users
@@ -1788,6 +1852,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-018
   name: Create user
@@ -1897,6 +1965,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Role assignment at creation = escalation lever.
 - id: gt-action-019
   name: Read one user
@@ -2020,6 +2092,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-020
   name: Update one user
@@ -2127,13 +2203,16 @@ nodes:
       reason: Update one user.
     black_box_reachable: true
     reachability_conditions:
-    - directus_users update grant. PATCH role/password on another user (absent a row filter) = takeover
-      / escalation.
+    - directus_users update grant. PATCH role/password on another user (absent a row filter) = takeover / escalation.
     observable_evidence: []
     evidence:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Account-takeover + privilege-escalation primitive.
 - id: gt-action-021
   name: Delete one user
@@ -2244,6 +2323,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-022
   name: Read own account
@@ -2331,6 +2414,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/me)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-023
   name: Update own account
@@ -2410,6 +2497,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/me)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Must not expose role/policies for self-edit.
 - id: gt-action-024
   name: Invite user
@@ -2519,6 +2610,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/invite)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-025
   name: Accept user invite
@@ -2628,6 +2723,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: invite/accept
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/invite/accept)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-026
   name: Self-register
@@ -2736,6 +2835,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: register
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/register)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-027
   name: Disable a user's 2FA (admin)
@@ -2849,6 +2952,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/:pk/tfa/disable)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-028
   name: List roles
@@ -2949,6 +3056,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/roles)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-029
   name: Create role
@@ -3058,6 +3169,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/roles)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-030
   name: Update role (attach policies)
@@ -3171,6 +3286,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/roles/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Role<->policy link is an escalation lever.
 - id: gt-action-031
   name: Create policy (admin_access)
@@ -3280,6 +3399,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/policies.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/policies)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: 'TOP escalation: a policy carries the admin_access bypass flag.'
 - id: gt-action-032
   name: List policies
@@ -3380,6 +3503,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/policies.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/policies)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-033
   name: Update policy flags
@@ -3493,6 +3620,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/policies.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/policies/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-034
   name: Create permission rule
@@ -3602,6 +3733,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/permissions)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Permission rows are the content-API grants.
 - id: gt-action-035
   name: List permission rules
@@ -3702,6 +3837,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/permissions)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-036
   name: Edit permission rule
@@ -3815,6 +3954,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/permissions/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-037
   name: Read own permissions
@@ -3902,6 +4045,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/permissions/me)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-038
   name: Assign policy to user/role
@@ -4011,6 +4158,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/access.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/access)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: directus_access junction = direct escalation lever.
 - id: gt-action-039
   name: Upload file
@@ -4126,6 +4277,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: POST
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/files)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-040
   name: List files
@@ -4226,6 +4381,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/files)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-041
   name: Import file from URL (SSRF)
@@ -4330,6 +4489,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: import
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/files/import)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-042
   name: Update/replace file
@@ -4443,6 +4606,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/files.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/files/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-043
   name: Download/transform asset
@@ -4562,6 +4729,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/assets.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/assets/:pk/:filename)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Image-transform params are a resource-exhaustion surface.
 - id: gt-action-044
   name: Create folder
@@ -4671,6 +4842,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/folders.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/folders)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-045
   name: Trigger flow
@@ -4766,13 +4941,17 @@ nodes:
       reason: Flow execution.
     black_box_reachable: true
     reachability_conditions:
-    - 'Per the flow''s trigger config: a ''webhook'' flow can be PUBLIC. Runs operations (request=SSRF,
-      exec=sandboxed JS, item mutations) with the flow''s accountability.'
+    - 'Per the flow''s trigger config: a ''webhook'' flow can be PUBLIC. Runs operations (request=SSRF, exec=sandboxed JS,
+      item mutations) with the flow''s accountability.'
     observable_evidence: []
     evidence:
     - type: source
       ref: directus/api/src/controllers/flows.ts
       supports: webhookFlowHandler
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/flows/trigger/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-046
   name: Create flow
@@ -4882,6 +5061,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/flows.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/flows)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Flow authoring = server-side automation authoring.
 - id: gt-action-047
   name: Create flow operation
@@ -4991,6 +5174,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/operations.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/operations)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: 'Operation building blocks: exec (code) + request (SSRF).'
 - id: gt-action-048
   name: Export schema snapshot
@@ -5090,6 +5277,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/schema/snapshot)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-049
   name: Apply schema changes
@@ -5179,6 +5370,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/schema/apply)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Whole-schema write; highest-impact data-model primitive.
 - id: gt-action-050
   name: Create collection
@@ -5288,6 +5483,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/collections.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/collections)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-051
   name: Add field to collection
@@ -5421,6 +5620,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/fields.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/fields/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-052
   name: Export collection data
@@ -5544,6 +5747,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: export
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/utils/export/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-053
   name: Import file into collection
@@ -5677,6 +5884,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/utils/import/:collection)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-054
   name: Batch import
@@ -5756,6 +5967,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/utils/import)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: dangerouslyAllowDelete makes this destructive.
 - id: gt-action-055
   name: Clear cache
@@ -5951,6 +6166,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/extensions/registry/install)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Loading an extension executes untrusted code.
 - id: gt-action-057
   name: Enable/disable/remove extension
@@ -6065,6 +6284,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/extensions/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-058
   name: List extensions
@@ -6152,6 +6375,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/extensions)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-059
   name: Authenticate to a share
@@ -6266,13 +6493,16 @@ nodes:
       reason: Public share login.
     black_box_reachable: true
     reachability_conditions:
-    - Public. Share id (+ password if set) -> item-scoped token. Guessable id / weak password = unauthenticated
-      data access.
+    - Public. Share id (+ password if set) -> item-scoped token. Guessable id / weak password = unauthenticated data access.
     observable_evidence: []
     evidence:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: auth
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/shares/auth)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-060
   name: Read share info
@@ -6380,6 +6610,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/shares/info/:pk)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Share existence/password oracle.
 - id: gt-action-061
   name: Create a share
@@ -6489,6 +6723,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/shares.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/shares)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Deliberate public-exposure primitive.
 - id: gt-action-062
   name: Read project settings
@@ -6576,6 +6814,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/settings.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/settings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-063
   name: Update project settings
@@ -6665,6 +6907,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/settings.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/settings)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Controls registration, default roles, storage and CORS.
 - id: gt-action-064
   name: Promote content version
@@ -6778,6 +7024,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/versions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/versions/:pk/promote)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Draft->live publish path.
 - id: gt-action-065
   name: Create content version
@@ -6887,6 +7137,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/versions.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/versions)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-066
   name: Comment on an item
@@ -6996,6 +7250,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/comments.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/comments)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-067
   name: Send notification
@@ -7105,6 +7363,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/notifications.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/notifications)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-068
   name: GraphQL query/mutation
@@ -7200,13 +7462,16 @@ nodes:
       reason: GraphQL (items).
     black_box_reachable: true
     reachability_conditions:
-    - Same accountability/permission model as REST, re-exposed as GraphQL. Introspection + query depth
-      = recon/DoS surface.
+    - Same accountability/permission model as REST, re-exposed as GraphQL. Introspection + query depth = recon/DoS surface.
     observable_evidence: []
     evidence:
     - type: source
       ref: directus/api/src/controllers/graphql.ts
       supports: items
+    - type: runtime
+      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/graphql)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

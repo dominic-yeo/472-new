@@ -77,9 +77,24 @@ nodes:
     reference_fields:
     - posts
     reason: Published posts.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/posts/
+    identity: contentkey
+    status: 200
+    body_excerpt: '{"posts":[{"id":"6af2be2b6e167700012bb1d8","uuid":"b5213f94-9901-46a5-85fc-636ab89bcc3a","title":"Coming
+      soon","slug":"coming-soon","html":"'
+  - method: GET
+    path: /ghost/api/content/posts
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -90,6 +105,12 @@ nodes:
     - 403
     contentclient:
     - 200
+    anon:
+    - 403
+    contentkey:
+    - 200
+    admin:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -104,6 +125,13 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/content/posts/->403; contentkey
+        GET /ghost/api/content/posts/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/pages
   kind: api
@@ -179,16 +207,29 @@ nodes:
     reference_fields:
     - pages
     reason: Published pages.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/pages
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -202,6 +243,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/authors
   kind: api
@@ -277,16 +321,29 @@ nodes:
     reference_fields:
     - authors
     reason: Published authors.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/authors
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -300,6 +357,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/tags
   kind: api
@@ -375,16 +435,29 @@ nodes:
     reference_fields:
     - tags
     reason: Published tags.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/tags
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -398,6 +471,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/settings
   kind: api
@@ -475,9 +551,23 @@ nodes:
     reference_fields:
     - settings
     reason: Published settings.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/settings/
+    identity: contentkey
+    status: 200
+    body_excerpt: '{"settings":{"title":"GT Target","description":"Thoughts, stories and ideas.","logo":null,"icon":null,"accent_color":"#FF1A75","cover_image"'
+  - method: GET
+    path: /ghost/api/content/settings
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -488,6 +578,10 @@ nodes:
     - 403
     contentclient:
     - 200
+    contentkey:
+    - 200
+    admin:
+    - 403
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -502,6 +596,12 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): contentkey GET /ghost/api/content/settings/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/tiers
   kind: api
@@ -577,16 +677,29 @@ nodes:
     reference_fields:
     - tiers
     reason: Published tiers.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/tiers
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -600,6 +713,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/posts/:id
   kind: api
@@ -620,16 +736,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/posts/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -643,6 +772,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/posts/slug/:slug
   kind: api
@@ -663,16 +795,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/posts/slug/x
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -686,6 +831,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/pages/:id
   kind: api
@@ -706,16 +854,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/pages/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -729,6 +890,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/authors/:id
   kind: api
@@ -749,16 +913,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/authors/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -772,6 +949,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/tags/:id
   kind: api
@@ -792,16 +972,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/tags/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -815,6 +1008,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/newsletters
   kind: api
@@ -835,16 +1031,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/newsletters
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -858,6 +1067,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/offers/:id
   kind: api
@@ -878,16 +1090,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/offers/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -901,6 +1126,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/recommendations
   kind: api
@@ -921,16 +1149,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/recommendations
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -944,6 +1185,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/search-index/posts
   kind: api
@@ -964,16 +1208,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/search-index/posts
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -987,6 +1244,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/search-index/authors
   kind: api
@@ -1007,16 +1267,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/search-index/authors
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -1030,6 +1303,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/content/search-index/tags
   kind: api
@@ -1050,16 +1326,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/content/search-index/tags
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated member or
+      integration. Che'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -1073,6 +1362,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/session
   kind: api
@@ -1178,9 +1470,21 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Admin session cookie.
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/session/
+    identity: anon
+    status: 201
+  - method: POST
+    path: /ghost/api/admin/session
+    identity: anonymous
+    status: 401
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Access Denied.","context":null,"type":"UnauthorizedError","details":null,"property":null,"help":n'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1189,6 +1493,11 @@ nodes:
   identity_statuses:
     anonymous:
     - 201
+    - 401
+    anon:
+    - 201
+    admin:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -1203,6 +1512,12 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:session
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /ghost/api/admin/session/->201'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401; - DELETE->skipped'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Primary admin auth surface; brute-force target.
 - key: http://localhost:2368/ghost/api/admin/authentication/setup
   kind: api
@@ -1327,9 +1642,22 @@ nodes:
     reference_fields:
     - user
     reason: Created owner user.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/authentication/setup/
+    identity: anon
+    status: 200
+    body_excerpt: '{"setup":[{"status":false}]}'
+  - method: POST
+    path: /ghost/api/admin/authentication/setup
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"No root key (''setup'') provided.","context":null,"type":"BadRequestError","details":null,"property'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1339,7 +1667,15 @@ nodes:
     anonymous:
     - 200
     - 201
+    - 400
     - 403
+    anon:
+    - 200
+    - 201
+    - 403
+    admin:
+    - 200
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -1354,6 +1690,14 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:setup
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/authentication/setup/->200;
+        anon POST /ghost/api/admin/authentication/setup/->201; anon POST /ghost/api/admin/authentication/setup/->403'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400; anonymous GET->200; admin
+        GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Unauthenticated owner-creation; a setup-race / re-setup attack surface.
 - key: http://localhost:2368/ghost/api/admin/authentication/password_reset
   kind: api
@@ -1469,9 +1813,21 @@ nodes:
     reference_fields: []
     reason: Emailed password-reset token.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/authentication/password_reset/
+    identity: anon
+    status: 500
+  - method: POST
+    path: /ghost/api/admin/authentication/password_reset
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"The server did not receive a valid email","context":null,"type":"BadRequestError","details":null,'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1479,8 +1835,14 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 400
     - 404
     - 500
+    anon:
+    - 404
+    - 500
+    admin:
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -1495,6 +1857,14 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:password_reset
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /ghost/api/admin/authentication/password_reset/->500;
+        anon POST /ghost/api/admin/authentication/password_reset/->404'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400; anonymous PUT->400; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Unauthenticated reset-request = user-enumeration + email-bomb surface.
 - key: http://localhost:2368/ghost/api/admin/authentication/invitation
   kind: api
@@ -1615,16 +1985,31 @@ nodes:
     - email
     reason: Account email.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/authentication/invitation
+    identity: anonymous
+    status: 500
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"An unexpected error occurred, please try again.","context":"Cannot read properties
+      of undefined ('
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    - 500
+    admin:
+    - 400
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -1638,6 +2023,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:invitation
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->500; admin POST->500; anonymous GET->400; admin
+        GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/session/verify
   kind: api
@@ -1696,16 +2085,28 @@ nodes:
     reference_fields: []
     reason: Emailed 2FA code.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/session/verify
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Could not fetch user from the session.","context":null,"type":"BadRequestError","details":null,"p'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -1719,6 +2120,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:session_verify
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/identities
   kind: api
@@ -1776,16 +2180,29 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: SSO identity token for the authenticated staff user.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/identities
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -1799,6 +2216,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:identities
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/site
   kind: api
@@ -1849,9 +2269,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/site/
+    identity: anon
+    status: 200
+    body_excerpt: '{"site":{"title":"Ghost","description":"Thoughts, stories and ideas","logo":null,"icon":null,"cover_image":"https://static.ghost.org/v5.0.0/'
+  - method: GET
+    path: /ghost/api/admin/site
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"site":{"title":"GT","description":"Thoughts, stories and ideas.","logo":null,"icon":null,"cover_image":"https://static'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1859,6 +2292,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -1874,6 +2311,12 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:site
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/site/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/posts
   kind: api
@@ -1974,9 +2417,24 @@ nodes:
     reference_fields:
     - posts
     reason: Listed/created post.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/posts/
+    identity: owner
+    status: 200
+    body_excerpt: '{"posts":[{"id":"6af2be2b6e167700012bb1d8","uuid":"b5213f94-9901-46a5-85fc-636ab89bcc3a","title":"Coming
+      soon","slug":"coming-soon","mobiled'
+  - method: GET
+    path: /ghost/api/admin/posts
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1988,6 +2446,14 @@ nodes:
     staff:
     - 200
     - 201
+    anon:
+    - 403
+    owner:
+    - 200
+    - 201
+    admin:
+    - 200
+    - 422
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -2002,6 +2468,14 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/posts/->403; owner GET /ghost/api/admin/posts/->200;
+        owner POST /ghost/api/admin/posts/->201'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/posts/:id
   kind: api
@@ -2135,16 +2609,30 @@ nodes:
     - post
     reason: post id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/posts/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -2158,6 +2646,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->422; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/tags
   kind: api
@@ -2255,16 +2747,30 @@ nodes:
     reference_fields:
     - tags
     reason: Listed/created tag.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/tags
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -2278,6 +2784,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/tags/:id
   kind: api
@@ -2411,16 +2921,30 @@ nodes:
     - tag
     reason: tag id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/tags/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -2434,6 +2958,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->422; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/members
   kind: api
@@ -2533,9 +3061,23 @@ nodes:
     reference_fields:
     - members
     reason: Listed/created member.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/members/
+    identity: owner
+    status: 200
+    body_excerpt: '{"members":[],"meta":{"pagination":{"page":1,"limit":15,"pages":1,"total":0,"next":null,"prev":null}}}'
+  - method: GET
+    path: /ghost/api/admin/members
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2546,6 +3088,13 @@ nodes:
     - 403
     staff:
     - 200
+    anon:
+    - 403
+    owner:
+    - 200
+    admin:
+    - 200
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -2560,6 +3109,14 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/members/->403; owner GET
+        /ghost/api/admin/members/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/members/:id
   kind: api
@@ -2693,16 +3250,30 @@ nodes:
     - member
     reason: member id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/members/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -2716,6 +3287,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/integrations
   kind: api
@@ -2815,9 +3390,23 @@ nodes:
     reference_fields:
     - integrations
     reason: Listed/created integration.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/integrations/
+    identity: owner
+    status: 200
+    body_excerpt: '{"integrations":[{"id":"6af2be2c6e167700012bb1dc","type":"builtin","name":"Zapier","slug":"zapier","icon_image":null,"description":"Built-in'
+  - method: GET
+    path: /ghost/api/admin/integrations
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2828,6 +3417,13 @@ nodes:
     - 403
     staff:
     - 200
+    anon:
+    - 403
+    owner:
+    - 200
+    admin:
+    - 200
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -2842,6 +3438,14 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/integrations/->403; owner
+        GET /ghost/api/admin/integrations/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/integrations/:id
   kind: api
@@ -2975,16 +3579,30 @@ nodes:
     - integration
     reason: integration id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/integrations/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -2998,6 +3616,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/pages
   kind: api
@@ -3058,16 +3680,29 @@ nodes:
     reference_fields:
     - pages
     reason: Listed pages.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/pages
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3081,6 +3716,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/pages/:id
   kind: api
@@ -3103,16 +3741,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/pages/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3125,6 +3777,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/users
   kind: api
@@ -3185,9 +3841,23 @@ nodes:
     reference_fields:
     - users
     reason: Staff users.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/users/
+    identity: owner
+    status: 200
+    body_excerpt: '{"users":[{"id":"6af2be2a6e167700012bb1c5","name":"GT Owner","slug":"gt","email":"gtowner@example.com","profile_image":null,"cover_image":nu'
+  - method: GET
+    path: /ghost/api/admin/users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3197,6 +3867,12 @@ nodes:
     anonymous:
     - 403
     staff:
+    - 200
+    anon:
+    - 403
+    owner:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -3212,6 +3888,12 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/users/->403; owner GET /ghost/api/admin/users/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/users/:id
   kind: api
@@ -3345,16 +4027,30 @@ nodes:
     - id
     reason: Target staff user.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/users/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3368,6 +4064,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Cross-user edit/delete is role-gated by authorizeAdminApi -- a privilege-boundary surface.
 - key: http://localhost:2368/ghost/api/admin/users/password
   kind: api
@@ -3425,16 +4125,29 @@ nodes:
     reference_fields: []
     reason: Account password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /ghost/api/admin/users/password
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3448,6 +4161,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->403; admin PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/users/owner
   kind: api
@@ -3506,16 +4222,29 @@ nodes:
     - id
     reason: New owner.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /ghost/api/admin/users/owner
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3529,6 +4258,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->403; admin PUT->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Owner-only; site takeover primitive if abused.
 - key: http://localhost:2368/ghost/api/admin/users/:id/token
   kind: api
@@ -3550,16 +4282,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/users/000000000000000000000000/token
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3572,6 +4317,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403; anonymous PUT->403; admin
+        PUT->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/members/:id/signin_urls
   kind: api
@@ -3647,16 +4396,29 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: 'Impersonation URL: logs anyone in AS the member.'
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/members/000000000000000000000000/signin_urls
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3670,6 +4432,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Member-impersonation surface.
 - key: http://localhost:2368/ghost/api/admin/settings
   kind: api
@@ -3768,9 +4533,23 @@ nodes:
     reference_fields:
     - settings
     reason: Settings.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/settings/
+    identity: owner
+    status: 200
+    body_excerpt: '{"settings":[{"key":"title","value":"GT Target"},{"key":"description","value":"Thoughts, stories and ideas."},{"key":"heading_font","value":'
+  - method: GET
+    path: /ghost/api/admin/settings
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3781,6 +4560,13 @@ nodes:
     - 403
     staff:
     - 200
+    anon:
+    - 403
+    owner:
+    - 200
+    admin:
+    - 200
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
@@ -3795,6 +4581,14 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /ghost/api/admin/settings/->403; owner GET
+        /ghost/api/admin/settings/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous PUT->403; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/roles
   kind: api
@@ -3844,16 +4638,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/roles
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3867,6 +4674,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/db
   kind: api
@@ -3975,16 +4785,31 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Full-content export (data exfiltration).
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/db
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 204
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -3998,6 +4823,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:db
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->422; anonymous DELETE->403; admin DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: GET=full exfiltration; DELETE=destructive wipe; POST=import (mass-assignment surface).
 - key: http://localhost:2368/ghost/api/admin/themes/upload
   kind: api
@@ -4056,16 +4885,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/themes/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4079,6 +4921,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:themes
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Arbitrary ZIP -> theme files (template/helpers): code-adjacent upload surface.'
 - key: http://localhost:2368/ghost/api/admin/themes/install
   kind: api
@@ -4137,16 +4982,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/themes/install
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4160,6 +5018,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:themes
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Server fetches a remote source -> SSRF-adjacent.
 - key: http://localhost:2368/ghost/api/admin/themes/:name/activate
   kind: api
@@ -4227,16 +5088,29 @@ nodes:
     - name
     reason: Theme to activate.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /ghost/api/admin/themes/x/activate
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4250,6 +5124,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:themes
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->403; admin PUT->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/themes/
   kind: api
@@ -4270,16 +5147,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/themes/
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4292,6 +5182,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/themes/:name/download
   kind: api
@@ -4312,16 +5205,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/themes/x/download
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4334,6 +5240,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/themes/:name
   kind: api
@@ -4354,16 +5263,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /ghost/api/admin/themes/x
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4376,6 +5298,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/images/upload
   kind: api
@@ -4442,16 +5367,29 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Stored image URL.
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/images/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4465,6 +5403,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:images
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: File upload (type/size validation surface).
 - key: http://localhost:2368/ghost/api/admin/media/upload
   kind: api
@@ -4485,16 +5426,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/media/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4507,6 +5459,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->ERR'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/files/upload
   kind: api
@@ -4527,16 +5482,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/files/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4549,6 +5517,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/webhooks
   kind: api
@@ -4617,16 +5588,29 @@ nodes:
     reference_fields:
     - webhooks
     reason: Created webhook.
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/webhooks
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4644,6 +5628,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Attacker-controlled target_url -> SSRF-adjacent.
 - key: http://localhost:2368/ghost/api/admin/webhooks/:id
   kind: api
@@ -4665,16 +5652,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /ghost/api/admin/webhooks/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4687,6 +5688,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->403; admin PUT->400; anonymous DELETE->403; admin
+        DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/invites
   kind: api
@@ -4801,16 +5806,30 @@ nodes:
     reference_fields:
     - invites
     reason: Invites.
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/invites
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4824,6 +5843,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js:invites
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Inviting a high role is a privilege-escalation surface if role checks are weak.
 - key: http://localhost:2368/ghost/api/admin/invites/:id
   kind: api
@@ -4845,16 +5868,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/invites/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4867,6 +5903,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous DELETE->403; admin
+        DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/config
   kind: api
@@ -4887,16 +5927,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/config
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4910,6 +5963,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/config/featurebase
   kind: api
@@ -4930,16 +5986,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/config/featurebase
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4953,6 +6020,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->ERR'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/mentions
   kind: api
@@ -4973,16 +6043,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/mentions
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -4996,6 +6079,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/comments
   kind: api
@@ -5017,16 +6103,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/comments
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5040,6 +6140,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/comments/:id
   kind: api
@@ -5061,16 +6165,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/comments/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5084,6 +6202,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/labels
   kind: api
@@ -5105,16 +6227,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/labels
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5128,6 +6264,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/labels/:id
   kind: api
@@ -5150,16 +6290,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/labels/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5173,6 +6327,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/offers
   kind: api
@@ -5194,16 +6352,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/offers
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5217,6 +6389,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/offers/:id
   kind: api
@@ -5238,16 +6414,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/offers/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5261,6 +6451,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/snippets
   kind: api
@@ -5282,16 +6476,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/snippets
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5305,6 +6513,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/snippets/:id
   kind: api
@@ -5327,16 +6539,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/snippets/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5350,6 +6576,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/newsletters
   kind: api
@@ -5371,16 +6601,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/newsletters
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5394,6 +6638,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/newsletters/:id
   kind: api
@@ -5415,16 +6663,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/newsletters/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5438,6 +6700,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/recommendations
   kind: api
@@ -5459,16 +6725,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/recommendations
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5482,6 +6762,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/recommendations/:id
   kind: api
@@ -5504,16 +6788,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/recommendations/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5527,6 +6825,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous PUT->403; admin
+        PUT->400; anonymous DELETE->403; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/emails/:id
   kind: api
@@ -5547,16 +6849,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/emails/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5570,6 +6885,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/email_previews/posts/:id
   kind: api
@@ -5591,16 +6909,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/email_previews/posts/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5614,6 +6945,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404; anonymous POST->403; admin
+        POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/oembed
   kind: api
@@ -5634,16 +6969,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/oembed
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5657,6 +7005,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/slack/test
   kind: api
@@ -5677,16 +7028,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/slack/test
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5700,6 +7064,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/redirects/download
   kind: api
@@ -5720,16 +7087,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/redirects/download
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5743,6 +7123,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/redirects/upload
   kind: api
@@ -5763,16 +7146,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/redirects/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 422
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5786,6 +7182,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/exports/download
   kind: api
@@ -5806,16 +7205,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/exports/download
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5829,6 +7241,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/exports
   kind: api
@@ -5849,16 +7264,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/exports
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5872,6 +7300,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/db/backup
   kind: api
@@ -5892,16 +7323,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/db/backup
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5915,6 +7359,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/db/media/inline
   kind: api
@@ -5935,16 +7382,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /ghost/api/admin/db/media/inline
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -5958,6 +7418,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/schedules/:resource/:id
   kind: api
@@ -5978,16 +7441,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /ghost/api/admin/schedules/posts/000000000000000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Invalid token: No token found in URL","context":null,"type":"UnauthorizedError","details":null,"p'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6001,6 +7476,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/notifications
   kind: api
@@ -6022,16 +7500,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/notifications
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6045,6 +7537,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/custom_theme_settings
   kind: api
@@ -6066,16 +7562,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/custom_theme_settings
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6089,6 +7599,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous PUT->403; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/actions
   kind: api
@@ -6109,16 +7623,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/actions
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6132,6 +7659,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/tiers
   kind: api
@@ -6153,16 +7683,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/tiers
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6176,6 +7720,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous POST->403; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/tiers/:id
   kind: api
@@ -6197,16 +7745,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/tiers/000000000000000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 400
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6220,6 +7782,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->500; anonymous PUT->403; admin
+        PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/members/upload
   kind: api
@@ -6240,16 +7806,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/members/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6263,6 +7842,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/api/admin/members/stripe_connect
   kind: api
@@ -6283,16 +7865,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/api/admin/members/stripe_connect
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Authorization failed","context":"Unable to determine the authenticated user or integration.
+      Check'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6306,6 +7901,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/api/endpoints/admin/routes.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/send-magic-link
   kind: api
@@ -6365,9 +7963,21 @@ nodes:
     - email
     reason: Member email (signup/signin).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/send-magic-link/
+    identity: anon
+    status: 400
+  - method: POST
+    path: /members/api/send-magic-link
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"The request could not be understood.","context":null,"type":"BadRequestError","details":null,"pro'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6375,6 +7985,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 400
+    anon:
+    - 400
+    admin:
     - 400
   route_confirmed: true
   runtime_api_prefixes:
@@ -6390,6 +8004,12 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js:send-magic-link
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /members/api/send-magic-link/->400'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/verify-otc
   kind: api
@@ -6447,16 +8067,28 @@ nodes:
     reference_fields: []
     reason: Emailed one-time code.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/verify-otc
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"The request could not be understood.","context":null,"type":"BadRequestError","details":null,"pro'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6470,6 +8102,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js:verify-otc
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/session
   kind: api
@@ -6630,9 +8265,14 @@ nodes:
     reference_fields:
     - member
     reason: Own account.
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/member/
+    identity: anon
+    status: 204
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6640,6 +8280,8 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 204
+    anon:
     - 204
   route_confirmed: true
   runtime_api_prefixes:
@@ -6655,6 +8297,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js:/api/member
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /members/api/member/->204'
+      supports: 'runtime: observed status per identity'
     notes: null
 - key: http://localhost:2368/members/api/create-stripe-checkout-session
   kind: api
@@ -6713,16 +8358,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/create-stripe-checkout-session
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Bad Request.","context":"Expected offerId or tierId, received none","type":"BadRequestError","det'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6736,6 +8393,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js:create-stripe-checkout-session
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/site
   kind: api
@@ -6786,9 +8446,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/site/
+    identity: anon
+    status: 200
+    body_excerpt: '{"site":{"title":"GT Target","description":"Thoughts, stories and ideas.","logo":null,"icon":null,"cover_image":"https://static.ghost.org/v5'
+  - method: GET
+    path: /members/api/site
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"site":{"title":"GT","description":"Thoughts, stories and ideas.","logo":null,"icon":null,"cover_image":"https://static'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6796,6 +8469,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -6811,6 +8488,12 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js:/api/site
       supports: route + middleware
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /members/api/site/->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/member/newsletters
   kind: api
@@ -6832,16 +8515,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/member/newsletters
+    identity: anonymous
+    status: 401
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Missing uuid.","context":null,"type":"UnauthorizedError","details":null,"property":null,"help":nu'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6855,6 +8550,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401; anonymous PUT->401; admin
+        PUT->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/member/email
   kind: api
@@ -6875,16 +8574,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/member/email
+    identity: anonymous
+    status: 403
+    content_type: ''
+    body_excerpt: No Permission.
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -6898,6 +8609,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/entitlements
   kind: api
@@ -7004,16 +8718,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/create-stripe-update-session
+    identity: anonymous
+    status: 400
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7027,6 +8753,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/create-stripe-billing-portal-session
   kind: api
@@ -7047,16 +8776,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/create-stripe-billing-portal-session
+    identity: anonymous
+    status: 400
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7070,6 +8811,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/subscriptions/:id
   kind: api
@@ -7090,16 +8834,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /members/api/subscriptions/000000000000000000000000
+    identity: anonymous
+    status: 400
+    content_type: text/plain;charset=UTF-8
+    body_excerpt: Updating subscription failed!
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7113,6 +8869,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->400; admin PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/comments
   kind: api
@@ -7134,16 +8893,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/comments
+    identity: anonymous
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"comments":[],"meta":{"pagination":{"page":1,"limit":15,"pages":1,"total":0,"next":null,"prev":null}}}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    - 400
+    admin:
+    - 200
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7157,6 +8930,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200; anonymous POST->400; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/feedback
   kind: api
@@ -7177,16 +8954,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/feedback
+    identity: anonymous
+    status: 401
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Missing uuid.","context":null,"type":"UnauthorizedError","details":null,"property":null,"help":nu'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7200,6 +8989,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/gifts/:token/redeem
   kind: api
@@ -7221,16 +9013,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/gifts/x/redeem
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"This gift does not exist.","context":null,"type":"NotFoundError","details":null,"property":null,"'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    - 404
+    admin:
+    - 401
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7244,6 +9050,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404; anonymous POST->401; admin
+        POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/recommendations/:id/clicked
   kind: api
@@ -7264,16 +9074,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /members/api/recommendations/000000000000000000000000/clicked
+    identity: anonymous
+    status: 404
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Recommendation with id 000000000000000000000000 not found","context":null,"type":"NotFoundError",'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -7287,6 +9109,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/ghost/
   kind: static
@@ -7387,15 +9212,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /x/
+    identity: anonymous
+    status: 404
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"no-js\" lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n\n    <title>404\
+      \ — Page not found</t"
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -7407,6 +9245,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/web/site
       supports: frontend
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/rss/
   kind: page
@@ -7507,15 +9348,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /.well-known/
+    identity: anonymous
+    status: 404
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"no-js\" lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n\n    <title>404\
+      \ — Page not found</t"
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -7527,6 +9381,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/web/well-known.js
       supports: frontend
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 edges:
 - src: http://localhost:2368/ghost/
@@ -7548,13 +9405,12 @@ edges:
   triggers:
   - xhr
 excluded_items:
-- item: 'Admin API long tail: stats/*, automations/*, automated_emails/*, emails/*, offers, labels, snippets,
-    recommendations, newsletters, links, oembed, actions, email_previews, slack, tinybird, featurebase,
-    mentions, custom_theme_settings, apps/*, members/metafields/*'
-  reason: Enumerated as L1 api nodes (surface-complete) but NOT given io_variants / L2 coverage; they
-    share the authAdminApi gate already modeled by the covered resources.
-- item: Front-end theme rendering (/, /:slug, /tag/*, /author/*, RSS, sitemap, AMP) + Ghost Admin SPA
-    (/ghost/)
+- item: 'Admin API long tail: stats/*, automations/*, automated_emails/*, emails/*, offers, labels, snippets, recommendations,
+    newsletters, links, oembed, actions, email_previews, slack, tinybird, featurebase, mentions, custom_theme_settings, apps/*,
+    members/metafields/*'
+  reason: Enumerated as L1 api nodes (surface-complete) but NOT given io_variants / L2 coverage; they share the authAdminApi
+    gate already modeled by the covered resources.
+- item: Front-end theme rendering (/, /:slug, /tag/*, /author/*, RSS, sitemap, AMP) + Ghost Admin SPA (/ghost/)
   reason: Theme-rendered HTML + SPA shell; the JSON APIs they call are the modeled surface.
 - item: Stripe / Slack / oembed / webmention outbound callbacks to external services
   reason: External dependency; reachability needs third-party services configured.

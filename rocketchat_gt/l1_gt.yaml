@@ -110,9 +110,22 @@ nodes:
     reference_fields:
     - userId
     reason: Authenticated user id.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/login
+    identity: anon
+    status: 200
+    body_excerpt: '{"status":"success","data":{"userId":"6af2cedfbcca0ed8633086c4","authToken":"131oHU4vGyHl1TbTAGyZo77yI9Md4I5JG3O_0FCYHpT","me":{"_id":"6af2c'
+  - method: POST
+    path: /api/v1/login
+    identity: admin
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"Unauthorized","status":"error","message":"Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -121,6 +134,11 @@ nodes:
   identity_statuses:
     anonymous:
     - 200
+    - 401
+    anon:
+    - 200
+    - 401
+    admin:
     - 401
   route_confirmed: true
   runtime_api_prefixes:
@@ -136,6 +154,13 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/ApiClass.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /api/v1/login->200; anon POST /api/v1/login->401;
+        anon POST /api/v1/login->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: authRequired:false; primary auth. 2FA via X-2fa-code header.
 - key: http://localhost:3000/api/v1/logout
   kind: api
@@ -259,9 +284,24 @@ nodes:
     reference_fields:
     - user
     reason: Caller's own account.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/me
+    identity: anon
+    status: 401
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do this."}'
+  - method: GET
+    path: /api/v1/me
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -271,6 +311,12 @@ nodes:
     anonymous:
     - 401
     user:
+    - 200
+    anon:
+    - 401
+    admin:
+    - 200
+    userb:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -286,6 +332,13 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /api/v1/me->401; admin GET /api/v1/me->200;
+        userb GET /api/v1/me->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.register
   kind: api
@@ -407,9 +460,22 @@ nodes:
     reference_fields:
     - user
     reason: Created user.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.register
+    identity: anon
+    status: 200
+    body_excerpt: '{"user":{"_id":"mKQQcL297mkb2Q4FP","name":"Reg","type":"user","status":"offline","active":true,"username":"reg63464","__rooms":["GENERAL"]},'
+  - method: POST
+    path: /api/v1/users.register
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''username''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -418,6 +484,10 @@ nodes:
   identity_statuses:
     anonymous:
     - 200
+    anon:
+    - 200
+    admin:
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -432,6 +502,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /api/v1/users.register->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Unauthenticated account creation when registration is open.
 - key: http://localhost:3000/api/v1/users.generatePersonalAccessToken
   kind: api
@@ -498,16 +574,26 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Long-lived API credential (bypasses session/2FA for API calls).
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.generatePersonalAccessToken
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''tokenName''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -521,6 +607,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/../../imports/personal-access-tokens
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Persistent credential; high-value if stolen.
 - key: http://localhost:3000/api/v1/users.2fa.sendEmailCode
   kind: api
@@ -541,16 +630,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.2fa.sendEmailCode
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''emailOrUsername''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -559,7 +658,10 @@ nodes:
       reason: ''
     black_box_reachable: true
     reachability_conditions: []
-    evidence: []
+    evidence:
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.create
   kind: api
@@ -681,9 +783,22 @@ nodes:
     reference_fields:
     - user
     reason: Created user.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"user":{"_id":"hqgRKkTpogfDoCKkM","createdAt":"2026-11-10T08:00:08.867Z","username":"gtuserb18730","emails":[{"address":"gtuserb18730@examp'
+  - method: POST
+    path: /api/v1/users.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''email''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -692,6 +807,7 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    - 400
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -706,6 +822,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin POST /api/v1/users.create->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: roles[] in the body -> privilege assignment surface.
 - key: http://localhost:3000/api/v1/users.update
   kind: api
@@ -782,16 +904,26 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.update
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -805,6 +937,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Can change another user's password and roles.
 - key: http://localhost:3000/api/v1/users.delete
   kind: api
@@ -863,16 +998,27 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.delete
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -886,6 +1032,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.setActiveStatus
   kind: api
@@ -962,16 +1111,26 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.setActiveStatus
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -985,6 +1144,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.info
   kind: api
@@ -1079,16 +1241,29 @@ nodes:
     reference_fields:
     - user
     reason: Looked-up user.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.info
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1102,6 +1277,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Enumeration surface for usernames/emails.
 - key: http://localhost:3000/api/v1/users.resetAvatar
   kind: api
@@ -1160,16 +1338,26 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.resetAvatar
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"The required \"userId\" or \"username\" param was not provided [error-user-param-not-provided]'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1183,6 +1371,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.list
   kind: api
@@ -1252,9 +1443,23 @@ nodes:
     reference_fields:
     - users
     reason: All users.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"users":[{"_id":"6af2cedfbcca0ed8633086c4","name":"Administrator","username":"gtadmin","status":"offline","active":true,"type":"user","emai'
+  - method: GET
+    path: /api/v1/users.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1266,6 +1471,8 @@ nodes:
     user:
     - 200
     admin:
+    - 200
+    userb:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -1281,6 +1488,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /api/v1/users.list->200; userb GET /api/v1/users.list->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Bulk user/email enumeration for admins.
 - key: http://localhost:3000/api/v1/users.setAvatar
   kind: api
@@ -1301,16 +1514,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.setAvatar
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"Unsupported content type: application/json"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1324,6 +1547,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.getAvatar
   kind: api
@@ -1344,16 +1570,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.getAvatar
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1367,6 +1606,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.deleteOwnAccount
   kind: api
@@ -1387,16 +1629,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.deleteOwnAccount
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''password''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1410,6 +1662,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.getPreferences
   kind: api
@@ -1430,16 +1685,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.getPreferences
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1453,6 +1721,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.setPreferences
   kind: api
@@ -1473,16 +1744,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.setPreferences
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''data''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1496,6 +1777,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.presence
   kind: api
@@ -1516,16 +1800,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.presence
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1539,6 +1836,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.autocomplete
   kind: api
@@ -1559,16 +1859,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.autocomplete
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1582,6 +1895,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.verifyEmail
   kind: api
@@ -1602,16 +1918,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.verifyEmail
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''token''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1625,6 +1951,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.sendConfirmationEmail
   kind: api
@@ -1645,16 +1974,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.sendConfirmationEmail
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''email''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1668,6 +2007,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.removePersonalAccessToken
   kind: api
@@ -1688,16 +2030,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.removePersonalAccessToken
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''tokenName''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1711,6 +2063,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.getPersonalAccessTokens
   kind: api
@@ -1731,16 +2086,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users.getPersonalAccessTokens
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1754,6 +2122,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/users.forgotPassword
   kind: api
@@ -1774,16 +2145,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/users.forgotPassword
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''email''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1797,6 +2178,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/users.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.create
   kind: api
@@ -1874,9 +2258,22 @@ nodes:
     reference_fields:
     - channel
     reason: Created channel.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"channel":{"_id":"6af2cf08bcca0ed8633086cb","fname":"gtchan13579","_updatedAt":"2026-11-10T08:00:08.755Z","name":"gtchan13579","t":"c","msg'
+  - method: POST
+    path: /api/v1/channels.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''name''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1886,6 +2283,9 @@ nodes:
     user:
     - 200
     admin:
+    - 200
+    - 400
+    userb:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -1901,6 +2301,13 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin POST /api/v1/channels.create->200; userb POST
+        /api/v1/channels.create->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.delete
   kind: api
@@ -1968,16 +2375,27 @@ nodes:
     - roomId
     reason: Target room id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.delete
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -1991,6 +2409,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.info
   kind: api
@@ -2067,16 +2488,29 @@ nodes:
     - roomId
     reason: Target room id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.info
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2090,6 +2524,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.list
   kind: api
@@ -2150,9 +2587,24 @@ nodes:
     reference_fields:
     - channels
     reason: All channels.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.list
+    identity: anon
+    status: 401
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do this."}'
+  - method: GET
+    path: /api/v1/channels.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2163,6 +2615,8 @@ nodes:
     - 401
     admin:
     - 200
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -2177,6 +2631,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /api/v1/channels.list->401; admin GET /api/v1/channels.list->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.invite
   kind: api
@@ -2262,16 +2722,27 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.invite
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2285,6 +2756,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.kick
   kind: api
@@ -2370,16 +2844,27 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.kick
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2393,6 +2878,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.addOwner
   kind: api
@@ -2469,16 +2957,27 @@ nodes:
     - userId
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.addOwner
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2492,6 +2991,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setType
   kind: api
@@ -2568,16 +3070,27 @@ nodes:
     - roomId
     reason: Target room id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setType
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2591,6 +3104,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.members
   kind: api
@@ -2667,16 +3183,29 @@ nodes:
     reference_fields:
     - members
     reason: Channel members.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.members
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2690,6 +3219,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.archive
   kind: api
@@ -2710,16 +3242,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.archive
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2733,6 +3276,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.unarchive
   kind: api
@@ -2753,16 +3299,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.unarchive
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2776,6 +3333,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.rename
   kind: api
@@ -2796,16 +3356,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.rename
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2819,6 +3390,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setReadOnly
   kind: api
@@ -2839,16 +3413,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setReadOnly
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2862,6 +3447,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setDefault
   kind: api
@@ -2882,16 +3470,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setDefault
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2905,6 +3504,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setAnnouncement
   kind: api
@@ -2925,16 +3527,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setAnnouncement
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2948,6 +3561,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setDescription
   kind: api
@@ -2968,16 +3584,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setDescription
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -2991,6 +3618,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setTopic
   kind: api
@@ -3011,16 +3641,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setTopic
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3034,6 +3675,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.setJoinCode
   kind: api
@@ -3054,16 +3698,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.setJoinCode
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3077,6 +3732,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.addModerator
   kind: api
@@ -3097,16 +3755,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.addModerator
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3120,6 +3789,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.removeModerator
   kind: api
@@ -3140,16 +3812,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.removeModerator
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3163,6 +3846,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.removeOwner
   kind: api
@@ -3183,16 +3869,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.removeOwner
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3206,6 +3903,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.addLeader
   kind: api
@@ -3226,16 +3926,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.addLeader
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3249,6 +3960,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.history
   kind: api
@@ -3269,16 +3983,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.history
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3292,6 +4019,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.messages
   kind: api
@@ -3312,16 +4042,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.messages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3335,6 +4078,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.files
   kind: api
@@ -3355,16 +4101,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.files
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3378,6 +4137,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.online
   kind: api
@@ -3398,16 +4160,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.online
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3421,6 +4196,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.counters
   kind: api
@@ -3441,16 +4219,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.counters
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3464,6 +4255,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.join
   kind: api
@@ -3484,16 +4278,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.join
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3507,6 +4312,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.leave
   kind: api
@@ -3527,16 +4335,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.leave
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3550,6 +4369,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.open
   kind: api
@@ -3570,16 +4392,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.open
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3593,6 +4426,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.close
   kind: api
@@ -3613,16 +4449,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.close
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3636,6 +4483,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.convertToTeam
   kind: api
@@ -3656,16 +4506,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/channels.convertToTeam
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''channelId''\n must
+      have required prop'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3679,6 +4540,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.getIntegrations
   kind: api
@@ -3699,16 +4563,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.getIntegrations
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3722,6 +4599,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.anonymousread
   kind: api
@@ -3742,16 +4622,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.anonymousread
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3765,6 +4658,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.roles
   kind: api
@@ -3785,16 +4681,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.roles
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3808,6 +4717,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/channels.moderators
   kind: api
@@ -3828,16 +4740,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/channels.moderators
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3851,6 +4776,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/channels.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.create
   kind: api
@@ -3927,16 +4855,26 @@ nodes:
     reference_fields:
     - group
     reason: Created group.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''name''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -3950,6 +4888,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.list
   kind: api
@@ -4008,16 +4949,29 @@ nodes:
     reference_fields:
     - groups
     reason: Caller's groups.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/groups.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4031,6 +4985,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.delete
   kind: api
@@ -4051,16 +5008,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.delete
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4074,6 +5042,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.invite
   kind: api
@@ -4094,16 +5065,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.invite
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4117,6 +5099,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.kick
   kind: api
@@ -4137,16 +5122,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.kick
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4160,6 +5156,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.addOwner
   kind: api
@@ -4180,16 +5179,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.addOwner
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4203,6 +5213,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.removeOwner
   kind: api
@@ -4223,16 +5236,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.removeOwner
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4246,6 +5270,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.info
   kind: api
@@ -4266,16 +5293,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/groups.info
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4289,6 +5329,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.members
   kind: api
@@ -4309,16 +5352,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/groups.members
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4332,6 +5388,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.messages
   kind: api
@@ -4352,16 +5411,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/groups.messages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4375,6 +5447,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.history
   kind: api
@@ -4395,16 +5470,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/groups.history
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4418,6 +5506,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.setType
   kind: api
@@ -4438,16 +5529,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.setType
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4461,6 +5563,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.setEncrypted
   kind: api
@@ -4481,16 +5586,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.setEncrypted
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4504,6 +5620,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.listAll
   kind: api
@@ -4524,16 +5643,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/groups.listAll
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4547,6 +5679,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.convertToTeam
   kind: api
@@ -4567,16 +5702,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.convertToTeam
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4590,6 +5736,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/groups.rename
   kind: api
@@ -4610,16 +5759,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/groups.rename
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4633,6 +5793,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/groups.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/im.create
   kind: api
@@ -4653,16 +5816,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/im.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''usernames''\n must
+      have required prop'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4676,6 +5850,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/im.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/im.list
   kind: api
@@ -4696,16 +5873,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/im.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4719,6 +5909,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/im.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/im.history
   kind: api
@@ -4739,16 +5932,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/im.history
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4762,6 +5968,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/im.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/im.messages
   kind: api
@@ -4782,16 +5991,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/im.messages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4805,6 +6027,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/im.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/im.delete
   kind: api
@@ -4825,16 +6050,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/im.delete
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4848,6 +6084,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/im.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/im.members
   kind: api
@@ -4868,16 +6107,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/im.members
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -4891,6 +6143,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/im.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.postMessage
   kind: api
@@ -4994,16 +6249,27 @@ nodes:
     reference_fields:
     - message
     reason: Created message.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.postMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5017,6 +6283,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: attachments[] -> stored HTML/markdown (XSS/content-injection surface).
 - key: http://localhost:3000/api/v1/chat.sendMessage
   kind: api
@@ -5084,16 +6353,26 @@ nodes:
     reference_fields:
     - message
     reason: Created message.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.sendMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''message''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5107,6 +6386,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.update
   kind: api
@@ -5201,16 +6483,27 @@ nodes:
     - msgId
     reason: Target message.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.update
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5224,6 +6517,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.delete
   kind: api
@@ -5300,16 +6596,27 @@ nodes:
     - msgId
     reason: Target message.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.delete
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''msgId''\n must have
+      required property'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5323,6 +6630,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.react
   kind: api
@@ -5390,16 +6700,27 @@ nodes:
     - messageId
     reason: Target message.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.react
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''emoji''\n must have
+      required property'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5413,6 +6734,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getMessage
   kind: api
@@ -5480,16 +6804,29 @@ nodes:
     - msgId
     reason: Message id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getMessage
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5503,6 +6840,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'IDOR surface: confirm room-membership enforcement on arbitrary msgId.'
 - key: http://localhost:3000/api/v1/chat.pinMessage
   kind: api
@@ -5523,16 +6863,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.pinMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''messageId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5546,6 +6896,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.unPinMessage
   kind: api
@@ -5566,16 +6919,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.unPinMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''messageId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5589,6 +6952,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.starMessage
   kind: api
@@ -5609,16 +6975,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.starMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''messageId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5632,6 +7008,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.reportMessage
   kind: api
@@ -5652,16 +7031,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.reportMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''messageId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5675,6 +7064,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.search
   kind: api
@@ -5695,16 +7087,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.search
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5718,6 +7123,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getPinnedMessages
   kind: api
@@ -5738,16 +7146,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getPinnedMessages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5761,6 +7182,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getStarredMessages
   kind: api
@@ -5781,16 +7205,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getStarredMessages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5804,6 +7241,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getThreadsList
   kind: api
@@ -5824,16 +7264,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getThreadsList
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5847,6 +7300,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getMentionedMessages
   kind: api
@@ -5867,16 +7323,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getMentionedMessages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5890,6 +7359,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getURLPreview
   kind: api
@@ -5910,16 +7382,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getURLPreview
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5933,6 +7418,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.getDeletedMessages
   kind: api
@@ -5953,16 +7441,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/chat.getDeletedMessages
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -5976,6 +7477,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/chat.followMessage
   kind: api
@@ -5996,16 +7500,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/chat.followMessage
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''mid''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6019,6 +7533,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.media/:rid
   kind: api
@@ -6095,16 +7612,26 @@ nodes:
     - rid
     reason: Target room.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.media/GENERAL
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"Unsupported content type: application/json"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6118,6 +7645,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Upload surface (content-type sniffing, storage).
 - key: http://localhost:3000/api/v1/rooms.adminRooms
   kind: api
@@ -6187,9 +7717,23 @@ nodes:
     reference_fields:
     - rooms
     reason: All rooms.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/rooms.adminRooms
+    identity: admin
+    status: 200
+    body_excerpt: '{"rooms":[{"_id":"GENERAL","default":true,"msgs":0,"name":"general","t":"c","ts":"2026-11-10T07:59:27.856Z","u":{"_id":"rocket.cat","usernam'
+  - method: GET
+    path: /api/v1/rooms.adminRooms
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6200,6 +7744,10 @@ nodes:
     - 400
     admin:
     - 200
+    userb:
+    - 400
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -6214,6 +7762,13 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /api/v1/rooms.adminRooms->200; userb GET
+        /api/v1/rooms.adminRooms->400'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Lists private rooms' metadata to admins.
 - key: http://localhost:3000/api/v1/rooms.saveRoomSettings
   kind: api
@@ -6281,16 +7836,26 @@ nodes:
     - rid
     reason: Target room.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.saveRoomSettings
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''rid''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6304,6 +7869,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.cleanHistory
   kind: api
@@ -6380,16 +7948,26 @@ nodes:
     - roomId
     reason: Target room id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.cleanHistory
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6404,6 +7982,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.export
   kind: api
@@ -6471,16 +8052,27 @@ nodes:
     - rid
     reason: Room to export.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.export
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''rid''\n must have
+      required property '''
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6494,6 +8086,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.get
   kind: api
@@ -6514,16 +8109,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/rooms.get
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6537,6 +8145,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.info
   kind: api
@@ -6557,16 +8168,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/rooms.info
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6580,6 +8204,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.createDiscussion
   kind: api
@@ -6600,16 +8227,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.createDiscussion
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''prid''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6623,6 +8260,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.favorite
   kind: api
@@ -6643,16 +8283,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.favorite
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomName''\n must
+      have required prope'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6666,6 +8317,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.muteUser
   kind: api
@@ -6686,16 +8340,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.muteUser
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6709,6 +8374,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.unmuteUser
   kind: api
@@ -6729,16 +8397,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.unmuteUser
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''\n must have
+      required propert'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6752,6 +8431,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.changeArchivationState
   kind: api
@@ -6772,16 +8454,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/rooms.changeArchivationState
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''rid''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6795,6 +8487,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.nameExists
   kind: api
@@ -6815,16 +8510,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/rooms.nameExists
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6838,6 +8546,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/rooms.autocomplete.channelAndPrivate
   kind: api
@@ -6858,16 +8569,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/rooms.autocomplete.channelAndPrivate
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -6881,6 +8605,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/rooms.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/settings.public
   kind: api
@@ -6931,9 +8658,22 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/settings.public
+    identity: anon
+    status: 200
+    body_excerpt: '{"settings":[{"_id":"AI_Intelligent_Search_Answer_Enabled","enterprise":true,"invalidValue":false,"modules":["chat.rocket.rc-ai"],"value":fa'
+  - method: GET
+    path: /api/v1/settings.public
+    identity: anonymous
+    status: 200
+    content_type: application/json
+    body_excerpt: '{"settings":[{"_id":"AI_Intelligent_Search_Answer_Enabled","enterprise":true,"invalidValue":false,"modules":["chat.rocke'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6941,6 +8681,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -6956,6 +8700,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/settings.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /api/v1/settings.public->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/settings
   kind: api
@@ -7015,9 +8765,23 @@ nodes:
     reference_fields:
     - settings
     reason: All settings.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/settings
+    identity: admin
+    status: 200
+    body_excerpt: '{"settings":[{"_id":"AI_Intelligent_Search_API_Key","enterprise":true,"invalidValue":"","modules":["chat.rocket.rc-ai"],"value":""},{"_id":"'
+  - method: GET
+    path: /api/v1/settings
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -7028,6 +8792,10 @@ nodes:
     - 200
     admin:
     - 200
+    userb:
+    - 200
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -7042,6 +8810,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/settings.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /api/v1/settings->200; userb GET /api/v1/settings->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/settings/:_id
   kind: api
@@ -7147,16 +8921,29 @@ nodes:
     - _id
     reason: Setting key.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/settings/GENERAL
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7170,6 +8957,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/settings.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Setting writes can reconfigure auth, uploads, integrations -> high impact.
 - key: http://localhost:3000/api/v1/settings.oauth
   kind: api
@@ -7190,16 +8980,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/settings.oauth
+    identity: anonymous
+    status: 200
+    content_type: application/json
+    body_excerpt: '{"services":[],"success":true}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7213,6 +9015,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/settings.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/service.configurations
   kind: api
@@ -7233,16 +9038,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/service.configurations
+    identity: anonymous
+    status: 200
+    content_type: application/json
+    body_excerpt: '{"configurations":[],"success":true}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7256,6 +9073,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/settings.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/permissions.listAll
   kind: api
@@ -7315,9 +9135,23 @@ nodes:
     reference_fields:
     - permissions
     reason: Permission mappings.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/permissions.listAll
+    identity: admin
+    status: 200
+    body_excerpt: '{"update":[{"_id":"access-permissions","_updatedAt":"2026-11-10T07:59:22.138Z","roles":["admin"]},{"_id":"access-marketplace","_updatedAt":"'
+  - method: GET
+    path: /api/v1/permissions.listAll
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -7326,6 +9160,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -7340,6 +9176,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /api/v1/permissions.listAll->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/permissions.update
   kind: api
@@ -7398,16 +9240,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/permissions.update
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''permissions''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7421,6 +9273,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Granting a permission to a low role = global privilege escalation.
 - key: http://localhost:3000/api/v1/roles.addUserToRole
   kind: api
@@ -7498,9 +9353,22 @@ nodes:
     - username
     reason: User to elevate.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/roles.addUserToRole
+    identity: userb
+    status: 400
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must NOT have additional properties"}'
+  - method: POST
+    path: /api/v1/roles.addUserToRole
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''username''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -7508,6 +9376,10 @@ nodes:
   js_sources: []
   identity_statuses:
     user:
+    - 400
+    userb:
+    - 400
+    admin:
     - 400
   route_confirmed: true
   runtime_api_prefixes:
@@ -7523,6 +9395,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/roles.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): userb POST /api/v1/roles.addUserToRole->400'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Primary privilege-escalation primitive.
 - key: http://localhost:3000/api/v1/roles.list
   kind: api
@@ -7581,16 +9459,29 @@ nodes:
     reference_fields:
     - roles
     reason: Roles.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/roles.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7604,6 +9495,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/roles.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/roles.create
   kind: api
@@ -7624,16 +9518,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/roles.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"This is an enterprise feature [error-action-not-allowed]","errorType":"error-action-not-allowe'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7647,6 +9551,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/roles.delete
   kind: api
@@ -7667,16 +9574,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/roles.delete
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roleId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7690,6 +9607,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/roles.removeUserFromRole
   kind: api
@@ -7710,16 +9630,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/roles.removeUserFromRole
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''username''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7733,6 +9663,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/roles.getUsersInRole
   kind: api
@@ -7753,16 +9686,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/roles.getUsersInRole
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7776,6 +9722,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/permissions.addRole
   kind: api
@@ -7796,16 +9745,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/permissions.addRole
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''permissionId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7819,6 +9778,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/permissions.removeRole
   kind: api
@@ -7839,16 +9801,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/permissions.removeRole
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''permissionId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7862,6 +9834,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/permissions.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/integrations.create
   kind: api
@@ -7956,16 +9931,27 @@ nodes:
     reference_fields:
     - integration
     reason: Created integration.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/integrations.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''type''\n must have
+      required property '
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -7979,6 +9965,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Outgoing-webhook 'script' runs in a server VM; 'urls' = SSRF. High-impact (code/SSRF).
 - key: http://localhost:3000/api/v1/integrations.list
   kind: api
@@ -8038,9 +10027,23 @@ nodes:
     reference_fields:
     - integrations
     reason: Integrations (may expose webhook tokens/scripts).
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/integrations.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"integrations":[],"offset":0,"items":0,"count":0,"total":0,"success":true}'
+  - method: GET
+    path: /api/v1/integrations.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -8049,6 +10052,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -8063,6 +10068,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /api/v1/integrations.list->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/integrations.remove
   kind: api
@@ -8083,16 +10094,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/integrations.remove
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''type''\n must have
+      required property '
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8106,6 +10128,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/integrations.get
   kind: api
@@ -8126,16 +10151,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/integrations.get
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8149,6 +10187,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/integrations.update
   kind: api
@@ -8169,16 +10210,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /api/v1/integrations.update
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''integrationId''\n
+      must have required '
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8192,6 +10244,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin PUT->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/integrations.history
   kind: api
@@ -8212,16 +10267,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/integrations.history
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8235,6 +10303,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/integrations.replayOutgoing
   kind: api
@@ -8255,16 +10326,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/integrations.replayOutgoing
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''integrationId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8278,6 +10359,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/integrations.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/method.call/:method
   kind: api
@@ -8345,16 +10429,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/method.call/ping
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''message''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8368,6 +10462,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Single node standing in for the whole Meteor-method surface; per-method authz varies.
 - key: http://localhost:3000/api/v1/statistics
   kind: api
@@ -8419,9 +10516,23 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/statistics
+    identity: admin
+    status: 200
+    body_excerpt: '{"_id":"6af2cedfbcca0ed8633086c2","wizard":{"organizationType":"","industry":"","size":"","country":"","language":"","serverType":"","regist'
+  - method: GET
+    path: /api/v1/statistics
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -8432,6 +10543,10 @@ nodes:
     - 400
     admin:
     - 200
+    userb:
+    - 400
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
@@ -8446,6 +10561,12 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/stats.ts
       supports: route + authRequired
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /api/v1/statistics->200; userb GET /api/v1/statistics->400'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/directory
   kind: api
@@ -8466,16 +10587,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/directory
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8489,6 +10623,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/spotlight
   kind: api
@@ -8509,16 +10646,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/spotlight
+    identity: anonymous
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"error-invalid-params","error":"must have required property ''query''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8532,6 +10681,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/pw.getPolicy
   kind: api
@@ -8552,16 +10704,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/pw.getPolicy
+    identity: anonymous
+    status: 200
+    content_type: application/json
+    body_excerpt: '{"enabled":true,"policy":[["get-password-policy-minLength",{"minLength":14}],["get-password-policy-forbidRepeatingCharac'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8575,6 +10739,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/method.callAnon/:method
   kind: api
@@ -8595,16 +10762,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/method.callAnon/ping
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''message''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8618,6 +10795,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/instances.get
   kind: api
@@ -8638,16 +10818,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/instances.get
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8661,6 +10854,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/shield.svg
   kind: api
@@ -8681,16 +10877,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/shield.svg
+    identity: anonymous
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"error-invalid-params","error":"must have required property ''name''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8704,6 +10912,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/assets.setAsset
   kind: api
@@ -8724,16 +10935,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/assets.setAsset
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"Unsupported content type: application/json"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8747,6 +10968,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/oauth-apps.create
   kind: api
@@ -8767,16 +10991,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/oauth-apps.create
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''name''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8790,6 +11024,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/oauth-apps.list
   kind: api
@@ -8810,16 +11047,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/oauth-apps.list
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8833,6 +11083,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/moderation.reportUser
   kind: api
@@ -8853,16 +11106,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/moderation.reportUser
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8876,6 +11139,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/import.uploadImportFile
   kind: api
@@ -8939,16 +11205,26 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/statistics.telemetry
+    identity: admin
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''params''"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -8962,6 +11238,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/
   kind: static
@@ -9098,15 +11377,14 @@ edges:
   - xhr
 excluded_items:
 - item: 'Omnichannel / Livechat API (~150 routes: livechat/*, omnichannel/*) incl. EE variants'
-  reason: Large separate product surface; shares the /api/v1 + X-Auth-Token model already captured. Enumerated
-    as excluded rather than modeled per-route.
+  reason: Large separate product surface; shares the /api/v1 + X-Auth-Token model already captured. Enumerated as excluded
+    rather than modeled per-route.
 - item: 'Enterprise (ee/server/api/*): apps engine (/apps/*), canned-responses, omnichannel EE, licensing'
   reason: EE-licensed surface; reachability depends on a license. Out of scope for the OSS core GT.
-- item: 'Secondary core groups enumerated but not L2-covered: teams.*, video-conference.*, calendar.*,
-    moderation.*, cloud.*, import.*, e2e.*, oauth-apps.*, custom-sounds/emoji/status, banners, push, presence,
-    commands, autotranslate, ai-search, media-calls, email-inbox, subscriptions.*'
-  reason: Enumerated as L1 api nodes (surface-complete) without io_variants; same auth model as the covered
-    core (auth/users/channels/groups/chat/rooms/settings/permissions/roles/integrations).
+- item: 'Secondary core groups enumerated but not L2-covered: teams.*, video-conference.*, calendar.*, moderation.*, cloud.*,
+    import.*, e2e.*, oauth-apps.*, custom-sounds/emoji/status, banners, push, presence, commands, autotranslate, ai-search,
+    media-calls, email-inbox, subscriptions.*'
+  reason: Enumerated as L1 api nodes (surface-complete) without io_variants; same auth model as the covered core (auth/users/channels/groups/chat/rooms/settings/permissions/roles/integrations).
 - item: DDP/Meteor websocket methods + the method.call REST bridge payload space
   reason: method.call/:method proxies hundreds of server methods; modeled as ONE high-risk node, not expanded.
 - item: Ember/React web client static assets + theme/avatar file serving

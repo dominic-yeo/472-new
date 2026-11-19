@@ -117,9 +117,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/master/.well-known/openid-configuration
+    identity: anon
+    status: 200
+  - method: GET
+    path: /realms/gtrealm/.well-known/openid-configuration
+    identity: anonymous
+    status: 200
+    content_type: application/json;charset=UTF-8
+    body_excerpt: '{"issuer":"http://localhost:8080/realms/gtrealm","authorization_endpoint":"http://localhost:8080/realms/gtrealm/protocol'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -127,6 +139,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -142,6 +158,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCWellKnownProvider.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /realms/master/.well-known/openid-configuration->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Also /.well-known/{alias}: webfinger, oauth-authorization-server, etc.'
 - key: http://localhost:8080/realms/{realm}
   kind: api
@@ -231,9 +253,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/master
+    identity: anon
+    status: 200
+  - method: GET
+    path: /realms/gtrealm
+    identity: anonymous
+    status: 200
+    content_type: application/json;charset=UTF-8
+    body_excerpt: '{"realm":"gtrealm","public_key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA82vx6nL2XWrKouPM69nmVf+r2txvgy7jB6aDgDZsCPC'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -241,6 +275,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -256,6 +294,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/PublicRealmResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /realms/master->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/certs
   kind: api
@@ -324,9 +368,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/master/protocol/openid-connect/certs
+    identity: anon
+    status: 200
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/certs
+    identity: anonymous
+    status: 200
+    content_type: application/json;charset=UTF-8
+    body_excerpt: '{"keys":[{"kid":"OuPIUqqu0KTvsLOIUCW6dWg1ENYAGbEqrWzbMNRVVm0","kty":"RSA","alg":"RSA-OAEP","use":"enc","n":"wiIktsAdF5Kt'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -334,6 +390,10 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    anon:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -349,6 +409,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /realms/master/protocol/openid-connect/certs->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/.well-known/{alias}
   kind: api
@@ -369,16 +435,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/.well-known/saml
+    identity: anonymous
+    status: 404
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 404 Not Found"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -392,6 +470,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/RealmsResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/clients/{client_id}/redirect
   kind: api
@@ -613,9 +694,14 @@ nodes:
     - redirect_uri
     reason: Client redirect URI (validated against registered set).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/master/protocol/openid-connect/auth
+    identity: anon
+    status: 400
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -624,6 +710,8 @@ nodes:
   identity_statuses:
     anonymous:
     - 200
+    - 400
+    anon:
     - 400
   route_confirmed: true
   runtime_api_prefixes:
@@ -634,12 +722,15 @@ nodes:
       reason: PUBLIC authorization endpoint.
     black_box_reachable: true
     reachability_conditions:
-    - PUBLIC. redirect_uri validation, 'request_uri' (SSRF / request-object-by-reference), 'prompt=none'
-      silent auth, and PKCE live here. Mis-set redirect_uri = code/token theft.
+    - PUBLIC. redirect_uri validation, 'request_uri' (SSRF / request-object-by-reference), 'prompt=none' silent auth, and
+      PKCE live here. Mis-set redirect_uri = code/token theft.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/AuthorizationEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /realms/master/protocol/openid-connect/auth->400'
+      supports: 'runtime: observed status per identity'
     notes: Entry point of code & implicit flows; request_uri fetch is an SSRF vector.
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/token
   kind: api
@@ -847,8 +938,8 @@ nodes:
         type: string
         flow: true
         description: ''
-    reason: 'token endpoint: all grant types (code, refresh, password, client_credentials, token-exchange,
-      device_code, ciba, uma-ticket)'
+    reason: 'token endpoint: all grant types (code, refresh, password, client_credentials, token-exchange, device_code, ciba,
+      uma-ticket)'
     evidence: endpoints/TokenEndpoint.java
   operation_semantic: oidc_token
   semantic_inputs:
@@ -938,9 +1029,21 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Refresh token.
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/master/protocol/openid-connect/token
+    identity: anon
+    status: 401
+  - method: POST
+    path: /realms/gtrealm/protocol/openid-connect/token
+    identity: anonymous
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_request","error_description":"Missing form parameter: grant_type"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -948,9 +1051,13 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 400
     - 401
     admin:
     - 200
+    - 400
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -960,14 +1067,20 @@ nodes:
       reason: Token endpoint (all grants).
     black_box_reachable: true
     reachability_conditions:
-    - Client-authenticated (secret/assertion/mTLS) or public client. password grant = credential brute-force;
-      token-exchange = delegation/escalation; refresh = replay/rotation surface.
+    - Client-authenticated (secret/assertion/mTLS) or public client. password grant = credential brute-force; token-exchange
+      = delegation/escalation; refresh = replay/rotation surface.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenEndpoint.java
       supports: JAX-RS resource + handler
-    notes: grant_type dispatches to OAuth2GrantType providers; token-exchange + uma-ticket are high-risk
-      grants.
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon POST /realms/master/protocol/openid-connect/token->401;
+        admin POST /realms/master/protocol/openid-connect/token->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: grant_type dispatches to OAuth2GrantType providers; token-exchange + uma-ticket are high-risk grants.
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/userinfo
   kind: api
   methods:
@@ -1077,9 +1190,14 @@ nodes:
     reference_fields:
     - sub
     reason: Subject id.
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/master/protocol/openid-connect/userinfo
+    identity: admin
+    status: 403
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1102,6 +1220,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/UserInfoEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /realms/master/protocol/openid-connect/userinfo->403'
+      supports: 'runtime: observed status per identity'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout
   kind: api
@@ -1304,16 +1425,28 @@ nodes:
     reference_fields: []
     reason: Token to revoke.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/openid-connect/revoke
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_client","error_description":"Invalid client or Invalid client credentials"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -1327,6 +1460,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenRevocationEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/token/introspect
   kind: api
@@ -1449,16 +1585,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/openid-connect/token/introspect
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_request","error_description":"Authentication failed."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -1472,6 +1620,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/TokenIntrospectionEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout/backchannel-logout
   kind: api
@@ -1681,16 +1832,28 @@ nodes:
     reference_fields:
     - request_uri
     reason: PAR request_uri handle.
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/openid-connect/ext/par/request
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_request","error_description":"Authentication failed."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -1704,6 +1867,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/ext/par
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Extension under ext/{extension}.
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/oidc/device/auth
   kind: api
@@ -1819,16 +1985,28 @@ nodes:
     - client_id
     reason: OAuth client.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/openid-connect/ext/oidc/device/auth
+    identity: anonymous
+    status: 404
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 404 Not Found"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -1842,6 +2020,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/DeviceEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/registrations
   kind: api
@@ -1991,16 +2172,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/3p-cookies
+    identity: anonymous
+    status: 404
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 404 Not Found"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2014,6 +2207,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/oauth/oob
   kind: api
@@ -2034,16 +2230,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/oauth/oob
+    identity: anonymous
+    status: 500
+    content_type: application/json
+    body_excerpt: '{"error":"unknown_error","error_description":"For more on this error consult the server log."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 500
+    admin:
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2057,6 +2265,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->500; admin GET->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/authenticate
   kind: api
@@ -2205,8 +2416,7 @@ nodes:
       reason: Browser login form post.
     black_box_reachable: true
     reachability_conditions:
-    - PUBLIC. The username/password submission -> brute-force / credential-stuffing (attack-detection
-      applies).
+    - PUBLIC. The username/password submission -> brute-force / credential-stuffing (attack-detection applies).
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
@@ -2576,8 +2786,7 @@ nodes:
       reason: Action-token handler.
     black_box_reachable: true
     reachability_conditions:
-    - PUBLIC with a valid signed token. Verify-email / reset / execute-actions; token forgery = account
-      takeover.
+    - PUBLIC with a valid signed token. Verify-email / reset / execute-actions; token forgery = account takeover.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
@@ -2735,16 +2944,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/login-actions/consent
+    identity: anonymous
+    status: 404
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 404 Not Found"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    - 404
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2758,6 +2981,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404; anonymous POST->400; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/restart
   kind: api
@@ -2995,16 +3222,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/broker/x/endpoint
+    identity: anonymous
+    status: 404
+    content_type: application/json
+    body_excerpt: '{"error":"Identity Provider [x] not found."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3013,12 +3252,15 @@ nodes:
       reason: Broker callback.
     black_box_reachable: true
     reachability_conditions:
-    - PUBLIC. Consumes attacker-influenced IdP responses (OIDC code / SAMLResponse) -> assertion/signature
-      validation + account-linking surface.
+    - PUBLIC. Consumes attacker-influenced IdP responses (OIDC code / SAMLResponse) -> assertion/signature validation + account-linking
+      surface.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: SAMLResponse handling here is the XML-signature / assertion-injection surface.
 - key: http://localhost:8080/realms/{realm}/broker/{provider}/token
   kind: api
@@ -3039,16 +3281,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/broker/x/token
+    identity: anonymous
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"errorMessage":"Invalid token."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3062,6 +3316,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/clients-registrations/openid-connect
   kind: api
@@ -3194,16 +3451,29 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Client secret.
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/clients-registrations/openid-connect
+    identity: anonymous
+    status: 403
+    content_type: application/json
+    body_excerpt: '{"error":"insufficient_scope","error_description":"Policy ''Trusted Hosts'' rejected request to client-registration
+      servic'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3212,12 +3482,15 @@ nodes:
       reason: Dynamic client registration.
     black_box_reachable: true
     reachability_conditions:
-    - Gated by an initial-access token OR anonymous *iff* the realm allows it (client-registration-policy).
-      Open registration = attacker-registered clients / redirect_uris.
+    - Gated by an initial-access token OR anonymous *iff* the realm allows it (client-registration-policy). Open registration
+      = attacker-registered clients / redirect_uris.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/clientregistration/ClientRegistrationService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Anonymous DCR is a classic misconfiguration; policies restrict it.
 - key: http://localhost:8080/realms/{realm}/clients-registrations/openid-connect/{clientId}
   kind: api
@@ -3312,16 +3585,29 @@ nodes:
     - client_id
     reason: OAuth client.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/clients-registrations/openid-connect/account
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_token","error_description":"Not authorized to view client. Not valid token or client
+      credentials provi'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3335,6 +3621,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/clientregistration/ClientRegistrationService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/clients-registrations/default
   kind: api
@@ -3355,16 +3644,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/clients-registrations/default
+    identity: anonymous
+    status: 403
+    content_type: application/json
+    body_excerpt: '{"error":"insufficient_scope","error_description":"Policy ''Trusted Hosts'' rejected request to client-registration
+      servic'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3378,6 +3680,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/clientregistration/ClientRegistrationService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/clients-registrations/install/{clientId}
   kind: api
@@ -3398,16 +3703,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/clients-registrations/install/account
+    identity: anonymous
+    status: 200
+    content_type: application/json;charset=UTF-8
+    body_excerpt: '{"realm":"gtrealm","auth-server-url":"http://localhost:8080/","ssl-required":"external","resource":"account","public-cli'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3421,6 +3738,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/clientregistration/ClientRegistrationService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/clients-managements/register-node
   kind: api
@@ -3441,16 +3761,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/clients-managements/register-node
+    identity: anonymous
+    status: 500
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"details":"Error id f147e96f-d7f8-4514-a7b5-3a67f9d52a98-1","stack":""}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 500
+    admin:
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3464,6 +3796,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/ClientsManagementService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->500; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/saml
   kind: api
@@ -3559,16 +3894,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/saml
+    identity: anonymous
+    status: 415
+    content_type: application/json
+    body_excerpt: '{"error":"The content-type header value did not match the value in @Consumes"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 415
+    admin:
+    - 415
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3577,12 +3924,14 @@ nodes:
       reason: SAML IdP endpoint.
     black_box_reachable: true
     reachability_conditions:
-    - PUBLIC. Parses attacker-supplied SAMLRequest/Response XML -> XML signature-wrapping / XXE / assertion-injection
-      surface.
+    - PUBLIC. Parses attacker-supplied SAMLRequest/Response XML -> XML signature-wrapping / XXE / assertion-injection surface.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/saml/SamlService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->415; admin POST->415'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Primary SAML attack surface.
 - key: http://localhost:8080/realms/{realm}/protocol/saml/descriptor
   kind: api
@@ -3647,16 +3996,30 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/saml/clients/account
+    identity: anonymous
+    status: 404
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 404 Not Found"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    - 404
+    admin:
+    - 400
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3670,6 +4033,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/saml/SamlService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400; anonymous POST->404; admin
+        POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account
   kind: api
@@ -4065,16 +4432,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/account/linked-accounts/x
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4088,6 +4467,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/LinkedAccountsResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/applications
   kind: api
@@ -4153,16 +4535,32 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/account/applications/account/consent
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    - 401
+    - 405
+    admin:
+    - 200
+    - 401
+    - 405
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4176,6 +4574,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200; anonymous POST->401; admin
+        POST->401; anonymous DELETE->405; admin DELETE->405'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/resources
   kind: api
@@ -4407,16 +4809,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/authz/protection/resource_set
+    identity: anonymous
+    status: 403
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_bearer_token","error_description":"Could not obtain bearer access_token from request."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4430,6 +4844,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/authorization/protection/resource/ResourceService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/authz/protection/permission
   kind: api
@@ -4450,16 +4867,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/authz/protection/permission
+    identity: anonymous
+    status: 403
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_bearer_token","error_description":"Could not obtain bearer access_token from request."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4473,6 +4902,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/authorization/protection/permission
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/authz/protection/uma-policy
   kind: api
@@ -4493,16 +4925,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/authz/protection/uma-policy
+    identity: anonymous
+    status: 403
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_bearer_token","error_description":"Could not obtain bearer access_token from request."}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 403
+    admin:
+    - 403
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4516,6 +4960,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/authorization/protection/policy
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/serverinfo
   kind: api
@@ -4588,9 +5035,21 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/serverinfo
+    identity: anon
+    status: 401
+  - method: GET
+    path: /admin/serverinfo
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4601,6 +5060,8 @@ nodes:
     - 401
     admin:
     - 200
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -4615,6 +5076,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/info/ServerInfoAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /admin/serverinfo->401; admin GET /admin/serverinfo->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms
   kind: api
@@ -4714,9 +5181,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms
+    identity: anon
+    status: 401
+  - method: GET
+    path: /admin/realms
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4727,6 +5206,9 @@ nodes:
     - 401
     admin:
     - 200
+    - 400
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -4736,12 +5218,19 @@ nodes:
       reason: List / create realms.
     black_box_reachable: true
     reachability_conditions:
-    - 'GET: realms the token can view. POST create-realm: master-realm admin (create-realm role). A new
-      realm is a new trust domain.'
+    - 'GET: realms the token can view. POST create-realm: master-realm admin (create-realm role). A new realm is a new trust
+      domain.'
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmsAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /admin/realms->401; admin GET /admin/realms->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}
   kind: api
@@ -4841,9 +5330,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master
+    identity: anon
+    status: 401
+  - method: GET
+    path: /admin/realms/gtrealm
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4854,6 +5355,8 @@ nodes:
     - 401
     admin:
     - 200
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -4863,12 +5366,18 @@ nodes:
       reason: Realm config (ADMIN).
     black_box_reachable: true
     reachability_conditions:
-    - realm-management view-realm/manage-realm. PUT changes security-critical toggles (registrationAllowed,
-      sslRequired, bruteForceProtected, passwordPolicy, tokens).
+    - realm-management view-realm/manage-realm. PUT changes security-critical toggles (registrationAllowed, sslRequired, bruteForceProtected,
+      passwordPolicy, tokens).
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /admin/realms/master->401; admin GET /admin/realms/master->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/testSMTPConnection
   kind: api
@@ -4989,16 +5498,28 @@ nodes:
     reference_fields: []
     reason: SMTP host the server connects to (SSRF).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/testSMTPConnection
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5007,12 +5528,14 @@ nodes:
       reason: SMTP test (SSRF).
     black_box_reachable: true
     reachability_conditions:
-    - realm-management manage-realm. The server opens a connection to an attacker-chosen host:port (SSRF
-      / port-scan / credential-capture).
+    - realm-management manage-realm. The server opens a connection to an attacker-chosen host:port (SSRF / port-scan / credential-capture).
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #1.'
 - key: http://localhost:8080/admin/realms/{realm}/partialImport
   kind: api
@@ -5033,16 +5556,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/partialImport
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5056,6 +5591,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/partial-export
   kind: api
@@ -5076,16 +5614,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/partial-export
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5099,6 +5649,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/logout-all
   kind: api
@@ -5162,16 +5715,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/push-revocation
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5185,6 +5750,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/events
   kind: api
@@ -5206,16 +5774,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/events
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5229,6 +5810,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous DELETE->401; admin
+        DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/admin-events
   kind: api
@@ -5250,16 +5835,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/admin-events
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5273,6 +5871,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous DELETE->401; admin
+        DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/events/config
   kind: api
@@ -5294,16 +5896,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/events/config
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5317,6 +5932,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous PUT->401; admin
+        PUT->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/client-session-stats
   kind: api
@@ -5337,16 +5956,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/client-session-stats
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5360,6 +5991,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/keys
   kind: api
@@ -5380,16 +6014,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/keys
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5403,6 +6049,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/client-policies/policies
   kind: api
@@ -5424,16 +6073,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/client-policies/policies
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5447,6 +6109,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous PUT->401; admin
+        PUT->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/client-policies/profiles
   kind: api
@@ -5468,16 +6134,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/client-policies/profiles
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5491,6 +6170,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous PUT->401; admin
+        PUT->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/localization
   kind: api
@@ -5511,16 +6194,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/localization
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5534,6 +6229,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/client-description-converter
   kind: api
@@ -5554,16 +6252,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/client-description-converter
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5577,6 +6287,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users
   kind: api
@@ -5763,9 +6476,21 @@ nodes:
     - username
     reason: Login name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/users
+    identity: anon
+    status: 401
+  - method: GET
+    path: /admin/realms/gtrealm/users
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5776,6 +6501,9 @@ nodes:
     - 401
     admin:
     - 200
+    - 400
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -5790,6 +6518,14 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UsersResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /admin/realms/master/users->401; admin GET
+        /admin/realms/master/users->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}
   kind: api
@@ -5905,16 +6641,28 @@ nodes:
     - user_id
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5928,6 +6676,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/reset-password
   kind: api
@@ -6039,16 +6790,28 @@ nodes:
     reference_fields: []
     reason: User password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/reset-password
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6062,6 +6825,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Direct account-takeover primitive.
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/impersonation
   kind: api
@@ -6154,16 +6920,28 @@ nodes:
     - user_id
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/impersonation
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6172,12 +6950,14 @@ nodes:
       reason: Impersonate a user (ESCALATION).
     black_box_reachable: true
     reachability_conditions:
-    - realm-management impersonation role. Grants a live session AS the target user (lateral/vertical
-      move).
+    - realm-management impersonation role. Grants a live session AS the target user (lateral/vertical move).
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Impersonation = become any user; a key escalation lever.
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/role-mappings/realm
   kind: api
@@ -6265,16 +7045,28 @@ nodes:
     - user_id
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/role-mappings/realm
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6283,12 +7075,15 @@ nodes:
       reason: Grant roles to a user (ESCALATION).
     black_box_reachable: true
     reachability_conditions:
-    - manage-users (+ the role must be in the admin's manageable set). Granting 'admin'/realm-management
-      roles escalates the target (or the attacker if self-targeted).
+    - manage-users (+ the role must be in the admin's manageable set). Granting 'admin'/realm-management roles escalates the
+      target (or the attacker if self-targeted).
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleMapperResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Role-grant escalation lever.
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/execute-actions-email
   kind: api
@@ -6401,16 +7196,28 @@ nodes:
     - redirect_uri
     reason: Client redirect URI (validated against registered set).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/execute-actions-email
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6419,12 +7226,14 @@ nodes:
       reason: Send action-email (ADMIN).
     black_box_reachable: true
     reachability_conditions:
-    - manage-users. redirect_uri/client_id here are validated against the client; a weak client = link
-      hijack.
+    - manage-users. redirect_uri/client_id here are validated against the client; a weak client = link hijack.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/logout
   kind: api
@@ -6609,16 +7418,28 @@ nodes:
     - user_id
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/credentials
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6632,6 +7453,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/groups
   kind: api
@@ -6652,16 +7476,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/groups
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6675,6 +7511,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/groups/{groupId}
   kind: api
@@ -6696,16 +7535,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/groups/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6719,6 +7570,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404; anonymous DELETE->401; admin
+        DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/sessions
   kind: api
@@ -6739,16 +7594,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/sessions
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6762,6 +7629,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/federated-identity/{provider}
   kind: api
@@ -6783,16 +7653,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/federated-identity/x
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6806,6 +7688,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404; anonymous DELETE->401;
+        admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/consents
   kind: api
@@ -6827,16 +7713,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/consents
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6850,6 +7748,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous DELETE->401; admin
+        DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/disable-credential-types
   kind: api
@@ -6870,16 +7772,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/disable-credential-types
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6893,6 +7807,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/send-verify-email
   kind: api
@@ -6913,16 +7830,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/send-verify-email
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6936,6 +7865,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/count
   kind: api
@@ -6956,16 +7888,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/count
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -6979,6 +7923,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UsersResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/profile
   kind: api
@@ -7000,16 +7947,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users/profile
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7023,6 +7982,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UsersResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous PUT->401; admin
+        PUT->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients
   kind: api
@@ -7183,9 +8146,21 @@ nodes:
     - client_id
     reason: OAuth client.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/clients
+    identity: anon
+    status: 401
+  - method: GET
+    path: /admin/realms/gtrealm/clients
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -7196,6 +8171,9 @@ nodes:
     - 401
     admin:
     - 200
+    - 201
+    anon:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -7205,12 +8183,20 @@ nodes:
       reason: List / create clients (ADMIN).
     black_box_reachable: true
     reachability_conditions:
-    - view-clients (GET) / manage-clients (POST). A new client with serviceAccountsEnabled + roles is
-      an escalation primitive; redirectUris control token delivery.
+    - view-clients (GET) / manage-clients (POST). A new client with serviceAccountsEnabled + roles is an escalation primitive;
+      redirectUris control token delivery.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientsResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /admin/realms/master/clients->401; admin GET
+        /admin/realms/master/clients->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->201'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}
   kind: api
@@ -7326,16 +8312,28 @@ nodes:
     - id
     reason: Client internal id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7344,12 +8342,15 @@ nodes:
       reason: Manage a client (ADMIN).
     black_box_reachable: true
     reachability_conditions:
-    - view-clients (GET) / manage-clients (PUT,DELETE). PUT redirectUris/webOrigins/protocolMappers changes
-      token audience + delivery.
+    - view-clients (GET) / manage-clients (PUT,DELETE). PUT redirectUris/webOrigins/protocolMappers changes token audience
+      + delivery.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/client-secret
   kind: api
@@ -7451,16 +8452,28 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Client secret.
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/client-secret
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7469,12 +8482,15 @@ nodes:
       reason: Read/rotate client secret (CREDENTIAL).
     black_box_reachable: true
     reachability_conditions:
-    - view-clients reads the secret; manage-clients regenerates. A confidential client's secret = impersonate
-      that client (client_credentials / token-exchange).
+    - view-clients reads the secret; manage-clients regenerates. A confidential client's secret = impersonate that client
+      (client_credentials / token-exchange).
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Reading a secret = client impersonation.
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/service-account-user
   kind: api
@@ -7574,16 +8590,28 @@ nodes:
     - id
     reason: Client internal id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/service-account-user
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7597,6 +8625,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/certificates/{attr}
   kind: api
@@ -7708,16 +8739,28 @@ nodes:
     - id
     reason: Client internal id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/certificates/x
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7731,6 +8774,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientAttributeCertificateResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/nodes
   kind: api
@@ -7751,16 +8797,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/nodes
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7774,6 +8832,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/installation/providers/{providerId}
   kind: api
@@ -7794,16 +8855,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/installation/providers/x
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7817,6 +8890,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/user-sessions
   kind: api
@@ -7837,16 +8913,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/user-sessions
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7860,6 +8948,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/push-revocation
   kind: api
@@ -7880,16 +8971,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/push-revocation
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7903,6 +9006,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/evaluate-scopes
   kind: api
@@ -7923,16 +9029,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/evaluate-scopes
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7946,6 +9064,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/management/permissions
   kind: api
@@ -7967,16 +9088,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/management/permissions
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7990,6 +9123,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous PUT->401; admin
+        PUT->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/protocol-mappers/models
   kind: api
@@ -8011,16 +9148,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/protocol-mappers/models
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8034,6 +9183,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous POST->401; admin
+        POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/roles
   kind: api
@@ -8055,16 +9208,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/roles
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8078,6 +9243,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous POST->401; admin
+        POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/authz/resource-server
   kind: api
@@ -8098,16 +9267,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients/00000000-0000-0000-0000-000000000000/authz/resource-server
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8121,6 +9302,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/clients-initial-access
   kind: api
@@ -8143,16 +9327,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/clients-initial-access
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8166,6 +9363,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientInitialAccessResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->200; anonymous DELETE->401; admin DELETE->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/roles
   kind: api
@@ -8244,9 +9445,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/roles
+    identity: admin
+    status: 200
+  - method: GET
+    path: /admin/realms/gtrealm/roles
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -8255,6 +9468,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -8269,6 +9484,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleContainerResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /admin/realms/master/roles->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/roles/{role-name}/composites
   kind: api
@@ -8437,9 +9658,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/groups
+    identity: admin
+    status: 200
+  - method: GET
+    path: /admin/realms/gtrealm/groups
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -8448,6 +9681,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -8462,6 +9697,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/GroupsResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /admin/realms/master/groups->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}
   kind: api
@@ -8484,16 +9725,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/groups/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8507,6 +9760,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/GroupResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous PUT->401; admin
+        PUT->404; anonymous DELETE->401; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}/role-mappings/realm
   kind: api
@@ -8529,16 +9786,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/groups/00000000-0000-0000-0000-000000000000/role-mappings/realm
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8552,6 +9821,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleMapperResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous POST->401; admin
+        POST->404; anonymous DELETE->401; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}/members
   kind: api
@@ -8572,16 +9845,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/groups/00000000-0000-0000-0000-000000000000/members
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8595,6 +9880,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/GroupResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/identity-provider/import-config
   kind: api
@@ -8688,16 +9976,28 @@ nodes:
     reference_fields: []
     reason: Metadata URL fetched server-side (SSRF).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/identity-provider/import-config
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 401
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8711,6 +10011,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/IdentityProvidersResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #2.'
 - key: http://localhost:8080/admin/realms/{realm}/identity-provider/instances
   kind: api
@@ -8798,9 +10101,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/identity-provider/instances
+    identity: admin
+    status: 200
+  - method: POST
+    path: /admin/realms/gtrealm/identity-provider/instances
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -8809,6 +10124,9 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    - 401
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -8823,6 +10141,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/IdentityProvidersResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /admin/realms/master/identity-provider/instances->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/components
   kind: api
@@ -8910,9 +10234,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/components
+    identity: admin
+    status: 200
+  - method: GET
+    path: /admin/realms/gtrealm/components
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -8921,6 +10257,9 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    - 401
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -8930,12 +10269,18 @@ nodes:
       reason: Components (ADMIN).
     black_box_reachable: true
     reachability_conditions:
-    - manage-realm. User-federation (LDAP) components hold bind credentials + a connection URL (SSRF/credential
-      surface); key-provider components manage signing keys.
+    - manage-realm. User-federation (LDAP) components hold bind credentials + a connection URL (SSRF/credential surface);
+      key-provider components manage signing keys.
     evidence:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ComponentResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /admin/realms/master/components->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'LDAP federation config = SSRF sink #3.'
 - key: http://localhost:8080/admin/realms/{realm}/components/{id}
   kind: api
@@ -8958,16 +10303,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/components/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -8981,6 +10338,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ComponentResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404; anonymous PUT->401; admin
+        PUT->404; anonymous DELETE->401; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/testLDAPConnection
   kind: api
@@ -9001,16 +10362,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/testLDAPConnection
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9024,6 +10397,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ComponentResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/authentication/flows
   kind: api
@@ -9093,9 +10469,21 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/master/authentication/flows
+    identity: admin
+    status: 200
+  - method: GET
+    path: /admin/realms/gtrealm/authentication/flows
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -9104,6 +10492,8 @@ nodes:
   identity_statuses:
     admin:
     - 200
+    anonymous:
+    - 401
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
@@ -9118,6 +10508,12 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AuthenticationManagementResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /admin/realms/master/authentication/flows->200'
+      supports: 'runtime: observed status per identity'
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/authentication/executions
   kind: api
@@ -9138,16 +10534,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/authentication/executions
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9161,6 +10569,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AuthenticationManagementResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/authentication/executions/{executionId}/config
   kind: api
@@ -9181,16 +10592,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/authentication/executions/x/config
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9204,6 +10627,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AuthenticationManagementResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/authentication/register-required-action
   kind: api
@@ -9224,16 +10650,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/authentication/register-required-action
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9247,6 +10685,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AuthenticationManagementResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/authentication/required-actions
   kind: api
@@ -9267,16 +10708,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/authentication/required-actions
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9290,6 +10743,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AuthenticationManagementResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/attack-detection/brute-force/users/{userId}
   kind: api
@@ -9390,16 +10846,28 @@ nodes:
     - user_id
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/attack-detection/brute-force/users/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9413,6 +10881,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/AttackDetectionResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/client-scopes
   kind: api
@@ -9434,16 +10905,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/client-scopes
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+    - 500
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9457,6 +10941,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientScopesResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/client-registration-policy/providers
   kind: api
@@ -9477,16 +10965,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/client-registration-policy/providers
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9500,6 +11000,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/ClientRegistrationPolicyResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/sessions/{session}
   kind: api
@@ -9520,16 +11023,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /admin/realms/gtrealm/sessions/x
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9543,6 +11058,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users-management-permissions
   kind: api
@@ -9564,16 +11082,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/users-management-permissions
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-19'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9587,6 +11117,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous PUT->401; admin
+        PUT->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/master/console
   kind: page
@@ -9737,23 +11271,23 @@ edges:
   triggers:
   - xhr
 excluded_items:
-- item: '{realm} is a path template -- one node per route, not per realm. The whole protocol + admin +
-    account surface is replicated under every realm (master + each created realm)'
-  reason: Keycloak dispatches every realm through the same RealmsResource + resource tree; the GT models
-    each route once with {realm} as a parameter. Realms differ only in config, not in the route/auth model.
-- item: The deep admin sub-resource tree is enumerated at the resource ROOT + security-critical sub-paths;
-    the full per-item CRUD leaf set (e.g. every roles/{role}/composites, clients/{id}/nodes, client-scopes/{id}/scope-mappings/*,
-    group hierarchy leaves) is summarized, not expanded
-  reason: Hundreds of admin leaves share the identical realm-management-role authorization; the roots
-    + the high-value leaves (impersonation, credentials, client-secret, service-account, SSRF test endpoints)
-    are L2-covered and the rest enumerated as L1 nodes.
-- item: Theme/static assets, the Admin Console SPA (/admin/{realm}/console), the Account Console SPA,
-    welcome page resources, and JS adapter resources
+- item: '{realm} is a path template -- one node per route, not per realm. The whole protocol + admin + account surface is
+    replicated under every realm (master + each created realm)'
+  reason: Keycloak dispatches every realm through the same RealmsResource + resource tree; the GT models each route once with
+    {realm} as a parameter. Realms differ only in config, not in the route/auth model.
+- item: The deep admin sub-resource tree is enumerated at the resource ROOT + security-critical sub-paths; the full per-item
+    CRUD leaf set (e.g. every roles/{role}/composites, clients/{id}/nodes, client-scopes/{id}/scope-mappings/*, group hierarchy
+    leaves) is summarized, not expanded
+  reason: Hundreds of admin leaves share the identical realm-management-role authorization; the roots + the high-value leaves
+    (impersonation, credentials, client-secret, service-account, SSRF test endpoints) are L2-covered and the rest enumerated
+    as L1 nodes.
+- item: Theme/static assets, the Admin Console SPA (/admin/{realm}/console), the Account Console SPA, welcome page resources,
+    and JS adapter resources
   reason: Client assets; the OIDC + REST APIs they drive are the modeled surface.
-- item: SAML protocol internals beyond the endpoint + descriptor (artifact resolution, ECP, SOAP binding
-    details) and the WS-Fed/Docker/CIBA-channel protocol variants
-  reason: Protocol-specific message handling reusing the same realm/client model; the SAML endpoint +
-    metadata and the OIDC core are modeled, the variants enumerated.
+- item: SAML protocol internals beyond the endpoint + descriptor (artifact resolution, ECP, SOAP binding details) and the
+    WS-Fed/Docker/CIBA-channel protocol variants
+  reason: Protocol-specific message handling reusing the same realm/client model; the SAML endpoint + metadata and the OIDC
+    core are modeled, the variants enumerated.
 - item: 'The separate management port (9000): /health, /health/ready|live, /metrics'
-  reason: A distinct bind on a different port (KC_HTTP_MANAGEMENT_PORT), not part of the 8080 request
-    surface; enumerated as out-of-scope for this origin.
+  reason: A distinct bind on a different port (KC_HTTP_MANAGEMENT_PORT), not part of the 8080 request surface; enumerated
+    as out-of-scope for this origin.
