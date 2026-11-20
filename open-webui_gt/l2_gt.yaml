@@ -126,6 +126,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:185
       supports: GET / [get_current_user] -> SessionUserInfoResponse; re-issues token
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Discloses caller role + effective permissions; re-issues a token on every call.
 - id: gt-action-002
   name: Update own profile
@@ -254,6 +257,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:253
       supports: POST /update/profile [get_verified_user] -> UserProfileImageResponse
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/profile)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: name/bio are stored-reflected (self stored-XSS surface); image URL passes validate_image_url.
 - id: gt-action-003
   name: Update own timezone
@@ -338,6 +344,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:288
       supports: POST /update/timezone [get_current_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/timezone)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-004
   name: Rotate own password
@@ -438,6 +447,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:316
       supports: POST /update/password [get_current_user] verify_password -> bool
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/password)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Secrets are inputs only, never echoed.
 - id: gt-action-005
   name: Sign in via LDAP
@@ -553,6 +565,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:409
       supports: POST /ldap -> SigninResult; escape_filter_chars on bind
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/ldap)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Live only when LDAP is enabled.
 - id: gt-action-006
   name: Sign in with password
@@ -657,9 +672,11 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:676
       supports: 'WEBUI_AUTH_TRUSTED_EMAIL/ROLE_HEADER: proxy header establishes identity + role'
-    notes: 'Rate-limited (5*3/180s). Alternate modes: trusted-header (a proxy header sets BOTH identity
-      and role -> impersonation if the header is spoofable) and WEBUI_AUTH=false (admin@localhost/admin
-      bootstrap).'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/signin)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+    notes: 'Rate-limited (5*3/180s). Alternate modes: trusted-header (a proxy header sets BOTH identity and role -> impersonation
+      if the header is spoofable) and WEBUI_AUTH=false (admin@localhost/admin bootstrap).'
 - id: gt-action-007
   name: Register account
   kind: normal
@@ -766,6 +783,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:849
       supports: POST /signup -> signup_handler; first user -> admin
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/signup)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Gated by ui.enable_signup except for the initial-admin bootstrap.
 - id: gt-action-008
   name: Sign out
@@ -1045,8 +1065,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1605
       supports: POST /oauth/{provider}/token/exchange -> SigninResult; trusted client ids + rate limit
-    notes: Best-effort rate limit (no caller identity before the provider answers); trusts configured
-      client ids.
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/oauth/{provider}/token/exchange)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+    notes: Best-effort rate limit (no caller identity before the provider answers); trusts configured client ids.
 - id: gt-action-011
   name: Provision user (admin)
   kind: normal
@@ -1177,6 +1199,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1051
       supports: POST /add [get_admin_user] -> AddUserResponse (returns a token)
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/add)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Direct privilege assignment; the returned token can bootstrap the new account's session.
 - id: gt-action-012
   name: Read admin contact
@@ -1268,6 +1293,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1124
       supports: GET /admin/details [get_current_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/details)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Information disclosure when SHOW_ADMIN_DETAILS is on.
 - id: gt-action-013
   name: Read auth/admin config
@@ -1359,12 +1387,14 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1155
       supports: GET /admin/config [get_admin_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Includes secret-config presence; GT records config location, not secret values.
 - id: gt-action-014
   name: Update auth/admin config
   kind: normal
-  description: An admin writes auth/admin configuration (signup, default role, API-key policy, JWT expiry,
-    ...).
+  description: An admin writes auth/admin configuration (signup, default role, API-key policy, JWT expiry, ...).
   action_key: owui_update_admin_config
   subject:
     id: actor
@@ -1451,6 +1481,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1228
       supports: POST /admin/config [get_admin_user] AdminConfig
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'High-impact: changing these alters who can register and how sessions/keys are governed.'
 - id: gt-action-015
   name: Read LDAP server config
@@ -1542,6 +1575,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1297
       supports: GET /admin/config/ldap/server [get_admin_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap/server)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Carries the LDAP bind-secret location (app_dn_password); GT records location, not value.
 - id: gt-action-016
   name: Update LDAP server config
@@ -1633,6 +1669,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1303
       supports: POST /admin/config/ldap/server [get_admin_user] LdapServerConfig
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap/server)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Sets a stored credential (app_dn_password) and the directory endpoint used for auth.
 - id: gt-action-017
   name: Read LDAP enabled flag
@@ -1720,6 +1759,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1328
       supports: GET /admin/config/ldap [get_admin_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-018
   name: Toggle LDAP auth method
@@ -1807,6 +1849,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1338
       supports: POST /admin/config/ldap [get_admin_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-019
   name: Read OAuth config
@@ -1898,6 +1943,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1483
       supports: GET /admin/config/oauth [get_admin_user] -> OAuthConfigResponse
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/oauth)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Carries OAuth client-secret locations; GT records location, not value.
 - id: gt-action-020
   name: Update OAuth config
@@ -1989,6 +2037,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1489
       supports: POST /admin/config/oauth [get_admin_user] OAuthConfigForm
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/oauth)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Controls which external IdPs can mint sessions on this instance.
 - id: gt-action-021
   name: Read own API key
@@ -2075,6 +2126,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1553
       supports: GET /api_key [get_current_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/api_key)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: The key is returned in clear; it is a long-lived bearer credential.
 - id: gt-action-022
   name: Mint own API key
@@ -2158,6 +2212,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1510
       supports: POST /api_key [_check_api_key_permission]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/api_key)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Gated by enable_api_keys + the features.api_keys permission.
 - id: gt-action-023
   name: Revoke own API key
@@ -2233,6 +2290,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1535
       supports: DELETE /api_key [get_current_user]
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/api_key)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 edges: []
 annotation_issues: []

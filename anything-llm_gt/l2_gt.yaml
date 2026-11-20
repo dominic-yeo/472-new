@@ -90,6 +90,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/auth/index.js:6
       supports: validApiKey gate + fixed response
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auth)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-002
   name: Flush settings to .env
@@ -165,8 +168,7 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:16
       supports: no auth middleware; dumpENV() in production
-    notes: Unauthenticated by design (SECURITY.md); no secret values returned, but it persists config
-      state.
+    notes: Unauthenticated by design (SECURITY.md); no secret values returned, but it persists config state.
 - id: gt-action-003
   name: Read system settings
   kind: normal
@@ -253,6 +255,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:39
       supports: SystemSettings.currentSettings()
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Discloses which provider credentials are configured (as booleans) and non-secret config values.
 - id: gt-action-004
   name: Read vector count
@@ -341,12 +346,14 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:76
       supports: VectorDb.totalVectors()
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/vector-count)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-005
   name: Update system settings
   kind: normal
-  description: A developer updates instance settings (can switch LLM provider, vector DB, or embedded
-    keys).
+  description: A developer updates instance settings (can switch LLM provider, vector DB, or embedded keys).
   action_key: dev_update_system_settings
   subject:
     id: actor
@@ -442,6 +449,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:108
       supports: updateENV(body) persists settings
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/update-env)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: High-impact reconfiguration via one authenticated call.
 - id: gt-action-006
   name: Export all chats
@@ -533,6 +543,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:157
       supports: exportChatsAsType(type,'workspace')
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/export-chats)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Bulk cross-workspace data exposure surface.
 - id: gt-action-007
   name: Remove documents
@@ -630,6 +643,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:219
       supports: purgeDocument(name) per name
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/remove-documents)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-008
   name: Create workspace
@@ -734,6 +750,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:28
       supports: Workspace.new()
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/new)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-009
   name: List workspaces
@@ -821,6 +840,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:109
       supports: Workspace._findMany
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspaces)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-010
   name: Read workspace
@@ -908,6 +930,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:163
       supports: Workspace._findMany by slug
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-011
   name: Delete workspace
@@ -996,6 +1021,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:228
       supports: cascade delete + delete-namespace
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Guarded by workspaceDeletionProtection middleware.
 - id: gt-action-012
   name: Update workspace
@@ -1105,6 +1133,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:279
       supports: Workspace.update(id, data)
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-013
   name: Read workspace chats
@@ -1211,6 +1242,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:360
       supports: WorkspaceChats.forWorkspace
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/chats)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Returns chats for ALL users of the workspace.
 - id: gt-action-014
   name: Update workspace documents
@@ -1320,6 +1354,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:457
       supports: Document.addDocuments/removeDocuments
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update-embeddings)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-015
   name: Pin workspace document
@@ -1439,6 +1476,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:534
       supports: Document.update(id, {pinned})
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update-pin)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-016
   name: Chat with workspace
@@ -1583,8 +1623,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:603
       supports: ApiChatHandler.chatSync/streamChat
-    notes: Untrusted prompt -> LLM -> model-authored output (streaming-phase XSS to RCE via LLM response
-      injection).
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/chat, /api/v1/workspace/{slug}/stream-chat)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+    notes: Untrusted prompt -> LLM -> model-authored output (streaming-phase XSS to RCE via LLM response injection).
 - id: gt-action-017
   name: Vector search workspace
   kind: normal
@@ -1690,6 +1732,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:899
       supports: vector similarity search
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/vector-search)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-018
   name: Create thread
@@ -1804,6 +1849,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:21
       supports: WorkspaceThread.new
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/new)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-019
   name: Update thread
@@ -1935,6 +1983,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:111
       supports: WorkspaceThread.update
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/update)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-020
   name: Delete thread
@@ -2034,6 +2085,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:197
       supports: WorkspaceThread.delete
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-021
   name: Read thread chats
@@ -2149,6 +2203,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:246
       supports: WorkspaceChats for thread
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/chats)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-022
   name: Chat in thread
@@ -2302,6 +2359,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:330
       supports: ApiChatHandler.chatSync/streamChat
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/chat, /api/v1/workspace/{slug}/thread/{threadSlug}/stream-chat)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Untrusted prompt -> LLM -> model-authored output.
 - id: gt-action-023
   name: Upload document
@@ -2422,6 +2482,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:52
       supports: multipart upload -> collector
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/upload, /api/v1/document/upload/{folderName})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-024
   name: Upload document from link
@@ -2520,6 +2583,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:338
       supports: collector fetches the URL
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/upload-link)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'SSRF surface: the server-side collector fetches a caller-controlled URL.'
 - id: gt-action-025
   name: Upload raw text
@@ -2618,6 +2684,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:520
       supports: raw-text -> collector
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/raw-text)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-026
   name: List documents
@@ -2700,6 +2769,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:669
       supports: list local documents
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/documents)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-027
   name: List folder documents
@@ -2802,6 +2874,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:725
       supports: list folder documents
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/documents/folder/{folderName})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-028
   name: Read accepted file types
@@ -2889,6 +2964,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:810
       supports: accepted types
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/accepted-file-types)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-029
   name: Read metadata schema
@@ -2976,6 +3054,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:867
       supports: metadata schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/metadata-schema)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-030
   name: Read document
@@ -3069,6 +3150,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:919
       supports: get single document
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/{docName})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-031
   name: Create folder
@@ -3151,6 +3235,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:974
       supports: create folder
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/create-folder)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-032
   name: Remove folder
@@ -3239,6 +3326,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:1048
       supports: remove folder + contents
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/remove-folder)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-033
   name: Move documents
@@ -3334,6 +3424,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:1107
       supports: move files (traversal-guarded)
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/move-files)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-034
   name: Download generated file
@@ -3441,6 +3534,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:1219
       supports: download generated file
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/generated-files/{filename})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Filename is format-validated to reject path traversal.
 - id: gt-action-035
   name: List OpenAI models
@@ -3518,6 +3614,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:19
       supports: workspaces as models
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/models)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-036
   name: OpenAI chat completion
@@ -3635,6 +3734,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:76
       supports: OpenAI-compatible chat
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/chat/completions)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Untrusted messages -> LLM -> model-authored output.
 - id: gt-action-037
   name: Generate image
@@ -3743,6 +3845,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:195
       supports: image generation/editing
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/images/generations)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-038
   name: OpenAI embeddings
@@ -3836,6 +3941,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:290
       supports: Embedder.embedChunks
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/embeddings)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-039
   name: List vector stores
@@ -3913,6 +4021,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:357
       supports: workspaces as vector stores
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/vector_stores)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-040
   name: List users
@@ -4001,6 +4112,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/userManagement/index.js:12
       supports: list users
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/users)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Requires multi-user mode.
 - id: gt-action-041
   name: Issue user auth token
@@ -4119,6 +4233,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/userManagement/index.js:68
       supports: issue temp auth token
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/users/{id}/issue-auth-token)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'Impersonation surface: mints a login token for ANY user id.'
 - id: gt-action-042
   name: Check multi-user mode
@@ -4200,6 +4317,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:15
       supports: multi-user mode flag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/is-multi-user-mode)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-043
   name: Admin list users
@@ -4278,6 +4398,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:41
       supports: admin list users
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Requires multi-user mode.
 - id: gt-action-044
   name: Admin create user
@@ -4371,6 +4494,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:85
       supports: create user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users/new)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Requires multi-user mode.
 - id: gt-action-045
   name: Admin update user
@@ -4478,6 +4604,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:143
       supports: update user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users/{id})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-046
   name: Admin delete user
@@ -4563,6 +4692,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:216
       supports: delete user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users/{id})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-047
   name: Admin list invites
@@ -4651,6 +4783,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:270
       supports: list invites
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/invites)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-048
   name: Admin create invite
@@ -4754,6 +4889,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:316
       supports: create invite
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/invite/new)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-049
   name: Admin delete invite
@@ -4848,6 +4986,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:375
       supports: deactivate invite
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/invite/{id})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-050
   name: Admin list workspace users
@@ -4946,6 +5087,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:442
       supports: workspace users
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspaces/{workspaceId}/users)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-051
   name: Admin overwrite workspace users
@@ -5042,6 +5186,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:497
       supports: overwrite workspace perms
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspaces/{workspaceId}/update-users)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-052
   name: Admin manage workspace users
@@ -5138,6 +5285,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:564
       supports: set workspace perms
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspaces/{workspaceSlug}/manage-users)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-053
   name: Admin read all chats
@@ -5225,6 +5375,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:679
       supports: all system chats
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspace-chats)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Instance-wide chat data exposure.
 - id: gt-action-054
   name: Admin update preferences
@@ -5321,6 +5474,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:735
       supports: update preferences
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/preferences)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-055
   name: List embeds
@@ -5408,6 +5564,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:10
       supports: list embeds
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-056
   name: Read embed chats
@@ -5509,6 +5668,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:79
       supports: embed chats
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid}/chats)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-057
   name: Read embed session chats
@@ -5624,6 +5786,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:141
       supports: embed session chats
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid}/chats/{sessionUuid})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-058
   name: Create embed
@@ -5741,8 +5906,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:201
       supports: create embed
-    notes: 'Public exposure surface: allowlist_domains / allow_prompt_override govern who/what can drive
-      the widget.'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/new)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+    notes: 'Public exposure surface: allowlist_domains / allow_prompt_override govern who/what can drive the widget.'
 - id: gt-action-059
   name: Update embed
   kind: normal
@@ -5849,6 +6016,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:287
       supports: update embed
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-060
   name: Delete embed
@@ -5934,6 +6104,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:358
       supports: delete embed
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-061
   name: List MCP servers
@@ -6021,6 +6194,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:8
       supports: list MCP servers
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-062
   name: Add MCP server
@@ -6108,6 +6284,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:48
       supports: add + start MCP server
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/new)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: MCP config can define a local command -> code execution / agent tool surface.
 - id: gt-action-063
   name: Reload MCP servers
@@ -6187,6 +6366,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:108
       supports: reload MCP servers
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/reload)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-064
   name: Update MCP server
@@ -6294,6 +6476,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:139
       supports: replace MCP server
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name}/update)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-065
   name: Toggle MCP server
@@ -6385,6 +6570,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:209
       supports: toggle MCP server
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name}/toggle)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 - id: gt-action-066
   name: Toggle MCP tool
@@ -6508,6 +6696,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:252
       supports: toggle MCP tool
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name}/toggle-tool)'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Controls which MCP tools are exposed to agents (agent tool-surface control).
 - id: gt-action-067
   name: Delete MCP server
@@ -6593,6 +6784,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:322
       supports: remove MCP server
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name})'
+      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
 edges: []
 annotation_issues: []

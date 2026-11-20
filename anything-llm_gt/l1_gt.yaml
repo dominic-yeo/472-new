@@ -48,9 +48,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auth
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -61,6 +69,14 @@ nodes:
     - 403
     api_key:
     - 200
+    admin:
+    - 200
+    - 400
+    - 401
+    - 403
+    - 404
+    - 422
+    - 500
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost/api/v1
@@ -74,6 +90,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/auth/index.js:6
       supports: GET /v1/auth [validApiKey] -> {authenticated:true}
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: API-key probe; the status flag is not business data (flow=false).
 - key: http://localhost/api/v1/system/env-dump
   kind: api
@@ -197,9 +216,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Full instance configuration snapshot (provider, vector DB, flags; secret presence).
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/system
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -219,6 +246,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:39
       supports: GET /v1/system [validApiKey] -> {settings}
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Exposes instance configuration incl. which provider keys are set (presence booleans).
 - key: http://localhost/api/v1/system/vector-count
   kind: api
@@ -268,9 +298,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/system/vector-count
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -290,6 +328,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:76
       supports: GET /v1/system/vector-count [validApiKey] -> {vectorCount}
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Aggregate count; not an object reference.
 - key: http://localhost/api/v1/system/update-env
   kind: api
@@ -371,9 +412,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Echo of the applied configuration values.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/system/update-env
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -393,8 +442,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:108
       supports: POST /v1/system/update-env [validApiKey] -> updateENV(body)
-    notes: 'High-impact: reconfigures the instance (provider/vector-DB/keys) via a single authenticated
-      call.'
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: 'High-impact: reconfigures the instance (provider/vector-DB/keys) via a single authenticated call.'
 - key: http://localhost/api/v1/system/export-chats
   kind: api
   methods:
@@ -454,9 +505,17 @@ nodes:
     reference_fields: []
     reason: Format discriminator; not an object reference.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/system/export-chats
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -476,6 +535,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:157
       supports: GET /v1/system/export-chats?type= [validApiKey] -> serialized chats
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Exports ALL chats across every workspace -- bulk data exposure surface.
 - key: http://localhost/api/v1/system/remove-documents
   kind: api
@@ -549,9 +611,17 @@ nodes:
     - names
     reason: Document storage paths identifying the documents to delete.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /api/v1/system/remove-documents
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -571,6 +641,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:219
       supports: DELETE /v1/system/remove-documents [validApiKey] -> purgeDocument()
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Permanent deletion keyed by caller-supplied storage path.
 - key: http://localhost/api/v1/workspace/new
   kind: api
@@ -621,8 +694,7 @@ nodes:
         type: object
         required: false
         flow: true
-        description: 'Optional settings: similarityThreshold, openAiTemp/History/Prompt, queryRefusalResponse,
-          chatMode, topN.'
+        description: 'Optional settings: similarityThreshold, openAiTemp/History/Prompt, queryRefusalResponse, chatMode, topN.'
     response:
       format: json
       scalar_type: null
@@ -673,9 +745,17 @@ nodes:
     reference_fields:
     - slug
     reason: Created workspace slug.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/new
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -695,6 +775,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:28
       supports: POST /v1/workspace/new [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspaces
   kind: api
@@ -753,9 +836,17 @@ nodes:
     reference_fields:
     - slug
     reason: Slugs of listed workspaces.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/workspaces
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -775,6 +866,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:109
       supports: GET /v1/workspaces [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}
   kind: api
@@ -881,9 +975,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Workspace config snapshot.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/workspace/gtweb
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -903,6 +1005,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:163
       supports: GET + DELETE /v1/workspace/:slug [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200; anonymous DELETE->403; admin
+        DELETE->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: DELETE is guarded by workspaceDeletionProtection middleware; cascades to chats/vectors/documents.
 - key: http://localhost/api/v1/workspace/{slug}/update
   kind: api
@@ -990,9 +1096,17 @@ nodes:
     reference_fields: []
     reason: New settings values.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/update
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1012,6 +1126,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:279
       supports: POST /v1/workspace/:slug/update [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/chats
   kind: api
@@ -1108,9 +1225,17 @@ nodes:
     - apiSessionId
     reason: External chat session id filter.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/workspace/gtweb/chats
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1130,6 +1255,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:360
       supports: GET /v1/workspace/:slug/chats [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Returns ALL chats in the workspace regardless of user.
 - key: http://localhost/api/v1/workspace/{slug}/update-embeddings
   kind: api
@@ -1229,9 +1357,17 @@ nodes:
     reference_fields: []
     reason: Documents to remove (same resource type as adds).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/update-embeddings
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1251,6 +1387,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:457
       supports: POST /v1/workspace/:slug/update-embeddings [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/update-pin
   kind: api
@@ -1340,9 +1479,17 @@ nodes:
     - docPath
     reason: Document to pin/unpin.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/update-pin
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1362,6 +1509,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:534
       supports: POST /v1/workspace/:slug/update-pin [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/chat
   kind: api
@@ -1526,9 +1676,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Model-authored answer.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/chat
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1548,8 +1706,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:603
       supports: POST /v1/workspace/:slug/chat [validApiKey]
-    notes: 'Untrusted prompt -> LLM; response is model-authored (CVE class: streaming-phase XSS to RCE
-      via LLM response injection).'
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: 'Untrusted prompt -> LLM; response is model-authored (CVE class: streaming-phase XSS to RCE via LLM response injection).'
 - key: http://localhost/api/v1/workspace/{slug}/stream-chat
   kind: api
   methods:
@@ -1595,8 +1755,7 @@ nodes:
       value_name: null
       value_type: null
       value_flow: false
-      value_description: text/event-stream of textResponseChunk events (id, textResponse, sources, close,
-        error).
+      value_description: text/event-stream of textResponseChunk events (id, textResponse, sources, close, error).
       fields: []
     reason: ApiChatHandler.streamChat (SSE).
     evidence: server/endpoints/api/workspace/index.js:737
@@ -1608,9 +1767,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: *id020
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/stream-chat
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1630,6 +1797,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:737
       supports: POST /v1/workspace/:slug/stream-chat [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Streaming variant of chat_with_workspace; same untrusted-prompt -> model-authored-output surface.
 - key: http://localhost/api/v1/workspace/{slug}/vector-search
   kind: api
@@ -1725,9 +1895,17 @@ nodes:
     reference_fields: []
     reason: Vector search query.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/vector-search
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1747,6 +1925,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspace/index.js:899
       supports: POST /v1/workspace/:slug/vector-search [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/thread/new
   kind: api
@@ -1856,9 +2037,17 @@ nodes:
     reference_fields:
     - slug
     reason: Created thread slug.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/thread/new
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1878,6 +2067,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:21
       supports: POST /v1/workspace/:slug/thread/new [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/update
   kind: api
@@ -1981,9 +2173,17 @@ nodes:
     reference_fields: []
     reason: New thread name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/thread/1ae20f49-66ad-4943-9321-137b6529bb71/update
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2003,6 +2203,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:111
       supports: POST /v1/workspace/:slug/thread/:threadSlug/update [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}
   kind: api
@@ -2068,9 +2271,17 @@ nodes:
   - *id013
   - *id025
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /api/v1/workspace/gtweb/thread/1ae20f49-66ad-4943-9321-137b6529bb71
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2090,6 +2301,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:197
       supports: DELETE /v1/workspace/:slug/thread/:threadSlug [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chats
   kind: api
@@ -2162,9 +2376,17 @@ nodes:
   - *id013
   - *id025
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/workspace/gtweb/thread/1ae20f49-66ad-4943-9321-137b6529bb71/chats
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2184,6 +2406,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:246
       supports: GET /v1/workspace/:slug/thread/:threadSlug/chats [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/chat
   kind: api
@@ -2340,9 +2565,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Model-authored answer.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/thread/1ae20f49-66ad-4943-9321-137b6529bb71/chat
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2362,6 +2595,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:330
       supports: POST /v1/workspace/:slug/thread/:threadSlug/chat [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Thread-scoped chat; untrusted prompt -> model-authored output.
 - key: http://localhost/api/v1/workspace/{slug}/thread/{threadSlug}/stream-chat
   kind: api
@@ -2420,9 +2656,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: *id030
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/workspace/gtweb/thread/1ae20f49-66ad-4943-9321-137b6529bb71/stream-chat
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2442,6 +2686,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/workspaceThread/index.js:493
       supports: POST /v1/workspace/:slug/thread/:threadSlug/stream-chat [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Streaming variant of chat_in_thread.
 - key: http://localhost/api/v1/document/upload
   kind: api
@@ -2558,9 +2805,17 @@ nodes:
     reference_fields:
     - documents
     reason: Created document storage locations.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/document/upload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2580,6 +2835,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:52
       supports: POST /v1/document/upload [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/upload/{folderName}
   kind: api
@@ -2694,9 +2952,17 @@ nodes:
   - *id033
   semantic_output_decisions:
   - *id034
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/document/upload/custom-documents
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2716,6 +2982,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:183
       supports: POST /v1/document/upload/:folderName [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/upload-link
   kind: api
@@ -2817,9 +3086,17 @@ nodes:
   - *id033
   semantic_output_decisions:
   - *id034
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/document/upload-link
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2839,6 +3116,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:338
       supports: POST /v1/document/upload-link [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF surface: the server fetches a caller-supplied URL to scrape.'
 - key: http://localhost/api/v1/document/raw-text
   kind: api
@@ -2945,9 +3225,17 @@ nodes:
   - *id033
   semantic_output_decisions:
   - *id034
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/document/raw-text
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2967,6 +3255,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:520
       supports: POST /v1/document/raw-text [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/documents
   kind: api
@@ -3060,9 +3351,17 @@ nodes:
     reference_fields:
     - localFiles
     reason: Listed document locations.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/documents
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3082,6 +3381,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:669
       supports: GET /v1/documents [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/documents/folder/{folderName}
   kind: api
@@ -3166,9 +3468,17 @@ nodes:
     reference_fields:
     - documents
     reason: Folder document locations.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/documents/folder/custom-documents
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3188,6 +3498,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:725
       supports: GET /v1/documents/folder/:folderName [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/accepted-file-types
   kind: api
@@ -3237,9 +3550,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/document/accepted-file-types
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3259,6 +3580,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:810
       supports: GET /v1/document/accepted-file-types [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/metadata-schema
   kind: api
@@ -3308,9 +3632,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/document/metadata-schema
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3330,6 +3662,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:867
       supports: GET /v1/document/metadata-schema [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/{docName}
   kind: api
@@ -3398,9 +3733,17 @@ nodes:
     - docName
     reason: Document name identifies a stored document.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/document/x.json
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3420,6 +3763,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:919
       supports: GET /v1/document/:docName [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/create-folder
   kind: api
@@ -3492,9 +3838,17 @@ nodes:
     - name
     reason: New folder name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/document/create-folder
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3514,6 +3868,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:974
       supports: POST /v1/document/create-folder [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/remove-folder
   kind: api
@@ -3586,9 +3943,17 @@ nodes:
     - name
     reason: Folder to remove.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /api/v1/document/remove-folder
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3608,6 +3973,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:1048
       supports: DELETE /v1/document/remove-folder [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/document/move-files
   kind: api
@@ -3683,9 +4051,17 @@ nodes:
     - files
     reason: Document from/to storage paths.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/document/move-files
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3705,6 +4081,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:1107
       supports: POST /v1/document/move-files [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Destination paths are validated to a top-level folder/file (path-traversal guard).
 - key: http://localhost/api/v1/document/generated-files/{filename}
   kind: api
@@ -3767,9 +4146,17 @@ nodes:
     - filename
     reason: Generated file name (format-validated against traversal).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/document/generated-files/x
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3789,8 +4176,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/document/index.js:1219
       supports: GET /v1/document/generated-files/:filename [validApiKey]
-    notes: Download by caller-supplied filename; format validation rejects traversal ('Invalid filename
-      format').
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: Download by caller-supplied filename; format validation rejects traversal ('Invalid filename format').
 - key: http://localhost/api/v1/openai/models
   kind: api
   methods:
@@ -3849,9 +4238,17 @@ nodes:
     reference_fields:
     - id
     reason: Model/store id == workspace slug.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/openai/models
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -3871,6 +4268,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:19
       supports: GET /v1/openai/models [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/openai/chat/completions
   kind: api
@@ -3982,9 +4382,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Model-authored completion.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/openai/chat/completions
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4004,6 +4412,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:76
       supports: POST /v1/openai/chat/completions [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: OpenAI-compatible chat; untrusted messages -> LLM -> model-authored output. Supports stream.
 - key: http://localhost/api/v1/openai/images/generations
   kind: api
@@ -4103,9 +4514,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Generated image bytes (base64).
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/openai/images/generations
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4125,6 +4544,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:195
       supports: POST /v1/openai/images/generations [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/openai/embeddings
   kind: api
@@ -4210,9 +4632,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Embedding vectors.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/openai/embeddings
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4232,6 +4662,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:290
       supports: POST /v1/openai/embeddings [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/openai/vector_stores
   kind: api
@@ -4283,9 +4716,17 @@ nodes:
   semantic_input_decisions: []
   semantic_output_decisions:
   - *id052
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/openai/vector_stores
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4305,6 +4746,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/openai/index.js:357
       supports: GET /v1/openai/vector_stores [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/users
   kind: api
@@ -4365,9 +4809,17 @@ nodes:
     reference_fields:
     - username
     reason: Listed usernames.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4387,6 +4839,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/userManagement/index.js:12
       supports: GET /v1/users [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/users/{id}/issue-auth-token
   kind: api
@@ -4469,9 +4924,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Issued login token for the target user (impersonation surface).
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/users/1/issue-auth-token
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4491,6 +4954,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/userManagement/index.js:68
       supports: GET /v1/users/:id/issue-auth-token [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Issues a login token for ANY user id -> impersonation. Requires multi-user mode.
 - key: http://localhost/api/v1/admin/is-multi-user-mode
   kind: api
@@ -4538,9 +5004,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/admin/is-multi-user-mode
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4560,6 +5034,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:15
       supports: GET /v1/admin/is-multi-user-mode [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/admin/users
   kind: api
@@ -4612,9 +5089,17 @@ nodes:
   semantic_input_decisions: []
   semantic_output_decisions:
   - *id057
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/admin/users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4634,6 +5119,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:41
       supports: GET /v1/admin/users [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/users/new
   kind: api
@@ -4744,9 +5232,17 @@ nodes:
     reference_fields: []
     reason: User role.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/users/new
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4766,6 +5262,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:85
       supports: POST /v1/admin/users/new [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/users/{id}
   kind: api
@@ -4915,9 +5414,17 @@ nodes:
     reference_fields: []
     reason: New role.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/users/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4937,6 +5444,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:143
       supports: POST + DELETE /v1/admin/users/:id [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401; anonymous DELETE->403;
+        admin DELETE->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/invites
   kind: api
@@ -4996,9 +5507,17 @@ nodes:
     reference_fields:
     - code
     reason: Invite codes.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/admin/invites
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5018,6 +5537,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:270
       supports: GET /v1/admin/invites [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/invite/new
   kind: api
@@ -5094,9 +5616,17 @@ nodes:
     reference_fields:
     - code
     reason: Created invite code.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/invite/new
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5116,6 +5646,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:316
       supports: POST /v1/admin/invite/new [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/invite/{id}
   kind: api
@@ -5187,9 +5720,17 @@ nodes:
     - id
     reason: Invite id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /api/v1/admin/invite/1
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5209,6 +5750,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:375
       supports: DELETE /v1/admin/invite/:id [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/workspaces/{workspaceId}/users
   kind: api
@@ -5279,9 +5823,17 @@ nodes:
     reason: Workspace id.
   semantic_output_decisions:
   - *id057
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/admin/workspaces/1/users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5301,6 +5853,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:442
       supports: GET /v1/admin/workspaces/:workspaceId/users [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/workspaces/{workspaceId}/update-users
   kind: api
@@ -5393,9 +5948,17 @@ nodes:
     - userIds
     reason: User ids granted access.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/workspaces/1/update-users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5415,6 +5978,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:497
       supports: POST /v1/admin/workspaces/:workspaceId/update-users [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/workspaces/{workspaceSlug}/manage-users
   kind: api
@@ -5515,9 +6081,17 @@ nodes:
     - userIds
     reason: User ids granted access.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/workspaces/gtweb/manage-users
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5537,6 +6111,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:564
       supports: POST /v1/admin/workspaces/:workspaceSlug/manage-users [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/admin/workspace-chats
   kind: api
@@ -5600,9 +6177,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/workspace-chats
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5622,8 +6207,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:679
       supports: POST /v1/admin/workspace-chats [validApiKey]
-    notes: Returns ALL chats across ALL workspaces/users -- instance-wide data exposure. Requires multi-user
-      mode.
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: Returns ALL chats across ALL workspaces/users -- instance-wide data exposure. Requires multi-user mode.
 - key: http://localhost/api/v1/admin/preferences
   kind: api
   methods:
@@ -5694,9 +6281,17 @@ nodes:
     reference_fields: []
     reason: Multi-user preference settings.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/admin/preferences
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5716,6 +6311,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/admin/index.js:735
       supports: POST /v1/admin/preferences [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Requires multi-user mode.
 - key: http://localhost/api/v1/embed
   kind: api
@@ -5774,9 +6372,17 @@ nodes:
     reference_fields:
     - uuid
     reason: Embed uuids.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/embed
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5796,6 +6402,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:10
       supports: GET /v1/embed [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/embed/{embedUuid}/chats
   kind: api
@@ -5865,9 +6474,17 @@ nodes:
     - embedUuid
     reason: Embed uuid identifies the widget config.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/embed/00000000-0000-0000-0000-000000000000/chats
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5887,6 +6504,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:79
       supports: GET /v1/embed/:embedUuid/chats [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/embed/{embedUuid}/chats/{sessionUuid}
   kind: api
@@ -5966,9 +6586,17 @@ nodes:
     - sessionUuid
     reason: Embed chat session uuid.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/embed/00000000-0000-0000-0000-000000000000/chats/x
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -5988,6 +6616,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:141
       supports: GET /v1/embed/:embedUuid/chats/:sessionUuid [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/embed/new
   kind: api
@@ -6092,9 +6723,17 @@ nodes:
     reference_fields:
     - uuid
     reason: Created embed uuid.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/embed/new
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6114,6 +6753,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:201
       supports: POST /v1/embed/new [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Creates a PUBLIC chat widget (allowlist_domains / allow_prompt_override are the exposure controls).
 - key: http://localhost/api/v1/embed/{embedUuid}
   kind: api
@@ -6229,9 +6871,17 @@ nodes:
     reference_fields: []
     reason: Updated embed config.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/embed/00000000-0000-0000-0000-000000000000
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6251,6 +6901,10 @@ nodes:
     - type: source
       ref: server/endpoints/api/embed/index.js:287
       supports: POST + DELETE /v1/embed/:embedUuid [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->404; anonymous DELETE->403;
+        admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/mcp-servers
   kind: api
@@ -6309,9 +6963,17 @@ nodes:
     reference_fields:
     - name
     reason: MCP server names.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/mcp-servers
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6331,6 +6993,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:8
       supports: GET /v1/mcp-servers [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->403; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/mcp-servers/new
   kind: api
@@ -6426,9 +7091,17 @@ nodes:
     reference_fields: []
     reason: MCP server config (command executed / URL contacted).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/mcp-servers/new
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6448,6 +7121,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:48
       supports: POST /v1/mcp-servers/new [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Config can define a command the server executes -> code-execution/tool surface for agents.
 - key: http://localhost/api/v1/mcp-servers/reload
   kind: api
@@ -6495,9 +7171,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/mcp-servers/reload
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6517,6 +7201,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:108
       supports: POST /v1/mcp-servers/reload [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/mcp-servers/{name}/update
   kind: api
@@ -6603,9 +7290,17 @@ nodes:
     reference_fields: []
     reason: Replacement MCP config.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/mcp-servers/gtweb/update
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6625,6 +7320,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:139
       supports: POST /v1/mcp-servers/:name/update [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/mcp-servers/{name}/toggle
   kind: api
@@ -6683,9 +7381,17 @@ nodes:
   semantic_input_decisions:
   - *id080
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/mcp-servers/gtweb/toggle
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6705,6 +7411,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:209
       supports: POST /v1/mcp-servers/:name/toggle [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/api/v1/mcp-servers/{name}/toggle-tool
   kind: api
@@ -6792,9 +7501,17 @@ nodes:
     - toolName
     reason: MCP tool name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/mcp-servers/gtweb/toggle-tool
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6814,6 +7531,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:252
       supports: POST /v1/mcp-servers/:name/toggle-tool [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Disabled tools are not exposed to agents (agent tool-surface control).
 - key: http://localhost/api/v1/mcp-servers/{name}
   kind: api
@@ -6872,9 +7592,17 @@ nodes:
   semantic_input_decisions:
   - *id080
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /api/v1/mcp-servers/gtweb
+    identity: anonymous
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"No valid api key found."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -6894,14 +7622,17 @@ nodes:
     - type: source
       ref: server/endpoints/api/mcpServers/index.js:322
       supports: DELETE /v1/mcp-servers/:name [validApiKey]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 edges: []
 excluded_items:
-- item: 'Internal UI API (/api/* non-v1: /api/system/*, /api/workspace/*, /api/admin/*, /api/embed/*,
-    /api/agents/*, /api/mobile/*, ...)'
-  reason: Session/JWT-authenticated browser-app API consumed by the frontend; large separate surface.
-    Tracked as remaining work in environment.yaml (web_gt_status). Not yet enumerated here.
-- item: 'Developer API (/api/v1/*) modules not yet modeled: workspace, workspaceThread, document, openai,
-    admin, userManagement, embed, mcp-servers'
-  reason: In-progress. This checkpoint models the System Settings + Authentication module; the remaining
-    /api/v1 modules are enumerated in environment.yaml and will be added incrementally.
+- item: 'Internal UI API (/api/* non-v1: /api/system/*, /api/workspace/*, /api/admin/*, /api/embed/*, /api/agents/*, /api/mobile/*,
+    ...)'
+  reason: Session/JWT-authenticated browser-app API consumed by the frontend; large separate surface. Tracked as remaining
+    work in environment.yaml (web_gt_status). Not yet enumerated here.
+- item: 'Developer API (/api/v1/*) modules not yet modeled: workspace, workspaceThread, document, openai, admin, userManagement,
+    embed, mcp-servers'
+  reason: In-progress. This checkpoint models the System Settings + Authentication module; the remaining /api/v1 modules are
+    enumerated in environment.yaml and will be added incrementally.

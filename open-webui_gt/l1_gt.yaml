@@ -167,9 +167,17 @@ nodes:
     reference_fields:
     - profile_image_url
     reason: profile_image_url denotes ProfileImage(identity).
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -184,6 +192,8 @@ nodes:
     - 200
     admin:
     - 200
+    - 403
+    - 422
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost/api/v1
@@ -199,6 +209,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:185
       supports: GET / [get_current_user] -> SessionUserInfoResponse; re-issues token
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Re-issues a session token on every call; discloses caller role + effective permissions.
 - key: http://localhost/api/v1/auths/update/profile
   kind: api
@@ -315,9 +328,17 @@ nodes:
   semantic_output_decisions:
   - *id003
   - *id004
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/update/profile
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -332,6 +353,7 @@ nodes:
     - 200
     admin:
     - 200
+    - 422
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost/api/v1
@@ -347,8 +369,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:253
       supports: POST /update/profile [get_verified_user] -> UserProfileImageResponse
-    notes: profile_image_url passes validate_image_url; bio/name are stored-reflected (self-stored XSS
-      surface).
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: profile_image_url passes validate_image_url; bio/name are stored-reflected (self-stored XSS surface).
 - key: http://localhost/api/v1/auths/update/timezone
   kind: api
   methods:
@@ -423,9 +447,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Stored timezone.
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/update/timezone
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -447,6 +479,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:288
       supports: POST /update/timezone [get_current_user]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Low-sensitivity preference write.
 - key: http://localhost/api/v1/auths/update/password
   kind: api
@@ -528,9 +563,17 @@ nodes:
     reference_fields: []
     reason: Replacement credential.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/update/password
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -552,6 +595,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:316
       supports: POST /update/password [get_current_user] verify_password -> bool
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Credential write; requires the current password. Secrets are inputs only, never echoed.
 - key: http://localhost/api/v1/auths/ldap
   kind: api
@@ -653,9 +699,17 @@ nodes:
   - *id010
   - *id011
   - *id012
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/ldap
+    identity: anonymous
+    status: 422
+    content_type: application/json
+    body_excerpt: '{"detail":"Invalid authentication request."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -666,6 +720,9 @@ nodes:
     - 200
     - 400
     - 403
+    - 422
+    admin:
+    - 422
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost/api/v1
@@ -682,6 +739,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:409
       supports: POST /ldap -> SigninResult; escape_filter_chars on bind
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->422; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: LDAP bind boundary; filter chars escaped. Live only when LDAP is enabled.
 - key: http://localhost/api/v1/auths/signin
   kind: api
@@ -800,9 +860,17 @@ nodes:
   - *id004
   - *id012
   - *id003
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/signin
+    identity: anonymous
+    status: 422
+    content_type: application/json
+    body_excerpt: '{"detail":"Invalid authentication request."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -828,9 +896,11 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:676
       supports: 'WEBUI_AUTH_TRUSTED_EMAIL/ROLE_HEADER: proxy header establishes identity+role'
-    notes: 'Auth boundary. Rate-limited (5*3/180s). Alternate modes: trusted-header (proxy header sets
-      identity AND role -> impersonation if header spoofable) and WEBUI_AUTH=false (admin@localhost/admin
-      bootstrap).'
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->422; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: 'Auth boundary. Rate-limited (5*3/180s). Alternate modes: trusted-header (proxy header sets identity AND role ->
+      impersonation if header spoofable) and WEBUI_AUTH=false (admin@localhost/admin bootstrap).'
 - key: http://localhost/api/v1/auths/signup
   kind: api
   methods:
@@ -957,9 +1027,17 @@ nodes:
   - *id011
   - *id012
   - *id004
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/signup
+    identity: anonymous
+    status: 422
+    content_type: application/json
+    body_excerpt: '{"detail":"Invalid authentication request."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -982,6 +1060,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:849
       supports: POST /signup -> signup_handler; first user -> admin
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->422; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Registration boundary; gated by ui.enable_signup except the initial-admin bootstrap.
 - key: http://localhost/api/v1/auths/signout
   kind: api
@@ -1245,9 +1326,17 @@ nodes:
   - *id010
   - *id011
   - *id012
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/oauth/ollama/token/exchange
+    identity: anonymous
+    status: 422
+    content_type: application/json
+    body_excerpt: '{"detail":"Invalid authentication request."}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1271,8 +1360,11 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1605
       supports: POST /oauth/{provider}/token/exchange -> SigninResult; trusted client ids + rate limit
-    notes: 'Federated auth boundary: mints a local session from an external token. Best-effort rate limit
-      (no caller identity pre-validation); trusts configured client ids.'
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->422; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: 'Federated auth boundary: mints a local session from an external token. Best-effort rate limit (no caller identity
+      pre-validation); trusts configured client ids.'
 - key: http://localhost/api/v1/auths/add
   kind: api
   methods:
@@ -1419,9 +1511,17 @@ nodes:
   - *id004
   - *id012
   - *id010
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/add
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1436,6 +1536,7 @@ nodes:
     - 401
     admin:
     - 200
+    - 422
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost/api/v1
@@ -1451,8 +1552,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1051
       supports: POST /add [get_admin_user] -> AddUserResponse (returns a token)
-    notes: Admin sets role at creation (privilege assignment); response carries a session token for the
-      new user.
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: Admin sets role at creation (privilege assignment); response carries a session token for the new user.
 - key: http://localhost/api/v1/auths/admin/details
   kind: api
   methods:
@@ -1512,9 +1615,17 @@ nodes:
   semantic_output_decisions:
   - *id004
   - *id011
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/admin/details
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1536,6 +1647,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1124
       supports: GET /admin/details [get_current_user]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Discloses the admin's name/email to any authenticated user when SHOW_ADMIN_DETAILS is on.
 - key: http://localhost/api/v1/auths/admin/config
   kind: api
@@ -1631,13 +1745,21 @@ nodes:
     value_kind: content
     reference_capable: false
     reference_fields: []
-    reason: Instance auth/admin configuration blob (includes secret config such as ldap app password /
-      OAuth client secrets -- recorded as location, not value).
+    reason: Instance auth/admin configuration blob (includes secret config such as ldap app password / OAuth client secrets
+      -- recorded as location, not value).
   semantic_output_decisions:
   - *id024
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/admin/config
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1662,6 +1784,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1228
       supports: POST /admin/config [get_admin_user] AdminConfig
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Controls signup/default-role/api-key policy/JWT expiry; changing these reshapes the auth boundary.
 - key: http://localhost/api/v1/auths/admin/config/ldap/server
   kind: api
@@ -1762,9 +1888,17 @@ nodes:
     reason: LDAP bind/server configuration (app_dn_password is a stored secret -- location only).
   semantic_output_decisions:
   - *id027
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/admin/config/ldap/server
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1789,8 +1923,11 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1303
       supports: POST /admin/config/ldap/server [get_admin_user] LdapServerConfig
-    notes: Carries the LDAP bind secret (app_dn_password) -- a stored credential location; GT records
-      location, not value.
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->422'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: Carries the LDAP bind secret (app_dn_password) -- a stored credential location; GT records location, not value.
 - key: http://localhost/api/v1/auths/admin/config/ldap
   kind: api
   methods:
@@ -1892,9 +2029,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: LDAP auth method state.
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/admin/config/ldap
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1919,6 +2064,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1338
       supports: POST /admin/config/ldap [get_admin_user]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Enables/disables an entire authentication path.
 - key: http://localhost/api/v1/auths/admin/config/oauth
   kind: api
@@ -2018,9 +2167,17 @@ nodes:
     reason: OAuth provider configuration (client_secret is a stored secret -- location only).
   semantic_output_decisions:
   - *id030
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/admin/config/oauth
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2045,6 +2202,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1489
       supports: POST /admin/config/oauth [get_admin_user] OAuthConfigForm
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200; anonymous POST->401; admin
+        POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Carries OAuth client secrets (stored-credential location); controls federated auth providers.
 - key: http://localhost/api/v1/auths/api_key
   kind: api
@@ -2153,9 +2314,17 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: api_key denotes ApiKey(credential).
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/auths/api_key
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -2185,16 +2354,19 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1553
       supports: GET /api_key
-    notes: Mints/reads/revokes a long-lived `sk-` credential; gated by enable_api_keys + features.api_keys
-      permission.
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->403; anonymous POST->401; admin
+        POST->403; - DELETE->skipped'
+      supports: 'runtime: handler reached incl. mutating methods'
+    notes: Mints/reads/revokes a long-lived `sk-` credential; gated by enable_api_keys + features.api_keys permission.
 edges: []
 excluded_items:
 - item: WebSocket transport (/ws, socket.io) and static mounts (/static, /pyodide, SPA fallback)
-  reason: Not HTTP request/response attack-surface nodes in the pengent-web-gt-v1 sense; the realtime
-    channel is covered by the agentic layer. Out of scope for L1/L2.
-- item: 'Open WebUI routers not yet modeled (34 of 36): users, chats, models, files, knowledge, folders,
-    groups, prompts, tools, functions, memories, notes, channels, comments, retrieval, images, audio,
-    ollama, openai, pipelines, tasks, configs, evaluations, mfa, sessions, scim, skills, apps, automations,
-    calendar, notifications, analytics, terminals, utils, search, tether'
-  reason: In-progress, module by module. This checkpoint models the Authentication + Account router (/api/v1/auths).
-    Remaining routers + route counts are tracked in environment.yaml web_gt:.
+  reason: Not HTTP request/response attack-surface nodes in the pengent-web-gt-v1 sense; the realtime channel is covered by
+    the agentic layer. Out of scope for L1/L2.
+- item: 'Open WebUI routers not yet modeled (34 of 36): users, chats, models, files, knowledge, folders, groups, prompts,
+    tools, functions, memories, notes, channels, comments, retrieval, images, audio, ollama, openai, pipelines, tasks, configs,
+    evaluations, mfa, sessions, scim, skills, apps, automations, calendar, notifications, analytics, terminals, utils, search,
+    tether'
+  reason: In-progress, module by module. This checkpoint models the Authentication + Account router (/api/v1/auths). Remaining
+    routers + route counts are tracked in environment.yaml web_gt:.

@@ -87,6 +87,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:50
       supports: GET /session/csrf -> {csrf}
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/csrf)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-002
   name: Get signup honeypot
@@ -164,6 +167,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:838
       supports: GET /session/hp -> {value, challenge}
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/hp)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-003
   name: Log in with password
@@ -288,8 +294,11 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:13
       supports: rate_limit_login
-    notes: Rate-limited per IP and per account; enforces approval/activation/password-expiry/2FA. Generic
-      invalid_credentials avoids user enumeration on the password check.
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+    notes: Rate-limited per IP and per account; enforces approval/activation/password-expiry/2FA. Generic invalid_credentials
+      avoids user enumeration on the password check.
 - id: gt-action-004
   name: Log out
   kind: normal
@@ -441,6 +450,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:777
       supports: GET /session/current -> CurrentUserSerializer
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/current)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-006
   name: Read API-key scopes
@@ -522,6 +534,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:849
       supports: GET /session/scopes -> scopes or 404
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/scopes)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-007
   name: Request password reset
@@ -599,8 +614,10 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:713
       supports: POST /session/forgot_password require(:login)
-    notes: Deliberately does not reveal whether the account exists (unless hide_email_address_taken is
-      off).
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/forgot_password)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+    notes: Deliberately does not reveal whether the account exists (unless hide_email_address_taken is off).
 - id: gt-action-008
   name: Redeem password reset
   kind: normal
@@ -702,6 +719,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:754
       supports: POST /session/password-reset-code/verify
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/password-reset-code/verify)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-009
   name: Check email-login token
@@ -797,6 +817,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:456
       supports: GET /session/email-login/:token -> info
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/email-login/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-010
   name: Log in via email token
@@ -902,6 +925,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:13
       supports: rate_limit_login
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/email-login/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-011
   name: Request login code
@@ -979,6 +1005,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:525
       supports: POST /session/login-code; honeypot + rate limit
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/login-code)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-012
   name: Verify login code
@@ -1081,6 +1110,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:548
       supports: POST /session/login-code/verify; rate limit
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/login-code/verify)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-013
   name: Show OTP confirmation
@@ -1170,6 +1202,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:562
       supports: GET /session/otp/:token -> page
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/otp/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-014
   name: Redeem OTP
@@ -1253,6 +1288,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:562
       supports: POST /session/otp/:token; redis del
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/otp/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-015
   name: Show 2FA challenge
@@ -1344,6 +1382,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:583
       supports: GET /session/2fa require(:nonce)
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/2fa)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-016
   name: Perform 2FA step
@@ -1433,6 +1474,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:640
       supports: POST /session/2fa authenticate
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/2fa)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-017
   name: Get passkey challenge
@@ -1511,6 +1555,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:419
       supports: GET /session/passkey/challenge
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/passkey/challenge)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-018
   name: Log in with passkey
@@ -1607,6 +1654,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:423
       supports: POST /session/passkey/auth require(:publicKeyCredential)
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/passkey/auth)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-019
   name: Begin SSO login
@@ -1686,6 +1736,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:54
       supports: GET /session/sso -> redirect
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/sso)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-020
   name: Complete SSO login
@@ -1795,6 +1848,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:197
       supports: GET /session/sso_login require(:sso,:sig)
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/sso_login)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'FEDERATED AUTH BOUNDARY: trust rests on the shared-secret HMAC + nonce validation.'
 - id: gt-action-021
   name: Assert identity as SSO provider
@@ -1893,6 +1949,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:73
       supports: GET /session/sso_provider -> signed redirect_url
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/sso_provider)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'Discourse-as-IdP: discloses this user''s identity to the downstream consumer per its request.'
 - id: gt-action-022
   name: Register account
@@ -1966,6 +2025,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:737
       supports: register_account
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Honeypot + approval/activation gated; name/user_fields stored-reflected.
 - id: gt-action-023
   name: Check username availability
@@ -2046,6 +2108,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:634
       supports: check_username
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/check_username)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Username enumeration surface.
 - id: gt-action-024
   name: Check email availability
@@ -2122,6 +2187,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:697
       supports: check_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/check_email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Email enumeration surface; rate-limited.
 - id: gt-action-025
   name: Search users
@@ -2198,6 +2266,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1342
       supports: search_users
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/search/users)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Directory enumeration surface.
 - id: gt-action-026
   name: View user profile
@@ -2274,6 +2345,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:134
       supports: show_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}.json)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups the users#show view aliases.
 - id: gt-action-027
   name: View user summary
@@ -2350,6 +2424,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:526
       supports: user_summary
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/summary)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-028
   name: Read account preferences
@@ -2434,6 +2511,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:507
       supports: read_preferences
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Self-or-staff guarded; groups /preferences/* views.
 - id: gt-action-029
   name: Reveal account emails
@@ -2518,6 +2598,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:319
       supports: check_emails
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/emails)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Sensitive PII; staff can view other users' emails.
 - id: gt-action-030
   name: Update profile
@@ -2600,6 +2683,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:219
       supports: update_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: bio/website/user_fields stored-reflected.
 - id: gt-action-031
   name: Change username
@@ -2682,6 +2768,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:288
       supports: change_username
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/username)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Impacts @mentions and references.
 - id: gt-action-032
   name: Set primary email
@@ -2769,6 +2858,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:372
       supports: set_primary_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/primary-email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Account-takeover-relevant (recovery email).
 - id: gt-action-033
   name: Add secondary email
@@ -2849,6 +2941,9 @@ nodes:
     - type: source
       ref: app/controllers/users_email_controller.rb:1
       supports: add_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-034
   name: Change email
@@ -2931,6 +3026,9 @@ nodes:
     - type: source
       ref: app/controllers/users_email_controller.rb:1
       supports: change_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-035
   name: Remove secondary email
@@ -3010,6 +3108,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:406
       supports: remove_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-036
   name: Set badge title
@@ -3092,6 +3193,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:459
       supports: set_badge_title
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/badge_title)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-037
   name: Pick avatar
@@ -3174,6 +3278,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1430
       supports: pick_avatar
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/avatar/pick)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-038
   name: Select avatar by URL
@@ -3256,6 +3363,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1465
       supports: select_avatar
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/avatar/select)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: URL-sourced (server fetch -> SSRF-relevant).
 - id: gt-action-039
   name: Clear profile image
@@ -3335,6 +3445,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1496
       supports: destroy_user_image
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/user_image)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-040
   name: Unlink OAuth account
@@ -3577,6 +3690,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1521
       supports: set_user_notification_level
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/notification_level)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Ignoring staff is restricted.
 - id: gt-action-043
   name: List second factors
@@ -3661,6 +3777,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1673
       supports: list_second_factors
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/second_factors)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Requires a confirmed session.
 - id: gt-action-044
   name: Edit second factor
@@ -3743,6 +3862,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1872
       supports: update_second_factor
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/second_factor)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-045
   name: Create TOTP secret
@@ -3823,6 +3945,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1706
       supports: create_second_factor_totp
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/create_second_factor_totp)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Activated by enable_second_factor_totp.
 - id: gt-action-046
   name: Enable TOTP
@@ -3905,6 +4030,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1830
       supports: enable_second_factor_totp
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/enable_second_factor_totp)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-047
   name: Disable second factor
@@ -3984,6 +4112,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1858
       supports: disable_second_factor
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/disable_second_factor)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Weakens account auth.
 - id: gt-action-048
   name: Stage security-key challenge
@@ -4068,6 +4199,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1721
       supports: create_security_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/create_second_factor_security_key)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-049
   name: Register security key
@@ -4148,6 +4282,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1740
       supports: register_security_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/register_second_factor_security_key)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-050
   name: Edit security key
@@ -4230,6 +4367,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1820
       supports: update_security_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/security_key)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-051
   name: Generate 2FA backup codes
@@ -4310,6 +4450,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1700
       supports: create_second_factor_backup
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/second_factors_backup)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Returns recovery credentials (shown once).
 - id: gt-action-052
   name: Stage passkey challenge
@@ -4394,6 +4537,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1756
       supports: create_passkey
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/create_passkey)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-053
   name: Register passkey
@@ -4474,6 +4620,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1771
       supports: register_passkey
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/register_passkey)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-054
   name: Rename passkey
@@ -4556,6 +4705,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1807
       supports: rename_passkey
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/rename_passkey/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-055
   name: Delete passkey
@@ -4635,6 +4787,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1791
       supports: delete_passkey
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/delete_passkey/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-056
   name: Check trusted session
@@ -4719,6 +4874,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1669
       supports: trusted_session
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/trusted-session)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-057
   name: Confirm session (step-up)
@@ -4805,6 +4963,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1655
       supports: confirm_session
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/confirm-session)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-058
   name: Check reset token
@@ -4895,6 +5056,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:897
       supports: password_reset_show
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/password-reset/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-059
   name: Redeem password reset
@@ -4984,6 +5148,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:955
       supports: password_reset_update
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/password-reset/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 2FA enforced; rate-limited.
 - id: gt-action-060
   name: Show activation
@@ -5060,6 +5227,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1197
       supports: activate_account_show
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/activate-account/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-061
   name: Activate account
@@ -5141,6 +5311,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1208
       supports: activate_account
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/activate-account/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-062
   name: Change pre-activation email
@@ -5215,6 +5388,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1256
       supports: update_activation_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/update-activation-email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Password-gated when a password exists; rate-limited.
 - id: gt-action-063
   name: Resend activation email
@@ -5287,6 +5463,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1312
       supports: send_activation_email
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/action/send_activation_email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Rate-limited; enumeration-resistant.
 - id: gt-action-064
   name: Confirm email token
@@ -5375,6 +5554,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1066
       supports: confirm_email_token
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/confirm-email-token/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-065
   name: Show admin recovery login
@@ -5451,6 +5633,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1086
       supports: admin_login_show
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/admin-login)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-066
   name: Request admin login link
@@ -5523,6 +5708,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1086
       supports: admin_login_request
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/admin-login)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Admin account-recovery path; rate-limited.
 - id: gt-action-067
   name: Show confirm-admin
@@ -5599,6 +5787,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1636
       supports: confirm_admin_show
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/confirm-admin/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-068
   name: Grant admin via token
@@ -5696,6 +5887,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1636
       supports: confirm_admin
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/confirm-admin/{token})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: PRIVILEGE ESCALATION path -- guarded by the emailed one-time token.
 - id: gt-action-069
   name: Request email login link
@@ -5768,6 +5962,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1112
       supports: request_email_login
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/email-login)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Enumeration-resistant.
 - id: gt-action-070
   name: Toggle anonymous mode
@@ -5851,6 +6048,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1153
       supports: toggle_anon
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/toggle-anon)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-071
   name: Read recent searches
@@ -5935,6 +6135,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1581
       supports: recent_searches
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/recent-searches)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-072
   name: Clear recent searches
@@ -6014,6 +6217,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1611
       supports: reset_recent_searches
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/recent-searches)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-073
   name: Read topic
@@ -6090,6 +6296,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:77
       supports: show_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups print/summary/feed/external-id views.
 - id: gt-action-074
   name: Edit topic
@@ -6172,6 +6381,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:433
       supports: update_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-075
   name: Delete topic
@@ -6251,6 +6463,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:786
       supports: destroy_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-076
   name: Load topic posts
@@ -6327,6 +6542,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:309
       supports: topic_posts
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/posts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups post_ids/excerpts.
 - id: gt-action-077
   name: Recover topic
@@ -6426,6 +6644,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:812
       supports: recover_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/recover)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-078
   name: Set topic status
@@ -6521,6 +6742,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:587
       supports: set_topic_status
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/status)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-079
   name: Mute topic
@@ -6603,6 +6827,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:638
       supports: mute_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/mute)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-080
   name: Set topic timer
@@ -6698,6 +6925,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:646
       supports: set_topic_timer
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/timer)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Future auto close/delete/publish.
 - id: gt-action-081
   name: Make topic banner
@@ -6793,6 +7023,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:704
       supports: make_banner
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/make-banner)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Shown to all users.
 - id: gt-action-082
   name: Publish shared draft
@@ -6888,6 +7121,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:244
       supports: publish_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id}/publish)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-083
   name: Update shared draft
@@ -6983,6 +7219,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:414
       supports: update_shared_draft
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id}/shared-draft)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-084
   name: Convert topic type
@@ -7078,6 +7317,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:1323
       supports: convert_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id}/convert-topic/{type})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Changes visibility audience.
 - id: gt-action-085
   name: Update topic tags
@@ -7160,6 +7402,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:529
       supports: update_topic_tags
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/tags)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-086
   name: Invite to topic
@@ -7240,6 +7485,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:887
       supports: invite_to_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/invite)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: On PMs grants another user read access.
 - id: gt-action-087
   name: Invite group to topic
@@ -7320,6 +7568,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:854
       supports: invite_group_to_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/invite-group)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-088
   name: Remove PM participant
@@ -7399,6 +7650,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:826
       supports: remove_allowed_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/remove-allowed-user)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-089
   name: Move/split posts
@@ -7494,6 +7748,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:999
       supports: move_posts
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/move-posts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-090
   name: Merge topic
@@ -7589,6 +7846,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:964
       supports: merge_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/merge-topic)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-091
   name: Change post owner
@@ -7684,6 +7944,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:1040
       supports: change_post_owners
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/change-owner)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Attribution integrity.
 - id: gt-action-092
   name: Change topic timestamps
@@ -7779,6 +8042,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:1060
       supports: change_timestamps
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/change-timestamp)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-093
   name: Record read timings
@@ -7861,6 +8127,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:1098
       supports: topic_timings
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/timings)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-094
   name: Bookmark topic
@@ -7943,6 +8212,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:775
       supports: bookmark_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/bookmark)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-095
   name: Set topic notification level
@@ -8025,6 +8297,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:955
       supports: set_topic_notifications
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-096
   name: Archive PM
@@ -8107,6 +8382,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:729
       supports: archive_message
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id}/archive-message)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-097
   name: Bulk topic operation
@@ -8189,6 +8467,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:1145
       supports: bulk_topics
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/topics/bulk)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-098
   name: Dismiss new/unread
@@ -8271,6 +8552,9 @@ nodes:
     - type: source
       ref: app/controllers/topics_controller.rb:1239
       supports: reset_new
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/topics/reset-new)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-099
   name: Create post
@@ -8351,6 +8635,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:168
       supports: create_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: PRIMARY untrusted content entry; raw markdown cooked to HTML (stored-XSS surface).
 - id: gt-action-100
   name: Read post
@@ -8427,6 +8714,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:297
       supports: read_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-101
   name: Edit post
@@ -8509,6 +8799,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:198
       supports: update_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Guardian#can_edit_post? (author window/wiki/staff).
 - id: gt-action-102
   name: Delete post
@@ -8588,6 +8881,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:332
       supports: destroy_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Recoverable.
 - id: gt-action-103
   name: Recover post
@@ -8683,6 +8979,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:375
       supports: recover_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/recover)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-104
   name: Bulk delete posts
@@ -8775,6 +9074,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:401
       supports: destroy_many_posts
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/destroy_many)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-105
   name: Merge posts
@@ -8870,6 +9172,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:424
       supports: merge_posts
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/merge_posts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-106
   name: Toggle wiki
@@ -8965,6 +9270,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:728
       supports: toggle_wiki
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/wiki)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Widens edit surface to trusted users.
 - id: gt-action-107
   name: Set post type
@@ -9060,6 +9368,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:740
       supports: set_post_type
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/post_type)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-108
   name: Rebake post
@@ -9155,6 +9466,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:766
       supports: rebake_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/rebake)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-109
   name: Lock post
@@ -9250,6 +9564,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:677
       supports: lock_post
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/locked)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-110
   name: Set post notice
@@ -9345,6 +9662,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:684
       supports: set_post_notice
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/notice)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-111
   name: List post replies
@@ -9421,6 +9741,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:436
       supports: post_replies
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/replies)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-112
   name: Read post revision
@@ -9497,6 +9820,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:469
       supports: post_revision
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/revisions/{revision})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups revision view ops.
 - id: gt-action-113
   name: Hide revision
@@ -9592,6 +9918,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:499
       supports: hide_revision
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/revisions/{revision}/hide)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups show/unlist/relist revision ops.
 - id: gt-action-114
   name: Revert revision
@@ -9687,6 +10016,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:597
       supports: revert_revision
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/revisions/{revision}/revert)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-115
   name: Permanently delete revisions
@@ -9779,6 +10111,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:526
       supports: permanently_delete_revisions
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/revisions/permanently_delete)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Irreversible.
 - id: gt-action-116
   name: Remove post bookmark
@@ -9858,6 +10193,9 @@ nodes:
     - type: source
       ref: app/controllers/posts_controller.rb:713
       supports: destroy_post_bookmark
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/bookmark)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-117
   name: List categories
@@ -9934,6 +10272,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:45
       supports: list_categories
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-118
   name: Create category
@@ -10027,6 +10368,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:177
       supports: create_category
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Permissions define group-level access.
 - id: gt-action-119
   name: Update category
@@ -10122,6 +10466,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:249
       supports: update_category
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Permission edits change visibility/posting rights.
 - id: gt-action-120
   name: Delete category
@@ -10214,6 +10561,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:362
       supports: destroy_category
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-121
   name: Reorder categories
@@ -10309,6 +10659,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:110
       supports: reorder_categories
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/reorder)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-122
   name: Move category
@@ -10404,6 +10757,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:95
       supports: move_category
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/category/{category_id}/move)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-123
   name: Change category slug
@@ -10499,6 +10855,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:331
       supports: update_category_slug
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/category/{category_id}/slug)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-124
   name: Set category notification level
@@ -10581,6 +10940,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:347
       supports: set_category_notifications
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/category/{category_id}/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-125
   name: Read category
@@ -10657,6 +11019,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:150
       supports: show_category
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/c/{id}/show)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-126
   name: List category visible groups
@@ -10733,6 +11098,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:400
       supports: category_visible_groups
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/c/{id}/visible_groups)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-127
   name: Search categories
@@ -10809,6 +11177,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:458
       supports: search_categories
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/search)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-128
   name: Hierarchical category search
@@ -10885,6 +11256,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:444
       supports: hierarchical_search_categories
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/hierarchical_search)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-129
   name: Find categories
@@ -10961,6 +11335,9 @@ nodes:
     - type: source
       ref: app/controllers/categories_controller.rb:411
       supports: find_categories
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/find)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-130
   name: List tags
@@ -11037,6 +11414,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:107
       supports: list_tags
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tags)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-131
   name: Show tag topics
@@ -11113,6 +11493,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:11
       supports: show_tag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tag/{tag_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-132
   name: Rename tag
@@ -11208,6 +11591,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:269
       supports: update_tag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tag/{tag_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Affects all tagged topics.
 - id: gt-action-133
   name: Delete tag
@@ -11300,6 +11686,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:374
       supports: destroy_tag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tag/{tag_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-134
   name: Read tag notification level
@@ -11384,6 +11773,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:424
       supports: tag_notifications
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tag/{tag_id}/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-135
   name: Set tag notification level
@@ -11466,6 +11858,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:443
       supports: update_tag_notifications
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tag/{tag_id}/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-136
   name: Add tag synonyms
@@ -11559,6 +11954,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:459
       supports: create_tag_synonyms
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tag/{tag_id}/synonyms)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups synonym delete.
 - id: gt-action-137
   name: Search tags
@@ -11635,6 +12033,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:400
       supports: search_tags
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tags/filter/search)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-138
   name: Import tags CSV
@@ -11728,6 +12129,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:308
       supports: upload_tags
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tags/upload)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: File ingestion.
 - id: gt-action-139
   name: Bulk create tags
@@ -11821,6 +12225,9 @@ nodes:
     - type: source
       ref: app/controllers/tags_controller.rb:351
       supports: bulk_create_tags
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tags/bulk_create)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-140
   name: Read group
@@ -11897,6 +12304,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:1
       supports: show_group
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-141
   name: Update group
@@ -11992,6 +12402,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:103
       supports: update_group
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Visibility/membership-policy changes.
 - id: gt-action-142
   name: List group members
@@ -12068,6 +12481,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:201
       supports: group_members
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/members)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-143
   name: Add group members
@@ -12163,6 +12579,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:302
       supports: add_group_members
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/members)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Grants group-scoped access.
 - id: gt-action-144
   name: Remove group members
@@ -12255,6 +12674,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:395
       supports: remove_group_members
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/members)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-145
   name: Add group owners
@@ -12350,6 +12772,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:330
       supports: add_group_owners
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/owners)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Privilege delegation.
 - id: gt-action-146
   name: Remove group owner
@@ -12442,6 +12867,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:1
       supports: remove_group_owner
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/owners)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-147
   name: Join group
@@ -12524,6 +12952,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:347
       supports: join_group
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/join)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups /leave.
 - id: gt-action-148
   name: Request group membership
@@ -12604,6 +13035,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:426
       supports: request_group_membership
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/request_membership)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-149
   name: Handle membership request
@@ -12686,6 +13120,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:356
       supports: handle_membership_request
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/handle_membership_request)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-150
   name: Set group notification level
@@ -12768,6 +13205,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:437
       supports: set_group_notifications
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/g/{id}/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-151
   name: Check group name
@@ -12852,6 +13292,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:389
       supports: check_group_name
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/groups/check-name)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-152
   name: Search groups
@@ -12928,6 +13371,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:482
       supports: search_groups
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/groups/search)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-153
   name: Create group
@@ -13021,6 +13467,9 @@ nodes:
     - type: source
       ref: app/controllers/groups_controller.rb:1
       supports: admin_create_group
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/groups)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups admin group delete.
 - id: gt-action-154
   name: Create invite
@@ -13101,6 +13550,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:142
       supports: create_invite
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: group_ids auto-grants groups on redemption; link invites reusable.
 - id: gt-action-155
   name: Delete invite
@@ -13180,6 +13632,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:370
       supports: destroy_invite
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-156
   name: Show invite
@@ -13360,6 +13815,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:383
       supports: accept_invite
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites/show/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Applies invite group grants.
 - id: gt-action-158
   name: Redeem invite via SSO
@@ -13432,6 +13890,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:59
       supports: invite_sso
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites/{id}/sso)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-159
   name: Bulk create invites
@@ -13525,6 +13986,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:73
       supports: create_multiple_invites
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites/create-multiple)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-160
   name: Invite from CSV
@@ -13618,6 +14082,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:536
       supports: invite_upload_csv
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites/upload_csv)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: File ingestion.
 - id: gt-action-161
   name: Resend invite
@@ -13700,6 +14167,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:496
       supports: resend_invite
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/invites/reinvite)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups reinvite-all/destroy-expired.
 - id: gt-action-162
   name: Retrieve invite
@@ -13868,6 +14338,9 @@ nodes:
     - type: source
       ref: app/controllers/notifications_controller.rb:1
       supports: list_notifications
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-164
   name: Create notification
@@ -13961,6 +14434,9 @@ nodes:
     - type: source
       ref: app/controllers/notifications_controller.rb:146
       supports: create_notification
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-165
   name: Update notification
@@ -14043,6 +14519,9 @@ nodes:
     - type: source
       ref: app/controllers/notifications_controller.rb:151
       supports: update_notification
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-166
   name: Delete notification
@@ -14122,6 +14601,9 @@ nodes:
     - type: source
       ref: app/controllers/notifications_controller.rb:156
       supports: destroy_notification
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-167
   name: Mark notifications read
@@ -14204,6 +14686,9 @@ nodes:
     - type: source
       ref: app/controllers/notifications_controller.rb:120
       supports: mark_read
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications/mark-read)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-168
   name: Read notification totals
@@ -14288,6 +14773,9 @@ nodes:
     - type: source
       ref: app/controllers/notifications_controller.rb:161
       supports: notification_totals
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications/totals)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-169
   name: Create upload
@@ -14368,6 +14856,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:26
       supports: create_upload
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'FILE-INGESTION + SSRF: `url` triggers a server-side download; type/size validated.'
 - id: gt-action-170
   name: Resolve upload short-urls
@@ -14452,6 +14943,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:97
       supports: lookup_upload_urls
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads/lookup-urls)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Honors secure-upload access.
 - id: gt-action-171
   name: Lookup upload metadata
@@ -14536,6 +15030,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:246
       supports: lookup_upload_metadata
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads/lookup-metadata)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-172
   name: Generate presigned PUT
@@ -14616,6 +15113,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:409
       supports: generate_presigned_put
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads/generate-presigned-put)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Size/type validated before signing.
 - id: gt-action-173
   name: Complete external upload
@@ -14696,6 +15196,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:409
       supports: complete_external_upload
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads/complete-external-upload)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-174
   name: Begin multipart upload
@@ -14776,6 +15279,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:409
       supports: create_multipart_upload
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads/create-multipart)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups complete/abort/batch-presign.
 - id: gt-action-175
   name: Serve upload
@@ -14852,6 +15358,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:161
       supports: show_upload
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/uploads/{site}/{sha})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-176
   name: Serve secure upload
@@ -14956,6 +15465,9 @@ nodes:
     - type: source
       ref: app/controllers/uploads_controller.rb:190
       supports: show_secure_upload
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/secure-uploads/{path})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: IDOR surface on secure media.
 - id: gt-action-177
   name: Create bookmark
@@ -15036,6 +15548,9 @@ nodes:
     - type: source
       ref: app/controllers/bookmarks_controller.rb:6
       supports: create_bookmark
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/bookmarks)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-178
   name: Edit bookmark
@@ -15118,6 +15633,9 @@ nodes:
     - type: source
       ref: app/controllers/bookmarks_controller.rb:49
       supports: update_bookmark
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/bookmarks/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-179
   name: Delete bookmark
@@ -15197,6 +15715,9 @@ nodes:
     - type: source
       ref: app/controllers/bookmarks_controller.rb:42
       supports: destroy_bookmark
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/bookmarks/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-180
   name: Toggle bookmark pin
@@ -15279,6 +15800,9 @@ nodes:
     - type: source
       ref: app/controllers/bookmarks_controller.rb:69
       supports: toggle_bookmark_pin
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/bookmarks/{id}/toggle_pin)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-181
   name: Bulk bookmark op
@@ -15361,6 +15885,9 @@ nodes:
     - type: source
       ref: app/controllers/bookmarks_controller.rb:81
       supports: bulk_bookmarks
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/bookmarks/bulk)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-182
   name: List drafts
@@ -15445,6 +15972,9 @@ nodes:
     - type: source
       ref: app/controllers/drafts_controller.rb:1
       supports: list_drafts
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/drafts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-183
   name: Save draft
@@ -15525,6 +16055,9 @@ nodes:
     - type: source
       ref: app/controllers/drafts_controller.rb:39
       supports: save_draft
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/drafts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-184
   name: Read draft
@@ -15609,6 +16142,9 @@ nodes:
     - type: source
       ref: app/controllers/drafts_controller.rb:1
       supports: read_draft
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/drafts/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-185
   name: Delete draft
@@ -15688,6 +16224,9 @@ nodes:
     - type: source
       ref: app/controllers/drafts_controller.rb:142
       supports: destroy_draft
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/drafts/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups bulk_destroy.
 - id: gt-action-186
   name: Search content
@@ -15840,6 +16379,9 @@ nodes:
     - type: source
       ref: app/controllers/directory_items_controller.rb:1
       supports: directory_items
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/directory_items)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-188
   name: Read about page
@@ -15916,6 +16458,9 @@ nodes:
     - type: source
       ref: app/controllers/about_controller.rb:1
       supports: about
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/about)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-189
   name: Read site bootstrap
@@ -15992,6 +16537,9 @@ nodes:
     - type: source
       ref: app/controllers/site_controller.rb:1
       supports: site
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/site)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Exposes client-visible settings.
 - id: gt-action-190
   name: Like/flag post
@@ -16072,6 +16620,9 @@ nodes:
     - type: source
       ref: app/controllers/post_actions_controller.rb:1
       supports: create_post_action
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/post_actions)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Flags enqueue a reviewable; rate-limited.
 - id: gt-action-191
   name: Remove post action
@@ -16151,6 +16702,9 @@ nodes:
     - type: source
       ref: app/controllers/post_actions_controller.rb:1
       supports: destroy_post_action
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/post_actions)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-192
   name: List user actions
@@ -16227,6 +16781,9 @@ nodes:
     - type: source
       ref: app/controllers/user_actions_controller.rb:1
       supports: user_actions
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/user_actions)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-193
   name: Report illegal content
@@ -16299,6 +16856,9 @@ nodes:
     - type: source
       ref: app/controllers/dsa_notices_controller.rb:1
       supports: dsa_report
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/dsa/report-illegal-content)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Email-verified; rate-limited.
 - id: gt-action-194
   name: Resolve mentions
@@ -16383,6 +16943,9 @@ nodes:
     - type: source
       ref: app/controllers/composer_controller.rb:1
       supports: composer_mentions
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/composer/mentions)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-195
   name: Track outbound click
@@ -16455,6 +17018,9 @@ nodes:
     - type: source
       ref: app/controllers/clicks_controller.rb:1
       supports: track_click
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/clicks/track)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Open-redirect-validated.
 - id: gt-action-196
   name: List moderation queue
@@ -16552,6 +17118,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:13
       supports: reviewables_index
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Discloses flagged/hidden content to staff.
 - id: gt-action-197
   name: Read reviewable
@@ -16649,6 +17218,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:173
       supports: show_reviewable
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-198
   name: Edit reviewable
@@ -16744,6 +17316,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:227
       supports: update_reviewable
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-199
   name: Delete reviewable
@@ -16836,6 +17411,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:192
       supports: destroy_reviewable
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-200
   name: Perform moderation action
@@ -16931,6 +17509,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:266
       supports: perform_reviewable
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id}/perform/{action_id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: HIGH-IMPACT moderation authority (can delete/suspend users).
 - id: gt-action-201
   name: Scrub reviewable
@@ -17026,6 +17607,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:207
       supports: scrub_reviewable
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id}/scrub)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-202
   name: Add reviewable note
@@ -17119,6 +17703,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewable_notes_controller.rb:1
       supports: create_reviewable_note
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id}/notes)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-203
   name: Record DSA classification
@@ -17214,6 +17801,9 @@ nodes:
     - type: source
       ref: app/controllers/dsa_statements_controller.rb:1
       supports: dsa_classify
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/{reviewable_id}/dsa-classification)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-204
   name: Read queue settings
@@ -17311,6 +17901,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:310
       supports: reviewable_settings
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/settings)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-205
   name: Update queue settings
@@ -17406,6 +17999,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:310
       supports: update_reviewable_settings
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/settings)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-206
   name: Reviewable count
@@ -17503,6 +18099,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewables_controller.rb:120
       supports: reviewable_count
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/review/count)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-207
   name: Claim topic reviewables
@@ -17596,6 +18195,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewable_claimed_topics_controller.rb:1
       supports: claim_reviewable_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/reviewable_claimed_topics)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-208
   name: Release claimed topic
@@ -17688,6 +18290,9 @@ nodes:
     - type: source
       ref: app/controllers/reviewable_claimed_topics_controller.rb:1
       supports: release_reviewable_topic
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/reviewable_claimed_topics)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-209
   name: List site settings
@@ -17785,6 +18390,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/site_settings_controller.rb:1
       supports: list_site_settings
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/site_settings)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Full config disclosure.
 - id: gt-action-210
   name: Update site setting
@@ -17880,6 +18488,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/site_settings_controller.rb:1
       supports: update_site_setting
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/site_settings/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'HIGH-IMPACT: governs auth/uploads/embedding/CSP/outbound.'
 - id: gt-action-211
   name: Read dashboard
@@ -17977,6 +18588,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/dashboard_controller.rb:1
       supports: admin_dashboard
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/dashboard)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-212
   name: List API keys
@@ -18074,6 +18688,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/api_controller.rb:1
       supports: list_api_keys
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-213
   name: Create API key
@@ -18167,6 +18784,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/api_controller.rb:1
       supports: create_api_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Long-lived credential; scopes define authority.
 - id: gt-action-214
   name: Read API key
@@ -18264,6 +18884,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/api_controller.rb:1
       supports: read_api_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-215
   name: Update API key
@@ -18359,6 +18982,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/api_controller.rb:1
       supports: update_api_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups revoke/undo-revoke.
 - id: gt-action-216
   name: Delete API key
@@ -18451,6 +19077,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/api_controller.rb:1
       supports: delete_api_key
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-217
   name: List webhooks
@@ -18548,6 +19177,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: list_web_hooks
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-218
   name: Create webhook
@@ -18641,6 +19273,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: create_web_hook
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'SSRF/exfil: payload_url receives server-side POSTs.'
 - id: gt-action-219
   name: Read webhook
@@ -18738,6 +19373,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: read_web_hook
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-220
   name: Update webhook
@@ -18833,6 +19471,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: update_web_hook
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-221
   name: Delete webhook
@@ -18925,6 +19566,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: delete_web_hook
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-222
   name: Ping webhook
@@ -19018,6 +19662,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: ping_web_hook
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks/{id}/ping)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: On-demand SSRF test vector.
 - id: gt-action-223
   name: Redeliver webhook event
@@ -19111,6 +19758,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: redeliver_web_hook_event
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks/{id}/events/{event_id}/redeliver)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups bulk/failed redeliver.
 - id: gt-action-224
   name: List backups
@@ -19208,6 +19858,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: list_backups
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-225
   name: Create backup
@@ -19301,6 +19954,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: create_backup
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Backup = entire DB.
 - id: gt-action-226
   name: Download backup
@@ -19398,6 +20054,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: download_backup
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Full-database exfiltration.
 - id: gt-action-227
   name: Email backup link
@@ -19493,6 +20152,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: email_backup
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-228
   name: Delete backup
@@ -19585,6 +20247,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: delete_backup
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-229
   name: Restore backup
@@ -19676,6 +20341,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: restore_backup
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/{id}/restore)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'FULL TAKEOVER: replaces the whole instance.'
 - id: gt-action-230
   name: Upload backup check
@@ -19773,6 +20441,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: check_backup_chunk
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/upload)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-231
   name: Upload backup chunk
@@ -19866,6 +20537,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: upload_backup_chunk
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/upload)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Ingests an archive later used by /restore.
 - id: gt-action-232
   name: Toggle read-only
@@ -19957,6 +20631,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/backups_controller.rb:1
       supports: backup_readonly
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups/readonly)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups rollback/cancel.
 - id: gt-action-233
   name: Read email settings
@@ -20054,6 +20731,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/email_controller.rb:1
       supports: admin_email_index
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/email)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups email-logs.
 - id: gt-action-234
   name: Send test email
@@ -20147,6 +20827,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/email_controller.rb:1
       supports: admin_email_test
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/email/test)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Outbound SMTP trigger.
 - id: gt-action-235
   name: Update email template
@@ -20242,6 +20925,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/email_templates_controller.rb:1
       supports: update_email_template
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/email/templates/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Content sent to users; groups revert.
 - id: gt-action-236
   name: List users (admin)
@@ -20339,6 +21025,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:1
       supports: admin_list_users
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/list)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Discloses emails/IPs/flags.
 - id: gt-action-237
   name: Read user (admin)
@@ -20436,6 +21125,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:1
       supports: admin_show_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}.json)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Sensitive PII + security history.
 - id: gt-action-238
   name: Delete user (admin)
@@ -20528,6 +21220,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:457
       supports: admin_delete_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Destructive.
 - id: gt-action-239
   name: Suspend user
@@ -20628,6 +21323,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:211
       supports: admin_suspend_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/suspend)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Account lockout; groups unsuspend.
 - id: gt-action-240
   name: Silence user
@@ -20724,6 +21422,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:397
       supports: admin_silence_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/silence)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups unsilence.
 - id: gt-action-241
   name: Grant admin
@@ -20836,6 +21537,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:261
       supports: admin_grant_admin
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/grant_admin)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: PRIVILEGE ESCALATION; may require 2FA/email confirm.
 - id: gt-action-242
   name: Revoke admin
@@ -21028,6 +21732,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:277
       supports: admin_grant_moderation
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/grant_moderation)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups revoke_moderation.
 - id: gt-action-244
   name: Log out user
@@ -21118,6 +21825,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:243
       supports: admin_log_out_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/log_out)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-245
   name: Approve user
@@ -21214,6 +21924,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:365
       supports: admin_approve_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/approve)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups approve-bulk.
 - id: gt-action-246
   name: Activate user
@@ -21310,6 +22023,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:381
       supports: admin_activate_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/activate)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups deactivate.
 - id: gt-action-247
   name: Set trust level
@@ -21406,6 +22122,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:329
       supports: admin_set_trust_level
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/trust_level)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Governs capabilities; groups trust_level_lock.
 - id: gt-action-248
   name: Set primary group
@@ -21501,6 +22220,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:311
       supports: admin_set_primary_group
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/primary_group)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-249
   name: Add user to group
@@ -21596,6 +22318,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:284
       supports: admin_add_user_group
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/groups)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Access grant; groups member removal.
 - id: gt-action-250
   name: Anonymize user
@@ -21692,6 +22417,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:600
       supports: admin_anonymize_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/anonymize)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Irreversible identity scrub.
 - id: gt-action-251
   name: Merge user
@@ -21787,6 +22515,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:613
       supports: admin_merge_user
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/merge)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-252
   name: Disable user 2FA (admin)
@@ -21879,6 +22610,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:442
       supports: admin_disable_2fa
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/disable_second_factor)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Recovery path; takeover enabler if abused.
 - id: gt-action-253
   name: Delete SSO record
@@ -21971,6 +22705,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:636
       supports: admin_delete_sso_record
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/sso_record)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-254
   name: Batch-delete user posts
@@ -22063,6 +22800,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:146
       supports: admin_delete_posts_batch
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/delete_posts_batch)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-255
   name: Impersonate user
@@ -22154,6 +22894,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/impersonate_controller.rb:1
       supports: admin_impersonate
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/impersonate)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: FULL ACCOUNT TAKEOVER by design (audited).
 - id: gt-action-256
   name: Sync SSO user
@@ -22249,6 +22992,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:547
       supports: admin_sync_sso
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/sync_sso)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Identity + group sync.
 - id: gt-action-257
   name: Look up IP info
@@ -22346,6 +23092,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:540
       supports: admin_ip_info
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/ip-info)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups same-IP account tools.
 - id: gt-action-258
   name: List themes
@@ -22443,6 +23192,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/themes_controller.rb:1
       supports: list_themes
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-259
   name: Create theme
@@ -22536,6 +23288,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/themes_controller.rb:1
       supports: create_theme
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Theme JS runs in every browser (stored-XSS-by-design).
 - id: gt-action-260
   name: Read theme
@@ -22633,6 +23388,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/themes_controller.rb:1
       supports: read_theme
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-261
   name: Update theme
@@ -22728,6 +23486,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/themes_controller.rb:1
       supports: update_theme
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups source/setting.
 - id: gt-action-262
   name: Delete theme
@@ -22820,6 +23581,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/themes_controller.rb:1
       supports: delete_theme
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-263
   name: Import theme
@@ -22913,6 +23677,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/themes_controller.rb:1
       supports: import_theme
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes/import)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: 'SSRF + code-ingestion: remote cloned server-side; JS runs in all browsers.'
 - id: gt-action-264
   name: List badges
@@ -23010,6 +23777,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/badges_controller.rb:1
       supports: list_badges
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/badges)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-265
   name: Create badge
@@ -23103,6 +23873,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/badges_controller.rb:1
       supports: create_badge
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/badges)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Custom SQL -> data exposure.
 - id: gt-action-266
   name: Update badge
@@ -23198,6 +23971,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/badges_controller.rb:1
       supports: update_badge
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/badges/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-267
   name: Delete badge
@@ -23290,6 +24066,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/badges_controller.rb:1
       supports: delete_badge
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/badges/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-268
   name: List flag types
@@ -23387,6 +24166,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/flags_controller.rb:1
       supports: list_flags
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/flags)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-269
   name: Create flag type
@@ -23480,6 +24262,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/flags_controller.rb:1
       supports: create_flag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/flags)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups reorder.
 - id: gt-action-270
   name: Update flag type
@@ -23575,6 +24360,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/flags_controller.rb:1
       supports: update_flag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/flags/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-271
   name: Delete flag type
@@ -23667,6 +24455,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/flags_controller.rb:1
       supports: delete_flag
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/flags/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-272
   name: List watched words
@@ -23764,6 +24555,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/watched_words_controller.rb:1
       supports: list_watched_words
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/watched_words)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-273
   name: Add watched word
@@ -23857,6 +24651,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/watched_words_controller.rb:1
       supports: create_watched_word
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/watched_words)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Regex -> ReDoS surface.
 - id: gt-action-274
   name: Delete watched word
@@ -23949,6 +24746,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/watched_words_controller.rb:1
       supports: delete_watched_word
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/watched_words/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-275
   name: Import watched words
@@ -24042,6 +24842,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/watched_words_controller.rb:1
       supports: upload_watched_words
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/watched_words/upload)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-276
   name: Add embeddable host
@@ -24135,6 +24938,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/embeddable_hosts_controller.rb:1
       supports: create_embeddable_host
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/embeddable_hosts)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: SSRF/embed-trust; groups PUT/DELETE.
 - id: gt-action-277
   name: Create color scheme
@@ -24228,6 +25034,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/color_schemes_controller.rb:1
       supports: create_color_scheme
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/color_schemes)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups PUT/DELETE.
 - id: gt-action-278
   name: List permalinks
@@ -24325,6 +25134,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/permalinks_controller.rb:1
       supports: list_permalinks
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/permalinks)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-279
   name: Create permalink
@@ -24418,6 +25230,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/permalinks_controller.rb:1
       supports: create_permalink
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/permalinks)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: External-URL redirect surface.
 - id: gt-action-280
   name: List user fields
@@ -24515,6 +25330,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/user_fields_controller.rb:1
       supports: list_user_fields
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/user_fields)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-281
   name: Create user field
@@ -24608,6 +25426,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/user_fields_controller.rb:1
       supports: create_user_field
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/user_fields)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Groups PUT/DELETE.
 - id: gt-action-282
   name: Add custom emoji
@@ -24701,6 +25522,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/emoji_controller.rb:1
       supports: create_emoji
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/emoji)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: File ingestion.
 - id: gt-action-283
   name: Delete custom emoji
@@ -24793,6 +25617,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/emoji_controller.rb:1
       supports: delete_emoji
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/emoji)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-284
   name: List screened IPs
@@ -24890,6 +25717,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/screened_ip_addresses_controller.rb:1
       supports: list_screened_ips
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/logs/screened_ip_addresses)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-285
   name: Add screened IP
@@ -24983,6 +25813,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/screened_ip_addresses_controller.rb:1
       supports: create_screened_ip
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/logs/screened_ip_addresses)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Network ACL; groups screened_emails/urls.
 - id: gt-action-286
   name: Read audit log
@@ -25080,6 +25913,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/staff_action_logs_controller.rb:1
       supports: staff_action_logs
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/logs/staff_action_logs)'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: null
 - id: gt-action-287
   name: Override UI string
@@ -25175,6 +26011,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/site_texts_controller.rb:1
       supports: update_site_text
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/customize/site_texts/{id})'
+      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
     notes: Rendered in UI/emails; groups revert.
 edges: []
 annotation_issues: []
