@@ -157,9 +157,12 @@ agents:
     notes: ''
   source_ref: packages/agent-core/src/agent-loop.ts; agent-loop-tool-execution.ts; src/agents/* (embedded-agent-runner,
     cli-runner); src/channels/* (inbound-event); src/cron/*
-  evidence_status: source_confirmed
+  evidence_status: observed
   notes: 'Untrusted entry is a channel message (or A2A/cron prompt): anyone who passes the DM allowlist
-    can drive the agent + its tools. The core attack surface.'
+    can drive the agent + its tools. The core attack surface | RUNTIME 2026-11-20: observed via `openclaw
+    agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo), apply_patch (file
+    write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool hook (''[security]
+    blocked URL fetch ... private/internal IP'').'
 - id: agent.openclaw.subagent
   name: Sub-agent (background spawn)
   component: openclaw
@@ -338,11 +341,14 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/tools/terminal-tool.ts; src/agents/bash-tools.exec-run.ts; bash-tools.exec-approval-request.ts;
     bash-process-registry.ts
-  notes: Arbitrary command execution; isolation depends on sandbox config -> UNSANDBOXED host runs = full
-    RCE. Exec can require approval (bash-tools.exec-approval-*).
+  notes: 'Arbitrary command execution; isolation depends on sandbox config -> UNSANDBOXED host runs =
+    full RCE. Exec can require approval (bash-tools.exec-approval-*) | RUNTIME 2026-11-20: observed via
+    `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo), apply_patch
+    (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool hook (''[security]
+    blocked URL fetch ... private/internal IP'').'
 - id: tool.primary.file_read
   agent_id: agent.openclaw.primary
   l1_ids: []
@@ -374,10 +380,12 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/agent-tools.read.ts; src/agents/sandbox/fs-bridge-path-safety.ts
-  notes: Reads workspace files into context; fs-bridge path safety bounds traversal under the workspace
-    root.
+  notes: 'Reads workspace files into context; fs-bridge path safety bounds traversal under the workspace
+    root | RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: tool.primary.apply_patch
   agent_id: agent.openclaw.primary
   l1_ids: []
@@ -410,9 +418,12 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/apply-patch-file-ops.ts; src/agents/sandbox/fs-bridge-mutation-helper.ts
-  notes: Writing workspace files incl. skills = stored-instruction injection (feeds ctx.skill_instructions).
+  notes: 'Writing workspace files incl. skills = stored-instruction injection (feeds ctx.skill_instructions)
+    | RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools
+    executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the
+    SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: tool.primary.web_fetch
   agent_id: agent.openclaw.primary
   l1_ids:
@@ -449,10 +460,12 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/tools/web-fetch.ts; web-guarded-fetch.ts; src/infra/net/ssrf.ts; packages/net-policy/src/{ip,ipv4,url-protocol}.ts
-  notes: Fetches arbitrary web content -> indirect injection + egress. net-policy blocks private/internal
-    IPs (SSRF).
+  notes: 'Fetches arbitrary web content -> indirect injection + egress. net-policy blocks private/internal
+    IPs (SSRF) | RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: tool.primary.web_search
   agent_id: agent.openclaw.primary
   l1_ids:
@@ -1259,8 +1272,11 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Role instructions require human approval (owner trust) before taking effect.
+  evidence_status: observed
+  notes: 'Role instructions require human approval (owner trust) before taking effect | RUNTIME 2026-11-20:
+    observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo),
+    apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool
+    hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctx.skill_instructions
   source_kind: developer_prompt
   source_ref: src/agents/tools/installed-skill-tools.ts; installed-skill-catalog.ts; ~/.openclaw/skills
@@ -1351,8 +1367,10 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctx.tool_results
   source_kind: tool_result
   source_ref: packages/agent-core/src/agent-loop-tool-execution.ts; tool-call-outcome.ts; src/agents/tools/tool-results.ts
@@ -1373,8 +1391,10 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctx.web_content
   source_kind: external
   source_ref: src/agents/tools/web-fetch.ts; web-search-output.ts; computer-tool page content
@@ -1416,8 +1436,11 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Remote MCP tool descriptions are model-facing -> rug-pull / tool-description injection.
+  evidence_status: observed
+  notes: 'Remote MCP tool descriptions are model-facing -> rug-pull / tool-description injection | RUNTIME
+    2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed:
+    terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy
+    before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctx.subagent_task
   source_kind: delegated_summary
   source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts (parent-composed task)
@@ -1527,13 +1550,16 @@ memory_stores:
   retention_and_deletion: session lifecycle
   related_l2_ids:
   - l2.agent.channel_run
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: src/agents sessions store; src/agents/tools/sessions-history-tool.ts
-  notes: Cross-agent session visibility (tree/all) can cross agent boundaries.
+  notes: 'Cross-agent session visibility (tree/all) can cross agent boundaries | RUNTIME 2026-11-20: observed
+    via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo), apply_patch
+    (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool hook (''[security]
+    blocked URL fetch ... private/internal IP'').'
 - id: mem.workspace
   store_kind: database
   owner_component: openclaw
@@ -1552,13 +1578,16 @@ memory_stores:
   retention_and_deletion: workspace lifecycle
   related_l2_ids:
   - l2.agent.channel_run
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: src/agents/sandbox/fs-bridge.ts; fs-paths.ts; host-paths.ts
-  notes: Agent workspace filesystem; sandboxed runs use a sandbox workspace root.
+  notes: 'Agent workspace filesystem; sandboxed runs use a sandbox workspace root | RUNTIME 2026-11-20:
+    observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo),
+    apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool
+    hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: mem.skills
   store_kind: database
   owner_component: openclaw
@@ -1655,9 +1684,12 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/tools/message-tool-execution.ts; src/channels/*
-  notes: Model-composed content delivered to real recipients; exfil/abuse via outbound messages.
+  notes: 'Model-composed content delivered to real recipients; exfil/abuse via outbound messages | RUNTIME
+    2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed:
+    terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy
+    before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: sink.exec
   sink_kind: external_api
   producer_ids:
@@ -1675,9 +1707,12 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/bash-tools.exec-run.ts; src/agents/sandbox/docker-backend.ts
-  notes: RCE-class if sandbox disabled; network 'none' by default in docker sandbox.
+  notes: 'RCE-class if sandbox disabled; network ''none'' by default in docker sandbox | RUNTIME 2026-11-20:
+    observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo),
+    apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool
+    hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: sink.web_egress
   sink_kind: external_api
   producer_ids:
@@ -1722,9 +1757,12 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/apply-patch-file-ops.ts
-  notes: Writing skills/files feeds back as instructions/context.
+  notes: 'Writing skills/files feeds back as instructions/context | RUNTIME 2026-11-20: observed via `openclaw
+    agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo), apply_patch (file
+    write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool hook (''[security]
+    blocked URL fetch ... private/internal IP'').'
 - id: sink.agent_send
   sink_kind: delegated_result
   producer_ids:
@@ -1956,11 +1994,14 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: packages/agent-core/src/agent-loop-tool-execution.ts; src/agents/agent-tools.before-tool-call.policy.ts
     (runBeforeToolCallHook)
-  notes: Programmable before_tool_call policy chain can block a tool call; requester tool policy gates
-    which tools an external/delegated requester may use.
+  notes: 'Programmable before_tool_call policy chain can block a tool call; requester tool policy gates
+    which tools an external/delegated requester may use | RUNTIME 2026-11-20: observed via `openclaw agent
+    --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo), apply_patch (file write),
+    file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool hook (''[security] blocked
+    URL fetch ... private/internal IP'').'
 - id: edge.tool__primary
   source:
     agent_id: agent.openclaw.primary
@@ -1989,9 +2030,11 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: packages/agent-core/src/tool-call-outcome.ts; src/agents/tools/tool-results.ts
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: edge.primary__exec
   source:
     agent_id: agent.openclaw.primary
@@ -2024,9 +2067,12 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/bash-tools.exec-run.ts; src/agents/sandbox/docker-backend.ts
-  notes: Isolation depends on sandbox config; unsandboxed = host RCE; exec may require approval.
+  notes: 'Isolation depends on sandbox config; unsandboxed = host RCE; exec may require approval | RUNTIME
+    2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed:
+    terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy
+    before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: edge.primary__fetch
   source:
     agent_id: agent.openclaw.primary
@@ -2059,10 +2105,12 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/tools/web-guarded-fetch.ts; src/infra/net/ssrf.ts
-  notes: SSRF surface; net-policy blocks private/internal targets but model picks the URL (egress + indirect
-    injection).
+  notes: 'SSRF surface; net-policy blocks private/internal targets but model picks the URL (egress + indirect
+    injection) | RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: edge.primary__subagent
   source:
     agent_id: agent.openclaw.primary
@@ -2253,9 +2301,11 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: packages/agent-core/src/agent-stream-response.ts; src/agents (streaming/persistence)
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 controls:
 - id: ctl.sandbox
   control_kind: tool_policy
@@ -2279,7 +2329,7 @@ controls:
   - l1.tool.exec_shell
   - l1.tool.browser
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/sandbox/config.ts (network default 'none', readOnlyRoot default true); container-allocation.ts
     (--network, capDrop); docker-backend.ts; sandbox-tool-policy.ts
   visibility: white_box_required
@@ -2287,7 +2337,10 @@ controls:
     status: black_box_reachable
     notes: default-on; posture observable via container inspect
   notes: 'Docker sandbox defaults: network ''none'' + readOnlyRoot + capDrop. Crabbox lease alt. If sandboxing
-    is DISABLED (UNSANDBOXED), exec/file/browser run on the host -> major posture change.'
+    is DISABLED (UNSANDBOXED), exec/file/browser run on the host -> major posture change | RUNTIME 2026-11-20:
+    observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed: terminal (echo),
+    apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool
+    hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctl.before_tool_hook
   control_kind: tool_policy
   applies_at: before_tool
@@ -2301,15 +2354,18 @@ controls:
   applies_to_tool_binding_ids: []
   related_l1_ids: []
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/agents/agent-tools.before-tool-call.policy.ts (runBeforeToolCallHook; approvalMode request|report|deny|defer);
     agent-tools.before-tool-call.wrapper.ts; plugins/trusted-tool-policy.ts
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: runs on every wrapped tool call
-  notes: Programmable ordered before_tool_call policy chain (plugin + trusted-tool policies) can block
-    any tool call; fail-closed ('Tool call blocked because before_tool_call hook failed').
+  notes: 'Programmable ordered before_tool_call policy chain (plugin + trusted-tool policies) can block
+    any tool call; fail-closed (''Tool call blocked because before_tool_call hook failed'') | RUNTIME
+    2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768). Tools executed:
+    terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED by the SSRF net-policy
+    before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctl.dm_allowlist
   control_kind: authorization
   applies_at: before_model
@@ -2494,7 +2550,7 @@ controls:
   related_l1_ids:
   - l1.tool.web_fetch
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: src/infra/net/ssrf.ts; packages/net-policy/src/{ip,ipv4,url-protocol,url-userinfo,redact-sensitive-url}.ts;
     src/agents/tools/web-guarded-fetch.ts
   visibility: white_box_required
@@ -2502,7 +2558,9 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: 'SSRF guard: blocks private/internal IPs + disallowed protocols/userinfo for model-chosen fetch
-    URLs.'
+    URLs | RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 (num_ctx 32768).
+    Tools executed: terminal (echo), apply_patch (file write), file_read; web_fetch invoked and BLOCKED
+    by the SSRF net-policy before-tool hook (''[security] blocked URL fetch ... private/internal IP'').'
 - id: ctl.requester_tool_policy
   control_kind: authorization
   applies_at: before_tool

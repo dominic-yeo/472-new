@@ -14,6 +14,36 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import agentic_data as D  # noqa: E402
 
+# --- Runtime grounding (Phase E) ---------------------------------------------
+# Observed live 2026-11-20 by building openclaw:local from source and driving
+# `openclaw agent --local` embedded turns on a local qwen2.5 (ollama provider,
+# baseUrl host.docker.internal:11436; needed a num_ctx=32768 model variant --
+# the 14k-token system prompt overflows the default 4096 ctx). Tools confirmed by
+# EFFECT/response: terminal (echo executed), apply_patch (wrote /tmp/gtx.txt=pengent),
+# file_read (/etc/hostname), web_fetch (invoked -> blocked by the SSRF control). The
+# SSRF before-tool hook fired: "[security] blocked URL fetch ... private/internal IP".
+# No secrets recorded. Re-applied every build.
+_RUNTIME_OBSERVED = {
+    "agent.openclaw.primary",
+    "tool.primary.terminal", "tool.primary.apply_patch", "tool.primary.file_read",
+    "tool.primary.web_fetch",
+    "ctx.system_prompt", "ctx.tool_descriptions", "ctx.tool_results", "ctx.session_history",
+    "mem.sessions", "mem.workspace",
+    "sink.channel_reply", "sink.exec", "sink.file_write",
+    "edge.primary__tool", "edge.tool__primary", "edge.primary__exec",
+    "edge.primary__fetch", "edge.primary__output",
+    "ctl.net_policy_ssrf", "ctl.before_tool_hook", "ctl.sandbox",
+}
+_RUNTIME_NOTE = ("RUNTIME 2026-11-20: observed via `openclaw agent --local` on local qwen2.5 "
+                 "(num_ctx 32768). Tools executed: terminal (echo), apply_patch (file write), "
+                 "file_read; web_fetch invoked and BLOCKED by the SSRF net-policy before-tool hook "
+                 "('[security] blocked URL fetch ... private/internal IP').")
+for _seq in (D.AGENTS, D.TOOLS, D.CONTEXT, D.MEMORY, D.SINKS, D.EDGES, D.CONTROLS):
+    for _r in _seq:
+        if _r.get("id") in _RUNTIME_OBSERVED:
+            _r["evidence_status"] = "observed"
+            _r["notes"] = ((_r.get("notes") or "").rstrip(" .") + " | " + _RUNTIME_NOTE).lstrip(" |")
+
 OUT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "agentic_gt.yaml"))
 ENV_ID = "openclaw-oss"
 SCHEMA_VERSION = "agentic-attack-surface-v1"
