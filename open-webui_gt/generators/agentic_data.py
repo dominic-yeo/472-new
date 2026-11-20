@@ -196,7 +196,7 @@ _argh_code = {"validation": "JSON parse + depth<=32 + 64KiB literal cap (tool_ca
 
 TOOLS = [
     tool("tool.primary.code_interpreter", A, "execute_code", "native", "code_execution",
-         l1_ids=["l1.api.code_execute"], capabilities=["run arbitrary Python"],
+         l1_ids=[], capabilities=["run arbitrary Python"],
          server_or_provider="pyodide (browser) or Jupyter server",
          execution_identity={"identity": "pyodide sandbox OR shared Jupyter token",
                             "credential_source": "CODE_INTERPRETER_JUPYTER_AUTH token in server config"},
@@ -211,7 +211,7 @@ TOOLS = [
          notes="Jupyter engine shares one server token across users -> cross-user kernel reach if enabled."),
 
     tool("tool.primary.web", A, "search_web / fetch_url", "native", "external_send",
-         l1_ids=["l1.api.web_search", "l1.api.web_fetch"],
+         l1_ids=[],
          capabilities=["web search via configured engine", "fetch arbitrary URL"],
          execution_identity={"identity": "server-side HTTP client", "credential_source": "search engine API key in config"},
          execution_environment=_code_env("in-process aiohttp", "unrestricted (arbitrary URL = SSRF surface)",
@@ -238,7 +238,7 @@ TOOLS = [
          notes="Mutating memory tools are stripped for internal/sub-agent runs (MUTATING_MEMORY_TOOLS)."),
 
     tool("tool.primary.knowledge_rag", A, "knowledge/KB query + kb_exec", "native", "mixed",
-         l1_ids=["l1.api.retrieval.query"],
+         l1_ids=[],
          capabilities=["query/search/grep knowledge bases and files", "kb_exec file ops"],
          execution_identity=_user_ident, output_ids=["ctx.rag_knowledge", "ctx.tool_results"],
          control_ids=["ctl.tool_permission_rbac"],
@@ -327,7 +327,7 @@ TOOLS = [
          notes="Human-in-the-loop input primitive; exempt from approval gating."),
 
     tool("tool.primary.workspace_python", A, "workspace Python tools", "code", "code_execution",
-         l1_ids=["l1.api.tools.execute"], capabilities=["admin/user-authored Python tools"],
+         l1_ids=[], capabilities=["admin/user-authored Python tools"],
          description_source={"source_ref": "tool docstring/spec authored in workspace",
                            "writers": [writer("admin", "l1.api.tools.create"), writer("user", "l1.api.tools.create")]},
          execution_identity={"identity": "server process", "credential_source": "tool's own valves/config"},
@@ -339,7 +339,7 @@ TOOLS = [
                "model-facing and admin/user-editable -> tool-description injection + RCE class."),
 
     tool("tool.primary.tool_server", A, "OpenAPI tool-server tools", "api", "mixed",
-         l1_ids=["l1.api.tool_server.execute"], server_or_provider="configured OpenAPI tool server(s)",
+         l1_ids=[], server_or_provider="configured OpenAPI tool server(s)",
          capabilities=["call external OpenAPI-described operations"],
          description_source={"source_ref": "remote OpenAPI spec (openapi.json)",
                            "writers": [writer("external_service", None), writer("admin", "l1.api.configs.tool_servers")]},
@@ -366,7 +366,7 @@ TOOLS = [
                "(no server->client model inference)."),
 
     tool("tool.primary.terminal", A, "terminal server tools (ACP)", "external", "code_execution",
-         l1_ids=["l1.api.terminal.execute"],
+         l1_ids=[],
          server_or_provider="terminal server (ACP v1)", capabilities=["shell/coding-agent actions in a workspace"],
          description_source={"source_ref": "terminal server tool specs + working_directory_context",
                            "writers": [writer("external_service", None)]},

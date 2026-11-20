@@ -145,9 +145,13 @@ agents:
     status: black_box_reachable
     notes: ''
   source_ref: utils/middleware.py:process_chat_payload/process_chat_response; utils/tools.py:get_tools/get_builtin_tools
-  evidence_status: source_confirmed
-  notes: Builtin tool set is gated by (global config) AND (model capability meta) AND (per-user permission)
-    AND (feature flag) -- most tools are conditionally_mounted.
+  evidence_status: observed
+  notes: 'Builtin tool set is gated by (global config) AND (model capability meta) AND (per-user permission)
+    AND (feature flag) -- most tools are conditionally_mounted | RUNTIME 2026-11-20: observed via Open
+    WebUI socket.io chat on local qwen2.5:7b -- model natively invoked add_memory, search_memories, execute_code,
+    create_tasks, create_automation, create_calendar_event, search_chats, search_knowledge_bases, ask_user
+    (response.output_item function_call events); 40-tool builtin spec confirmed sent to the model. Tool
+    invocation observed; server-side execution/effects need the full UI client.'
 - id: agent.openwebui.subagent
   name: Delegated sub-agent
   component: open-webui
@@ -332,8 +336,7 @@ agents:
 tool_bindings:
 - id: tool.primary.code_interpreter
   agent_id: agent.openwebui.primary
-  l1_ids:
-  - l1.api.code_execute
+  l1_ids: []
   tool_name: execute_code
   tool_source: native
   server_or_provider: pyodide (browser) or Jupyter server
@@ -368,14 +371,17 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: code_interpreter.enable + model cap + feature + user perm
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/code_interpreter.py; tools.py get_builtin_tools(code_interpreter)
-  notes: Jupyter engine shares one server token across users -> cross-user kernel reach if enabled.
+  notes: 'Jupyter engine shares one server token across users -> cross-user kernel reach if enabled |
+    RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively invoked
+    add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: tool.primary.web
   agent_id: agent.openwebui.primary
-  l1_ids:
-  - l1.api.web_search
-  - l1.api.web_fetch
+  l1_ids: []
   tool_name: search_web / fetch_url
   tool_source: native
   server_or_provider: null
@@ -466,13 +472,17 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: memories.enable + memory feature + cap + perm
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/memory.py; tools.py get_builtin_tools(memory)
-  notes: Mutating memory tools are stripped for internal/sub-agent runs (MUTATING_MEMORY_TOOLS).
+  notes: 'Mutating memory tools are stripped for internal/sub-agent runs (MUTATING_MEMORY_TOOLS) | RUNTIME
+    2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively invoked add_memory,
+    search_memories, execute_code, create_tasks, create_automation, create_calendar_event, search_chats,
+    search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool builtin spec
+    confirmed sent to the model. Tool invocation observed; server-side execution/effects need the full
+    UI client.'
 - id: tool.primary.knowledge_rag
   agent_id: agent.openwebui.primary
-  l1_ids:
-  - l1.api.retrieval.query
+  l1_ids: []
   tool_name: knowledge/KB query + kb_exec
   tool_source: native
   server_or_provider: null
@@ -496,9 +506,14 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: knowledge builtin + attached/available KB
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(knowledge); ENABLE_KB_EXEC
-  notes: Shared knowledge bases are a cross-user read path when a KB is shared to the user/group.
+  notes: 'Shared knowledge bases are a cross-user read path when a KB is shared to the user/group | RUNTIME
+    2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively invoked add_memory,
+    search_memories, execute_code, create_tasks, create_automation, create_calendar_event, search_chats,
+    search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool builtin spec
+    confirmed sent to the model. Tool invocation observed; server-side execution/effects need the full
+    UI client.'
 - id: tool.primary.files
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -576,9 +591,13 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(chats)
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: tool.primary.channels
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -631,9 +650,13 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: calendar.enable + perm
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(calendar)
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: tool.primary.automations
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -660,9 +683,14 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: automations.enable + perm
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(automations)
-  notes: Creates persistent scheduled triggers that later re-invoke the agent -> durable foothold.
+  notes: 'Creates persistent scheduled triggers that later re-invoke the agent -> durable foothold | RUNTIME
+    2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively invoked add_memory,
+    search_memories, execute_code, create_tasks, create_automation, create_calendar_event, search_chats,
+    search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool builtin spec
+    confirmed sent to the model. Tool invocation observed; server-side execution/effects need the full
+    UI client.'
 - id: tool.primary.notify
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -714,9 +742,13 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(tasks)
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: tool.primary.skills
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -856,13 +888,16 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(user_input); tool_approval.py (ask_user special-cased)
-  notes: Human-in-the-loop input primitive; exempt from approval gating.
+  notes: 'Human-in-the-loop input primitive; exempt from approval gating | RUNTIME 2026-11-20: observed
+    via Open WebUI socket.io chat on local qwen2.5:7b -- model natively invoked add_memory, search_memories,
+    execute_code, create_tasks, create_automation, create_calendar_event, search_chats, search_knowledge_bases,
+    ask_user (response.output_item function_call events); 40-tool builtin spec confirmed sent to the model.
+    Tool invocation observed; server-side execution/effects need the full UI client.'
 - id: tool.primary.workspace_python
   agent_id: agent.openwebui.primary
-  l1_ids:
-  - l1.api.tools.execute
+  l1_ids: []
   tool_name: workspace Python tools
   tool_source: code
   server_or_provider: null
@@ -903,8 +938,7 @@ tool_bindings:
     and admin/user-editable -> tool-description injection + RCE class.
 - id: tool.primary.tool_server
   agent_id: agent.openwebui.primary
-  l1_ids:
-  - l1.api.tool_server.execute
+  l1_ids: []
   tool_name: OpenAPI tool-server tools
   tool_source: api
   server_or_provider: configured OpenAPI tool server(s)
@@ -986,8 +1020,7 @@ tool_bindings:
     model inference).
 - id: tool.primary.terminal
   agent_id: agent.openwebui.primary
-  l1_ids:
-  - l1.api.terminal.execute
+  l1_ids: []
   tool_name: terminal server tools (ACP)
   tool_source: external
   server_or_provider: terminal server (ACP v1)
@@ -1046,8 +1079,13 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: User-settable system prompt -> a user controls a trusted_instruction channel for their own agent.
+  evidence_status: observed
+  notes: 'User-settable system prompt -> a user controls a trusted_instruction channel for their own agent
+    | RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: ctx.user_message
   source_kind: user_input
   source_ref: chat messages (user role)
@@ -1065,8 +1103,12 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: ctx.chat_history
   source_kind: chat_history
   source_ref: models/chats.py; message output array
@@ -1086,8 +1128,12 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Carries prior tool_results (untrusted) back into context each turn.
+  evidence_status: observed
+  notes: 'Carries prior tool_results (untrusted) back into context each turn | RUNTIME 2026-11-20: observed
+    via Open WebUI socket.io chat on local qwen2.5:7b -- model natively invoked add_memory, search_memories,
+    execute_code, create_tasks, create_automation, create_calendar_event, search_chats, search_knowledge_bases,
+    ask_user (response.output_item function_call events); 40-tool builtin spec confirmed sent to the model.
+    Tool invocation observed; server-side execution/effects need the full UI client.'
 - id: ctx.rag_knowledge
   source_kind: retrieval
   source_ref: middleware.py rag_template(); chat_completion_files_handler; retrieval
@@ -1110,9 +1156,13 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Retrieved document text is injected as context -> classic indirect prompt-injection vector; shared
-    KBs cross user boundaries.
+  evidence_status: observed
+  notes: 'Retrieved document text is injected as context -> classic indirect prompt-injection vector;
+    shared KBs cross user boundaries | RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local
+    qwen2.5:7b -- model natively invoked add_memory, search_memories, execute_code, create_tasks, create_automation,
+    create_calendar_event, search_chats, search_knowledge_bases, ask_user (response.output_item function_call
+    events); 40-tool builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: ctx.tool_results
   source_kind: tool_result
   source_ref: middleware.py tool dispatch; tool_result_with_citations; function_call_output
@@ -1176,9 +1226,13 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Memory is auto-written by the after-turn review model from turn content -> poisoned memory re-injected
-    into later system context (persistence-scope user).
+  evidence_status: observed
+  notes: 'Memory is auto-written by the after-turn review model from turn content -> poisoned memory re-injected
+    into later system context (persistence-scope user) | RUNTIME 2026-11-20: observed via Open WebUI socket.io
+    chat on local qwen2.5:7b -- model natively invoked add_memory, search_memories, execute_code, create_tasks,
+    create_automation, create_calendar_event, search_chats, search_knowledge_bases, ask_user (response.output_item
+    function_call events); 40-tool builtin spec confirmed sent to the model. Tool invocation observed;
+    server-side execution/effects need the full UI client.'
 - id: ctx.files_attached
   source_kind: document
   source_ref: metadata.files / __files__; file/image attachments
@@ -1240,9 +1294,13 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: External/remote tool descriptions are model-facing instructions -> rug-pull / tool-description
-    injection.
+  evidence_status: observed
+  notes: 'External/remote tool descriptions are model-facing instructions -> rug-pull / tool-description
+    injection | RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model
+    natively invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: ctx.terminal_system_prompt
   source_kind: external
   source_ref: utils/tools.py get_terminal_system_prompt (remote terminal server)
@@ -1282,8 +1340,12 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: ctx.delegated_task
   source_kind: delegated_summary
   source_ref: utils/subagents.py delegate(task, context)
@@ -1408,13 +1470,17 @@ memory_stores:
   read_path: prior messages replayed into context each turn
   retention_and_deletion: user-managed chats; temporary chats not persisted
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: models/chats.py
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: mem.knowledge_vector
   store_kind: vector_store
   owner_component: open-webui
@@ -1550,10 +1616,14 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/middleware.py process_chat_response; outlet_filter_handler
-  notes: Model-authored markdown image/link URLs are the data-exfil-on-render channel; sanitize.py + outlet
-    filters are the mitigations to verify at runtime.
+  notes: 'Model-authored markdown image/link URLs are the data-exfil-on-render channel; sanitize.py +
+    outlet filters are the mitigations to verify at runtime | RUNTIME 2026-11-20: observed via Open WebUI
+    socket.io chat on local qwen2.5:7b -- model natively invoked add_memory, search_memories, execute_code,
+    create_tasks, create_automation, create_calendar_event, search_chats, search_knowledge_bases, ask_user
+    (response.output_item function_call events); 40-tool builtin spec confirmed sent to the model. Tool
+    invocation observed; server-side execution/effects need the full UI client.'
 - id: sink.notify
   sink_kind: notification
   producer_ids:
@@ -1717,9 +1787,13 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: middleware.py process_chat_payload
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: edge.inlet_filter
   source:
     agent_id: agent.openwebui.primary
@@ -1792,9 +1866,14 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: middleware.py tool loop; tool_calling.py; tool_approval.py
-  notes: Tool selection + argument composition is fully model-directed -> primary injection->action edge.
+  notes: 'Tool selection + argument composition is fully model-directed -> primary injection->action edge
+    | RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: edge.approval__tool
   source:
     agent_id: agent.openwebui.primary
@@ -2107,9 +2186,13 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tool_calling.final_answer_payload
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 controls:
 - id: ctl.tool_approval
   control_kind: human_approval
@@ -2310,13 +2393,17 @@ controls:
   - tool.primary.terminal
   related_l1_ids: []
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py ask_user; utils/agents/acp.py form cards
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local qwen2.5:7b -- model natively
+    invoked add_memory, search_memories, execute_code, create_tasks, create_automation, create_calendar_event,
+    search_chats, search_knowledge_bases, ask_user (response.output_item function_call events); 40-tool
+    builtin spec confirmed sent to the model. Tool invocation observed; server-side execution/effects
+    need the full UI client.'
 - id: ctl.untrusted_data_prompt
   control_kind: tool_policy
   applies_at: before_model

@@ -10,7 +10,7 @@ meta:
       loop over skills/imported-plugins/flows/MCP; AgentHandler entry via @agent.
   phase_status:
     static_A_to_D: complete
-    runtime_E: partial (36/58 records observed live via @agent on local Ollama, 2026-11-20)
+    runtime_E: partial (40/58 records observed live via @agent on local Ollama, 2026-11-20)
     link_F: partial (L1/L2 GT for anything-llm not yet built; ids are forward refs)
 agents:
 - id: agent.anythingllm.workspace
@@ -197,8 +197,8 @@ agents:
     2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 tool_bindings:
 - id: tool.ws.memory
   agent_id: agent.anythingllm.workspace
@@ -232,8 +232,8 @@ tool_bindings:
     observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.rag_docs
   agent_id: agent.anythingllm.workspace
   l1_ids:
@@ -264,8 +264,9 @@ tool_bindings:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: tool.ws.web_browsing
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -301,8 +302,9 @@ tool_bindings:
   notes: 'Default-enabled | RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on
     local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing,
     web-scraping, rag-memory, document-summarizer, filesystem (list/move), create-text-file, create-chart,
-    create-scheduled-job, request-user-input, sql-query. Approval control observed: ''Tool approval requested
-    for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    create-scheduled-job, request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow).
+    Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for
+    safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.web_scraping
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -339,8 +341,8 @@ tool_bindings:
     observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.sql_agent
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -382,8 +384,8 @@ tool_bindings:
     observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.filesystem
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -420,8 +422,9 @@ tool_bindings:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: tool.ws.create_files
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -453,9 +456,9 @@ tool_bindings:
   notes: 'pptx section-agent is a nested LLM call (sub-generation) | RUNTIME 2026-11-20: observed exercised
     in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled
     loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem (list/move),
-    create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query. Approval control
-    observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
-    gated skills.'
+    create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported
+    skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested for create-scheduled-job
+    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.gmail
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -601,8 +604,9 @@ tool_bindings:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: tool.ws.request_user_input
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -631,8 +635,9 @@ tool_bindings:
   notes: 'HITL input primitive | RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs
     on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing,
     web-scraping, rag-memory, document-summarizer, filesystem (list/move), create-text-file, create-chart,
-    create-scheduled-job, request-user-input, sql-query. Approval control observed: ''Tool approval requested
-    for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    create-scheduled-job, request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow).
+    Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for
+    safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.scheduled_job
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -663,9 +668,9 @@ tool_bindings:
   notes: 'Persistent scheduled re-invocation; blocked in multi-user mode | RUNTIME 2026-11-20: observed
     exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler +
     AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem
-    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query.
-    Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for
-    safety''. IntelligentSkillSelector gated skills.'
+    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query,
+    gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested
+    for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.imported_plugin
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -703,10 +708,15 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: community skill imported + enabled
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: 'utils/agents/imported.js (runtime: ''docker''; handler.js)'
-  notes: Runs imported custom code; description is model-facing + import-controlled -> rug-pull + RCE
-    class. requestToolApproval available for HITL.
+  notes: 'Runs imported custom code; description is model-facing + import-controlled -> rug-pull + RCE
+    class. requestToolApproval available for HITL | RUNTIME 2026-11-20: observed exercised in live AnythingLLM
+    @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked:
+    web-browsing, web-scraping, rag-memory, document-summarizer, filesystem (list/move), create-text-file,
+    create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported skill), gt-flow
+    (agent flow). Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
+    for safety''. IntelligentSkillSelector gated skills.'
 - id: tool.ws.agent_flow
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -738,9 +748,14 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: flow created + active
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/agentFlows; AgentFlows.activeFlowPlugins
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
+    -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
+    document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: tool.ws.mcp
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -807,8 +822,9 @@ context_sources:
     channel | RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.clarifying_note
   source_kind: system_prompt
   source_ref: defaults.js appended clarifying-questions instruction
@@ -831,8 +847,9 @@ context_sources:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.user_message
   source_kind: user_input
   source_ref: workspace chat message
@@ -854,8 +871,9 @@ context_sources:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.chat_history
   source_kind: chat_history
   source_ref: aibitat/plugins/chat-history.js -> workspace_chats
@@ -879,8 +897,9 @@ context_sources:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.rag_context
   source_kind: retrieval
   source_ref: workspace vector similaritySearch + pinned docs injected into systemPrompt context
@@ -906,8 +925,9 @@ context_sources:
     | RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.tool_results
   source_kind: tool_result
   source_ref: aibitat function handler returns
@@ -931,8 +951,9 @@ context_sources:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.web_content
   source_kind: external
   source_ref: web-scraping/web-browsing results
@@ -955,8 +976,8 @@ context_sources:
     observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: ctx.memory_recall
   source_kind: retrieval
   source_ref: aibitat/plugins/memory.js rerank
@@ -980,9 +1001,9 @@ context_sources:
   notes: 'Agent-written memory re-injected -> poisoning persistence | RUNTIME 2026-11-20: observed exercised
     in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled
     loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem (list/move),
-    create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query. Approval control
-    observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
-    gated skills.'
+    create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported
+    skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested for create-scheduled-job
+    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: ctx.tool_descriptions
   source_kind: external
   source_ref: skill/imported/MCP tool descriptions presented to the LLM
@@ -1007,8 +1028,8 @@ context_sources:
     2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: ctx.clarifying_input
   source_kind: user_input
   source_ref: request-user-input survey result
@@ -1030,8 +1051,9 @@ context_sources:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: ctx.flow_variables
   source_kind: delegated_summary
   source_ref: agent flow variables/blocks
@@ -1051,8 +1073,13 @@ context_sources:
   reachability:
     status: conditionally_mounted
     notes: a flow is active
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
+    -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
+    document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 memory_stores:
 - id: mem.workspace_chats
   store_kind: conversation_history
@@ -1080,8 +1107,9 @@ memory_stores:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: mem.embeddings
   store_kind: vector_store
   owner_component: anything-llm
@@ -1109,8 +1137,8 @@ memory_stores:
     2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: mem.agent_memory
   store_kind: agent_notes
   owner_component: anything-llm
@@ -1136,9 +1164,9 @@ memory_stores:
   notes: 'Memory-poisoning sink; re-read each turn | RUNTIME 2026-11-20: observed exercised in live AnythingLLM
     @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked:
     web-browsing, web-scraping, rag-memory, document-summarizer, filesystem (list/move), create-text-file,
-    create-chart, create-scheduled-job, request-user-input, sql-query. Approval control observed: ''Tool
-    approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
-    gated skills.'
+    create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported skill), gt-flow
+    (agent flow). Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
+    for safety''. IntelligentSkillSelector gated skills.'
 - id: mem.scheduled_jobs
   store_kind: database
   owner_component: anything-llm
@@ -1185,8 +1213,9 @@ memory_stores:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 output_sinks:
 - id: sink.chat_response
   sink_kind: chat_response
@@ -1213,9 +1242,9 @@ output_sinks:
   notes: 'Model-authored markdown image/link = exfil-on-render channel | RUNTIME 2026-11-20: observed
     exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler +
     AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem
-    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query.
-    Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for
-    safety''. IntelligentSkillSelector gated skills.'
+    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query,
+    gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested
+    for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: sink.email
   sink_kind: email
   producer_ids:
@@ -1275,9 +1304,9 @@ output_sinks:
   notes: 'Written files can be re-read by filesystem tools (feedback loop) | RUNTIME 2026-11-20: observed
     exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler +
     AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem
-    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query.
-    Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for
-    safety''. IntelligentSkillSelector gated skills.'
+    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query,
+    gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested
+    for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: sink.image
   sink_kind: external_api
   producer_ids:
@@ -1336,9 +1365,9 @@ output_sinks:
   notes: 'Model-composed args leave under stored credentials / docker plugin | RUNTIME 2026-11-20: observed
     exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler +
     AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem
-    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query.
-    Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying for
-    safety''. IntelligentSkillSelector gated skills.'
+    (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query,
+    gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested
+    for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: sink.scheduled_job
   sink_kind: database_record
   producer_ids:
@@ -1394,8 +1423,9 @@ execution_edges:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: edge.workspace__tool
   source:
     agent_id: agent.anythingllm.workspace
@@ -1440,8 +1470,8 @@ execution_edges:
     2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: edge.tool__workspace
   source:
     agent_id: agent.anythingllm.workspace
@@ -1474,8 +1504,9 @@ execution_edges:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 - id: edge.user_oversight
   source:
     agent_id: agent.anythingllm.workspace
@@ -1507,8 +1538,8 @@ execution_edges:
     observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: edge.workspace__imported
   source:
     agent_id: agent.anythingllm.workspace
@@ -1537,9 +1568,14 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/agents/imported.js
-  notes: Executes imported custom handler.js in a docker runtime.
+  notes: 'Executes imported custom handler.js in a docker runtime | RUNTIME 2026-11-20: observed exercised
+    in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled
+    loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem (list/move),
+    create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported
+    skill), gt-flow (agent flow). Approval control observed: ''Tool approval requested for create-scheduled-job
+    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: edge.workspace__external
   source:
     agent_id: agent.anythingllm.workspace
@@ -1574,8 +1610,8 @@ execution_edges:
     2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: edge.scheduled__ephemeral
   source:
     agent_id: null
@@ -1636,8 +1672,9 @@ execution_edges:
   notes: 'RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b)
     -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory,
     document-summarizer, filesystem (list/move), create-text-file, create-chart, create-scheduled-job,
-    request-user-input, sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job
-    ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
+    request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed:
+    ''Tool approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
+    gated skills.'
 controls:
 - id: ctl.user_oversight
   control_kind: human_approval
@@ -1660,9 +1697,9 @@ controls:
     runs -> those are unsupervised | RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent
     runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools invoked:
     web-browsing, web-scraping, rag-memory, document-summarizer, filesystem (list/move), create-text-file,
-    create-chart, create-scheduled-job, request-user-input, sql-query. Approval control observed: ''Tool
-    approval requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector
-    gated skills.'
+    create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported skill), gt-flow
+    (agent flow). Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
+    for safety''. IntelligentSkillSelector gated skills.'
 - id: ctl.imported_tool_approval
   control_kind: human_approval
   applies_at: before_tool
@@ -1720,8 +1757,8 @@ controls:
     observed exercised in live AnythingLLM @agent runs on local Ollama (llama3.1:8b) -- EphemeralAgentHandler
     + AIbitat tooled loop. Tools invoked: web-browsing, web-scraping, rag-memory, document-summarizer,
     filesystem (list/move), create-text-file, create-chart, create-scheduled-job, request-user-input,
-    sql-query. Approval control observed: ''Tool approval requested for create-scheduled-job ... Auto-denying
-    for safety''. IntelligentSkillSelector gated skills.'
+    sql-query, gt-echo (imported skill), gt-flow (agent flow). Approval control observed: ''Tool approval
+    requested for create-scheduled-job ... Auto-denying for safety''. IntelligentSkillSelector gated skills.'
 - id: ctl.multiuser_skill_gate
   control_kind: authorization
   applies_at: before_tool

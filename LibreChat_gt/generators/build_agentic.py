@@ -14,6 +14,37 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import agentic_data as D  # noqa: E402
 
+# --- Runtime grounding (Phase E) ---------------------------------------------
+# Observed live 2026-11-20 by driving LibreChat's server-side agent framework on a
+# local qwen2.5:7b (Ollama custom endpoint). Official image ghcr.io/danny-avila/
+# librechat:latest + mongo; browser User-Agent required (uaParser rejects bots as
+# "Illegal request"); agent provider must be lowercase 'ollama' to match the
+# endpoint. Flow: register/login -> create agent (tools execute_code, web_search)
+# -> POST /api/agents/chat/agents (returns streamId) -> GET /api/agents/chat/stream/
+# {streamId} SSE. The agent RAN and PERSISTED conversations (4 saved), and natively
+# invoked tools: execute_code (bash_tool) and web_search (tool_call/run_step events).
+# No secrets recorded. Re-applied on every build. Scripts: scratchpad/lc_ground2.py.
+_RUNTIME_OBSERVED = {
+    "agent.librechat.primary",
+    "tool.execute_code", "tool.web_search",
+    "ctx.user_message", "ctx.system_prompt", "ctx.chat_history",
+    "ctx.tool_descriptions", "ctx.tool_results",
+    "mem.conversations", "mem.agents_config",
+    "sink.chat_response",
+    "edge.user__primary", "edge.primary__tool", "edge.tool__primary",
+    "edge.primary__output", "edge.primary__code", "edge.primary__external",
+    "ctl.agent_capabilities",
+}
+_RUNTIME_NOTE = ("RUNTIME 2026-11-20: observed via LibreChat server-side agent on local "
+                 "qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively "
+                 "invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events "
+                 "on /api/agents/chat/stream/{streamId}).")
+for _seq in (D.AGENTS, D.TOOLS, D.CONTEXT, D.MEMORY, D.SINKS, D.EDGES, D.CONTROLS):
+    for _r in _seq:
+        if _r.get("id") in _RUNTIME_OBSERVED:
+            _r["evidence_status"] = "observed"
+            _r["notes"] = ((_r.get("notes") or "").rstrip(" .") + " | " + _RUNTIME_NOTE).lstrip(" |")
+
 OUT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "agentic_gt.yaml"))
 ENV_ID = "librechat-oss"
 SCHEMA_VERSION = "agentic-attack-surface-v1"

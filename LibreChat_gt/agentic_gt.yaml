@@ -103,9 +103,11 @@ agents:
     status: black_box_reachable
     notes: ''
   source_ref: api/server/services/ToolService.js loadAgentTools; createRunBody.js; Runs/StreamRunManager.js
-  evidence_status: source_confirmed
-  notes: Tool set = native capability tools + agent.tools (plugins) + agent actions + MCP servers, each
-    gated by AgentCapabilities and tool role grants.
+  evidence_status: observed
+  notes: 'Tool set = native capability tools + agent.tools (plugins) + agent actions + MCP servers, each
+    gated by AgentCapabilities and tool role grants | RUNTIME 2026-11-20: observed via LibreChat server-side
+    agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
+    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: agent.librechat.subagent
   name: Sub-agent (delegated)
   component: LibreChat
@@ -274,9 +276,12 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: AgentCapabilities.execute_code enabled + code resource
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: ToolService; app/clients/tools code/agent.ts
-  notes: Sandboxed interpreter (stronger isolation than in-process evaluators).
+  notes: 'Sandboxed interpreter (stronger isolation than in-process evaluators) | RUNTIME 2026-11-20:
+    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
+    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
+    on /api/agents/chat/stream/{streamId}).'
 - id: tool.file_search
   agent_id: agent.librechat.primary
   l1_ids:
@@ -341,9 +346,12 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: AgentCapabilities.web_search enabled
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: app/clients/tools web/agent.ts
-  notes: Scrapes model-reachable URLs -> SSRF + indirect injection via page content.
+  notes: 'Scrapes model-reachable URLs -> SSRF + indirect injection via page content | RUNTIME 2026-11-20:
+    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
+    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
+    on /api/agents/chat/stream/{streamId}).'
 - id: tool.image_gen
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -566,8 +574,11 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Agent instructions authored by the agent owner; shared agents expose this to other users.
+  evidence_status: observed
+  notes: 'Agent instructions authored by the agent owner; shared agents expose this to other users | RUNTIME
+    2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent
+    ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.memory_prompt
   source_kind: system_prompt
   source_ref: librechat.yaml memory prompt
@@ -607,8 +618,10 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.chat_history
   source_kind: chat_history
   source_ref: conversations/messages
@@ -630,8 +643,10 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.file_search_rag
   source_kind: retrieval
   source_ref: RAG API file_search results
@@ -670,8 +685,10 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.web_content
   source_kind: external
   source_ref: web_search scrape results
@@ -752,8 +769,11 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Remote MCP/action descriptions are model-facing -> rug-pull / description injection.
+  evidence_status: observed
+  notes: 'Remote MCP/action descriptions are model-facing -> rug-pull / description injection | RUNTIME
+    2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent
+    ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.delegated_task
   source_kind: delegated_summary
   source_ref: parent -> sub-agent task
@@ -813,13 +833,15 @@ memory_stores:
   read_path: messages replayed into run
   retention_and_deletion: user-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: packages/data-schemas conversations/messages
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: mem.vectordb
   store_kind: vector_store
   owner_component: LibreChat
@@ -882,13 +904,16 @@ memory_stores:
   read_path: agent definition supplies instructions + tools + actions
   retention_and_deletion: owner-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: agents schema
-  notes: Editing a shared agent = provisioning instructions + tools for its users.
+  notes: 'Editing a shared agent = provisioning instructions + tools for its users | RUNTIME 2026-11-20:
+    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
+    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
+    on /api/agents/chat/stream/{streamId}).'
 - id: mem.actions
   store_kind: database
   owner_component: LibreChat
@@ -930,9 +955,11 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: StreamRunManager
-  notes: Markdown image/link auto-load = exfil-on-render channel.
+  notes: 'Markdown image/link auto-load = exfil-on-render channel | RUNTIME 2026-11-20: observed via LibreChat
+    server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively
+    invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: sink.artifacts
   sink_kind: file
   producer_ids:
@@ -1117,9 +1144,11 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: agents endpoint; createRunBody.js
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.primary__tool
   source:
     agent_id: agent.librechat.primary
@@ -1159,9 +1188,12 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: Runs/StreamRunManager.js; @librechat/agents graph
-  notes: Tool use gated by capability + auth, but no interactive human approval per call.
+  notes: 'Tool use gated by capability + auth, but no interactive human approval per call | RUNTIME 2026-11-20:
+    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
+    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
+    on /api/agents/chat/stream/{streamId}).'
 - id: edge.tool__primary
   source:
     agent_id: agent.librechat.primary
@@ -1189,9 +1221,11 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: RunManager
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.primary__subagent
   source:
     agent_id: agent.librechat.primary
@@ -1284,9 +1318,12 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: Tools/mcp.js; processActions
-  notes: MCP under per-user OBO; Actions under stored action auth. No MCP sampling edge observed.
+  notes: 'MCP under per-user OBO; Actions under stored action auth. No MCP sampling edge observed | RUNTIME
+    2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent
+    ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.primary__code
   source:
     agent_id: agent.librechat.primary
@@ -1315,9 +1352,11 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: code/agent.ts
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.memory_extract
   source:
     agent_id: agent.librechat.memory
@@ -1377,9 +1416,11 @@ execution_edges:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: StreamRunManager finalize
-  notes: ''
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
+    SSE events on /api/agents/chat/stream/{streamId}).'
 controls:
 - id: ctl.agent_capabilities
   control_kind: tool_policy
@@ -1394,14 +1435,16 @@ controls:
   applies_to_tool_binding_ids: []
   related_l1_ids: []
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: ToolService resolveAgentCapabilities; librechat.yaml endpoints.agents.capabilities
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
-  notes: Admin enables capability classes (execute_code/file_search/web_search/actions/tools/artifacts/ocr/context/memory/chain);
-    a disabled capability's tools are never loaded.
+  notes: 'Admin enables capability classes (execute_code/file_search/web_search/actions/tools/artifacts/ocr/context/memory/chain);
+    a disabled capability''s tools are never loaded | RUNTIME 2026-11-20: observed via LibreChat server-side
+    agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
+    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctl.tool_role_grants
   control_kind: authorization
   applies_at: before_tool

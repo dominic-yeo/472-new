@@ -25,19 +25,21 @@ _RUNTIME_OBSERVED = {
     "tool.ws.web_browsing", "tool.ws.web_scraping", "tool.ws.memory", "tool.ws.rag_docs",
     "tool.ws.filesystem", "tool.ws.create_files", "tool.ws.rechart",
     "tool.ws.scheduled_job", "tool.ws.request_user_input", "tool.ws.sql_agent",
+    "tool.ws.imported_plugin", "tool.ws.agent_flow",
     "ctx.user_message", "ctx.system_prompt", "ctx.chat_history", "ctx.tool_descriptions",
     "ctx.tool_results", "ctx.web_content", "ctx.memory_recall", "ctx.rag_context",
-    "ctx.clarifying_note", "ctx.clarifying_input",
+    "ctx.clarifying_note", "ctx.clarifying_input", "ctx.flow_variables",
     "mem.workspace_chats", "mem.agent_memory", "mem.embeddings", "mem.filesystem",
     "sink.chat_response", "sink.external_call", "sink.files",
     "edge.user__workspace", "edge.workspace__tool", "edge.tool__workspace",
     "edge.workspace__output", "edge.workspace__external", "edge.user_oversight",
+    "edge.workspace__imported",
     "ctl.skill_enablement", "ctl.user_oversight",
 }
 _RUNTIME_NOTE = ("RUNTIME 2026-11-20: observed exercised in live AnythingLLM @agent runs on "
                  "local Ollama (llama3.1:8b) -- EphemeralAgentHandler + AIbitat tooled loop. Tools "
                  "invoked: web-browsing, web-scraping, rag-memory, document-summarizer, filesystem "
-                 "(list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query. "
+                 "(list/move), create-text-file, create-chart, create-scheduled-job, request-user-input, sql-query, gt-echo (imported skill), gt-flow (agent flow). "
                  "Approval control observed: 'Tool approval requested for create-scheduled-job ... "
                  "Auto-denying for safety'. IntelligentSkillSelector gated skills.")
 for _seq in (D.AGENTS, D.TOOLS, D.CONTEXT, D.MEMORY, D.SINKS, D.EDGES, D.CONTROLS):
@@ -58,7 +60,7 @@ META = {
                     "tool-call loop over skills/imported-plugins/flows/MCP; AgentHandler entry via @agent.",
     },
     "phase_status": {"static_A_to_D": "complete",
-                     "runtime_E": "partial (36/58 records observed live via @agent on local Ollama, 2026-11-20)",
+                     "runtime_E": "partial (40/58 records observed live via @agent on local Ollama, 2026-11-20)",
                      "link_F": "partial (L1/L2 GT for anything-llm not yet built; ids are forward refs)"},
 }
 

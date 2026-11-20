@@ -14,6 +14,40 @@ import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import agentic_data as D  # noqa: E402
 
+# --- Runtime grounding (Phase E) ---------------------------------------------
+# Records observed live on 2026-11-20 by driving Open WebUI's agentic chat through
+# its socket.io UI flow (python-socketio harness: connect /ws/socket.io, user-join,
+# POST /api/chat/completions with session_id + a real chat_id) against a local
+# qwen2.5:7b (native tool-calling, served from a dedicated Ollama container). The
+# model natively invoked 8 built-in tools (captured as response.output_item.added
+# function_call events); a logging proxy confirmed Open WebUI sends the full 40-tool
+# builtin spec to the model. Tool INVOCATION observed (model selects+calls); full
+# server-side EXECUTION/effects need the complete UI client, so effect-only sinks/
+# stores are left source_confirmed. No secrets recorded. Re-applied every build.
+_RUNTIME_OBSERVED = {
+    "agent.openwebui.primary",
+    "tool.primary.memory", "tool.primary.code_interpreter", "tool.primary.tasks",
+    "tool.primary.automations", "tool.primary.calendar", "tool.primary.chats",
+    "tool.primary.knowledge_rag", "tool.primary.ask_user",
+    "ctx.user_message", "ctx.system_prompt", "ctx.chat_history", "ctx.tool_descriptions",
+    "ctx.tool_approval_policy", "ctx.memory_recall", "ctx.rag_knowledge",
+    "mem.chat_history",
+    "sink.chat_stream",
+    "edge.user__primary", "edge.primary__tool", "edge.primary__output",
+    "ctl.ask_user_hitl",
+}
+_RUNTIME_NOTE = ("RUNTIME 2026-11-20: observed via Open WebUI socket.io chat on local "
+                 "qwen2.5:7b -- model natively invoked add_memory, search_memories, "
+                 "execute_code, create_tasks, create_automation, create_calendar_event, "
+                 "search_chats, search_knowledge_bases, ask_user (response.output_item "
+                 "function_call events); 40-tool builtin spec confirmed sent to the model. "
+                 "Tool invocation observed; server-side execution/effects need the full UI client.")
+for _seq in (D.AGENTS, D.TOOLS, D.CONTEXT, D.MEMORY, D.SINKS, D.EDGES, D.CONTROLS):
+    for _r in _seq:
+        if _r.get("id") in _RUNTIME_OBSERVED:
+            _r["evidence_status"] = "observed"
+            _r["notes"] = ((_r.get("notes") or "").rstrip(" .") + " | " + _RUNTIME_NOTE).lstrip(" |")
+
 OUT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "agentic_gt.yaml"))
 ENV_ID = "open-webui-oss"
 SCHEMA_VERSION = "agentic-attack-surface-v1"
