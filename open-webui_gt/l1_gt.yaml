@@ -214,6 +214,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Re-issues a session token on every call; discloses caller role + effective permissions.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost/api/v1/auths/update/profile
   kind: api
   methods:
@@ -375,6 +385,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: profile_image_url passes validate_image_url; bio/name are stored-reflected (self-stored XSS surface).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/update/timezone
   kind: api
   methods:
@@ -485,6 +505,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Low-sensitivity preference write.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/update/password
   kind: api
   methods:
@@ -601,6 +631,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Credential write; requires the current password. Secrets are inputs only, never echoed.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/ldap
   kind: api
   methods:
@@ -745,6 +785,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->422; admin POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: LDAP bind boundary; filter chars escaped. Live only when LDAP is enabled.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 422
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/signin
   kind: api
   methods:
@@ -903,6 +953,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Auth boundary. Rate-limited (5*3/180s). Alternate modes: trusted-header (proxy header sets identity AND role ->
       impersonation if header spoofable) and WEBUI_AUTH=false (admin@localhost/admin bootstrap).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 422
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/signup
   kind: api
   methods:
@@ -1066,6 +1126,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->422; admin POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Registration boundary; gated by ui.enable_signup except the initial-admin bootstrap.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 422
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/signout
   kind: api
   methods:
@@ -1152,6 +1222,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->200; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Clears token/oauth cookies; may 302 to WEBUI_AUTH_SIGNOUT_REDIRECT_URL.
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/oauth/sessions/{provider}
   kind: api
   methods:
@@ -1246,6 +1326,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Scoped to the caller's own OAuth sessions.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost/api/v1/auths/oauth/{provider}/token/exchange
   kind: api
   methods:
@@ -1389,6 +1479,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Federated auth boundary: mints a local session from an external token. Best-effort rate limit (no caller identity
       pre-validation); trusts configured client ids.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 422
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/add
   kind: api
   methods:
@@ -1580,6 +1680,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Admin sets role at creation (privilege assignment); response carries a session token for the new user.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost/api/v1/auths/admin/details
   kind: api
   methods:
@@ -1675,6 +1785,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Discloses the admin's name/email to any authenticated user when SHOW_ADMIN_DETAILS is on.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost/api/v1/auths/admin/config
   kind: api
   methods:
@@ -1813,6 +1933,16 @@ nodes:
         POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Controls signup/default-role/api-key policy/JWT expiry; changing these reshapes the auth boundary.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost/api/v1/auths/admin/config/ldap/server
   kind: api
   methods:
@@ -1952,6 +2082,16 @@ nodes:
         POST->422'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Carries the LDAP bind secret (app_dn_password) -- a stored credential location; GT records location, not value.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost/api/v1/auths/admin/config/ldap
   kind: api
   methods:
@@ -2093,6 +2233,16 @@ nodes:
         POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Enables/disables an entire authentication path.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost/api/v1/auths/admin/config/oauth
   kind: api
   methods:
@@ -2231,6 +2381,16 @@ nodes:
         POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Carries OAuth client secrets (stored-credential location); controls federated auth providers.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost/api/v1/auths/api_key
   kind: api
   methods:
@@ -2383,6 +2543,16 @@ nodes:
         POST->403; - DELETE->skipped'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Mints/reads/revokes a long-lived `sk-` credential; gated by enable_api_keys + features.api_keys permission.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 edges: []
 excluded_items:
 - item: WebSocket transport (/ws, socket.io) and static mounts (/static, /pyodide, SPA fallback)

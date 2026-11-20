@@ -129,6 +129,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/v1/login (identity=anon) -> resource created; server returned
         it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-002
   name: Log out
   kind: normal
@@ -211,6 +214,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-003
   name: Read own account
   kind: normal
@@ -302,6 +308,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-004
   name: Self-register
   kind: normal
@@ -419,6 +428,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/v1/users.register (identity=anon) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-005
   name: Generate personal access token
   kind: normal
@@ -531,6 +543,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-006
   name: Create user
   kind: normal
@@ -644,6 +659,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/v1/users.create (identity=admin) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: roles[] in the body assigns privileges at creation -> escalation if 'admin'.
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-007
   name: Update user
   kind: normal
@@ -761,6 +779,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Can set another user's password/roles -> takeover + escalation.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-008
   name: Delete user
   kind: normal
@@ -875,6 +896,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-009
   name: Set user active status
   kind: normal
@@ -992,6 +1016,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-010
   name: Read user info
   kind: normal
@@ -1107,6 +1134,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-011
   name: Reset avatar
   kind: normal
@@ -1224,6 +1254,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-012
   name: List users
   kind: normal
@@ -1327,6 +1360,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/users.list (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-013
   name: Create channel
   kind: normal
@@ -1440,6 +1476,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/v1/channels.create (identity=admin) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-014
   name: Delete channel
   kind: normal
@@ -1554,6 +1593,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-015
   name: Read channel info
   kind: normal
@@ -1669,6 +1711,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-016
   name: List channels
   kind: normal
@@ -1772,6 +1817,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-017
   name: Invite to channel
   kind: normal
@@ -1889,6 +1937,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-018
   name: Kick from channel
   kind: normal
@@ -2006,6 +2057,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-019
   name: Grant channel owner
   kind: normal
@@ -2123,6 +2177,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Room-level privilege escalation.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-020
   name: Set channel type
   kind: normal
@@ -2240,6 +2297,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: public<->private visibility boundary change.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-021
   name: List channel members
   kind: normal
@@ -2355,6 +2415,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-022
   name: Create private group
   kind: normal
@@ -2468,6 +2531,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-023
   name: List groups
   kind: normal
@@ -2559,6 +2625,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-024
   name: Post message
   kind: normal
@@ -2701,6 +2770,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-025
   name: Send message
   kind: normal
@@ -2843,6 +2915,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-026
   name: Edit message
   kind: normal
@@ -2960,6 +3035,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-027
   name: Delete message
   kind: normal
@@ -3074,6 +3152,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-028
   name: React to message
   kind: normal
@@ -3191,6 +3272,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-029
   name: Read message
   kind: normal
@@ -3306,6 +3390,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-030
   name: Upload file to room
   kind: normal
@@ -3443,6 +3530,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: File upload (type/size validation, storage).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-031
   name: Admin list all rooms
   kind: normal
@@ -3546,6 +3636,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/rooms.adminRooms (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-032
   name: Save room settings
   kind: normal
@@ -3663,6 +3756,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-033
   name: Clean room history
   kind: normal
@@ -3777,6 +3873,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Bulk destructive message deletion.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-034
   name: Export room
   kind: normal
@@ -3900,6 +3999,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-035
   name: Read public settings
   kind: normal
@@ -3987,6 +4089,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/settings.public (identity=anon) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-036
   name: List settings
   kind: normal
@@ -4090,6 +4195,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/settings (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-037
   name: Read a setting
   kind: normal
@@ -4218,6 +4326,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-038
   name: Change a setting
   kind: normal
@@ -4336,6 +4447,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Setting writes reconfigure auth/uploads/integrations -> workspace takeover.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-039
   name: List permissions
   kind: normal
@@ -4427,6 +4541,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/permissions.listAll (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-040
   name: Rewrite permissions
   kind: normal
@@ -4520,6 +4637,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Granting a permission to a low role = global escalation.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-041
   name: Assign role to user
   kind: normal
@@ -4644,6 +4764,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-042
   name: List roles
   kind: normal
@@ -4735,6 +4858,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-043
   name: Create integration/webhook
   kind: normal
@@ -4848,6 +4974,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Outgoing-webhook 'script' runs in a server VM; 'urls' = SSRF. Code/SSRF-adjacent.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-044
   name: List integrations
   kind: normal
@@ -4951,6 +5080,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/integrations.list (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-045
   name: Call server method (DDP bridge)
   kind: normal
@@ -5032,6 +5164,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-046
   name: Read statistics
   kind: normal
@@ -5135,5 +5270,8 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/statistics (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 edges: []
 annotation_issues: []

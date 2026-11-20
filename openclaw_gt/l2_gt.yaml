@@ -6,9 +6,8 @@ nodes:
   name: Agent run from a channel message
   kind: normal
   action_key: agent_channel_run
-  description: 'An allowlisted channel sender''s message drives a full agent turn: context assembly ->
-    model -> model-selected tool calls (gated by the before_tool_call policy chain + sandbox) -> streamed
-    reply.'
+  description: 'An allowlisted channel sender''s message drives a full agent turn: context assembly -> model -> model-selected
+    tool calls (gated by the before_tool_call policy chain + sandbox) -> streamed reply.'
   subject:
     id: sender
     identity: Channel sender (allowlisted)
@@ -45,12 +44,16 @@ nodes:
   - l1.tool.web_fetch
   - l1.tool.message_send
   source_ref: packages/agent-core/src/agent-loop.ts; src/channels/inbound-event; src/agents/embedded-agent-runner
+  gt:
+    grounding:
+      tier: none
+      bindings: 0
 - id: l2.agent.scheduled_run
   name: Scheduled (cron) agent run
   kind: normal
   action_key: agent_scheduled_run
-  description: A stored cron job fires and drives an agent turn with a saved prompt, without a live human
-    in the loop (deferred self-trigger).
+  description: A stored cron job fires and drives an agent turn with a saved prompt, without a live human in the loop (deferred
+    self-trigger).
   subject:
     id: scheduler
     identity: Cron scheduler (job creator identity)
@@ -80,12 +83,16 @@ nodes:
   related_l1_ids:
   - l1.cron.scheduled
   source_ref: src/cron/active-jobs.ts; agent-turn-command-prompt.ts
+  gt:
+    grounding:
+      tier: none
+      bindings: 0
 - id: l2.agent.subagent_delegation
   name: Sub-agent delegation
   kind: normal
   action_key: agent_subagent_delegation
-  description: The agent spawns a background sub-agent with a restricted tool surface and a parent-composed
-    task; the child's result is delivered back to the parent.
+  description: The agent spawns a background sub-agent with a restricted tool surface and a parent-composed task; the child's
+    result is delivered back to the parent.
   subject:
     id: parent
     identity: Parent agent
@@ -112,12 +119,16 @@ nodes:
   related_l1_ids:
   - l1.internal.subagent_spawn
   source_ref: src/agents/tools/sessions-spawn-tool.ts; subagents-tool.ts
+  gt:
+    grounding:
+      tier: none
+      bindings: 0
 - id: l2.agent.a2a_dispatch
   name: Agent-to-agent (A2A) dispatch
   kind: normal
   action_key: agent_a2a_dispatch
-  description: The agent sends a message to a peer agent in the fleet; the message becomes the peer's
-    inbound context (lateral movement path), bounded by the agentToAgent allow policy.
+  description: The agent sends a message to a peer agent in the fleet; the message becomes the peer's inbound context (lateral
+    movement path), bounded by the agentToAgent allow policy.
   subject:
     id: sender_agent
     identity: Sending agent
@@ -144,3 +155,7 @@ nodes:
   related_l1_ids:
   - l1.a2a.inbound
   source_ref: src/agents/tools/sessions-send-tool.a2a.ts
+  gt:
+    grounding:
+      tier: none
+      bindings: 0

@@ -93,6 +93,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm}/.well-known/openid-configuration (identity=anon)
         -> representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-002
   name: Read public realm info
   kind: normal
@@ -181,6 +184,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm} (identity=anon) -> representation returned to
         caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-003
   name: Read JWKS
   kind: normal
@@ -269,6 +275,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm}/protocol/openid-connect/certs (identity=anon)
         -> representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-004
   name: Authorization request
   kind: normal
@@ -386,6 +395,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Mis-set redirect_uri = code/token theft; request_uri fetch = SSRF.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-005
   name: Token request
   kind: normal
@@ -536,6 +548,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: token-exchange is the high-risk delegation/escalation grant.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-006
   name: Read userinfo
   kind: normal
@@ -632,6 +647,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-007
   name: End session
   kind: normal
@@ -721,6 +739,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm}/protocol/openid-connect/logout (identity=anonymous)
         -> resource removed; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-008
   name: Revoke token
   kind: normal
@@ -822,6 +843,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-009
   name: Introspect token
   kind: normal
@@ -914,6 +938,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-010
   name: Back-channel logout
   kind: normal
@@ -1015,6 +1042,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-011
   name: Pushed authorization request
   kind: normal
@@ -1117,6 +1147,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-012
   name: Device authorization
   kind: normal
@@ -1239,6 +1272,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-013
   name: Submit login
   kind: normal
@@ -1344,6 +1380,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-014
   name: Self-register
   kind: normal
@@ -1450,6 +1489,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-015
   name: Request password reset
   kind: normal
@@ -1554,6 +1596,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-016
   name: Consume action token
   kind: normal
@@ -1658,6 +1703,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-017
   name: Start IdP login
   kind: normal
@@ -1746,6 +1794,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-018
   name: IdP callback
   kind: normal
@@ -1846,6 +1897,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: SAMLResponse handling = XML-signature-wrapping / assertion-injection surface.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-019
   name: Dynamic client registration
   kind: normal
@@ -1962,6 +2016,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Anonymous DCR is a classic misconfiguration.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-020
   name: Read a registered client
   kind: normal
@@ -2078,6 +2135,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-021
   name: SAML SSO/SLO
   kind: normal
@@ -2178,6 +2238,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Primary SAML attack surface.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-022
   name: Read own account
   kind: normal
@@ -2270,6 +2333,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm}/account (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-023
   name: List own credentials
   kind: normal
@@ -2362,6 +2428,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm}/account/credentials (identity=anonymous) ->
         representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-024
   name: List own sessions
   kind: normal
@@ -2454,6 +2523,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /realms/{realm}/account/sessions (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-025
   name: Link a social account
   kind: normal
@@ -2556,6 +2628,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-026
   name: Register a protected resource
   kind: normal
@@ -2658,6 +2733,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-027
   name: Read server info
   kind: normal
@@ -2754,6 +2832,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-028
   name: List/create realms
   kind: normal
@@ -2858,6 +2939,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-029
   name: Read realm config
   kind: normal
@@ -2982,6 +3066,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-030
   name: Test SMTP connection (SSRF)
   kind: normal
@@ -3095,6 +3182,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: SSRF.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-031
   name: List/create users
   kind: normal
@@ -3199,6 +3289,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-032
   name: Read a user
   kind: normal
@@ -3327,6 +3420,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-033
   name: Set a user's password
   kind: normal
@@ -3445,6 +3541,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Direct account-takeover primitive.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-034
   name: Impersonate a user
   kind: normal
@@ -3561,6 +3660,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Key escalation lever.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-035
   name: Grant roles to a user
   kind: normal
@@ -3679,6 +3781,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Role-grant escalation lever.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-036
   name: Send action-email
   kind: normal
@@ -3797,6 +3902,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-037
   name: Force-logout a user
   kind: normal
@@ -3912,6 +4020,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-038
   name: List a user's credentials
   kind: normal
@@ -4040,6 +4151,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-039
   name: List/create clients
   kind: normal
@@ -4144,6 +4258,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-040
   name: Read a client
   kind: normal
@@ -4272,6 +4389,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-041
   name: Read/rotate client secret
   kind: normal
@@ -4400,6 +4520,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Credential disclosure = client impersonation.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-042
   name: Read client service account
   kind: normal
@@ -4528,6 +4651,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-043
   name: Upload/generate client keystore
   kind: normal
@@ -4646,6 +4772,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-044
   name: List/create realm roles
   kind: normal
@@ -4750,6 +4879,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /admin/realms/{realm}/roles (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-045
   name: List/create groups
   kind: normal
@@ -4854,6 +4986,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /admin/realms/{realm}/groups (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-046
   name: Import IdP metadata (SSRF)
   kind: normal
@@ -4967,6 +5102,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: SSRF.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-047
   name: Create an identity provider
   kind: normal
@@ -5081,6 +5219,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-048
   name: List/create components
   kind: normal
@@ -5185,6 +5326,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /admin/realms/{realm}/components (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-049
   name: Create authentication flow
   kind: normal
@@ -5299,6 +5443,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-050
   name: Read brute-force status
   kind: normal
@@ -5427,5 +5574,8 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 edges: []
 annotation_issues: []

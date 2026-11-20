@@ -410,6 +410,16 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200 all identities; POST upload 201
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - user
+      statuses:
+      - 201
+      methods:
+      - POST
 - key: http://localhost/api/v1/media/{friendly_token}
   kind: api
   methods:
@@ -839,6 +849,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET pub=200; private anon=400,user=200; missing=400
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/actions
   kind: api
   methods:
@@ -1045,6 +1062,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET anon=400 user=200; POST no-type=400
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/comments
   kind: api
   methods:
@@ -1285,6 +1309,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200 all
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/comments/{uid}
   kind: api
   methods:
@@ -1464,6 +1495,13 @@ nodes:
       ref: files/views/comments.py:64-133
       supports: DELETE auth branch
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/share
   kind: api
   methods:
@@ -1564,6 +1602,13 @@ nodes:
       ref: files/views/media.py:1251-1274
       supports: require_POST, owner check
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/chapters
   kind: api
   methods:
@@ -1678,6 +1723,13 @@ nodes:
       ref: files/views/pages.py:301-358
       supports: login_required, editor/contributor check
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/trim_video
   kind: api
   methods:
@@ -1788,6 +1840,13 @@ nodes:
       ref: files/views/pages.py:542-570
       supports: trimmer gate + auth
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/{friendly_token}/pdf
   kind: api
   methods:
@@ -1884,6 +1943,13 @@ nodes:
       ref: files/views/media_auth.py:215-233
       supports: require_safe, access check
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media/user/bulk_actions
   kind: api
   methods:
@@ -2142,6 +2208,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403, user no-ids=400
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/search
   kind: api
   methods:
@@ -2356,6 +2429,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: q=clip 200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/categories
   kind: api
   methods:
@@ -2483,6 +2563,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: '200'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/categories/contributor
   kind: api
   methods:
@@ -2579,6 +2666,13 @@ nodes:
       ref: files/views/categories.py:82-100
       supports: contributor list
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/categories/{uid}
   kind: api
   methods:
@@ -2713,6 +2807,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: '200'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/tags
   kind: api
   methods:
@@ -2822,6 +2923,13 @@ nodes:
       ref: files/views/categories.py:103-123
       supports: tag list
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/encode_profiles/
   kind: api
   methods:
@@ -2916,6 +3024,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: 200 all identities
     notes: No permission_classes set -> readable by anyone. See annotation_issues.
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/comments
   kind: api
   methods:
@@ -3059,6 +3174,13 @@ nodes:
       ref: files/views/comments.py:29-61
       supports: global comment list
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/playlists
   kind: api
   methods:
@@ -3297,6 +3419,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/playlists/{friendly_token}
   kind: api
   methods:
@@ -3612,6 +3741,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/user/action/{action}
   kind: api
   methods:
@@ -3780,6 +3916,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: like 200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/manage_media
   kind: api
   methods:
@@ -4030,6 +4173,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon/user=403, admin=200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/manage_comments
   kind: api
   methods:
@@ -4186,6 +4336,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon/user=403, admin=200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/manage_users
   kind: api
   methods:
@@ -4291,8 +4448,7 @@ nodes:
       value_flow: false
       value_description: null
       fields: []
-    reason: management_views.UserList.delete bulk-deletes users; managers only; cannot delete superuser
-      unless admin.
+    reason: management_views.UserList.delete bulk-deletes users; managers only; cannot delete superuser unless admin.
     evidence: files/management_views.py:246-262
   operation_semantic: manage_users
   semantic_inputs:
@@ -4361,6 +4517,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon/user=403, admin=200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/tasks
   kind: api
   methods:
@@ -4441,6 +4604,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/tasks/{friendly_token}
   kind: api
   methods:
@@ -4531,6 +4701,13 @@ nodes:
       ref: files/views/tasks.py:20-30
       supports: IsAdminUser; no-op delete
     notes: Handler is a no-op (revoke commented out); DELETE always 204. See annotation_issues.
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/media-auth
   kind: api
   methods:
@@ -4613,6 +4790,13 @@ nodes:
       ref: files/views/media_auth.py:178-212
       supports: path-only decision
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/users
   kind: api
   methods:
@@ -4859,6 +5043,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET anon=200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/users/{username}
   kind: api
   methods:
@@ -5181,6 +5372,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/users/{username}/contact
   kind: api
   methods:
@@ -5288,6 +5486,13 @@ nodes:
       ref: users/views.py:161-192
       supports: api_view POST, auth check
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/whoami
   kind: api
   methods:
@@ -5399,6 +5604,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user=200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/user/token
   kind: api
   methods:
@@ -5489,6 +5701,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user=200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/login
   kind: api
   methods:
@@ -5667,6 +5886,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: no-body=400
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/
   kind: api
   methods:
@@ -5897,6 +6123,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/
   kind: api
   methods:
@@ -6125,6 +6358,13 @@ nodes:
       ref: migrationservice/views.py:38-144
       supports: ModelViewSet detail
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/start/
   kind: api
   methods:
@@ -6222,6 +6462,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Start a saved migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/resume/
   kind: api
   methods:
@@ -6319,6 +6566,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Resume a paused migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/rerun/
   kind: api
   methods:
@@ -6416,6 +6670,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Re-run a finished migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/pause/
   kind: api
   methods:
@@ -6513,6 +6774,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Pause a running migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/abort/
   kind: api
   methods:
@@ -6610,6 +6878,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Abort a migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/records/
   kind: api
   methods:
@@ -6707,6 +6982,13 @@ nodes:
       ref: migrationservice/views.py
       supports: List mapping records of a migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/progress/
   kind: api
   methods:
@@ -6804,6 +7086,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Poll progress of a migration.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/check_connection/
   kind: api
   methods:
@@ -6901,6 +7190,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Test stored source credentials.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/source_categories/
   kind: api
   methods:
@@ -6998,6 +7294,13 @@ nodes:
       ref: migrationservice/views.py
       supports: List source categories (saved).
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/{pk}/source_roles/
   kind: api
   methods:
@@ -7095,6 +7398,13 @@ nodes:
       ref: migrationservice/views.py
       supports: List source roles (saved).
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/check_connection/
   kind: api
   methods:
@@ -7174,6 +7484,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Test typed source credentials.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/source_categories/
   kind: api
   methods:
@@ -7253,6 +7570,13 @@ nodes:
       ref: migrationservice/views.py
       supports: List source categories (unsaved).
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/source_roles/
   kind: api
   methods:
@@ -7332,6 +7656,13 @@ nodes:
       ref: migrationservice/views.py
       supports: List source roles (unsaved).
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/server_time/
   kind: api
   methods:
@@ -7411,6 +7742,13 @@ nodes:
       ref: migrationservice/views.py
       supports: Portal clock for the scheduling form.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/api/v1/migrations/lti_platforms/
   kind: api
   methods:
@@ -7490,6 +7828,13 @@ nodes:
       ref: migrationservice/views.py
       supports: LTI platforms a course can bind to.
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/fu/upload/
   kind: api
   methods:
@@ -7560,8 +7905,7 @@ nodes:
         type: string
         flow: true
         description: Created media URL.
-    reason: FineUploaderView handles chunked uploads; creates a Media on completion; upload permission
-      required.
+    reason: FineUploaderView handles chunked uploads; creates a Media on completion; upload permission required.
     evidence: uploader/views.py:19-76
   operation_semantic: chunked_upload
   semantic_inputs:
@@ -7618,6 +7962,13 @@ nodes:
       ref: uploader/views.py:19-76
       supports: user_allowed_to_upload gate
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/lti/jwks/
   kind: api
   methods:
@@ -7700,6 +8051,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: 200 all
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/lti/public-key/
   kind: api
   methods:
@@ -7765,6 +8123,13 @@ nodes:
       ref: lti/views.py:669-674
       supports: public key PEM
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/
   kind: page
   methods:
@@ -7808,6 +8173,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/about
   kind: page
   methods:
@@ -7851,6 +8223,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/featured
   kind: page
   methods:
@@ -7894,6 +8273,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/history
   kind: page
   methods:
@@ -7937,6 +8323,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/liked
   kind: page
   methods:
@@ -7980,6 +8373,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/latest
   kind: page
   methods:
@@ -8023,6 +8423,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/members
   kind: page
   methods:
@@ -8066,6 +8473,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/popular
   kind: page
   methods:
@@ -8109,6 +8523,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/recommended
   kind: page
   methods:
@@ -8152,6 +8573,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/search
   kind: page
   methods:
@@ -8195,6 +8623,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/tags
   kind: page
   methods:
@@ -8238,6 +8673,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/categories
   kind: page
   methods:
@@ -8281,6 +8723,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/tos
   kind: page
   methods:
@@ -8324,6 +8773,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/contact
   kind: page
   methods:
@@ -8367,6 +8823,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/upload
   kind: page
   methods:
@@ -8410,6 +8873,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/scpublisher
   kind: page
   methods:
@@ -8453,6 +8923,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/record_screen
   kind: page
   methods:
@@ -8496,6 +8973,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/embed
   kind: page
   methods:
@@ -8539,6 +9023,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/publish
   kind: page
   methods:
@@ -8582,6 +9073,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/edit
   kind: page
   methods:
@@ -8625,6 +9123,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/edit_video
   kind: page
   methods:
@@ -8668,6 +9173,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/edit_chapters
   kind: page
   methods:
@@ -8711,6 +9223,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/replace_media
   kind: page
   methods:
@@ -8754,6 +9273,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/add_subtitle
   kind: page
   methods:
@@ -8797,6 +9323,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/edit_subtitle
   kind: page
   methods:
@@ -8840,6 +9373,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/manage/media
   kind: page
   methods:
@@ -8883,6 +9423,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/manage/comments
   kind: page
   methods:
@@ -8926,6 +9473,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/manage/users
   kind: page
   methods:
@@ -8969,6 +9523,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/playlist/{friendly_token}
   kind: page
   methods:
@@ -9012,6 +9573,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/playlists/{friendly_token}
   kind: page
   methods:
@@ -9055,6 +9623,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/edit_category/{uid}
   kind: page
   methods:
@@ -9098,6 +9673,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/user/{username}
   kind: page
   methods:
@@ -9141,6 +9723,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/user/{username}/about
   kind: page
   methods:
@@ -9184,6 +9773,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/user/{username}/playlists
   kind: page
   methods:
@@ -9227,6 +9823,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/user/{username}/edit
   kind: page
   methods:
@@ -9270,6 +9873,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/user/{username}/shared_with_me
   kind: page
   methods:
@@ -9313,6 +9923,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/user/{username}/shared_by_me
   kind: page
   methods:
@@ -9356,6 +9973,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/channel/{friendly_token}
   kind: page
   methods:
@@ -9399,6 +10023,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/channel/{friendly_token}/edit
   kind: page
   methods:
@@ -9442,6 +10073,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/{slug}
   kind: page
   methods:
@@ -9485,6 +10123,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/view
   kind: page
   methods:
@@ -9528,6 +10173,13 @@ nodes:
       ref: http GET / -> 200
       supports: SPA entry reachable
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/migrations
   kind: page
   methods:
@@ -9578,6 +10230,13 @@ nodes:
       ref: migrationservice/views.py:253-287
       supports: login_required + superuser
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/migrations/new
   kind: page
   methods:
@@ -9628,6 +10287,13 @@ nodes:
       ref: migrationservice/views.py:253-287
       supports: login_required + superuser
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/migrations/new/{source}
   kind: page
   methods:
@@ -9678,6 +10344,13 @@ nodes:
       ref: migrationservice/views.py:253-287
       supports: login_required + superuser
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/migrations/{pk}
   kind: page
   methods:
@@ -9728,6 +10401,13 @@ nodes:
       ref: migrationservice/views.py:253-287
       supports: login_required + superuser
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/migrations/{pk}/edit
   kind: page
   methods:
@@ -9778,6 +10458,13 @@ nodes:
       ref: migrationservice/views.py:253-287
       supports: login_required + superuser
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/accounts/login/
   kind: page
   methods:
@@ -9832,6 +10519,13 @@ nodes:
       ref: cms/urls.py:28 allauth.urls
       supports: account_login
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/accounts/signup/
   kind: page
   methods:
@@ -9877,6 +10571,13 @@ nodes:
       ref: allauth.account.views.SignupView
       supports: account_signup
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/accounts/logout/
   kind: page
   methods:
@@ -9922,6 +10623,13 @@ nodes:
       ref: allauth logout
       supports: account_logout
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/accounts/password/change/
   kind: page
   methods:
@@ -9967,6 +10675,13 @@ nodes:
       ref: allauth
       supports: account_change_password
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/accounts/password/reset/
   kind: page
   methods:
@@ -10013,6 +10728,13 @@ nodes:
       ref: allauth
       supports: account_reset_password
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/accounts/email/
   kind: page
   methods:
@@ -10058,6 +10780,13 @@ nodes:
       ref: allauth
       supports: account_email
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/swagger/
   kind: page
   methods:
@@ -10101,6 +10830,13 @@ nodes:
       ref: GET /swagger.json -> 200 error page
       supports: schema gen crash
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/docs/api/
   kind: page
   methods:
@@ -10144,6 +10880,13 @@ nodes:
       ref: files/urls.py / users/urls.py
       supports: Registered page route
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/swagger.json
   kind: page
   methods:
@@ -10187,6 +10930,13 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: 200 but HTML error body
     notes: Schema generation crashes; body is the MediaCMS error template, not JSON. See issue-001.
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/robots.txt
   kind: page
   methods:
@@ -10230,6 +10980,13 @@ nodes:
       ref: cms/urls.py:21-24
       supports: TemplateView
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/rss/
   kind: page
   methods:
@@ -10273,6 +11030,13 @@ nodes:
       ref: files/feeds.py
       supports: IndexRSSFeed
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost/rss/search
   kind: page
   methods:
@@ -10316,6 +11080,13 @@ nodes:
       ref: files/feeds.py
       supports: SearchRSSFeed
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 edges:
 - src: http://localhost/view
   dst: http://localhost/api/v1/media/{friendly_token}
@@ -10421,11 +11192,10 @@ edges:
 excluded_items:
 - item: Django admin generic CRUD (admin/<app>/<model>/{,add,<id>/change,<id>/delete,<id>/history})
   reason: Framework-generated generic admin views (~180 routes over auth/account/socialaccount/sites/authtoken/files/users/lti/migrationservice
-    models). Real staff surface but not MediaCMS application business actions with a JSON IO contract;
-    represented collectively, not per-route.
+    models). Real staff surface but not MediaCMS application business actions with a JSON IO contract; represented collectively,
+    not per-route.
 - item: debug_toolbar routes (^__debug__/...)
-  reason: django-debug-toolbar; only active when DEBUG=True. This deployment runs DEBUG=False, so they
-    are inert.
+  reason: django-debug-toolbar; only active when DEBUG=True. This deployment runs DEBUG=False, so they are inert.
 - item: allauth socialaccount/SAML provider routes (accounts/3rdparty/*, accounts/social/*, accounts/saml/*)
   reason: No social application is configured and USE_SAML=False; provider endpoints cannot complete.
 - item: api-auth/ (DRF browsable-API login/logout)
@@ -10435,5 +11205,5 @@ excluded_items:
 - item: i18n/setlanguage, i18n/setlang, setlanguage
   reason: Locale cookie setters; no business data flow.
 - item: LTI launch/OIDC/select-media/my-media/embed
-  reason: USE_LTI=False in this deployment and no LTIPlatform configured; the launch/OIDC flow needs an
-    external LMS platform (EXTERNAL DEPENDENCY). jwks/public-key are kept (publicly served). See issue-004.
+  reason: USE_LTI=False in this deployment and no LTIPlatform configured; the launch/OIDC flow needs an external LMS platform
+    (EXTERNAL DEPENDENCY). jwks/public-key are kept (publicly served). See issue-004.

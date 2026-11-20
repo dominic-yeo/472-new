@@ -120,6 +120,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->400'
       supports: 'runtime: handler/router reached'
     notes: Token travels in a Set-Cookie (name 'token'), not the JSON body.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:14318/internal/v1/users/logout
   kind: api
   methods:
@@ -190,6 +200,15 @@ nodes:
       ref: '2026-11-20: runtime: POST observed -> 200; session-invalidation endpoint driven (auth-breaking)'
       supports: status=200
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - '?'
+      statuses:
+      - 200
+      methods: []
   method: POST
   path: /internal/v1/users/logout
 - key: http://localhost:14318/internal/v1/users/current
@@ -303,6 +322,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/projects/:project_id
   kind: api
   methods:
@@ -427,6 +456,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler/router reached; anon 401/admin 200 auth-gated'
     notes: DSN embeds the project token; any logged-in user can read ANY project's DSN (no ACL).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/data-usage
   kind: api
   methods:
@@ -511,6 +550,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/traces/search
   kind: api
   methods:
@@ -651,6 +697,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: 'Gated by m.User only (NOT UserAndProject): a cross-project trace-id oracle.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/tracing/:project_id/systems
   kind: api
   methods:
@@ -788,6 +844,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/spans
   kind: api
   methods:
@@ -902,6 +965,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/groups
   kind: api
   methods:
@@ -1011,6 +1081,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/groups/:group_id
   kind: api
   methods:
@@ -1128,6 +1205,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id
   kind: api
   methods:
@@ -1250,6 +1337,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/attributes
   kind: api
   methods:
@@ -1370,6 +1464,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/tracing/:project_id/attributes/:attr
   kind: api
   methods:
@@ -1428,6 +1532,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/tracing/:project_id/percentiles
   kind: api
   methods:
@@ -1474,6 +1588,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/group-stats
   kind: api
   methods:
@@ -1520,6 +1641,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/timeseries
   kind: api
   methods:
@@ -1566,6 +1694,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/tracing/:project_id/traces/:trace_id/:span_id
   kind: api
   methods:
@@ -1612,6 +1747,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/metrics/:project_id
   kind: api
   methods:
@@ -1729,6 +1871,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/table
   kind: api
   methods:
@@ -1837,6 +1989,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/attributes
   kind: api
   methods:
@@ -1954,6 +2116,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler/router reached; anon 401/admin 200 auth-gated'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/describe
   kind: api
   methods:
@@ -2011,6 +2183,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/stats
   kind: api
   methods:
@@ -2057,6 +2239,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/metrics/:project_id/attributes/:attr
   kind: api
   methods:
@@ -2114,6 +2303,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/timeseries
   kind: api
   methods:
@@ -2171,6 +2370,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/gauge
   kind: api
   methods:
@@ -2217,6 +2426,13 @@ nodes:
       supports: 'runtime observation: API dispatch NOT confirmed (SPA fallback / drift)'
     notes: 'RUNTIME 2026-11-19: GET returns SPA shell and other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled
       read route not dispatch-confirmed (version/route drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/internal/v1/metrics/:project_id/heatmap
   kind: api
   methods:
@@ -2274,6 +2490,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards
   kind: api
   methods:
@@ -2442,6 +2668,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405; anonymous GET->200; admin GET->200'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - POST
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/yaml
   kind: api
   methods:
@@ -2557,6 +2793,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - POST
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id
   kind: api
   methods:
@@ -2809,6 +3055,16 @@ nodes:
         PUT->405; admin DELETE->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/pinned
   kind: api
   methods:
@@ -2909,6 +3165,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/yaml
   kind: api
   methods:
@@ -2972,6 +3238,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->200; admin GET->200; admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/table
   kind: api
   methods:
@@ -3027,6 +3303,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid
   kind: api
   methods:
@@ -3158,6 +3444,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - POST
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/reset
   kind: api
   methods:
@@ -3213,6 +3509,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/unpinned
   kind: api
   methods:
@@ -3268,6 +3574,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/:row_id
   kind: api
   methods:
@@ -3390,6 +3706,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin DELETE->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - DELETE
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows
   kind: api
   methods:
@@ -3517,6 +3843,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - POST
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id
   kind: api
   methods:
@@ -3643,6 +3979,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin DELETE->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - DELETE
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/grid/layout
   kind: api
   methods:
@@ -3698,6 +4044,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id/up
   kind: api
   methods:
@@ -3753,6 +4109,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/internal/v1/metrics/:project_id/dashboards/:dash_id/rows/:row_id/down
   kind: api
   methods:
@@ -3808,6 +4174,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin PUT->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - PUT
 - key: http://localhost:14318/api/v1/tracing/:project_id/spans
   kind: api
   methods:
@@ -3934,6 +4310,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/api/v1/tracing/:project_id/groups
   kind: api
   methods:
@@ -4045,6 +4431,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:14318/v1/traces
   kind: api
   methods:
@@ -4151,6 +4547,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
       supports: 'runtime: handler/router reached'
     notes: protobuf/json OTLP body; project resolved from DSN, not user session.
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - dsn
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:14318/v1/logs
   kind: api
   methods:
@@ -4257,6 +4663,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - dsn
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:14318/v1/metrics
   kind: api
   methods:
@@ -4363,6 +4779,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - dsn
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:14318/api/v1/vector-logs
   kind: api
   methods:
@@ -4465,6 +4891,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->403'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:14318/api/v1/prometheus/write
   kind: api
   methods:
@@ -4563,6 +4999,15 @@ nodes:
         -> 401; route live, gated by project token'
       supports: status=401
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - '?'
+      statuses:
+      - 401
+      methods: []
   method: POST
   path: /api/v1/prometheus/write
 - key: http://localhost:14318/api/v1/prometheus/read
@@ -4667,6 +5112,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->405'
       supports: 'runtime: handler/router reached; mutation/method routed (405 method-drift on v2.1.0-rc.1)'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 405
+      methods:
+      - POST
 - key: http://localhost:14318/api/v1/cloudwatch/metrics
   kind: api
   methods:
@@ -4769,6 +5224,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->400'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:14318/api/v1/vector/logs
   kind: api
   methods:
@@ -4825,6 +5290,16 @@ nodes:
       ref: '2026-11-19 probe (admin Bearer, mutations driven): admin POST->403'
       supports: 'runtime: handler/router reached'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:14318/debug/pprof/
   kind: page
   methods:
@@ -4870,6 +5345,13 @@ nodes:
       ref: '2026-11-19 probe: GET / ->200 text/html'
       supports: 'runtime: SPA page served'
     notes: Mounted only when Debug=true; not present in production config.
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/debug/pprof/:name
   kind: page
   methods:
@@ -4915,6 +5397,13 @@ nodes:
       ref: '2026-11-19 probe: GET / ->200 text/html'
       supports: 'runtime: SPA page served'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 - key: http://localhost:14318/
   kind: static
   methods:
@@ -4960,6 +5449,13 @@ nodes:
     notes: 'SPA shell + client bundle; JSON APIs above are the real surface. | RUNTIME 2026-11-19: GET returns SPA shell and
       other methods 404/unrouted on uptrace 2.1.0-rc.1 -- source-modeled read route not dispatch-confirmed (version/route
       drift); recheck route name/method.'
+    grounding:
+      depth: route-confirmed
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
 edges:
 - src: http://localhost:14318/
   dst: http://localhost:14318/internal/v1/users/login

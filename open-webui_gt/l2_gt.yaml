@@ -130,6 +130,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Discloses caller role + effective permissions; re-issues a token on every call.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-002
   name: Update own profile
   kind: normal
@@ -261,6 +264,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/profile)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: name/bio are stored-reflected (self stored-XSS surface); image URL passes validate_image_url.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-003
   name: Update own timezone
   kind: normal
@@ -348,6 +354,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/timezone)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-004
   name: Rotate own password
   kind: normal
@@ -451,6 +460,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/password)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Secrets are inputs only, never echoed.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-005
   name: Sign in via LDAP
   kind: normal
@@ -569,6 +581,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/ldap)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Live only when LDAP is enabled.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-006
   name: Sign in with password
   kind: normal
@@ -677,6 +692,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'Rate-limited (5*3/180s). Alternate modes: trusted-header (a proxy header sets BOTH identity and role -> impersonation
       if the header is spoofable) and WEBUI_AUTH=false (admin@localhost/admin bootstrap).'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-007
   name: Register account
   kind: normal
@@ -787,6 +805,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/signup)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Gated by ui.enable_signup except for the initial-admin bootstrap.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-008
   name: Sign out
   kind: normal
@@ -862,6 +883,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/v1/auths/signout (identity=anonymous) -> resource removed;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: May 302-redirect to WEBUI_AUTH_SIGNOUT_REDIRECT_URL.
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-009
   name: Drop own OAuth session
   kind: normal
@@ -962,6 +986,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-010
   name: Exchange IdP token for session
   kind: normal
@@ -1077,6 +1104,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/oauth/{provider}/token/exchange)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Best-effort rate limit (no caller identity before the provider answers); trusts configured client ids.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-011
   name: Provision user (admin)
   kind: normal
@@ -1211,6 +1241,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/add)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Direct privilege assignment; the returned token can bootstrap the new account's session.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-012
   name: Read admin contact
   kind: normal
@@ -1305,6 +1338,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/details)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Information disclosure when SHOW_ADMIN_DETAILS is on.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-013
   name: Read auth/admin config
   kind: normal
@@ -1399,6 +1435,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Includes secret-config presence; GT records config location, not secret values.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-014
   name: Update auth/admin config
   kind: normal
@@ -1493,6 +1532,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'High-impact: changing these alters who can register and how sessions/keys are governed.'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-015
   name: Read LDAP server config
   kind: normal
@@ -1587,6 +1629,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap/server)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Carries the LDAP bind-secret location (app_dn_password); GT records location, not value.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-016
   name: Update LDAP server config
   kind: normal
@@ -1681,6 +1726,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap/server)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Sets a stored credential (app_dn_password) and the directory endpoint used for auth.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-017
   name: Read LDAP enabled flag
   kind: normal
@@ -1771,6 +1819,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-018
   name: Toggle LDAP auth method
   kind: normal
@@ -1861,6 +1912,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-019
   name: Read OAuth config
   kind: normal
@@ -1955,6 +2009,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/oauth)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Carries OAuth client-secret locations; GT records location, not value.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-020
   name: Update OAuth config
   kind: normal
@@ -2049,6 +2106,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/oauth)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Controls which external IdPs can mint sessions on this instance.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-021
   name: Read own API key
   kind: normal
@@ -2138,6 +2198,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/api_key)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: The key is returned in clear; it is a long-lived bearer credential.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-022
   name: Mint own API key
   kind: normal
@@ -2224,6 +2287,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/api_key)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Gated by enable_api_keys + the features.api_keys permission.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-023
   name: Revoke own API key
   kind: normal
@@ -2302,5 +2368,8 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/api_key)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 edges: []
 annotation_issues: []

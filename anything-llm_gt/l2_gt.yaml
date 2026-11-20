@@ -94,6 +94,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auth)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-002
   name: Flush settings to .env
   kind: normal
@@ -173,6 +176,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/v1/system/env-dump (identity=anonymous) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: Unauthenticated by design (SECURITY.md); no secret values returned, but it persists config state.
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-003
   name: Read system settings
   kind: normal
@@ -263,6 +269,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Discloses which provider credentials are configured (as booleans) and non-secret config values.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-004
   name: Read vector count
   kind: normal
@@ -354,6 +363,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/vector-count)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-005
   name: Update system settings
   kind: normal
@@ -457,6 +469,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/update-env)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: High-impact reconfiguration via one authenticated call.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-006
   name: Export all chats
   kind: normal
@@ -551,6 +566,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/export-chats)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Bulk cross-workspace data exposure surface.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-007
   name: Remove documents
   kind: normal
@@ -651,6 +669,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system/remove-documents)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-008
   name: Create workspace
   kind: normal
@@ -758,6 +779,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/new)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-009
   name: List workspaces
   kind: normal
@@ -848,6 +872,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspaces)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-010
   name: Read workspace
   kind: normal
@@ -938,6 +965,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-011
   name: Delete workspace
   kind: normal
@@ -1029,6 +1059,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Guarded by workspaceDeletionProtection middleware.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-012
   name: Update workspace
   kind: normal
@@ -1141,6 +1174,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-013
   name: Read workspace chats
   kind: normal
@@ -1250,6 +1286,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/chats)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Returns chats for ALL users of the workspace.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-014
   name: Update workspace documents
   kind: normal
@@ -1362,6 +1401,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update-embeddings)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-015
   name: Pin workspace document
   kind: normal
@@ -1484,6 +1526,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update-pin)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-016
   name: Chat with workspace
   kind: normal
@@ -1631,6 +1676,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/chat, /api/v1/workspace/{slug}/stream-chat)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Untrusted prompt -> LLM -> model-authored output (streaming-phase XSS to RCE via LLM response injection).
+    grounding:
+      tier: interface
+      bindings: 2
 - id: gt-action-017
   name: Vector search workspace
   kind: normal
@@ -1740,6 +1788,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/vector-search)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-018
   name: Create thread
   kind: normal
@@ -1857,6 +1908,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/new)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-019
   name: Update thread
   kind: normal
@@ -1991,6 +2045,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/update)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-020
   name: Delete thread
   kind: normal
@@ -2093,6 +2150,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-021
   name: Read thread chats
   kind: normal
@@ -2211,6 +2271,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/chats)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-022
   name: Chat in thread
   kind: normal
@@ -2367,6 +2430,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/chat, /api/v1/workspace/{slug}/thread/{threadSlug}/stream-chat)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Untrusted prompt -> LLM -> model-authored output.
+    grounding:
+      tier: interface
+      bindings: 2
 - id: gt-action-023
   name: Upload document
   kind: normal
@@ -2490,6 +2556,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/upload, /api/v1/document/upload/{folderName})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 2
 - id: gt-action-024
   name: Upload document from link
   kind: normal
@@ -2591,6 +2660,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/upload-link)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'SSRF surface: the server-side collector fetches a caller-controlled URL.'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-025
   name: Upload raw text
   kind: normal
@@ -2692,6 +2764,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/raw-text)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-026
   name: List documents
   kind: normal
@@ -2777,6 +2852,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/documents)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-027
   name: List folder documents
   kind: normal
@@ -2882,6 +2960,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/documents/folder/{folderName})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-028
   name: Read accepted file types
   kind: normal
@@ -2972,6 +3053,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/accepted-file-types)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-029
   name: Read metadata schema
   kind: normal
@@ -3062,6 +3146,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/metadata-schema)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-030
   name: Read document
   kind: normal
@@ -3158,6 +3245,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/{docName})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-031
   name: Create folder
   kind: normal
@@ -3243,6 +3333,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/create-folder)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-032
   name: Remove folder
   kind: normal
@@ -3334,6 +3427,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/remove-folder)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-033
   name: Move documents
   kind: normal
@@ -3432,6 +3528,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/move-files)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-034
   name: Download generated file
   kind: normal
@@ -3542,6 +3641,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/document/generated-files/{filename})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Filename is format-validated to reject path traversal.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-035
   name: List OpenAI models
   kind: normal
@@ -3622,6 +3724,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/models)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-036
   name: OpenAI chat completion
   kind: normal
@@ -3742,6 +3847,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/chat/completions)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Untrusted messages -> LLM -> model-authored output.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-037
   name: Generate image
   kind: normal
@@ -3853,6 +3961,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/images/generations)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-038
   name: OpenAI embeddings
   kind: normal
@@ -3949,6 +4060,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/embeddings)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-039
   name: List vector stores
   kind: normal
@@ -4029,6 +4143,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/openai/vector_stores)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-040
   name: List users
   kind: normal
@@ -4120,6 +4237,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/users)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Requires multi-user mode.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-041
   name: Issue user auth token
   kind: normal
@@ -4241,6 +4361,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/users/{id}/issue-auth-token)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'Impersonation surface: mints a login token for ANY user id.'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-042
   name: Check multi-user mode
   kind: normal
@@ -4325,6 +4448,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/is-multi-user-mode)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-043
   name: Admin list users
   kind: normal
@@ -4406,6 +4532,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Requires multi-user mode.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-044
   name: Admin create user
   kind: normal
@@ -4502,6 +4631,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users/new)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Requires multi-user mode.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-045
   name: Admin update user
   kind: normal
@@ -4612,6 +4744,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users/{id})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-046
   name: Admin delete user
   kind: normal
@@ -4700,6 +4835,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/users/{id})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-047
   name: Admin list invites
   kind: normal
@@ -4791,6 +4929,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/invites)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-048
   name: Admin create invite
   kind: normal
@@ -4897,6 +5038,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/invite/new)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-049
   name: Admin delete invite
   kind: normal
@@ -4994,6 +5138,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/invite/{id})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-050
   name: Admin list workspace users
   kind: normal
@@ -5095,6 +5242,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspaces/{workspaceId}/users)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-051
   name: Admin overwrite workspace users
   kind: normal
@@ -5194,6 +5344,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspaces/{workspaceId}/update-users)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-052
   name: Admin manage workspace users
   kind: normal
@@ -5293,6 +5446,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspaces/{workspaceSlug}/manage-users)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-053
   name: Admin read all chats
   kind: normal
@@ -5383,6 +5539,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/workspace-chats)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Instance-wide chat data exposure.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-054
   name: Admin update preferences
   kind: normal
@@ -5482,6 +5641,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/admin/preferences)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-055
   name: List embeds
   kind: normal
@@ -5572,6 +5734,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-056
   name: Read embed chats
   kind: normal
@@ -5676,6 +5841,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid}/chats)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-057
   name: Read embed session chats
   kind: normal
@@ -5794,6 +5962,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid}/chats/{sessionUuid})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-058
   name: Create embed
   kind: normal
@@ -5914,6 +6085,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/new)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: 'Public exposure surface: allowlist_domains / allow_prompt_override govern who/what can drive the widget.'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-059
   name: Update embed
   kind: normal
@@ -6024,6 +6198,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-060
   name: Delete embed
   kind: normal
@@ -6112,6 +6289,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/embed/{embedUuid})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-061
   name: List MCP servers
   kind: normal
@@ -6202,6 +6382,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-062
   name: Add MCP server
   kind: normal
@@ -6292,6 +6475,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/new)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: MCP config can define a local command -> code execution / agent tool surface.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-063
   name: Reload MCP servers
   kind: normal
@@ -6374,6 +6560,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/reload)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-064
   name: Update MCP server
   kind: normal
@@ -6484,6 +6673,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name}/update)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-065
   name: Toggle MCP server
   kind: normal
@@ -6578,6 +6770,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name}/toggle)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-066
   name: Toggle MCP tool
   kind: normal
@@ -6704,6 +6899,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name}/toggle-tool)'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: Controls which MCP tools are exposed to agents (agent tool-surface control).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-067
   name: Delete MCP server
   kind: normal
@@ -6792,5 +6990,8 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/mcp-servers/{name})'
       supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 edges: []
 annotation_issues: []

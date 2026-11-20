@@ -98,6 +98,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200 all identities
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-002
   name: Upload media
   kind: normal
@@ -227,6 +230,9 @@ nodes:
       supports: 'runtime: bound interface returned 201 to POST /api/v1/media (identity=user) -> resource created; server returned
         it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-action-003
   name: View media
   kind: normal
@@ -323,6 +329,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: pub=200; private anon=400 user=200; missing=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-004
   name: Edit media
   kind: normal
@@ -453,6 +462,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-005
   name: Delete media
   kind: normal
@@ -546,6 +558,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: DELETE missing user=400 (anon=403)
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-006
   name: Run encoding
   kind: normal
@@ -660,6 +675,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-007
   name: Review media
   kind: normal
@@ -782,6 +800,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-008
   name: Like media
   kind: normal
@@ -882,6 +903,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: POST no-type=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-009
   name: Dislike media
   kind: normal
@@ -982,6 +1006,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: POST no-type=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-010
   name: Report media
   kind: normal
@@ -1082,6 +1109,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: POST no-type=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-011
   name: Watch media
   kind: normal
@@ -1182,6 +1212,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: POST no-type=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-012
   name: List media reports
   kind: normal
@@ -1284,6 +1317,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET anon=400 owner=200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-013
   name: Reset media reports
   kind: normal
@@ -1397,6 +1433,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-014
   name: List media comments
   kind: normal
@@ -1513,6 +1552,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 2
 - id: gt-action-015
   name: Add comment
   kind: normal
@@ -1637,6 +1679,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-016
   name: Delete own comment
   kind: normal
@@ -1759,6 +1804,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-017
   name: Moderate comment
   kind: normal
@@ -1881,6 +1929,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-018
   name: Share media to course
   kind: normal
@@ -2001,6 +2052,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-019
   name: Set chapters
   kind: normal
@@ -2117,6 +2171,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-020
   name: Trim video
   kind: normal
@@ -2234,6 +2291,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-021
   name: Download media PDF
   kind: normal
@@ -2340,6 +2400,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-022
   name: Bulk enable comments
   kind: normal
@@ -2447,6 +2510,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-023
   name: Bulk disable comments
   kind: normal
@@ -2554,6 +2620,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-024
   name: Bulk delete comments
   kind: normal
@@ -2659,6 +2728,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-025
   name: Bulk delete media
   kind: normal
@@ -2752,6 +2824,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-026
   name: Bulk enable download
   kind: normal
@@ -2859,6 +2934,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-027
   name: Bulk disable download
   kind: normal
@@ -2966,6 +3044,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-028
   name: Bulk set media state
   kind: normal
@@ -3083,6 +3164,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-029
   name: Bulk change owner
   kind: normal
@@ -3199,6 +3283,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-030
   name: Bulk copy media
   kind: normal
@@ -3303,6 +3390,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-031
   name: Bulk add to playlist
   kind: normal
@@ -3415,6 +3505,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-032
   name: Bulk remove from playlist
   kind: normal
@@ -3522,6 +3615,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-033
   name: Bulk grant ownership
   kind: normal
@@ -3635,6 +3731,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-034
   name: Bulk revoke ownership
   kind: normal
@@ -3747,6 +3846,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-035
   name: Bulk add to category
   kind: normal
@@ -3859,6 +3961,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-036
   name: Bulk remove from category
   kind: normal
@@ -3966,6 +4071,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-037
   name: Bulk add tags
   kind: normal
@@ -4078,6 +4186,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-038
   name: Bulk remove tags
   kind: normal
@@ -4185,6 +4296,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-039
   name: Course cleanup
   kind: normal
@@ -4302,6 +4416,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user no-ids=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-040
   name: Query shared owners
   kind: normal
@@ -4418,6 +4535,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-041
   name: Query playlist membership
   kind: normal
@@ -4525,6 +4645,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-042
   name: Query category membership
   kind: normal
@@ -4632,6 +4755,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-043
   name: Query tag membership
   kind: normal
@@ -4739,6 +4865,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-044
   name: Search media
   kind: normal
@@ -4822,6 +4951,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: q=clip 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-045
   name: List categories
   kind: normal
@@ -4905,6 +5037,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-046
   name: Read category
   kind: normal
@@ -4988,6 +5123,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-047
   name: List contributor courses
   kind: normal
@@ -5075,6 +5213,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-048
   name: List tags
   kind: normal
@@ -5158,6 +5299,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-049
   name: List comments
   kind: normal
@@ -5241,6 +5385,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-050
   name: List encode profiles
   kind: normal
@@ -5324,6 +5471,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-051
   name: List acted-on media
   kind: normal
@@ -5407,6 +5557,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-052
   name: List playlists
   kind: normal
@@ -5490,6 +5643,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-053
   name: Create playlist
   kind: normal
@@ -5596,6 +5752,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-054
   name: View playlist
   kind: normal
@@ -5690,6 +5849,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-055
   name: Edit playlist
   kind: normal
@@ -5806,6 +5968,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-056
   name: Add media to playlist
   kind: normal
@@ -5958,6 +6123,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-057
   name: Remove media from playlist
   kind: normal
@@ -6105,6 +6273,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-058
   name: Reorder playlist media
   kind: normal
@@ -6261,6 +6432,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-059
   name: Delete playlist
   kind: normal
@@ -6358,6 +6532,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-060
   name: Manage media listing
   kind: normal
@@ -6444,6 +6621,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-061
   name: 'Manage: delete media'
   kind: normal
@@ -6543,6 +6723,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-062
   name: Manage comments listing
   kind: normal
@@ -6639,6 +6822,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-063
   name: 'Manage: delete comments'
   kind: normal
@@ -6751,6 +6937,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-064
   name: Manage users listing
   kind: normal
@@ -6847,6 +7036,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-065
   name: 'Manage: delete users'
   kind: normal
@@ -6953,6 +7145,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-066
   name: List tasks
   kind: normal
@@ -7052,6 +7247,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-067
   name: Cancel task
   kind: normal
@@ -7164,6 +7362,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: Behavior inferred from intent; the revoke call is commented out so no effect actually occurs.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-068
   name: Authorize protected file
   kind: normal
@@ -7245,6 +7446,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-069
   name: List users
   kind: normal
@@ -7329,6 +7533,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-070
   name: Create user
   kind: normal
@@ -7454,6 +7661,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-071
   name: View user profile
   kind: normal
@@ -7541,6 +7751,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: GET 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-072
   name: Edit profile
   kind: normal
@@ -7662,6 +7875,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-073
   name: Change password
   kind: normal
@@ -7784,6 +8000,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-074
   name: Approve user
   kind: normal
@@ -7902,6 +8121,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-075
   name: Disapprove user
   kind: normal
@@ -8019,6 +8241,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-076
   name: Delete own account
   kind: normal
@@ -8116,6 +8341,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-077
   name: Delete user account
   kind: normal
@@ -8213,6 +8441,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-078
   name: Contact user
   kind: normal
@@ -8337,6 +8568,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-079
   name: Whoami
   kind: normal
@@ -8424,6 +8658,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user=200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-080
   name: Get API token
   kind: normal
@@ -8511,6 +8748,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: anon=403 user=200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-081
   name: Login
   kind: normal
@@ -8631,6 +8871,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: no-body=400
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-082
   name: Chunked upload
   kind: normal
@@ -8737,6 +8980,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-083
   name: Read LTI JWKS
   kind: normal
@@ -8820,6 +9066,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: 200 all
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-084
   name: Read LTI public key
   kind: normal
@@ -8902,6 +9151,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: 200 all
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-085
   name: List migrations
   kind: normal
@@ -9001,6 +9253,9 @@ nodes:
       ref: mediacms_gt/runtime_probe.txt
       supports: admin=200 else 403
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-086
   name: Create migration
   kind: normal
@@ -9125,6 +9380,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-087
   name: Read migration
   kind: normal
@@ -9236,6 +9494,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-088
   name: Update migration
   kind: normal
@@ -9354,6 +9615,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-089
   name: Delete migration
   kind: normal
@@ -9444,6 +9708,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-090
   name: Start migration
   kind: normal
@@ -9549,6 +9816,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-091
   name: Resume migration
   kind: normal
@@ -9654,6 +9924,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-092
   name: Re-run migration
   kind: normal
@@ -9759,6 +10032,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-093
   name: Pause migration
   kind: normal
@@ -9864,6 +10140,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-094
   name: Abort migration
   kind: normal
@@ -9969,6 +10248,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-095
   name: List migration records
   kind: normal
@@ -10087,6 +10369,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-096
   name: Read migration progress
   kind: normal
@@ -10205,6 +10490,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-097
   name: Check saved connection
   kind: normal
@@ -10324,6 +10612,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-098
   name: List source categories (saved)
   kind: normal
@@ -10443,6 +10734,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-099
   name: List source roles (saved)
   kind: normal
@@ -10562,6 +10856,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-100
   name: Check typed connection
   kind: normal
@@ -10670,6 +10967,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-101
   name: List source categories (unsaved)
   kind: normal
@@ -10778,6 +11078,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-102
   name: List source roles (unsaved)
   kind: normal
@@ -10886,6 +11189,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-103
   name: Read server time
   kind: normal
@@ -10993,6 +11299,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-action-104
   name: List LTI platforms
   kind: normal
@@ -11100,5 +11409,8 @@ nodes:
       supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
         not effect-observed)'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 edges: []
 annotation_issues: []

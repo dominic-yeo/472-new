@@ -155,6 +155,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Feature-gated: deployment login config has oidc: [] so the handler returns 403 (token.rs:418-424).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/metamask/nonce
   kind: api
   methods:
@@ -273,6 +283,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Not gated by LoginConfig.metamask: any caller can upsert a nonce row for an arbitrary address (token.rs:526-545).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/create_third_party_key
   kind: api
   methods:
@@ -431,6 +451,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Missing X-SECRET header -> 400 (poem required header); wrong secret -> 403 (token.rs:556).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/login_guest
   kind: api
   methods:
@@ -657,6 +687,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Creates a new guest user row on every call (token.rs:587-594).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/login
   kind: api
   methods:
@@ -1179,6 +1219,17 @@ nodes:
     notes: '[POST] Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty
       if enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/bind
   kind: api
   methods:
@@ -1406,6 +1457,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/credentials
   kind: api
   methods:
@@ -1556,6 +1617,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/renew
   kind: api
   methods:
@@ -1726,6 +1797,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] No session header required; validity proven by the token pair (token.rs:1211-1278).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/logout
   kind: api
   methods:
@@ -1843,6 +1924,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Deletes refresh_token+device rows for (uid, device) and kicks SSE; the stateless access token remains valid
       until expiry (token.rs:1281-1322).'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      - user
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/device_token
   kind: api
   methods:
@@ -1961,6 +2055,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:3009/api/user/check_magic_token
   kind: api
   methods:
@@ -2067,6 +2171,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/register
   kind: api
   methods:
@@ -2451,6 +2565,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] who_can_sign_up=EveryOne in deployment, so anonymous self-registration succeeds (runtime auth.har#10).
       Registering with a group invite token adds the new uid to that private group (user.rs:430-459).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/check_email
   kind: api
   methods:
@@ -2570,6 +2694,17 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Unauthenticated account-enumeration oracle (user.rs:464-468).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/send_reg_magic_link
   kind: api
   methods:
@@ -2749,6 +2884,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] With SMTP disabled (deployment) the server signs and returns a confirmed register token embedding the supplied
       email/password without validating the input magic_token (user.rs:526-541, 600-604).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/send_login_magic_link
   kind: api
   methods:
@@ -2877,6 +3022,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Requires working SMTP to be useful; deployment /admin/smtp/enabled=false.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/me
   kind: api
   methods:
@@ -3050,6 +3205,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/{uid}
   kind: api
   methods:
@@ -3239,6 +3404,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] No Token parameter: unauthenticated profile (incl. e-mail) lookup by uid (user.rs:656-664).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/change_password
   kind: api
   methods:
@@ -3376,6 +3551,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user
   kind: api
   methods:
@@ -3706,6 +3891,17 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: PUT=update_own_profile, GET=list_users [GET] Source handler has no Token -> anonymous listing
       of all non-guest users with e-mails (user.rs:891-904).'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 3
+      identities:
+      - admin
+      - user
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/avatar
   kind: api
   methods:
@@ -3828,6 +4024,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/{uid}/send
   kind: api
   methods:
@@ -4001,6 +4207,18 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/{uid}/history
   kind: api
   methods:
@@ -4254,6 +4472,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/events
   kind: api
   methods:
@@ -4507,6 +4735,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] 403 when the token''s device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries
       uid/gid/mid references (and every non-guest user''s e-mail in users_snapshot) that enable follow-on actions.'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      - user
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/devices
   kind: api
   methods:
@@ -4610,6 +4851,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/devices/{device}
   kind: api
   methods:
@@ -4720,6 +4971,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/user/mute
   kind: api
   methods:
@@ -4933,6 +5194,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/burn-after-reading
   kind: api
   methods:
@@ -5109,6 +5380,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/read-index
   kind: api
   methods:
@@ -5287,6 +5568,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/delete
   kind: api
   methods:
@@ -5381,6 +5672,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/user/update_fcm_token
   kind: api
   methods:
@@ -5510,6 +5811,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[PUT] Upserts an arbitrary device row for the caller (user.rs:1475-1516); a fresh device row also satisfies the
       SSE device check.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:3009/api/group
   kind: api
   methods:
@@ -5887,6 +6198,17 @@ nodes:
         GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=create_group, GET=list_related_groups'
+    grounding:
+      depth: exercised
+      samples: 2
+      success_2xx: 2
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
+      - POST
 - key: http://localhost:3009/api/group/{gid}/avatar
   kind: api
   methods:
@@ -6028,6 +6350,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Unknown gid returns 401 (not 404) (group.rs:256-259).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/{gid}
   kind: api
   methods:
@@ -6459,6 +6791,20 @@ nodes:
       show_email/add_friend/only_owner_can_send_msg/dm_to_member/ext_setting (frontend ChannelDTO; runtime localhost.har#25
       body {only_owner_can_send_msg:true}); not present in this source tree. [GET] No Token extractor in source: anonymous
       read of any group incl. private member lists and pinned content (group.rs:682-692).'
+    grounding:
+      depth: exercised
+      samples: 4
+      success_2xx: 3
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - DELETE
+      - GET
+      - PUT
 - key: http://localhost:3009/api/group/{gid}/change_type
   kind: api
   methods:
@@ -6627,6 +6973,18 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/{gid}/leave
   kind: api
   methods:
@@ -6743,6 +7101,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/group/{gid}/members/add
   kind: api
   methods:
@@ -6884,6 +7252,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Any existing member (not only the owner) may add members to a private group (group.rs:731-737).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/{gid}/members/remove
   kind: api
   methods:
@@ -7036,6 +7414,18 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 401
+      - 403
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/{gid}/send
   kind: api
   methods:
@@ -7212,6 +7602,18 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/create_reg_magic_link
   kind: api
   methods:
@@ -7380,6 +7782,18 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Any authenticated user can mint invite links (no admin check in source; deployment ext_setting admin_only_can_invite
       may restrict newer build).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/group/{gid}/history
   kind: api
   methods:
@@ -7639,6 +8053,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/group/{gid}/agora_token
   kind: api
   methods:
@@ -7827,6 +8251,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/api/group/{gid}/pin
   kind: api
   methods:
@@ -7969,6 +8403,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Does not check that mid belongs to gid (group.rs:1012-1017).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/{gid}/unpin
   kind: api
   methods:
@@ -8107,6 +8551,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/message/{mid}/edit
   kind: api
   methods:
@@ -8276,6 +8730,18 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[PUT] Implemented as an appended Reaction{Edit} message, not an in-place update (message_api.rs:45-63).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:3009/api/message/{mid}/like
   kind: api
   methods:
@@ -8430,6 +8896,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[PUT] can_reaction(Like) returns true for any user; no membership check on target conversation (message.rs:170-174).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:3009/api/message/{mid}
   kind: api
   methods:
@@ -8560,6 +9036,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/message/{mid}/reply
   kind: api
   methods:
@@ -8717,6 +9203,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/resource/organization/logo
   kind: api
   methods:
@@ -8824,6 +9320,16 @@ nodes:
       supports: GET http://localhost:3009/api/resource/organization/logo?t=1791277505950?ts=1791277506269 as anonymous ->
         200
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/resource/avatar
   kind: api
   methods:
@@ -8946,6 +9452,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/resource/group_avatar
   kind: api
   methods:
@@ -9088,6 +9604,17 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/api/resource/file/prepare
   kind: api
   methods:
@@ -9220,6 +9747,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:3009/api/resource/file/upload
   kind: api
   methods:
@@ -9406,6 +9943,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] file_id is joined into a filesystem path without validation (resource.rs:206-211); any session can append
       to any pending upload id.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/resource/file
   kind: api
   methods:
@@ -9546,6 +10093,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] No auth: anyone with the path can download (resource.rs:341-381). Frontend also issues HEAD (message.ts
       preCheckFileFromUrl).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/resource/archive
   kind: api
   methods:
@@ -9838,6 +10395,16 @@ nodes:
         GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=create_message_archive, GET=read_message_archive [GET] No auth on archive read (resource.rs:414-430).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/resource/archive/attachment
   kind: api
   methods:
@@ -9988,6 +10555,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/resource/open_graphic_parse
   kind: api
   methods:
@@ -10116,6 +10693,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Unauthenticated server-side fetch of attacker-chosen URL (SSRF primitive) (resource.rs:467-487).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/favorite
   kind: api
   methods:
@@ -10337,6 +10924,17 @@ nodes:
         GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=create_favorite_archive, GET=list_favorites'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 3
+      identities:
+      - admin
+      - user
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/favorite/{id}
   kind: api
   methods:
@@ -10606,6 +11204,16 @@ nodes:
         admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: DELETE=delete_favorite, GET=read_favorite'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/favorite/attachment/{uid}/{id}/{attachment_id}
   kind: api
   methods:
@@ -10774,6 +11382,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] No auth and owner uid supplied by caller (favorite.rs:149-177).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/api/license/check
   kind: api
   methods:
@@ -10942,6 +11560,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/license
   kind: api
   methods:
@@ -11175,6 +11803,18 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: PUT=save_license, GET=read_license [PUT] Non-admin succeeds (200 true) without effect when
       a license exists; with no license file any user can install one (license.rs:68-85).'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 3
+      identities:
+      - admin
+      - anon
+      - user
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/version
   kind: api
   methods:
@@ -11277,6 +11917,16 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #90 (2026-10-06T09:05:18.172Z)'
       supports: GET http://localhost:3009/api/admin/system/version as anonymous -> 200
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/create_admin
   kind: api
   methods:
@@ -11522,6 +12172,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/system/initialized
   kind: api
   methods:
@@ -11627,6 +12287,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/metrics
   kind: api
   methods:
@@ -11745,6 +12415,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/organization
   kind: api
   methods:
@@ -12021,6 +12701,16 @@ nodes:
       uses PUT on servers > 0.3.8 (server.ts updateServer); POST is the source-declared method. Route absent from the server
       source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (confirmed in
       HAR).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/organization/logo
   kind: api
   methods:
@@ -12136,6 +12826,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/system/send_mail
   kind: api
   methods:
@@ -12293,6 +12993,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/system/third_party_secret
   kind: api
   methods:
@@ -12433,6 +13143,16 @@ nodes:
         POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: GET=read_third_party_secret, POST=rotate_third_party_secret'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/frontend_url
   kind: api
   methods:
@@ -12541,6 +13261,16 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #71 (2026-10-06T08:37:24.987Z)'
       supports: GET http://localhost:3009/api/admin/system/frontend_url as admin -> 200
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/update_frontend_url
   kind: api
   methods:
@@ -12656,6 +13386,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[POST] Value is embedded in every invite/login magic link; admin can redirect links (admin_system.rs:293-322).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/agora/config
   kind: api
   methods:
@@ -13023,6 +13763,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=update_agora_config, GET=read_agora_config [GET] Admin check commented out in source
       (admin_agora.rs:106-108): any session reads app_certificate/rtm_secret.'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/agora/usages
   kind: api
   methods:
@@ -13140,6 +13890,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->401; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/fcm/config
   kind: api
   methods:
@@ -13469,6 +14229,16 @@ nodes:
         GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=update_fcm_config, GET=read_fcm_config'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/smtp/config
   kind: api
   methods:
@@ -13815,6 +14585,16 @@ nodes:
         GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=update_smtp_config, GET=read_smtp_config'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/smtp/enabled
   kind: api
   methods:
@@ -13923,6 +14703,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/login/config
   kind: api
   methods:
@@ -14355,6 +15145,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): - POST->skipped; anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=update_login_policy, GET=read_login_policy'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/google_auth/config
   kind: api
   methods:
@@ -14516,6 +15316,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=update_google_auth_config, GET=read_google_auth_config [GET] Source: unauthenticated.
       Frontend whiteList401 tolerates 401 here, suggesting the deployed build added auth (unverified; not in HAR).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/github_auth/config
   kind: api
   methods:
@@ -14714,6 +15524,16 @@ nodes:
     notes: 'Per-method semantics: POST=update_github_auth_config, GET=read_github_auth_config [GET] Source: unauthenticated
       and returns client_secret (admin_github_auth.rs:59-63). Frontend whiteList401 suggests deployed build may require auth
       (unverified).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/user
   kind: api
   methods:
@@ -15231,6 +16051,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=admin_create_user, GET=admin_list_users [POST] webhook_url is fetched server-side before
       save (admin_user.rs:161-170).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/user/{uid}
   kind: api
   methods:
@@ -15839,6 +16669,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: GET=admin_read_user, DELETE=admin_delete_user, PUT=admin_update_user [PUT] Selector-like
       optional fields: is_admin (privilege), status (freeze), password (reset), profile fields.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - DELETE
+      - GET
 - key: http://localhost:3009/api/admin/user/{uid}/avatar
   kind: api
   methods:
@@ -15974,6 +16817,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/user/bot-api-key/{uid}
   kind: api
   methods:
@@ -16213,6 +17066,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: POST=create_bot_api_key, GET=list_bot_api_keys [POST] Works for any uid, not only is_bot
       users (admin_user.rs:508-562).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/user/bot-api-key/{uid}/{kid}
   kind: api
   methods:
@@ -16346,6 +17209,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/bot
   kind: api
   methods:
@@ -16580,6 +17453,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/send_to_user/{uid}
   kind: api
   methods:
@@ -16736,6 +17619,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/bot/send_to_group/{gid}
   kind: api
   methods:
@@ -16894,6 +17787,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/bot/user/{uid}
   kind: api
   methods:
@@ -17104,6 +18007,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Handler binds uid from the QUERY string although the route declares :uid (bot.rs:115-131).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/group/{gid}
   kind: api
   methods:
@@ -17356,6 +18269,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Returns any group incl. private ones regardless of bot membership (bot.rs:134-150).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/file/prepare
   kind: api
   methods:
@@ -17488,6 +18411,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/bot/file/upload
   kind: api
   methods:
@@ -17665,6 +18598,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/doc
   kind: page
   methods:
@@ -17723,6 +18666,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/doc2
   kind: page
   methods:
@@ -17781,6 +18734,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/swagger
   kind: page
   methods:
@@ -17842,6 +18805,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/doc3
   kind: page
   methods:
@@ -17900,6 +18873,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/spec
   kind: api
   methods:
@@ -17958,6 +18941,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/passkey/register/start
   kind: api
   methods:
@@ -18090,6 +19083,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/passkey/register/finish
   kind: api
   methods:
@@ -18248,6 +19251,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/passkey/auth/start
   kind: api
   methods:
@@ -18351,6 +19364,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/passkey/auth/finish
   kind: api
   methods:
@@ -18608,6 +19631,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/token/passkey/list
   kind: api
   methods:
@@ -18734,6 +19767,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/passkey/{credential_id}
   kind: api
   methods:
@@ -18841,6 +19884,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/user/contacts
   kind: api
   methods:
@@ -19018,6 +20071,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      - user
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/search
   kind: api
   methods:
@@ -19222,6 +20288,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/pin_chat
   kind: api
   methods:
@@ -19350,6 +20426,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/unpin_chat
   kind: api
   methods:
@@ -19478,6 +20564,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/contact_remark
   kind: api
   methods:
@@ -19605,6 +20701,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:3009/api/user/update_contact_status
   kind: api
   methods:
@@ -19751,6 +20857,18 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/join_private
   kind: api
   methods:
@@ -19987,6 +21105,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/notification/channel-types
   kind: api
   methods:
@@ -20195,6 +21323,16 @@ nodes:
     notes: 'Per-method semantics: GET=admin_list_notification_types, POST=admin_toggle_notification_type Route absent from
       the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (not
       exercised in the captures; existence inferred from the shipped frontend).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/notification/channel-types/{channel_type}
   kind: api
   methods:
@@ -20302,6 +21440,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/user/notification/available-types
   kind: api
   methods:
@@ -20406,6 +21554,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/notification/channels
   kind: api
   methods:
@@ -20757,6 +21915,16 @@ nodes:
       contains outbound webhook URLs -> server-side requests to user-chosen URLs (see channelSchemas.ts). Route absent from
       the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (not
       exercised in the captures; existence inferred from the shipped frontend).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/notification/channels/{id}
   kind: api
   methods:
@@ -21092,6 +22260,16 @@ nodes:
     notes: 'Per-method semantics: PUT=update_notification_channel, DELETE=delete_notification_channel Route absent from the
       server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (not exercised
       in the captures; existence inferred from the shipped frontend).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:3009/api/user/notification/channels/{id}/test
   kind: api
   methods:
@@ -21199,6 +22377,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/group/{gid}/clear
   kind: api
   methods:
@@ -21304,6 +22492,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/group/create_invite_private_magic_link
   kind: api
   methods:
@@ -21438,6 +22636,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/group/{gid}/announcement
   kind: api
   methods:
@@ -21743,6 +22951,19 @@ nodes:
     notes: 'Per-method semantics: GET=read_group_announcement, POST=upsert_group_announcement, DELETE=delete_group_announcement
       Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
+      - POST
 - key: http://localhost:3009/api/message/bulk/{mids}
   kind: api
   methods:
@@ -21861,6 +23082,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/admin/system/common
   kind: api
   methods:
@@ -22407,6 +23638,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: GET=read_system_settings, PUT=update_system_settings Route absent from the server source
       tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (confirmed in HAR).'
+    grounding:
+      depth: exercised
+      samples: 4
+      success_2xx: 4
+      identities:
+      - admin
+      - anon
+      - user
+      statuses:
+      - 200
+      methods:
+      - GET
+      - PUT
 - key: http://localhost:3009/api/admin/system/files
   kind: api
   methods:
@@ -22630,6 +23874,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/system/message/clear
   kind: api
   methods:
@@ -22716,6 +23970,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/resource/file/delete
   kind: api
   methods:
@@ -22802,6 +24066,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/resource/widget-extra.css
   kind: api
   methods:
@@ -22950,6 +24224,16 @@ nodes:
     notes: 'Per-method semantics: GET=read_widget_css, PUT=update_widget_css Route absent from the server source tree (Cargo
       0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (not exercised in the captures; existence
       inferred from the shipped frontend).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/google_auth/public_config
   kind: api
   methods:
@@ -23063,6 +24347,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/github_auth/public_config
   kind: api
   methods:
@@ -23176,6 +24470,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/vocespace/config
   kind: api
   methods:
@@ -23479,6 +24783,17 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Per-method semantics: GET=read_vocespace_config, POST=update_vocespace_config Route absent from the server source
       tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (confirmed in HAR).'
+    grounding:
+      depth: exercised
+      samples: 2
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/vocespace/health/{url}
   kind: api
   methods:
@@ -23586,6 +24901,16 @@ nodes:
     notes: '[GET] Server probes a caller-supplied URL (SSRF-style primitive) per frontend contract. Route absent from the
       server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (not exercised
       in the captures; existence inferred from the shipped frontend).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/agora/enabled
   kind: api
   methods:
@@ -23708,6 +25033,18 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (confirmed in HAR).
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 3
+      identities:
+      - admin
+      - anon
+      - user
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/agora/token
   kind: api
   methods:
@@ -23900,6 +25237,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/agora/channel/{page_no}/{page_size}
   kind: api
   methods:
@@ -24039,6 +25386,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/cloudflared/status
   kind: api
   methods:
@@ -24156,6 +25513,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/cloudflared/stop
   kind: api
   methods:
@@ -24254,6 +25621,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/cloudflared/auto_info
   kind: api
   methods:
@@ -24363,6 +25740,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/cloudflared/start
   kind: api
   methods:
@@ -24461,6 +25848,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/cloudflared/auto_stream
   kind: api
   methods:
@@ -24551,6 +25948,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - GET
 - key: http://localhost:3009/api/page/apikey
   kind: api
   methods:
@@ -24695,6 +26102,16 @@ nodes:
     notes: 'Per-method semantics: GET=read_page_api_key, POST=rotate_page_api_key Route absent from the server source tree
       (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (not exercised in the captures;
       existence inferred from the shipped frontend).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:3009/api/page/{page}
   kind: api
   methods:
@@ -24935,6 +26352,17 @@ nodes:
     notes: 'Per-method semantics: GET=read_custom_page, PUT=update_custom_page, DELETE=reset_custom_page Route absent from
       the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (confirmed
       in HAR).'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/bot_chat/bots
   kind: api
   methods:
@@ -25109,6 +26537,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/bot_chat/{bot_uid}/conversations
   kind: api
   methods:
@@ -25292,6 +26730,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/bot_chat/{bot_uid}/user/{uid}/history
   kind: api
   methods:
@@ -25558,6 +27006,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/bot_chat/{bot_uid}/group/{gid}/history
   kind: api
   methods:
@@ -25825,6 +27283,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Route absent from the server source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed
       0.5.36 binary (not exercised in the captures; existence inferred from the shipped frontend).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/command
   kind: api
   methods:
@@ -26046,6 +27514,16 @@ nodes:
     notes: 'Per-method semantics: GET=bot_list_commands, POST=bot_add_command Operation present only in the deployed 0.5.36
       binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken
       from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/command/{id}
   kind: api
   methods:
@@ -26238,6 +27716,16 @@ nodes:
     notes: 'Per-method semantics: PUT=bot_update_command, DELETE=bot_delete_command Operation present only in the deployed
       0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract
       taken from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - PUT
 - key: http://localhost:3009/api/bot/delete/{mid}
   kind: api
   methods:
@@ -26362,6 +27850,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - DELETE
 - key: http://localhost:3009/api/bot/edit/{mid}
   kind: api
   methods:
@@ -26512,6 +28010,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - PUT
 - key: http://localhost:3009/api/bot/reply/{mid}
   kind: api
   methods:
@@ -26662,6 +28170,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/bot/user/{uid}/messages
   kind: api
   methods:
@@ -26871,6 +28389,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/group/{gid}/messages
   kind: api
   methods:
@@ -27100,6 +28628,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/secret
   kind: api
   methods:
@@ -27257,6 +28795,16 @@ nodes:
     notes: 'Per-method semantics: GET=bot_read_secret, PUT=bot_set_secret Operation present only in the deployed 0.5.36 binary''s
       OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken from the
       live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3009/api/bot/send_mail
   kind: api
   methods:
@@ -27411,6 +28959,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/{uid}/command
   kind: api
   methods:
@@ -27568,6 +29126,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/avo
   kind: api
   methods:
@@ -27811,6 +29379,16 @@ nodes:
     notes: 'Per-method semantics: GET=read_own_avatar_params, PUT=update_own_avatar_params Operation present only in the deployed
       0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract
       taken from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/user/contacts/search
   kind: api
   methods:
@@ -27992,6 +29570,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/send_mail
   kind: api
   methods:
@@ -28145,6 +29733,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/update_conv
   kind: api
   methods:
@@ -28297,6 +29895,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3009/api/user/events_ws
   kind: api
   methods:
@@ -28511,6 +30119,16 @@ nodes:
     notes: '[GET] WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE
       variant. Operation present only in the deployed 0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3
       source tree and from vocechat-web 0.9.122. Contract taken from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/voice/avo/events_ws
   kind: api
   methods:
@@ -28669,6 +30287,16 @@ nodes:
     notes: '[GET] WebSocket voice/Avo room stream under /api/voice (HTTP 101). room_type/room_id select the room. Operation
       present only in the deployed 0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from
       vocechat-web 0.9.122. Contract taken from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/token/parse_tokens
   kind: api
   methods:
@@ -28801,6 +30429,16 @@ nodes:
     notes: '[POST] Unauthenticated token-introspection endpoint. Operation present only in the deployed 0.5.36 binary''s OpenAPI
       spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken from the live
       spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/system/update_webclient
   kind: api
   methods:
@@ -28892,6 +30530,16 @@ nodes:
     notes: '[GET] Admin-triggered self-update of the bundled web client. Operation present only in the deployed 0.5.36 binary''s
       OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree and from vocechat-web 0.9.122. Contract taken from the
       live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/vocespace/enabled
   kind: api
   methods:
@@ -28994,6 +30642,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/agora/channel_event_callback
   kind: api
   methods:
@@ -29100,6 +30758,16 @@ nodes:
     notes: '[POST] Inbound webhook invoked by Agora''s RTC service; unauthenticated public callback that ingests channel events.
       Operation present only in the deployed 0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree
       and from vocechat-web 0.9.122. Contract taken from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3009/api/admin/agora/channel/user/{channel_name}/{hosts_only}
   kind: api
   methods:
@@ -29251,6 +30919,16 @@ nodes:
     notes: '[GET] Canonical spec route; the web client calls it with hosts_only hard-coded to false (server.ts getAgoraUsersByChannel).
       Operation present only in the deployed 0.5.36 binary''s OpenAPI spec (GET /api/spec); absent from the 0.3.3 source tree
       and from vocechat-web 0.9.122. Contract taken from the live spec.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/api/admin/agora/channel/user/property/{uid}/{channel_name}
   kind: api
   methods:
@@ -29392,6 +31070,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Operation present only in the deployed 0.5.36 binary's OpenAPI spec (GET /api/spec); absent from the 0.3.3 source
       tree and from vocechat-web 0.9.122. Contract taken from the live spec.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3009/health
   kind: api
   methods:
@@ -29448,6 +31136,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Liveness probe; no business IO (io_variants intentionally empty).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/metrics
   kind: api
   methods:
@@ -29505,6 +31203,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Runtime metrics exporter; no business IO.'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/
   kind: page
   methods:
@@ -29568,6 +31276,16 @@ nodes:
       #/send_magic_link/:email, #/guest_login, #/invite_private/:channel_id, #/invite_mobile/:magic_token, #/cb/:type/:payload,
       #/oauth/:token, #/onboarding, #/chat, #/chat/channel/:channel_id, #/chat/dm/:user_id, #/users, #/users/:user_id, #/favs,
       #/files, #/setting/:nav?, #/setting/channel/:cid/:nav?, #/setting/dm/:uid/:nav?, #/admin-bot-chat/:bot_uid/:kind/:target_id.'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/widget.html
   kind: page
   methods:
@@ -29625,6 +31343,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Embeddable chat widget page (vocechat-web/public/widget.html).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/widget_demo.html
   kind: page
   methods:
@@ -29684,6 +31412,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Widget demo page (public/widget_demo.html).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/github/cb/webapp.html
   kind: page
   methods:
@@ -29742,6 +31480,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] GitHub OAuth callback relay page (public/github/cb/webapp.html).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/github/cb/widget.html
   kind: page
   methods:
@@ -29800,6 +31548,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] GitHub OAuth callback relay for widget (public/github/cb/widget.html).'
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/email.tpl.html
   kind: static
   methods:
@@ -29859,6 +31617,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] E-mail template asset (public/email.tpl.html).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/manifest.json
   kind: static
   methods:
@@ -29934,6 +31702,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/site.webmanifest
   kind: static
   methods:
@@ -29996,6 +31774,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/favicon.ico
   kind: static
   methods:
@@ -30059,6 +31847,16 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #45 (2026-10-06T09:05:05.958Z)'
       supports: GET http://localhost:3009/favicon.ico as anonymous -> 200
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 304
+      methods:
+      - GET
 - key: http://localhost:3009/favicon-16x16.png
   kind: static
   methods:
@@ -30120,6 +31918,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/favicon-32x32.png
   kind: static
   methods:
@@ -30181,6 +31989,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/android-chrome-192x192.png
   kind: static
   methods:
@@ -30249,6 +32067,16 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #32 (2026-10-06T09:05:05.945Z)'
       supports: GET http://localhost:3009/android-chrome-192x192.png as anonymous -> 200
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/android-chrome-512x512.png
   kind: static
   methods:
@@ -30311,6 +32139,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/apple-touch-icon.png
   kind: static
   methods:
@@ -30372,6 +32210,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/robots.txt
   kind: static
   methods:
@@ -30435,6 +32283,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/service-worker.js
   kind: static
   methods:
@@ -30497,6 +32355,16 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #27 (2026-10-06T09:05:05.922Z)'
       supports: GET http://localhost:3009/service-worker.js as anonymous -> 200
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/firebase-messaging-sw.js
   kind: static
   methods:
@@ -30560,6 +32428,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/widget.js
   kind: static
   methods:
@@ -30622,6 +32500,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3009/splash/{device}_splash.png
   kind: static
   methods:
@@ -30683,6 +32571,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Normalised: content-hashed build chunks / language files collapse to one node.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/locales/{lang}/{namespace}.json
   kind: static
   methods:
@@ -30760,6 +32658,17 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Normalised: content-hashed build chunks / language files collapse to one node.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/static/js/{chunk}.js
   kind: static
   methods:
@@ -30836,6 +32745,17 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Normalised: content-hashed build chunks / language files collapse to one node.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/static/css/{chunk}.css
   kind: static
   methods:
@@ -30915,6 +32835,17 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Normalised: content-hashed build chunks / language files collapse to one node.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3009/static/media/{asset}
   kind: static
   methods:
@@ -30994,6 +32925,17 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Normalised: content-hashed build chunks / language files collapse to one node.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 404
+      methods:
+      - GET
 edges:
 - src: http://localhost:3009/
   dst: http://localhost:3009/api/token/openid/authorize

@@ -234,6 +234,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_magic_link_session-1
   name: Log in / auto-register with a magic-link token
   kind: normal
@@ -490,6 +493,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_google_session-2
   name: Log in with a Google ID token
   kind: normal
@@ -742,6 +748,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_github_session-3
   name: Log in with a GitHub OAuth code
   kind: normal
@@ -994,6 +1003,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_oidc_session-4
   name: Log in with an OpenID-Connect code
   kind: normal
@@ -1247,6 +1259,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_metamask_session-5
   name: Log in with a MetaMask wallet signature
   kind: normal
@@ -1499,6 +1514,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_third_party_session-6
   name: Log in with a third-party HMAC key
   kind: normal
@@ -1751,6 +1769,9 @@ nodes:
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_login_guest_session
   name: Log in as an anonymous guest
   kind: normal
@@ -1915,6 +1936,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/token/login_guest (identity=anonymous) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: Creates a new guest user row on every call (token.rs:587-594).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_renew_session
   name: Renew a session token pair
   kind: normal
@@ -2085,6 +2109,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/renew)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: No session header required; validity proven by the token pair (token.rs:1211-1278).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_logout_session
   name: Log out the current device session
   kind: normal
@@ -2184,6 +2211,9 @@ nodes:
         acknowledged; effect realized and observed (effect-observed)'
     notes: Deletes refresh_token+device rows for (uid, device) and kicks SSE; the stateless access token remains valid until
       expiry (token.rs:1281-1322).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_update_device_push_token
   name: Update the FCM push token of the current device
   kind: normal
@@ -2295,6 +2325,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/device_token)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_own_credentials
   name: Read linked login credentials
   kind: normal
@@ -2398,6 +2431,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/token/credentials (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_bind_external_credential
   name: Bind an external login credential
   kind: normal
@@ -2539,6 +2575,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/bind)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_start_oidc_authorization
   name: Start an OIDC authorization flow
   kind: normal
@@ -2654,6 +2693,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/openid/authorize)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Feature-gated: deployment login config has oidc: [] so the handler returns 403 (token.rs:418-424).'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_create_metamask_nonce
   name: Create a MetaMask login nonce
   kind: normal
@@ -2762,6 +2804,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/metamask/nonce)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Not gated by LoginConfig.metamask: any caller can upsert a nonce row for an arbitrary address (token.rs:526-545).'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-secret_create_third_party_login_key
   name: Mint a third-party login key
   kind: normal
@@ -2907,6 +2952,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/create_third_party_key)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Missing X-SECRET header -> 400 (poem required header); wrong secret -> 403 (token.rs:556).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_register_user_account
   name: Register a new user account
   kind: normal
@@ -3111,6 +3159,9 @@ nodes:
         server returned it; effect realized and observed (effect-observed)'
     notes: who_can_sign_up=EveryOne in deployment, so anonymous self-registration succeeds (runtime auth.har#10). Registering
       with a group invite token adds the new uid to that private group (user.rs:430-459).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_validate_magic_token
   name: Validate a magic token
   kind: normal
@@ -3205,6 +3256,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/check_magic_token)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_check_email_available
   name: Check whether an e-mail is registered
   kind: normal
@@ -3284,6 +3338,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/check_email (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: Unauthenticated account-enumeration oracle (user.rs:464-468).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_send_registration_magic_link
   name: Issue a registration magic link
   kind: normal
@@ -3404,6 +3461,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: With SMTP disabled (deployment) the server signs and returns a confirmed register token embedding the supplied
       email/password without validating the input magic_token (user.rs:526-541, 600-604).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_send_login_magic_link
   name: E-mail a login magic link
   kind: normal
@@ -3494,6 +3554,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/send_login_magic_link)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Requires working SMTP to be useful; deployment /admin/smtp/enabled=false.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_own_profile
   name: Read own profile
   kind: normal
@@ -3612,6 +3675,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/me (identity=admin) -> representation returned to
         caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_user_profile
   name: Read a user profile by id
   kind: normal
@@ -3751,6 +3817,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/{uid} (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: 'No Token parameter: unauthenticated profile (incl. e-mail) lookup by uid (user.rs:656-664).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_change_own_password
   name: Change own password
   kind: normal
@@ -3867,6 +3936,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/change_password)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_own_profile
   name: Update own profile
   kind: normal
@@ -4001,6 +4073,9 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #91 (2026-10-06T09:05:18.180Z)'
       supports: GET http://localhost:3009/api/user as user -> 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_upload_own_avatar
   name: Upload own avatar
   kind: normal
@@ -4101,6 +4176,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/avatar)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_list_users
   name: List all users
   kind: normal
@@ -4225,6 +4303,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user (identity=user) -> representation returned to caller;
         effect realized and observed (effect-observed)'
     notes: Source handler has no Token -> anonymous listing of all non-guest users with e-mails (user.rs:891-904).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_send_direct_message_message
   name: Send a direct message to a user
   kind: normal
@@ -4399,6 +4480,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/user/{uid}/send (identity=admin) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_read_direct_message_history
   name: Read DM history with a user
   kind: normal
@@ -4575,6 +4659,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/{uid}/history (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_subscribe_user_events
   name: Subscribe to the realtime event stream
   kind: normal
@@ -4801,6 +4888,9 @@ nodes:
         to caller; effect realized and observed (effect-observed)'
     notes: 403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries uid/gid/mid
       references (and every non-guest user's e-mail in users_snapshot) that enable follow-on actions.
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_list_own_devices
   name: List own devices
   kind: normal
@@ -4911,6 +5001,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/devices (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_delete_own_device
   name: Sign out a device
   kind: normal
@@ -5033,6 +5126,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/devices/{device})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_mute_settings
   name: Update mute settings
   kind: normal
@@ -5168,6 +5264,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/mute)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_burn_after_reading
   name: Update burn-after-reading
   kind: normal
@@ -5294,6 +5393,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/burn-after-reading)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_read_index
   name: Advance read markers
   kind: normal
@@ -5419,6 +5521,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/read-index)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_delete_own_account
   name: Delete own account
   kind: normal
@@ -5510,6 +5615,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/delete)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_register_device_fcm_token
   name: Register a device FCM token
   kind: normal
@@ -5613,6 +5721,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Upserts an arbitrary device row for the caller (user.rs:1475-1516); a fresh device row also satisfies the SSE device
       check.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_list_contacts
   name: List contacts
   kind: normal
@@ -5747,6 +5858,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/contacts (identity=user) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_search_user
   name: Search for a user
   kind: normal
@@ -5871,6 +5985,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/search)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_pin_chat
   name: Pin a conversation
   kind: normal
@@ -5972,6 +6089,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/pin_chat)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_unpin_chat
   name: Unpin a conversation
   kind: normal
@@ -6072,6 +6192,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/unpin_chat)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_contact_remark
   name: Set a contact remark
   kind: normal
@@ -6198,6 +6321,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/contact_remark)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_add_contact
   name: Add a contact
   kind: normal
@@ -6341,6 +6467,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_remove_contact-1
   name: Remove a contact
   kind: normal
@@ -6483,6 +6612,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_block_contact-2
   name: Block a user
   kind: normal
@@ -6626,6 +6758,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_unblock_contact-3
   name: Unblock a user
   kind: normal
@@ -6768,6 +6903,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_join_private_group_by_invite
   name: Join a private group via invite
   kind: normal
@@ -6940,6 +7078,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/join_private)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_create_private_group_group
   name: Create a private group
   kind: normal
@@ -7136,6 +7277,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/group (identity=admin) -> resource created; server returned
         it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_create_public_group_group-1
   name: Create a public group
   kind: normal
@@ -7293,6 +7437,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/group (identity=admin) -> resource created; server returned
         it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_list_related_groups
   name: List related groups
   kind: normal
@@ -7471,6 +7618,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/group (identity=admin) -> representation returned to caller;
         effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_group
   name: Read a group by id
   kind: normal
@@ -7665,6 +7815,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/group/{gid} (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: 'No Token extractor in source: anonymous read of any group incl. private member lists and pinned content (group.rs:682-692).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_update_group_group
   name: Update a group
   kind: normal
@@ -7841,6 +7994,9 @@ nodes:
         effect realized and observed (effect-observed)'
     notes: Deployed build also accepts show_email/add_friend/only_owner_can_send_msg/dm_to_member/ext_setting (frontend ChannelDTO;
       runtime localhost.har#25 body {only_owner_can_send_msg:true}); not present in this source tree.
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_delete_group_group
   name: Delete a group
   kind: normal
@@ -7987,6 +8143,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to DELETE /api/group/{gid} (identity=admin) -> resource removed; server
         acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_change_group_visibility
   name: Change group public/private
   kind: normal
@@ -8155,6 +8314,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/group/{gid}/change_type (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_upload_group_avatar
   name: Upload group avatar
   kind: normal
@@ -8292,6 +8454,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/avatar)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Unknown gid returns 401 (not 404) (group.rs:256-259).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_leave_group
   name: Leave a group
   kind: normal
@@ -8443,6 +8608,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/leave)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_add_group_members
   name: Add members to a group
   kind: normal
@@ -8628,6 +8796,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/members/add)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Any existing member (not only the owner) may add members to a private group (group.rs:731-737).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_remove_group_members
   name: Remove members from a group
   kind: normal
@@ -8816,6 +8987,9 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #33 (2026-10-06T08:36:43.285Z)'
       supports: POST http://localhost:3009/api/group/4/members/remove as admin -> 403
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_send_group_message_message
   name: Send a group message
   kind: normal
@@ -8999,6 +9173,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/group/{gid}/send (identity=admin) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_read_group_message_history
   name: Read group history
   kind: normal
@@ -9197,6 +9374,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/history)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_create_invite_link
   name: Create a registration invite link
   kind: normal
@@ -9328,6 +9508,9 @@ nodes:
         created; server returned it; effect realized and observed (effect-observed)'
     notes: Any authenticated user can mint invite links (no admin check in source; deployment ext_setting admin_only_can_invite
       may restrict newer build).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_create_private_invite_link
   name: Create a private-group invite link
   kind: normal
@@ -9471,6 +9654,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/create_invite_private_magic_link)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_create_group_call_token
   name: Get a group call token
   kind: normal
@@ -9640,6 +9826,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/agora_token)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_pin_group_message
   name: Pin a message
   kind: normal
@@ -9812,6 +10001,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/pin)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Does not check that mid belongs to gid (group.rs:1012-1017).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_unpin_group_message
   name: Unpin a message
   kind: normal
@@ -9973,6 +10165,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/unpin)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_clear_group_messages
   name: Clear group messages
   kind: normal
@@ -10113,6 +10308,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/clear)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_group_announcement
   name: Read group announcement
   kind: normal
@@ -10259,6 +10457,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/group/{gid}/announcement (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_upsert_group_announcement
   name: Set group announcement
   kind: normal
@@ -10419,6 +10620,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/group/{gid}/announcement (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_delete_group_announcement
   name: Delete group announcement
   kind: normal
@@ -10554,6 +10758,9 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #27 (2026-10-06T08:36:35.469Z)'
       supports: POST http://localhost:3009/api/group/4/announcement as admin -> 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_edit_message
   name: Edit a message
   kind: normal
@@ -10722,6 +10929,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to PUT /api/message/{mid}/edit (identity=admin) -> state mutated; server
         acknowledged; effect realized and observed (effect-observed)'
     notes: Implemented as an appended Reaction{Edit} message, not an in-place update (message_api.rs:45-63).
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_react_to_message
   name: React to a message
   kind: normal
@@ -10860,6 +11070,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/message/{mid}/like)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: can_reaction(Like) returns true for any user; no membership check on target conversation (message.rs:170-174).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_delete_message
   name: Delete a message
   kind: normal
@@ -11009,6 +11222,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/message/{mid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_reply_to_message_message
   name: Reply to a message
   kind: normal
@@ -11170,6 +11386,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/message/{mid}/reply)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_bulk_delete_messages
   name: Bulk delete messages
   kind: normal
@@ -11300,6 +11519,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to DELETE /api/message/bulk/{mids} (identity=admin) -> resource removed;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_prepare_file_upload
   name: Prepare a file upload
   kind: normal
@@ -11421,6 +11643,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/resource/file/prepare (identity=admin) -> resource created;
         server returned it; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_upload_file_chunk
   name: Upload a file chunk
   kind: normal
@@ -11599,6 +11824,9 @@ nodes:
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: file_id is joined into a filesystem path without validation (resource.rs:206-211); any session can append to any
       pending upload id.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_download_file
   name: Download a file
   kind: normal
@@ -11707,6 +11935,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'No auth: anyone with the path can download (resource.rs:341-381). Frontend also issues HEAD (message.ts preCheckFileFromUrl).'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_create_message_archive
   name: Archive messages
   kind: normal
@@ -11852,6 +12083,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/archive)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_message_archive
   name: Read a message archive
   kind: normal
@@ -12036,6 +12270,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/archive)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: No auth on archive read (resource.rs:414-430).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_download_archive_attachment
   name: Download an archive attachment
   kind: normal
@@ -12165,6 +12402,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/archive/attachment)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_fetch_url_preview
   name: Fetch an Open-Graph preview
   kind: normal
@@ -12259,6 +12499,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/open_graphic_parse)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Unauthenticated server-side fetch of attacker-chosen URL (SSRF primitive) (resource.rs:467-487).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_organization_logo
   name: Read organization logo
   kind: normal
@@ -12338,6 +12581,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/resource/organization/logo (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_user_avatar
   name: Read a user avatar
   kind: normal
@@ -12431,6 +12677,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/avatar)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_group_avatar
   name: Read a group avatar
   kind: normal
@@ -12527,6 +12776,9 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #41 (2026-10-06T08:36:52.316Z)'
       supports: GET http://localhost:3009/api/resource/group_avatar?gid=10&t=1791275812267 as anonymous -> 404
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_widget_css
   name: Read widget CSS
   kind: normal
@@ -12600,6 +12852,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/widget-extra.css)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_update_widget_css
   name: Update widget CSS
   kind: normal
@@ -12701,6 +12956,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/widget-extra.css)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_delete_all_files
   name: Delete all files
   kind: normal
@@ -12797,6 +13055,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file/delete)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_create_favorite_archive
   name: Create a favorite archive
   kind: normal
@@ -12947,6 +13208,9 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #92 (2026-10-06T09:05:18.180Z)'
       supports: GET http://localhost:3009/api/favorite as user -> 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_list_favorites
   name: List favorites
   kind: normal
@@ -13068,6 +13332,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/favorite (identity=user) -> representation returned to
         caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_read_favorite
   name: Read a favorite
   kind: normal
@@ -13265,6 +13532,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/favorite/{id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_delete_favorite
   name: Delete a favorite
   kind: normal
@@ -13391,6 +13661,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/favorite/{id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_download_favorite_attachment
   name: Download a favorite attachment
   kind: normal
@@ -13525,6 +13798,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/favorite/attachment/{uid}/{id}/{attachment_id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: No auth and owner uid supplied by caller (favorite.rs:149-177).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_check_license
   name: Validate a license blob
   kind: normal
@@ -13638,6 +13914,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/license/check)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_license
   name: Read the installed license
   kind: normal
@@ -13736,6 +14015,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/license (identity=user) -> representation returned to caller;
         effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_save_license
   name: Install a license
   kind: normal
@@ -13862,6 +14144,9 @@ nodes:
       supports: GET http://localhost:3009/api/license as user -> 200
     notes: Non-admin succeeds (200 true) without effect when a license exists; with no license file any user can install one
       (license.rs:68-85).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_server_version
   name: Read server version
   kind: normal
@@ -13944,6 +14229,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/version (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_server_initialized
   name: Read initialized flag
   kind: normal
@@ -14024,6 +14312,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/initialized (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_bootstrap_admin_account
   name: Bootstrap the first admin
   kind: normal
@@ -14159,6 +14450,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/create_admin)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_server_metrics
   name: Read server metrics
   kind: normal
@@ -14244,6 +14538,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/metrics (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_organization
   name: Read organization info
   kind: normal
@@ -14335,6 +14632,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/organization (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_organization
   name: Update organization info
   kind: normal
@@ -14452,6 +14752,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:319
       supports: POST called by deployed web client; request shape
     notes: Frontend uses PUT on servers > 0.3.8 (server.ts updateServer); POST is the source-declared method.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_update_organization_put
   name: Update organization info (PUT)
   kind: normal
@@ -14566,6 +14869,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:319
       supports: PUT called by deployed web client; request shape
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_upload_organization_logo
   name: Upload organization logo
   kind: normal
@@ -14666,6 +14972,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/organization/logo)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_send_test_mail
   name: Send a test e-mail
   kind: normal
@@ -14775,6 +15084,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/send_mail)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_third_party_secret
   name: Read third-party secret
   kind: normal
@@ -14881,6 +15193,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/third_party_secret)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_rotate_third_party_secret
   name: Rotate third-party secret
   kind: normal
@@ -15010,6 +15325,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/third_party_secret)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_frontend_url
   name: Read frontend URL
   kind: normal
@@ -15104,6 +15422,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/frontend_url (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_frontend_url
   name: Update frontend URL
   kind: normal
@@ -15215,6 +15536,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/update_frontend_url)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Value is embedded in every invite/login magic link; admin can redirect links (admin_system.rs:293-322).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_system_settings
   name: Read system settings
   kind: normal
@@ -15365,6 +15689,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/common (identity=user) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_system_settings
   name: Update system settings
   kind: normal
@@ -15537,6 +15864,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to PUT /api/admin/system/common (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_list_files
   name: List uploaded files
   kind: normal
@@ -15672,6 +16002,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/system/files (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_clear_all_messages
   name: Clear all messages
   kind: normal
@@ -15768,6 +16101,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/message/clear)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_agora_config
   name: Read Agora config
   kind: normal
@@ -15876,6 +16212,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/agora/config (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: 'Admin check commented out in source (admin_agora.rs:106-108): any session reads app_certificate/rtm_secret.'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_agora_config
   name: Update Agora config
   kind: normal
@@ -16017,6 +16356,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/config)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_agora_usage
   name: Read Agora usage
   kind: normal
@@ -16100,6 +16442,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/usages)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_agora_enabled
   name: Read Agora enabled flag
   kind: normal
@@ -16191,6 +16536,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/agora/enabled (identity=user) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_create_call_token
   name: Generate a call token
   kind: normal
@@ -16320,6 +16668,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/token)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_list_voice_channels
   name: List active voice channels
   kind: normal
@@ -16417,6 +16768,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel/{page_no}/{page_size})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_list_voice_channel_users
   name: List users in a voice channel
   kind: normal
@@ -16571,6 +16925,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel/user/{channel_name}/{hosts_only})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Canonical spec route; the web client calls it with hosts_only hard-coded to false (server.ts getAgoraUsersByChannel).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_fcm_config
   name: Read Firebase config
   kind: normal
@@ -16684,6 +17041,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/fcm/config (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_fcm_config
   name: Update Firebase config
   kind: normal
@@ -16819,6 +17179,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/fcm/config)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_smtp_config
   name: Read SMTP config
   kind: normal
@@ -16938,6 +17301,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/smtp/config (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_smtp_config
   name: Update SMTP config
   kind: normal
@@ -17076,6 +17442,9 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #70 (2026-10-06T08:37:24.987Z)'
       supports: GET http://localhost:3009/api/admin/smtp/config as admin -> 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_smtp_enabled
   name: Read SMTP enabled flag
   kind: normal
@@ -17158,6 +17527,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/smtp/enabled (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_login_policy
   name: Read login policy
   kind: normal
@@ -17278,6 +17650,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/login/config (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_login_policy
   name: Update login policy
   kind: normal
@@ -17428,6 +17803,9 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #30 (2026-10-06T09:05:05.940Z)'
       supports: GET http://localhost:3009/api/admin/login/config as anonymous -> 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_google_auth_config
   name: Read Google-auth config
   kind: normal
@@ -17507,6 +17885,9 @@ nodes:
         returned to caller; effect realized and observed (effect-observed)'
     notes: 'Source: unauthenticated. Frontend whiteList401 tolerates 401 here, suggesting the deployed build added auth (unverified;
       not in HAR).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_google_auth_config
   name: Update Google-auth config
   kind: normal
@@ -17618,6 +17999,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/google_auth/config)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_github_auth_config
   name: Read GitHub-auth config
   kind: normal
@@ -17702,6 +18086,9 @@ nodes:
         returned to caller; effect realized and observed (effect-observed)'
     notes: 'Source: unauthenticated and returns client_secret (admin_github_auth.rs:59-63). Frontend whiteList401 suggests
       deployed build may require auth (unverified).'
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_github_auth_config
   name: Update GitHub-auth config
   kind: normal
@@ -17818,6 +18205,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/github_auth/config)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_read_google_auth_public_config
   name: Read Google-auth public config
   kind: normal
@@ -17901,6 +18291,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/google_auth/public_config (identity=anonymous) ->
         representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_github_auth_public_config
   name: Read GitHub-auth public config
   kind: normal
@@ -17984,6 +18377,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/github_auth/public_config (identity=anonymous) ->
         representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_read_vocespace_config
   name: Read VoceSpace config
   kind: normal
@@ -18093,6 +18489,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/vocespace/config (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_vocespace_config
   name: Update VoceSpace config
   kind: normal
@@ -18221,6 +18620,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:200
       supports: POST called by deployed web client; request shape
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_check_vocespace_health
   name: Probe VoceSpace health
   kind: normal
@@ -18330,6 +18732,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/vocespace/health/{url} (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: Server probes a caller-supplied URL (SSRF-style primitive) per frontend contract.
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_read_tunnel_status
   name: Read tunnel status
   kind: normal
@@ -18420,6 +18825,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/cloudflared/status (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_read_auto_tunnel_info
   name: Read auto-tunnel info
   kind: normal
@@ -18499,6 +18907,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/cloudflared/auto_info (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_stop_tunnel
   name: Stop the tunnel
   kind: normal
@@ -18607,6 +19018,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/admin/cloudflared/stop (identity=admin) -> state mutated;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_start_tunnel
   name: Start the tunnel
   kind: normal
@@ -18703,6 +19117,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/start)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_stream_auto_tunnel
   name: Stream auto-tunnel progress
   kind: normal
@@ -18776,6 +19193,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/auto_stream)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_page_api_key
   name: Read page API key
   kind: normal
@@ -18878,6 +19298,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/page/apikey)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_rotate_page_api_key
   name: Rotate page API key
   kind: normal
@@ -19004,6 +19427,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to POST /api/page/apikey (identity=admin) -> state mutated; server
         acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_read_custom_page
   name: Read a custom page
   kind: normal
@@ -19110,6 +19536,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/page/{page} (identity=anonymous) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_custom_page
   name: Set a custom page
   kind: normal
@@ -19232,6 +19661,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:516
       supports: PUT called by deployed web client; request shape
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_reset_custom_page
   name: Reset a custom page
   kind: normal
@@ -19348,6 +19780,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:524
       supports: DELETE called by deployed web client; request shape
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_list_notification_types
   name: List enabled notification types
   kind: normal
@@ -19464,6 +19899,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/notification/channel-types (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_toggle_notification_type
   name: Enable/disable a notification type
   kind: normal
@@ -19594,6 +20032,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/notification/channel-types)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_delete_notification_type
   name: Delete a notification type
   kind: normal
@@ -19707,6 +20148,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to DELETE /api/admin/notification/channel-types/{channel_type} (identity=admin)
         -> resource removed; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_list_available_notification_types
   name: List available notification types
   kind: normal
@@ -19818,6 +20262,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/notification/available-types (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_list_own_notification_channels
   name: List own notification channels
   kind: normal
@@ -19949,6 +20396,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/notification/channels (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_create_notification_channel
   name: Create a notification channel
   kind: normal
@@ -20102,6 +20552,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Provider config contains outbound webhook URLs -> server-side requests to user-chosen URLs (see channelSchemas.ts).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_notification_channel
   name: Update a notification channel
   kind: normal
@@ -20262,6 +20715,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels/{id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_delete_notification_channel
   name: Delete a notification channel
   kind: normal
@@ -20374,6 +20830,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels/{id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_test_notification_channel
   name: Test a notification channel
   kind: normal
@@ -20489,6 +20948,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels/{id}/test)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_create_user_account
   name: Create a user
   kind: normal
@@ -20664,6 +21126,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: webhook_url is fetched server-side before save (admin_user.rs:161-170).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_list_users
   name: List users (admin)
   kind: normal
@@ -20809,6 +21274,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/user (identity=admin) -> representation returned
         to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_read_user
   name: Read a user (admin)
   kind: normal
@@ -20982,6 +21450,9 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #51 (2026-10-06T08:37:00.754Z)'
       supports: DELETE http://localhost:3009/api/admin/user/2 as admin -> 200
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_delete_user_account
   name: Delete a user (admin)
   kind: normal
@@ -21110,6 +21581,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to DELETE /api/admin/user/{uid} (identity=admin) -> resource removed;
         server acknowledged; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_update_user_account
   name: Update a user (admin)
   kind: normal
@@ -21318,6 +21792,9 @@ nodes:
       ref: vocechat-web/src/app/services/user.ts:130
       supports: PUT called by deployed web client; request shape
     notes: 'Selector-like optional fields: is_admin (privilege), status (freeze), password (reset), profile fields.'
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_upload_user_avatar
   name: Upload a user avatar (admin)
   kind: normal
@@ -21441,6 +21918,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/{uid}/avatar)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_create_bot_api_key
   name: Create a bot API key
   kind: normal
@@ -21591,6 +22071,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/bot-api-key/{uid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Works for any uid, not only is_bot users (admin_user.rs:508-562).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_list_bot_api_keys
   name: List bot API keys
   kind: normal
@@ -21761,6 +22244,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/bot-api-key/{uid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_delete_bot_api_key
   name: Delete a bot API key
   kind: normal
@@ -21906,6 +22392,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/bot-api-key/{uid}/{kid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_list_bots
   name: List bot accounts
   kind: normal
@@ -22031,6 +22520,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/bot_chat/bots (identity=admin) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-admin_list_bot_conversations
   name: List a bot's conversations
   kind: normal
@@ -22210,6 +22702,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/{bot_uid}/conversations)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_bot_dm_history
   name: Read a bot's DM history
   kind: normal
@@ -22409,6 +22904,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/{bot_uid}/user/{uid}/history)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_read_bot_group_history
   name: Read a bot's group history
   kind: normal
@@ -22608,6 +23106,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/{bot_uid}/group/{gid}/history)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_list_related_groups
   name: Bot lists related groups
   kind: normal
@@ -22780,6 +23281,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_send_direct_message_message
   name: Bot sends a DM
   kind: normal
@@ -22933,6 +23437,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/send_to_user/{uid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_send_group_message_message
   name: Bot sends a group message
   kind: normal
@@ -23084,6 +23591,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/send_to_group/{gid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_read_user
   name: Bot reads a user
   kind: normal
@@ -23226,6 +23736,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/user/{uid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Handler binds uid from the QUERY string although the route declares :uid (bot.rs:115-131).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_read_group
   name: Bot reads a group
   kind: normal
@@ -23413,6 +23926,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/group/{gid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Returns any group incl. private ones regardless of bot membership (bot.rs:134-150).
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_prepare_file_upload
   name: Bot prepares a file upload
   kind: normal
@@ -23532,6 +24048,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/file/prepare)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_upload_file_chunk
   name: Bot uploads a file chunk
   kind: normal
@@ -23698,6 +24217,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/file/upload)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_start_passkey_registration
   name: Start passkey registration
   kind: normal
@@ -23819,6 +24341,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/register/start)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_finish_passkey_registration
   name: Finish passkey registration
   kind: normal
@@ -23951,6 +24476,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/register/finish)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_start_passkey_login
   name: Start passkey login
   kind: normal
@@ -24054,6 +24582,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/auth/start)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_finish_passkey_login
   name: Finish passkey login
   kind: normal
@@ -24251,6 +24782,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/auth/finish)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_list_own_passkeys
   name: List own passkeys
   kind: normal
@@ -24367,6 +24901,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/list)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_delete_own_passkey
   name: Delete a passkey
   kind: normal
@@ -24481,6 +25018,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/{credential_id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_list_commands
   name: Bot lists its commands
   kind: normal
@@ -24605,6 +25145,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_add_command
   name: Bot adds a command
   kind: normal
@@ -24732,6 +25275,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_update_command
   name: Bot updates a command
   kind: normal
@@ -24872,6 +25418,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command/{id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_delete_command
   name: Bot deletes a command
   kind: normal
@@ -24988,6 +25537,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command/{id})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_delete_message
   name: Bot deletes a message
   kind: normal
@@ -25109,6 +25661,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/delete/{mid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_edit_message
   name: Bot edits a message
   kind: normal
@@ -25246,6 +25801,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/edit/{mid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_reply_message_message
   name: Bot replies to a message
   kind: normal
@@ -25395,6 +25953,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/reply/{mid})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_read_dm_history
   name: Bot reads recent DM messages
   kind: normal
@@ -25568,6 +26129,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/user/{uid}/messages)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_read_group_history
   name: Bot reads recent group messages
   kind: normal
@@ -25745,6 +26309,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/group/{gid}/messages)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_read_secret
   name: Bot reads its webhook secret
   kind: normal
@@ -25852,6 +26419,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/secret)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_set_secret
   name: Bot sets its webhook secret
   kind: normal
@@ -25964,6 +26534,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/secret)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-bot_send_mail
   name: Bot sends an e-mail
   kind: normal
@@ -26073,6 +26646,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/send_mail)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_user_commands
   name: Read a bot user's commands
   kind: normal
@@ -26225,6 +26801,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/user/{uid}/command (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-user_read_own_avatar_params
   name: Read own avatar (Avo) params
   kind: normal
@@ -26314,6 +26893,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/avo)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_own_avatar_params
   name: Update own avatar (Avo) params
   kind: normal
@@ -26451,6 +27033,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/avo)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_search_contacts
   name: Search within contacts
   kind: normal
@@ -26575,6 +27160,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/contacts/search)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_send_mail_to_user
   name: Send mail to another user
   kind: normal
@@ -26710,6 +27298,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/send_mail)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_update_conversation_comment
   name: Update a conversation comment
   kind: normal
@@ -26819,6 +27410,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/update_conv)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_subscribe_user_events_ws
   name: Subscribe events over WebSocket
   kind: normal
@@ -27011,6 +27605,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/events_ws)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE variant.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_subscribe_voice_events_ws
   name: Subscribe voice/Avo room events over WebSocket
   kind: normal
@@ -27116,6 +27713,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/voice/avo/events_ws)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: WebSocket voice/Avo room stream under /api/voice (HTTP 101). room_type/room_id select the room.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-anonymous_parse_tokens
   name: Introspect a token pair
   kind: normal
@@ -27218,6 +27818,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/parse_tokens)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Unauthenticated token-introspection endpoint.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-admin_update_webclient
   name: Update the bundled web client
   kind: normal
@@ -27312,6 +27915,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/update_webclient)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Admin-triggered self-update of the bundled web client.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_vocespace_enabled
   name: Read VoceSpace enabled flag
   kind: normal
@@ -27400,6 +28006,9 @@ nodes:
       supports: 'runtime: bound interface returned 200 to GET /api/admin/vocespace/enabled (identity=anonymous) -> representation
         returned to caller; effect realized and observed (effect-observed)'
     notes: null
+    grounding:
+      tier: effect
+      bindings: 1
 - id: gt-anonymous_ingest_agora_channel_event
   name: Ingest an Agora channel event
   kind: normal
@@ -27485,6 +28094,9 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel_event_callback)'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Inbound webhook invoked by Agora's RTC service; unauthenticated public callback that ingests channel events.
+    grounding:
+      tier: interface
+      bindings: 1
 - id: gt-user_read_voice_channel_user_property
   name: Read a user's property in a voice channel
   kind: normal
@@ -27632,5 +28244,8 @@ nodes:
       ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel/user/property/{uid}/{channel_name})'
       supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
+    grounding:
+      tier: interface
+      bindings: 1
 edges: []
 annotation_issues: []

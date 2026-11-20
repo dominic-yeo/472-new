@@ -119,6 +119,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->200; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Only public /api endpoint besides installation.create.
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:3000/api/auth.info
   kind: api
   methods:
@@ -265,6 +275,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/auth.delete
   kind: api
   methods:
@@ -343,6 +365,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/installation.create
   kind: api
   methods:
@@ -489,6 +521,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Self-hosted only (not isCloudHosted).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/api/installation.info
   kind: api
   methods:
@@ -601,6 +643,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/auth/email
   kind: api
   methods:
@@ -734,6 +786,17 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Default when no SSO provider is configured.
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/auth/:provider
   kind: api
   methods:
@@ -825,6 +888,16 @@ nodes:
       ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): user POST /auth/email.callback->200'
       supports: 'runtime: observed status per identity'
     notes: One pair per enabled provider (google/azure/oidc/discord/slack/github/gitlab/gitea/linear/notion/figma).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - user
+      statuses:
+      - 200
+      methods:
+      - POST
 - key: http://localhost:3000/auth/:provider.callback
   kind: api
   methods:
@@ -941,6 +1014,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3000/auth/redirect
   kind: api
   methods:
@@ -1028,6 +1111,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3000/oauth/authorize
   kind: api
   methods:
@@ -1170,6 +1263,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Outline ships an OAuth2 server + dynamic client registration.
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:3000/oauth/token
   kind: api
   methods:
@@ -1349,6 +1452,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/oauth/revoke
   kind: api
   methods:
@@ -1462,6 +1575,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/oauth/register
   kind: api
   methods:
@@ -1521,6 +1644,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/oauth/register/:clientId
   kind: api
   methods:
@@ -1579,6 +1712,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:3000/mcp
   kind: api
   methods:
@@ -1641,6 +1784,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 405
+      methods:
+      - GET
 - key: http://localhost:3000/api/users.list
   kind: api
   methods:
@@ -1791,6 +1944,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.info
   kind: api
   methods:
@@ -1896,6 +2061,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.invite
   kind: api
   methods:
@@ -2008,6 +2183,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.update
   kind: api
   methods:
@@ -2149,6 +2334,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.updateEmail
   kind: api
   methods:
@@ -2263,6 +2458,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.update_role
   kind: api
   methods:
@@ -2377,6 +2582,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Primary privilege-escalation lever (also promote/demote).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.promote
   kind: api
   methods:
@@ -2482,6 +2697,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.demote
   kind: api
   methods:
@@ -2596,6 +2821,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.suspend
   kind: api
   methods:
@@ -2701,6 +2936,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.activate
   kind: api
   methods:
@@ -2806,6 +3051,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.delete
   kind: api
   methods:
@@ -2920,6 +3175,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.requestDelete
   kind: api
   methods:
@@ -2978,6 +3243,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.resendInvite
   kind: api
   methods:
@@ -3036,6 +3311,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.notificationsSubscribe
   kind: api
   methods:
@@ -3094,6 +3379,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/users.notificationsUnsubscribe
   kind: api
   methods:
@@ -3152,6 +3447,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/apiKeys.create
   kind: api
   methods:
@@ -3290,6 +3595,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Keys are bearer tokens accepted on header/body/query transports.
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/apiKeys.list
   kind: api
   methods:
@@ -3406,6 +3723,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/apiKeys.delete
   kind: api
   methods:
@@ -3511,6 +3838,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthClients.create
   kind: api
   methods:
@@ -3647,6 +3984,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthClients.rotate_secret
   kind: api
   methods:
@@ -3767,6 +4114,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthClients.info
   kind: api
   methods:
@@ -3863,6 +4220,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthClients.update
   kind: api
   methods:
@@ -3986,6 +4353,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthClients.delete
   kind: api
   methods:
@@ -4091,6 +4468,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthClients.list
   kind: api
   methods:
@@ -4157,6 +4544,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthAuthentications.list
   kind: api
   methods:
@@ -4244,6 +4643,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/oauthAuthentications.delete
   kind: api
   methods:
@@ -4340,6 +4749,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.create
   kind: api
   methods:
@@ -4480,6 +4899,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.info
   kind: api
   methods:
@@ -4593,6 +5024,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.list
   kind: api
   methods:
@@ -4716,6 +5159,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.update
   kind: api
   methods:
@@ -4856,6 +5311,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.delete
   kind: api
   methods:
@@ -4961,6 +5428,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.add_user
   kind: api
   methods:
@@ -5100,6 +5577,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.add_group
   kind: api
   methods:
@@ -5232,6 +5719,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.documents
   kind: api
   methods:
@@ -5337,6 +5834,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.export
   kind: api
   methods:
@@ -5451,6 +5958,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.export_all
   kind: api
   methods:
@@ -5547,6 +6064,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.remove_user
   kind: api
   methods:
@@ -5605,6 +6132,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.remove_group
   kind: api
   methods:
@@ -5663,6 +6200,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.memberships
   kind: api
   methods:
@@ -5721,6 +6268,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.group_memberships
   kind: api
   methods:
@@ -5779,6 +6336,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.move
   kind: api
   methods:
@@ -5837,6 +6404,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.duplicate
   kind: api
   methods:
@@ -5895,6 +6472,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.archive
   kind: api
   methods:
@@ -5953,6 +6540,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.restore
   kind: api
   methods:
@@ -6011,6 +6608,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/collections.import
   kind: api
   methods:
@@ -6069,6 +6676,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.create
   kind: api
   methods:
@@ -6244,6 +6861,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.info
   kind: api
   methods:
@@ -6399,6 +7028,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Dual path: the shareId branch is the unauthenticated public-read surface.'
+    grounding:
+      depth: exercised
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.list
   kind: api
   methods:
@@ -6576,6 +7217,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.search
   kind: api
   methods:
@@ -6740,6 +7393,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.update
   kind: api
   methods:
@@ -6898,6 +7563,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.delete
   kind: api
   methods:
@@ -7019,6 +7696,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.move
   kind: api
   methods:
@@ -7167,6 +7856,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.import
   kind: api
   methods:
@@ -7299,6 +7998,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.export
   kind: api
   methods:
@@ -7397,6 +8106,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.add_user
   kind: api
   methods:
@@ -7536,6 +8255,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.add_group
   kind: api
   methods:
@@ -7668,6 +8397,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.users
   kind: api
   methods:
@@ -7782,6 +8521,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.templatize
   kind: api
   methods:
@@ -7896,6 +8645,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.unpublish
   kind: api
   methods:
@@ -8001,6 +8760,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.empty_trash
   kind: api
   methods:
@@ -8088,6 +8857,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.archived
   kind: api
   methods:
@@ -8146,6 +8925,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.deleted
   kind: api
   methods:
@@ -8204,6 +8993,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.drafts
   kind: api
   methods:
@@ -8262,6 +9061,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.viewed
   kind: api
   methods:
@@ -8320,6 +9129,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.search_titles
   kind: api
   methods:
@@ -8378,6 +9197,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.documents
   kind: api
   methods:
@@ -8436,6 +9265,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.insights
   kind: api
   methods:
@@ -8494,6 +9333,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.archive
   kind: api
   methods:
@@ -8560,6 +9409,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.restore
   kind: api
   methods:
@@ -8618,6 +9479,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.duplicate
   kind: api
   methods:
@@ -8676,6 +9547,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.remove_user
   kind: api
   methods:
@@ -8734,6 +9615,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.remove_group
   kind: api
   methods:
@@ -8792,6 +9683,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.memberships
   kind: api
   methods:
@@ -8850,6 +9751,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/documents.group_memberships
   kind: api
   methods:
@@ -8908,6 +9819,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.create
   kind: api
   methods:
@@ -9058,6 +9979,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Core public-exposure primitive; 'includeChildDocuments' widens scope to the subtree.
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.info
   kind: api
   methods:
@@ -9201,6 +10134,17 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'auth({optional:true}): the public-share read surface.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.update
   kind: api
   methods:
@@ -9324,6 +10268,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.revoke
   kind: api
   methods:
@@ -9429,6 +10383,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.list
   kind: api
   methods:
@@ -9536,6 +10500,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.sitemap
   kind: api
   methods:
@@ -9598,6 +10572,16 @@ nodes:
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3000/api/shares.subscribe
   kind: api
   methods:
@@ -9656,6 +10640,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.unsubscribe
   kind: api
   methods:
@@ -9715,6 +10709,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/api/shares.confirmSubscription
   kind: api
   methods:
@@ -9778,6 +10782,16 @@ nodes:
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3000/api/comments.create
   kind: api
   methods:
@@ -9901,6 +10915,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.update
   kind: api
   methods:
@@ -10015,6 +11039,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.delete
   kind: api
   methods:
@@ -10120,6 +11154,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.info
   kind: api
   methods:
@@ -10225,6 +11269,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.list
   kind: api
   methods:
@@ -10348,6 +11402,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.resolve
   kind: api
   methods:
@@ -10406,6 +11470,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.unresolve
   kind: api
   methods:
@@ -10464,6 +11538,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.add_reaction
   kind: api
   methods:
@@ -10522,6 +11606,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/comments.remove_reaction
   kind: api
   methods:
@@ -10580,6 +11674,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.create
   kind: api
   methods:
@@ -10683,6 +11787,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.add_user
   kind: api
   methods:
@@ -10820,6 +11936,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.update
   kind: api
   methods:
@@ -10941,6 +12067,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.delete
   kind: api
   methods:
@@ -11053,6 +12191,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.info
   kind: api
   methods:
@@ -11111,6 +12261,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.list
   kind: api
   methods:
@@ -11184,6 +12344,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 3
+      success_2xx: 2
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.remove_user
   kind: api
   methods:
@@ -11242,6 +12414,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.update_user
   kind: api
   methods:
@@ -11300,6 +12482,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.memberships
   kind: api
   methods:
@@ -11358,6 +12550,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groups.deleteAll
   kind: api
   methods:
@@ -11416,6 +12618,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/groupMemberships.list
   kind: api
   methods:
@@ -11474,6 +12686,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/userMemberships.list
   kind: api
   methods:
@@ -11532,6 +12754,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/userMemberships.update
   kind: api
   methods:
@@ -11590,6 +12822,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/attachments.create
   kind: api
   methods:
@@ -11745,6 +12987,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/attachments.createFromUrl
   kind: api
   methods:
@@ -11874,6 +13126,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #1.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/attachments.delete
   kind: api
   methods:
@@ -11979,6 +13241,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/attachments.list
   kind: api
   methods:
@@ -12037,6 +13309,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/fileOperations.info
   kind: api
   methods:
@@ -12142,6 +13424,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/fileOperations.delete
   kind: api
   methods:
@@ -12247,6 +13539,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/fileOperations.list
   kind: api
   methods:
@@ -12305,6 +13607,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/imports.create
   kind: api
   methods:
@@ -12419,6 +13731,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #2 (provider import).'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/imports.info
   kind: api
   methods:
@@ -12477,6 +13799,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/imports.list
   kind: api
   methods:
@@ -12535,6 +13867,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/imports.cancel
   kind: api
   methods:
@@ -12593,6 +13935,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/imports.delete
   kind: api
   methods:
@@ -12651,6 +14003,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/urls.unfurl
   kind: api
   methods:
@@ -12786,6 +14148,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #3; comment in source: ''External resources are unfurled with workspace credentials''.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:3000/api/urls.checkEmbed
   kind: api
   methods:
@@ -12890,6 +14262,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/urls.validateCustomDomain
   kind: api
   methods:
@@ -12948,6 +14330,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/team.update
   kind: api
   methods:
@@ -13116,6 +14508,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Also exposed as teams.update (alias).
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/teams.create
   kind: api
   methods:
@@ -13219,6 +14621,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/teams.delete
   kind: api
   methods:
@@ -13333,6 +14745,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/teams.update
   kind: api
   methods:
@@ -13391,6 +14813,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/teams.requestDelete
   kind: api
   methods:
@@ -13449,6 +14881,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/authenticationProviders.update
   kind: api
   methods:
@@ -13563,6 +15005,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/authenticationProviders.list
   kind: api
   methods:
@@ -13621,6 +15073,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/authenticationProviders.info
   kind: api
   methods:
@@ -13679,6 +15141,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/authenticationProviders.delete
   kind: api
   methods:
@@ -13737,6 +15209,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/authenticationProviders.startGroupSync
   kind: api
   methods:
@@ -13795,6 +15277,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/integrations.create
   kind: api
   methods:
@@ -13918,6 +15410,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Webhook subscriptions deliver event payloads to an admin-chosen URL.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/integrations.delete
   kind: api
   methods:
@@ -14023,6 +15525,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/integrations.list
   kind: api
   methods:
@@ -14092,6 +15604,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/integrations.info
   kind: api
   methods:
@@ -14150,6 +15672,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/integrations.update
   kind: api
   methods:
@@ -14208,6 +15740,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/revisions.list
   kind: api
   methods:
@@ -14322,6 +15864,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/revisions.info
   kind: api
   methods:
@@ -14427,6 +15979,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/revisions.update
   kind: api
   methods:
@@ -14485,6 +16047,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/revisions.delete
   kind: api
   methods:
@@ -14543,6 +16115,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/revisions.export
   kind: api
   methods:
@@ -14601,6 +16183,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/pins.create
   kind: api
   methods:
@@ -14715,6 +16307,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/pins.info
   kind: api
   methods:
@@ -14773,6 +16375,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/pins.list
   kind: api
   methods:
@@ -14831,6 +16443,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/pins.update
   kind: api
   methods:
@@ -14889,6 +16511,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/pins.delete
   kind: api
   methods:
@@ -14947,6 +16579,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/stars.create
   kind: api
   methods:
@@ -15061,6 +16703,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/stars.list
   kind: api
   methods:
@@ -15126,6 +16778,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/stars.update
   kind: api
   methods:
@@ -15184,6 +16848,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/stars.delete
   kind: api
   methods:
@@ -15242,6 +16916,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/subscriptions.create
   kind: api
   methods:
@@ -15365,6 +17049,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/subscriptions.info
   kind: api
   methods:
@@ -15423,6 +17117,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/subscriptions.list
   kind: api
   methods:
@@ -15481,6 +17185,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/subscriptions.delete
   kind: api
   methods:
@@ -15539,6 +17253,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/notifications.list
   kind: api
   methods:
@@ -15597,6 +17321,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/notifications.update
   kind: api
   methods:
@@ -15655,6 +17389,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/notifications.update_all
   kind: api
   methods:
@@ -15713,6 +17457,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/notifications.unsubscribe
   kind: api
   methods:
@@ -15773,6 +17527,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3000/api/notifications.pixel
   kind: api
   methods:
@@ -15872,6 +17636,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3000/api/views.create
   kind: api
   methods:
@@ -15930,6 +17704,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/views.list
   kind: api
   methods:
@@ -15988,6 +17772,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/emojis.create
   kind: api
   methods:
@@ -16046,6 +17840,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/emojis.list
   kind: api
   methods:
@@ -16104,6 +17908,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/emojis.info
   kind: api
   methods:
@@ -16162,6 +17976,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/emojis.update
   kind: api
   methods:
@@ -16220,6 +18044,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/emojis.delete
   kind: api
   methods:
@@ -16278,6 +18112,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/emojis.redirect
   kind: api
   methods:
@@ -16337,6 +18181,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:3000/api/reactions.list
   kind: api
   methods:
@@ -16395,6 +18249,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.create
   kind: api
   methods:
@@ -16518,6 +18382,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.info
   kind: api
   methods:
@@ -16576,6 +18450,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.list
   kind: api
   methods:
@@ -16634,6 +18518,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.update
   kind: api
   methods:
@@ -16692,6 +18586,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.delete
   kind: api
   methods:
@@ -16750,6 +18654,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.duplicate
   kind: api
   methods:
@@ -16808,6 +18722,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/templates.restore
   kind: api
   methods:
@@ -16866,6 +18790,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/searches.list
   kind: api
   methods:
@@ -16924,6 +18858,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/searches.update
   kind: api
   methods:
@@ -16982,6 +18926,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/searches.delete
   kind: api
   methods:
@@ -17040,6 +18994,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/suggestions.mention
   kind: api
   methods:
@@ -17098,6 +19062,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/events.list
   kind: api
   methods:
@@ -17164,6 +19138,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/relationships.list
   kind: api
   methods:
@@ -17222,6 +19208,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/relationships.info
   kind: api
   methods:
@@ -17280,6 +19276,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/accessRequests.create
   kind: api
   methods:
@@ -17394,6 +19400,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/accessRequests.info
   kind: api
   methods:
@@ -17452,6 +19468,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/accessRequests.approve
   kind: api
   methods:
@@ -17510,6 +19536,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/accessRequests.dismiss
   kind: api
   methods:
@@ -17568,6 +19604,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/batch
   kind: api
   methods:
@@ -17626,6 +19672,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:3000/api/cron
   kind: api
   methods:
@@ -17686,6 +19742,16 @@ nodes:
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3000/api/developer.create_test_users
   kind: api
   methods:
@@ -17744,6 +19810,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - POST
 - key: http://localhost:3000/api/developer.create_test_notifications
   kind: api
   methods:
@@ -17802,6 +19878,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - POST
 - key: http://localhost:3000/share/:shareId
   kind: page
   methods:
@@ -17859,6 +19945,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Unauthenticated read surface; also /share/:shareId/doc/:documentSlug and /s/:shareId.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:3000/
   kind: page
   methods:
@@ -17916,6 +20012,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 edges:
 - src: http://localhost:3000/
   dst: http://localhost:3000/api/auth.config

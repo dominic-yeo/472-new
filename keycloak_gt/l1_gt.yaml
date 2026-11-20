@@ -165,6 +165,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'Also /.well-known/{alias}: webfinger, oauth-authorization-server, etc.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}
   kind: api
   methods:
@@ -301,6 +311,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/certs
   kind: api
   methods:
@@ -416,6 +436,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 2
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/.well-known/{alias}
   kind: api
   methods:
@@ -474,6 +504,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/clients/{client_id}/redirect
   kind: api
   methods:
@@ -532,6 +572,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/auth
   kind: api
   methods:
@@ -747,6 +797,16 @@ nodes:
       ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): anon GET /realms/master/protocol/openid-connect/auth->400'
       supports: 'runtime: observed status per identity'
     notes: Entry point of code & implicit flows; request_uri fetch is an SSRF vector.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/token
   kind: api
   methods:
@@ -1096,6 +1156,17 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: grant_type dispatches to OAuth2GrantType providers; token-exchange + uma-ticket are high-risk grants.
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/userinfo
   kind: api
   methods:
@@ -1239,6 +1310,16 @@ nodes:
       ref: 'probe 2026-11-19 (from runtime/probe_results/matrix.json): admin GET /realms/master/protocol/openid-connect/userinfo->403'
       supports: 'runtime: observed status per identity'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 403
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout
   kind: api
   methods:
@@ -1364,6 +1445,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/revoke
   kind: api
   methods:
@@ -1495,6 +1586,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/token/introspect
   kind: api
   methods:
@@ -1655,6 +1756,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout/backchannel-logout
   kind: api
   methods:
@@ -1760,6 +1871,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/par/request
   kind: api
   methods:
@@ -1917,6 +2038,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Extension under ext/{extension}.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/oidc/device/auth
   kind: api
   methods:
@@ -2070,6 +2201,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/registrations
   kind: api
   methods:
@@ -2129,6 +2270,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/forgot-credentials
   kind: api
   methods:
@@ -2188,6 +2339,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/login-status-iframe.html
   kind: api
   methods:
@@ -2247,6 +2408,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/3p-cookies
   kind: api
   methods:
@@ -2305,6 +2476,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/oauth/oob
   kind: api
   methods:
@@ -2363,6 +2544,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->500; admin GET->500'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 500
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/login-actions/authenticate
   kind: api
   methods:
@@ -2532,6 +2723,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/login-actions/registration
   kind: api
   methods:
@@ -2702,6 +2903,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/login-actions/reset-credentials
   kind: api
   methods:
@@ -2827,6 +3038,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/login-actions/action-token
   kind: api
   methods:
@@ -2950,6 +3171,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Action tokens are JWTs signed by the realm; replay/scope handling is the surface.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/login-actions/required-action
   kind: api
   methods:
@@ -3011,6 +3242,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/login-actions/first-broker-login
   kind: api
   methods:
@@ -3072,6 +3313,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/login-actions/post-broker-login
   kind: api
   methods:
@@ -3133,6 +3384,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/login-actions/consent
   kind: api
   methods:
@@ -3195,6 +3456,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/login-actions/restart
   kind: api
   methods:
@@ -3254,6 +3525,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/broker/{provider}/login
   kind: api
   methods:
@@ -3369,6 +3650,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/broker/{provider}/endpoint
   kind: api
   methods:
@@ -3503,6 +3794,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: SAMLResponse handling here is the XML-signature / assertion-injection surface.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/broker/{provider}/token
   kind: api
   methods:
@@ -3561,6 +3862,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/clients-registrations/openid-connect
   kind: api
   methods:
@@ -3733,6 +4044,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Anonymous DCR is a classic misconfiguration; policies restrict it.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/clients-registrations/openid-connect/{clientId}
   kind: api
   methods:
@@ -3866,6 +4187,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/clients-registrations/default
   kind: api
   methods:
@@ -3925,6 +4256,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/clients-registrations/install/{clientId}
   kind: api
   methods:
@@ -3983,6 +4324,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->200; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/clients-managements/register-node
   kind: api
   methods:
@@ -4041,6 +4392,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->500; admin POST->500'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 500
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/saml
   kind: api
   methods:
@@ -4174,6 +4535,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->415; admin POST->415'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Primary SAML attack surface.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 415
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/protocol/saml/descriptor
   kind: api
   methods:
@@ -4233,6 +4604,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/protocol/saml/clients/{client}
   kind: api
   methods:
@@ -4295,6 +4676,16 @@ nodes:
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 404
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/account
   kind: api
   methods:
@@ -4438,6 +4829,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/credentials
   kind: api
   methods:
@@ -4543,6 +4944,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/sessions
   kind: api
   methods:
@@ -4649,6 +5060,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/linked-accounts/{providerAlias}
   kind: api
   methods:
@@ -4773,6 +5194,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/account/applications
   kind: api
   methods:
@@ -4831,6 +5262,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/applications/{clientId}/consent
   kind: api
   methods:
@@ -4896,6 +5337,16 @@ nodes:
         POST->401; anonymous DELETE->405; admin DELETE->405'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/account/resources
   kind: api
   methods:
@@ -4954,6 +5405,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/groups
   kind: api
   methods:
@@ -5012,6 +5473,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/organizations
   kind: api
   methods:
@@ -5070,6 +5541,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/authz/protection/resource_set
   kind: api
   methods:
@@ -5210,6 +5691,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/authz/protection/permission
   kind: api
   methods:
@@ -5268,6 +5759,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:8080/realms/{realm}/authz/protection/uma-policy
   kind: api
   methods:
@@ -5326,6 +5827,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->403; admin POST->403'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 403
+      methods:
+      - POST
 - key: http://localhost:8080/admin/serverinfo
   kind: api
   methods:
@@ -5445,6 +5956,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms
   kind: api
   methods:
@@ -5594,6 +6115,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}
   kind: api
   methods:
@@ -5741,6 +6272,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/testSMTPConnection
   kind: api
   methods:
@@ -5899,6 +6440,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->500'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #1.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/partialImport
   kind: api
   methods:
@@ -5957,6 +6508,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/partial-export
   kind: api
   methods:
@@ -6015,6 +6576,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/logout-all
   kind: api
   methods:
@@ -6073,6 +6644,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/push-revocation
   kind: api
   methods:
@@ -6131,6 +6712,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/events
   kind: api
   methods:
@@ -6192,6 +6783,16 @@ nodes:
         DELETE->204'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/admin-events
   kind: api
   methods:
@@ -6253,6 +6854,16 @@ nodes:
         DELETE->204'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/events/config
   kind: api
   methods:
@@ -6314,6 +6925,16 @@ nodes:
         PUT->204'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/client-session-stats
   kind: api
   methods:
@@ -6372,6 +6993,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/keys
   kind: api
   methods:
@@ -6430,6 +7061,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/client-policies/policies
   kind: api
   methods:
@@ -6491,6 +7132,16 @@ nodes:
         PUT->204'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/client-policies/profiles
   kind: api
   methods:
@@ -6552,6 +7203,16 @@ nodes:
         PUT->204'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/localization
   kind: api
   methods:
@@ -6610,6 +7271,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/client-description-converter
   kind: api
   methods:
@@ -6668,6 +7339,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/users
   kind: api
   methods:
@@ -6904,6 +7585,16 @@ nodes:
         POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}
   kind: api
   methods:
@@ -7057,6 +7748,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/reset-password
   kind: api
   methods:
@@ -7206,6 +7907,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Direct account-takeover primitive.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/impersonation
   kind: api
   methods:
@@ -7336,6 +8047,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Impersonation = become any user; a key escalation lever.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/role-mappings/realm
   kind: api
   methods:
@@ -7462,6 +8183,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Role-grant escalation lever.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/execute-actions-email
   kind: api
   methods:
@@ -7612,6 +8343,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/logout
   kind: api
   methods:
@@ -7726,6 +8467,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/credentials
   kind: api
   methods:
@@ -7849,6 +8600,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/groups
   kind: api
   methods:
@@ -7907,6 +8668,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/groups/{groupId}
   kind: api
   methods:
@@ -7967,6 +8738,16 @@ nodes:
         DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/sessions
   kind: api
   methods:
@@ -8025,6 +8806,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/federated-identity/{provider}
   kind: api
   methods:
@@ -8085,6 +8876,16 @@ nodes:
         admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/consents
   kind: api
   methods:
@@ -8145,6 +8946,16 @@ nodes:
         DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/disable-credential-types
   kind: api
   methods:
@@ -8203,6 +9014,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/send-verify-email
   kind: api
   methods:
@@ -8261,6 +9082,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous PUT->401; admin PUT->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/users/count
   kind: api
   methods:
@@ -8319,6 +9150,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/users/profile
   kind: api
   methods:
@@ -8379,6 +9220,16 @@ nodes:
         PUT->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients
   kind: api
   methods:
@@ -8590,6 +9441,16 @@ nodes:
         POST->201'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 2
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}
   kind: api
   methods:
@@ -8744,6 +9605,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/client-secret
   kind: api
   methods:
@@ -8884,6 +9755,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Reading a secret = client impersonation.
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/service-account-user
   kind: api
   methods:
@@ -9021,6 +9902,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/certificates/{attr}
   kind: api
   methods:
@@ -9170,6 +10061,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/nodes
   kind: api
   methods:
@@ -9228,6 +10129,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/installation/providers/{providerId}
   kind: api
   methods:
@@ -9286,6 +10197,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/user-sessions
   kind: api
   methods:
@@ -9344,6 +10265,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/push-revocation
   kind: api
   methods:
@@ -9402,6 +10333,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/evaluate-scopes
   kind: api
   methods:
@@ -9460,6 +10401,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/management/permissions
   kind: api
   methods:
@@ -9520,6 +10471,16 @@ nodes:
         PUT->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/protocol-mappers/models
   kind: api
   methods:
@@ -9580,6 +10541,16 @@ nodes:
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/roles
   kind: api
   methods:
@@ -9640,6 +10611,16 @@ nodes:
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/authz/resource-server
   kind: api
   methods:
@@ -9698,6 +10679,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/clients-initial-access
   kind: api
   methods:
@@ -9760,6 +10751,16 @@ nodes:
         POST->200; anonymous DELETE->401; admin DELETE->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/roles
   kind: api
   methods:
@@ -9883,6 +10884,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/roles/{role-name}/composites
   kind: api
   methods:
@@ -9944,6 +10957,16 @@ nodes:
         POST->400; anonymous DELETE->400; admin DELETE->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/roles-by-id/{role-id}
   kind: api
   methods:
@@ -10005,6 +11028,16 @@ nodes:
         PUT->400; anonymous DELETE->400; admin DELETE->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 400
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/groups
   kind: api
   methods:
@@ -10128,6 +11161,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}
   kind: api
   methods:
@@ -10189,6 +11234,16 @@ nodes:
         PUT->404; anonymous DELETE->401; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}/role-mappings/realm
   kind: api
   methods:
@@ -10250,6 +11305,16 @@ nodes:
         POST->404; anonymous DELETE->401; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}/members
   kind: api
   methods:
@@ -10308,6 +11373,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/identity-provider/import-config
   kind: api
   methods:
@@ -10439,6 +11514,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'SSRF sink #2.'
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/identity-provider/instances
   kind: api
   methods:
@@ -10572,6 +11657,19 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/components
   kind: api
   methods:
@@ -10706,6 +11804,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->401'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: 'LDAP federation config = SSRF sink #3.'
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/components/{id}
   kind: api
   methods:
@@ -10767,6 +11877,16 @@ nodes:
         PUT->404; anonymous DELETE->401; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/testLDAPConnection
   kind: api
   methods:
@@ -10825,6 +11945,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/authentication/flows
   kind: api
   methods:
@@ -10939,6 +12069,18 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 2
+      success_2xx: 1
+      identities:
+      - admin
+      - anon
+      statuses:
+      - 200
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/authentication/executions
   kind: api
   methods:
@@ -10997,6 +12139,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->500'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/authentication/executions/{executionId}/config
   kind: api
   methods:
@@ -11055,6 +12207,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/authentication/register-required-action
   kind: api
   methods:
@@ -11113,6 +12275,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/authentication/required-actions
   kind: api
   methods:
@@ -11171,6 +12343,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/attack-detection/brute-force/users/{userId}
   kind: api
   methods:
@@ -11309,6 +12491,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/client-scopes
   kind: api
   methods:
@@ -11370,6 +12562,16 @@ nodes:
         POST->500'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/client-registration-policy/providers
   kind: api
   methods:
@@ -11428,6 +12630,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous GET->401; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/realms/{realm}/sessions/{session}
   kind: api
   methods:
@@ -11486,6 +12698,16 @@ nodes:
       ref: '2026-11-19 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - DELETE
 - key: http://localhost:8080/admin/realms/{realm}/users-management-permissions
   kind: api
   methods:
@@ -11546,6 +12768,16 @@ nodes:
         PUT->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - anon
+      statuses:
+      - 401
+      methods:
+      - GET
 - key: http://localhost:8080/admin/master/console
   kind: page
   methods:
@@ -11602,6 +12834,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: One per realm (/admin/{realm}/console).
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/realms/{realm}/account/index.html
   kind: page
   methods:
@@ -11658,6 +12900,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 - key: http://localhost:8080/
   kind: page
   methods:
@@ -11714,6 +12966,16 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Fresh-install admin bootstrap happens here / via KEYCLOAK_ADMIN env.
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - anon
+      statuses:
+      - 200
+      methods:
+      - GET
 edges:
 - src: http://localhost:8080/admin/master/console
   dst: http://localhost:8080/realms/{realm}/protocol/openid-connect/token

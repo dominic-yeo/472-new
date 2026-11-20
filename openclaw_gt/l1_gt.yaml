@@ -24,6 +24,13 @@ nodes:
     - sender passes dmPolicy allowlist/pairing
     evidence: []
     notes: PRIMARY untrusted entry. Inbound WhatsApp DM/group message drives an agent turn.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: PRIMARY untrusted entry. Inbound WhatsApp DM/group message drives an agent turn.
 - id: l1.channel.feishu
   key: channel:feishu-slack-other/inbound
@@ -46,6 +53,13 @@ nodes:
     - sender passes channel dmPolicy
     evidence: []
     notes: Other messaging channels (Feishu/Slack/...) as invocation surfaces.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Other messaging channels (Feishu/Slack/...) as invocation surfaces.
 - id: l1.gateway.rpc
   key: gateway:rpc/control
@@ -66,6 +80,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Gateway RPC / Control UI talk surface (operator-facing).
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Gateway RPC / Control UI talk surface (operator-facing).
 - id: l1.gateway.system
   key: gateway:system-agent/ring-zero
@@ -86,6 +107,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Privileged system-agent / ring-zero setup surface.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Privileged system-agent / ring-zero setup surface.
 - id: l1.a2a.inbound
   key: fleet:agent-to-agent/inbound
@@ -107,6 +135,13 @@ nodes:
     - agentToAgent enabled + allowed sender pair
     evidence: []
     notes: Peer-agent (A2A) message as an invocation surface -> lateral movement entry.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Peer-agent (A2A) message as an invocation surface -> lateral movement entry.
 - id: l1.internal.subagent_spawn
   key: fleet:subagent/spawn
@@ -127,6 +162,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Internal spawn of a background sub-agent run.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Internal spawn of a background sub-agent run.
 - id: l1.cron.scheduled
   key: scheduler:cron/agent-turn
@@ -148,6 +190,13 @@ nodes:
     - a cron job exists (agent- or operator-created)
     evidence: []
     notes: Scheduler-driven self-trigger of a future agent turn.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Scheduler-driven self-trigger of a future agent turn.
 - id: l1.config.agents
   key: config:agents.defaults+entries
@@ -171,6 +220,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: 'Fleet wiring: roles, system prompts, allowlists, ownership, agentToAgent allow.'
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: 'Fleet wiring: roles, system prompts, allowlists, ownership, agentToAgent allow.'
 - id: l1.config.mcp
   key: config:mcp-servers
@@ -191,6 +247,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Operator-configured MCP servers (whose tool descriptions become model-facing).
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Operator-configured MCP servers (whose tool descriptions become model-facing).
 - id: l1.workspace.skills
   key: workspace:skills/files
@@ -211,6 +274,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Skill instruction files (stored-instruction surface).
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Skill instruction files (stored-instruction surface).
 - id: l1.workspace.files
   key: workspace:agent-root/files
@@ -231,6 +301,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Agent workspace filesystem writes.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Agent workspace filesystem writes.
 - id: l1.plugin.hook
   key: plugin:prompt-context+tool-policy/hook
@@ -253,6 +330,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Plugin hooks that steer context and gate tool calls; trust bound to pluginOwnerId.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Plugin hooks that steer context and gate tool calls; trust bound to pluginOwnerId.
 - id: l1.tool.exec_shell
   key: tool-backend:shell
@@ -274,6 +358,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Shell/exec backend (sandboxed by default; host if unsandboxed).
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Shell/exec backend (sandboxed by default; host if unsandboxed).
 - id: l1.tool.web_fetch
   key: tool-backend:http-fetch
@@ -294,6 +385,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Outbound HTTP fetch backend; SSRF-guarded.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Outbound HTTP fetch backend; SSRF-guarded.
 - id: l1.tool.web_search
   key: tool-backend:search-provider
@@ -315,6 +413,13 @@ nodes:
     - search provider configured
     evidence: []
     notes: Search provider API backend.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Search provider API backend.
 - id: l1.tool.browser
   key: tool-backend:sandboxed-browser-cdp
@@ -337,6 +442,13 @@ nodes:
     - computer/browser tool enabled; sandbox browser bridge
     evidence: []
     notes: Sandboxed browser (CDP) backend.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Sandboxed browser (CDP) backend.
 - id: l1.tool.message_send
   key: tool-backend:channel-send
@@ -358,6 +470,13 @@ nodes:
     reachability_conditions: []
     evidence: []
     notes: Outbound channel message backend (under the channel account).
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Outbound channel message backend (under the channel account).
 - id: l1.tool.github
   key: tool-backend:github-api
@@ -380,6 +499,13 @@ nodes:
     - github tool + identity configured
     evidence: []
     notes: GitHub publish backend.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: GitHub publish backend.
 - id: l1.tool.media
   key: tool-backend:media-providers
@@ -401,6 +527,13 @@ nodes:
     - media provider configured
     evidence: []
     notes: Media generation provider backend.
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: Media generation provider backend.
 - id: l1.mcp.call
   key: tool-backend:mcp-server
@@ -422,4 +555,11 @@ nodes:
     - MCP server configured
     evidence: []
     notes: MCP server call backend (remote or bundled).
+    grounding:
+      depth: none
+      samples: 0
+      success_2xx: 0
+      identities: []
+      statuses: []
+      methods: []
   notes: MCP server call backend (remote or bundled).
