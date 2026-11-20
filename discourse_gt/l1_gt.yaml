@@ -432,9 +432,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /session/1
+    identity: anonymous
+    status: 403
+    content_type: text/plain; charset=utf-8
+    body_excerpt: '["BAD CSRF"]'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -449,6 +457,7 @@ nodes:
     - 200
     admin:
     - 200
+    - 302
     - 400
     - 404
   route_confirmed: true
@@ -467,6 +476,9 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:821
       supports: permit push_subscription(endpoint, keys[p256dh,auth])
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->403; admin DELETE->302'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Session teardown; return_url is validated to prevent open-redirect.
 - key: http://localhost/session/current
   kind: api
@@ -3978,9 +3990,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /u/gtadmin/preferences/revoke-account
+    identity: admin
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":["param is missing or the value is empty or invalid: provider_name"]}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4000,6 +4020,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1915
       supports: POST .../revoke-account require(:provider_name)
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Detaches a federated-login provider from the account.
 - key: http://localhost/u/{username}/preferences/revoke-auth-token
   kind: api
@@ -4058,9 +4081,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /u/gtadmin/preferences/revoke-auth-token
+    identity: admin
+    status: 200
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"success":"OK"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4080,6 +4111,9 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1948
       supports: POST .../revoke-auth-token
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->403; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Session management; revokes device sessions.
 - key: http://localhost/u/{username}/notification_level
   kind: api
@@ -11729,6 +11763,7 @@ nodes:
     - 400
     - 403
     - 404
+    - 500
     user:
     - 200
     admin:
@@ -11736,6 +11771,7 @@ nodes:
     - 400
     - 403
     - 404
+    - 500
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost
@@ -11996,6 +12032,7 @@ nodes:
     anonymous:
     - 403
     - 404
+    - 500
     user:
     - 200
     admin:
@@ -12004,6 +12041,7 @@ nodes:
     - 403
     - 404
     - 422
+    - 500
   route_confirmed: true
   runtime_api_prefixes:
   - http://localhost
@@ -13617,9 +13655,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /invites/1
+    identity: anonymous
+    status: 500
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"\
+      width=device-width, "
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -13639,6 +13686,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:610
       supports: show_invite
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->500; admin GET->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/invites/show/{id}
   kind: api
@@ -14158,9 +14208,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /invites/retrieve
+    identity: anonymous
+    status: 500
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"\
+      width=device-width, "
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -14180,6 +14239,9 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:220
       supports: retrieve_invite
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->500; admin GET->500'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/notifications
   kind: api
@@ -16158,9 +16220,18 @@ nodes:
     reference_fields: []
     reason: Search terms + advanced filters.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /search
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html>\n  <head>\n    <meta name='robots' content='noindex'>\n  </head>\n  <body>\n  \
+      \  <p><em>*waves hand*</e"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -16180,6 +16251,9 @@ nodes:
     - type: source
       ref: app/controllers/search_controller.rb:1
       supports: search
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Honors per-user visibility; a common info-leak surface if guardian checks regress.
 - key: http://localhost/directory_items
   kind: api
@@ -20195,9 +20269,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: PUT
+    path: /admin/users/1/revoke_admin
+    identity: admin
+    status: 403
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":["You are not permitted to view the requested resource."],"error_type":"invalid_access"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -20217,6 +20299,9 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:254
       supports: admin_revoke_admin
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous PUT->404; admin PUT->403'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost/admin/users/{id}/grant_moderation
   kind: api

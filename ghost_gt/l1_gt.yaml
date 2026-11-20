@@ -8183,16 +8183,28 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: Member identity JWT.
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/session
+    identity: anonymous
+    status: 204
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 204
+    admin:
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -8206,6 +8218,10 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js:session
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->204; admin GET->204; anonymous DELETE->204; admin
+        DELETE->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/member
   kind: api
@@ -8632,16 +8648,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/entitlements
+    identity: anonymous
+    status: 204
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 204
+    admin:
+    - 204
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -8655,6 +8683,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->204; admin GET->204'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/integrity-token
   kind: api
@@ -8675,16 +8706,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /members/api/integrity-token
+    identity: anonymous
+    status: 200
+    content_type: ''
+    body_excerpt: 1795181349122:28cfaafa4870b5280284c6506310c004:fc39ce868cdfc65c99084dbd8fa1dec6233b4410b7045460ce657fdf5b387b3c
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:2368
   gt:
@@ -8698,6 +8741,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/members/app.js
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/members/api/create-stripe-update-session
   kind: api
@@ -9132,15 +9178,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /ghost/
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=UTF-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n\n    <title>Ghost</title>\n\
+      \n    <meta name=\"viewpo"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -9152,6 +9211,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/web/admin
       supports: frontend
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Ember Admin SPA shell.
 - key: http://localhost:2368/
   kind: page
@@ -9172,15 +9234,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n\n    <title>GT</title>\n    <meta charset=\"utf-8\">\n  \
+      \  <meta name=\"viewport\" cont"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -9192,6 +9267,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/web/site
       supports: frontend
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Theme-rendered home.
 - key: http://localhost:2368/:slug/
   kind: page
@@ -9268,15 +9346,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /rss/
+    identity: anonymous
+    status: 200
+    content_type: application/rss+xml; charset=utf-8
+    body_excerpt: <?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rs
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -9288,6 +9378,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/web/site
       supports: frontend
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/sitemap.xml
   kind: static
@@ -9308,15 +9401,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /sitemap.xml
+    identity: anonymous
+    status: 200
+    content_type: text/xml; charset=utf-8
+    body_excerpt: <?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="//localhost:2368/sitemap.xsl"?><sitemapinde
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -9328,6 +9433,9 @@ nodes:
     - type: source
       ref: ghost/core/server/web/web/site
       supports: frontend
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:2368/.well-known/
   kind: static

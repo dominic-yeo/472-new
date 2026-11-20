@@ -493,16 +493,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/clients/account/redirect
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -516,6 +528,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/RealmsResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/auth
   kind: api
@@ -1309,16 +1324,29 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/logout
+    identity: anonymous
+    status: 200
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -1332,6 +1360,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/LogoutEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/revoke
   kind: api
@@ -1690,16 +1721,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/protocol/openid-connect/logout/backchannel-logout
+    identity: anonymous
+    status: 400
+    content_type: application/json
+    body_excerpt: '{"error":"invalid_request","error_description":"No logout token"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -1713,6 +1756,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/LogoutEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/ext/par/request
   kind: api
@@ -2043,16 +2089,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/registrations
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2066,6 +2125,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/forgot-credentials
   kind: api
@@ -2086,16 +2148,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/forgot-credentials
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2109,6 +2184,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/login-status-iframe.html
   kind: api
@@ -2129,16 +2207,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/openid-connect/login-status-iframe.html
+    identity: anonymous
+    status: 200
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!doctype html>\n<html>\n  <head>\n    <meta charset=\"utf-8\">\n  </head>\n  <body>\n    <script type=\"\
+      module\">\n      window.ad"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2152,6 +2243,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/OIDCLoginProtocolService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/3p-cookies
   kind: api
@@ -2398,16 +2492,29 @@ nodes:
     reference_fields: []
     reason: User password.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/login-actions/authenticate
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2421,6 +2528,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/registration
   kind: api
@@ -2552,16 +2662,29 @@ nodes:
     - email
     reason: Email.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/login-actions/registration
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2575,6 +2698,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/reset-credentials
   kind: api
@@ -2661,16 +2787,29 @@ nodes:
     - username
     reason: Login name.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /realms/gtrealm/login-actions/reset-credentials
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2684,6 +2823,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/action-token
   kind: api
@@ -2768,16 +2910,29 @@ nodes:
     reference_fields: []
     reason: Signed action token.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/login-actions/action-token
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2791,6 +2946,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Action tokens are JWTs signed by the realm; replay/scope handling is the surface.
 - key: http://localhost:8080/realms/{realm}/login-actions/required-action
   kind: api
@@ -2812,16 +2970,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/login-actions/required-action
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2835,6 +3006,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400; anonymous POST->400; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/first-broker-login
   kind: api
@@ -2856,16 +3031,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/login-actions/first-broker-login
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2879,6 +3067,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400; anonymous POST->400; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/post-broker-login
   kind: api
@@ -2900,16 +3092,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/login-actions/post-broker-login
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -2923,6 +3128,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400; anonymous POST->400; admin
+        POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/login-actions/consent
   kind: api
@@ -3005,16 +3214,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/login-actions/restart
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3028,6 +3250,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/broker/{provider}/login
   kind: api
@@ -3104,16 +3329,29 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/broker/x/login
+    identity: anonymous
+    status: 400
+    content_type: text/html;charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html class=\"login-pf\">\n\n<head>\n    <meta charset=\"utf-8\">\n    <meta http-equiv=\"\
+      Content-Type\" content=\""
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3127,6 +3365,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/broker/{provider}/endpoint
   kind: api
@@ -3952,16 +4193,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/protocol/saml/descriptor
+    identity: anonymous
+    status: 200
+    content_type: application/xml;charset=UTF-8
+    body_excerpt: '<md:EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"
+      xmlns:'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -3975,6 +4229,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/saml/SamlService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/protocol/saml/clients/{client}
   kind: api
@@ -4142,16 +4399,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4165,6 +4434,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/credentials
   kind: api
@@ -4232,16 +4504,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/credentials
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4255,6 +4539,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountCredentialResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/sessions
   kind: api
@@ -4323,16 +4610,28 @@ nodes:
     - realm
     reason: Target realm.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/sessions
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4346,6 +4645,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/SessionResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/linked-accounts/{providerAlias}
   kind: api
@@ -4490,16 +4792,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/applications
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4513,6 +4827,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/applications/{clientId}/consent
   kind: api
@@ -4598,16 +4915,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/resources
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4621,6 +4950,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/groups
   kind: api
@@ -4641,16 +4973,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/groups
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4664,6 +5008,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/account/organizations
   kind: api
@@ -4684,16 +5031,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/organizations
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -4707,6 +5066,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/realms/{realm}/authz/protection/resource_set
   kind: api
@@ -5672,16 +6034,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/logout-all
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -5695,6 +6069,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RealmAdminResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/push-revocation
   kind: api
@@ -7310,16 +7687,28 @@ nodes:
     - user_id
     reason: Target user id.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /admin/realms/gtrealm/users/00000000-0000-0000-0000-000000000000/logout
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -7333,6 +7722,9 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/credentials
   kind: api
@@ -9512,16 +9904,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/roles/{role-name}/composites
+    identity: anonymous
+    status: 400
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9535,6 +9939,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleContainerResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400; anonymous POST->400; admin
+        POST->400; anonymous DELETE->400; admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/roles-by-id/{role-id}
   kind: api
@@ -9557,16 +9965,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/realms/gtrealm/roles-by-id/{role-id}
+    identity: anonymous
+    status: 400
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8080
   gt:
@@ -9580,6 +10000,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/RoleByIdResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->400; admin GET->400; anonymous PUT->400; admin
+        PUT->400; anonymous DELETE->400; admin DELETE->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/admin/realms/{realm}/groups
   kind: api
@@ -11141,15 +11565,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin/master/console
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/admin/keycloak.v2/"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -11162,6 +11598,9 @@ nodes:
     - type: source
       ref: services/resources/admin/AdminConsole.java
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: One per realm (/admin/{realm}/console).
 - key: http://localhost:8080/realms/{realm}/account/index.html
   kind: page
@@ -11182,15 +11621,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /realms/gtrealm/account/index.html
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/account/keycloak.v"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -11203,6 +11654,9 @@ nodes:
     - type: source
       ref: services/resources/account/AccountConsole.java
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8080/
   kind: page
@@ -11223,15 +11677,27 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <base href=\"/resources/zlkls/admin/keycloak.v2/"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -11244,6 +11710,9 @@ nodes:
     - type: source
       ref: services/resources/WelcomeResource.java
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Fresh-install admin bootstrap happens here / via KEYCLOAK_ADMIN env.
 edges:
 - src: http://localhost:8080/admin/master/console

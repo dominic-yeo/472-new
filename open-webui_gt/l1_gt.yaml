@@ -185,6 +185,7 @@ nodes:
   js_sources: []
   identity_statuses: &id006
     anonymous:
+    - 200
     - 401
     pending:
     - 200
@@ -353,6 +354,7 @@ nodes:
     - 200
     admin:
     - 200
+    - 404
     - 422
   route_confirmed: true
   runtime_api_prefixes:
@@ -1114,9 +1116,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/auths/signout
+    identity: anonymous
+    status: 200
+    content_type: application/json
+    body_excerpt: '{"status":true}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1138,6 +1148,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:905
       supports: POST /signout -> invalidate_token + delete_cookie
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->200; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Clears token/oauth cookies; may 302 to WEBUI_AUTH_SIGNOUT_REDIRECT_URL.
 - key: http://localhost/api/v1/auths/oauth/sessions/{provider}
   kind: api
@@ -1197,9 +1210,17 @@ nodes:
     - provider
     reason: Which provider session to drop.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: DELETE
+    path: /api/v1/auths/oauth/sessions/ollama
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"detail":"Not authenticated"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -1221,6 +1242,9 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1019
       supports: DELETE /oauth/sessions/{provider:path} [get_verified_user]
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->401; admin DELETE->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Scoped to the caller's own OAuth sessions.
 - key: http://localhost/api/v1/auths/oauth/{provider}/token/exchange
   kind: api

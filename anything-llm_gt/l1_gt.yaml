@@ -135,9 +135,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/v1/system/env-dump
+    identity: anonymous
+    status: 200
+    content_type: text/plain; charset=utf-8
+    body_excerpt: OK
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -145,6 +153,8 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -159,6 +169,9 @@ nodes:
     - type: source
       ref: server/endpoints/api/system/index.js:16
       supports: GET /v1/system/env-dump (no auth) -> dumpENV() in production
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: 'UNAUTHENTICATED by design: any caller triggers a settings flush to .env (prod only).'
 - key: http://localhost/api/v1/system
   kind: api

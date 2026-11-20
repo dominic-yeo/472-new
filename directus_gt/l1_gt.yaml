@@ -1183,16 +1183,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /server/specs/graphql/items
+    identity: anonymous
+    status: 200
+    content_type: application/octet-stream; charset=utf-8
+    body_excerpt: "type Query {\n  \"\"\"There's no data to query.\"\"\"\n  _empty: Void\n}\n\n\"\"\"Represents NULL values\"\
+      \"\"\nscalar Void"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -1206,6 +1219,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/server/ping
   kind: api
@@ -1226,16 +1242,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /server/ping
+    identity: anonymous
+    status: 503
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Service \"api\" is unavailable. Under pressure.","extensions":{"service":"api","reason":"Under
+      pr'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 503
+    admin:
+    - 503
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -1249,6 +1278,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->503; admin GET->503'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/items/:collection
   kind: api
@@ -6813,16 +6845,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/cache/clear
+    identity: anonymous
+    status: 503
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Service \"api\" is unavailable. Under pressure.","extensions":{"service":"api","reason":"Under
+      pr'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 503
+    admin:
+    - 503
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -6836,6 +6881,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->503; admin POST->503'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/import
   kind: api
@@ -7083,16 +7131,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /utils/revert/1
+    identity: anonymous
+    status: 503
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Service \"api\" is unavailable. Under pressure.","extensions":{"service":"api","reason":"Under
+      pr'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 503
+    admin:
+    - 503
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:8055
   gt:
@@ -7106,6 +7167,9 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->503; admin POST->503'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:8055/utils/translations/generate
   kind: api
@@ -10302,15 +10366,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin
+    identity: anonymous
+    status: 503
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Service \"api\" is unavailable. Under pressure.","extensions":{"service":"api","reason":"Under
+      pr'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 503
+    admin:
+    - 503
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -10322,6 +10399,9 @@ nodes:
     - type: source
       ref: app/ (Data Studio SPA)
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->503; admin GET->503'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Vue Data Studio SPA; drives the REST/GraphQL API.
 - key: http://localhost:8055/
   kind: page
@@ -10342,15 +10422,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /
+    identity: anonymous
+    status: 503
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"errors":[{"message":"Service \"api\" is unavailable. Under pressure.","extensions":{"service":"api","reason":"Under
+      pr'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 503
+    admin:
+    - 503
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -10362,6 +10455,9 @@ nodes:
     - type: source
       ref: api/src/app.ts
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->503; admin GET->503'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Root (redirects to /admin or returns server info).
 edges:
 - src: http://localhost:8055/admin

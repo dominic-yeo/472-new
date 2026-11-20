@@ -716,6 +716,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/LogoutEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/protocol/openid-connect/logout)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-008
   name: Revoke token
@@ -1006,6 +1010,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/protocol/oidc/endpoints/LogoutEndpoint.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/protocol/openid-connect/logout/backchannel-logout)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-011
   name: Pushed authorization request
@@ -1331,6 +1339,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: authenticate
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/login-actions/authenticate)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-014
   name: Self-register
@@ -1433,6 +1445,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: processRegister
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/login-actions/registration)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-015
   name: Request password reset
@@ -1533,6 +1549,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/login-actions/reset-credentials)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-016
   name: Consume action token
@@ -1633,6 +1653,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/LoginActionsService.java
       supports: executeActionToken
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/login-actions/action-token)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-017
   name: Start IdP login
@@ -1717,6 +1741,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/IdentityBrokerService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/broker/{provider}/login)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-018
   name: IdP callback
@@ -2237,6 +2265,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountRestService.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/account)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-023
   name: List own credentials
@@ -2325,6 +2357,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/AccountCredentialResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/account/credentials)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-024
   name: List own sessions
@@ -2413,6 +2449,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/account/SessionResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/realms/{realm}/account/sessions)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-025
   name: Link a social account
@@ -3867,6 +3907,10 @@ nodes:
     - type: source
       ref: keycloak/services/src/main/java/org/keycloak/services/resources/admin/UserResource.java
       supports: JAX-RS resource + handler
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/admin/realms/{realm}/users/{id}/logout)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-038
   name: List a user's credentials

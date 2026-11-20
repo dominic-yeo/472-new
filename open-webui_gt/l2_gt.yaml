@@ -857,6 +857,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:905
       supports: POST /signout -> invalidate_token + delete_cookie
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/api/v1/auths/signout)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: May 302-redirect to WEBUI_AUTH_SIGNOUT_REDIRECT_URL.
 - id: gt-action-009
   name: Drop own OAuth session
@@ -953,6 +957,10 @@ nodes:
     - type: source
       ref: backend/open_webui/routers/auths.py:1019
       supports: DELETE /oauth/sessions/{provider:path} [get_verified_user]
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/api/v1/auths/oauth/sessions/{provider})'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-010
   name: Exchange IdP token for session

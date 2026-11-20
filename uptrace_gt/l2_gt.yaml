@@ -206,6 +206,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/org/user_handler.go:Logout
       supports: clear cookie
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/internal/v1/users/logout)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-003
   name: Read current user
@@ -3801,6 +3805,10 @@ nodes:
     - type: source
       ref: uptrace/pkg/metrics/prom_remote_storage.go:Write
       supports: DSN ingest
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/api/v1/prometheus/write)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-035
   name: Ingest CloudWatch metrics

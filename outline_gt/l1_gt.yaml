@@ -894,9 +894,18 @@ nodes:
     - email
     reason: User email.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /auth/google.callback
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <title>Outline</title>\n    <meta\n      name=\"theme-color\"\
+      \n      content=\"#"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -904,6 +913,8 @@ nodes:
   js_sources: []
   identity_statuses:
     anonymous:
+    - 200
+    admin:
     - 200
   route_confirmed: true
   runtime_api_prefixes:
@@ -919,6 +930,9 @@ nodes:
     - type: source
       ref: outline/server/routes/../../plugins/google/server/auth/google.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/auth/redirect
   kind: api
@@ -1109,16 +1123,29 @@ nodes:
     reference_capable: false
     reference_fields: []
     reason: API key / OAuth / session token.
-  samples: []
+  samples:
+  - method: GET
+    path: /oauth/authorize
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <title>Outline</title>\n    <meta\n      name=\"theme-color\"\
+      \n      content=\"#"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000
   gt:
@@ -1132,6 +1159,9 @@ nodes:
     - type: source
       ref: outline/server/routes/oauth/index.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Outline ships an OAuth2 server + dynamic client registration.
 - key: http://localhost:3000/oauth/token
   kind: api
@@ -1386,16 +1416,28 @@ nodes:
     reference_fields: []
     reason: API key / OAuth / session token.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /oauth/revoke
+    identity: anonymous
+    status: 400
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"error":"invalid_request","error_description":"token: Invalid input: expected string, received undefined"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 400
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000
   gt:
@@ -1409,6 +1451,9 @@ nodes:
     - type: source
       ref: outline/server/routes/oauth/index.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->400; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/oauth/register
   kind: api
@@ -9247,16 +9292,28 @@ nodes:
     - shareId
     reason: Public share id (urlId).
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/shares.revoke
+    identity: anonymous
+    status: 401
+    content_type: application/json; charset=utf-8
+    body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 400
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000
   gt:
@@ -9270,6 +9327,9 @@ nodes:
     - type: source
       ref: outline/server/routes/api/shares/shares.ts
       supports: route + handler
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->400'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/shares.list
   kind: api
@@ -17685,15 +17745,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!doctype html>\n<html lang=\"en\">\n  <head>\n    <title>Outline</title>\n    <meta\n      name=\"theme-color\"\
+      \n      content=\"#"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -17706,6 +17779,9 @@ nodes:
     - type: source
       ref: server/routes/app.ts renderApp
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 edges:
 - src: http://localhost:3000/

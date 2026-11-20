@@ -159,9 +159,13 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - status: 200
+    ts: '2026-11-20'
+    note: 'runtime: POST observed -> 200; session-invalidation endpoint driven (auth-breaking)'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -182,7 +186,12 @@ nodes:
     - type: source
       ref: org/user_handler.go:Logout
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-20: runtime: POST observed -> 200; session-invalidation endpoint driven (auth-breaking)'
+      supports: status=200
     notes: null
+  method: POST
+  path: /internal/v1/users/logout
 - key: http://localhost:14318/internal/v1/users/current
   kind: api
   methods:
@@ -4521,9 +4530,14 @@ nodes:
     reference_fields: []
     reason: DSN authorizes the project.
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - status: 401
+    ts: '2026-11-20'
+    note: 'runtime: Prometheus remote-write ingestion (application/x-protobuf + Content-Encoding: snappy) observed -> 401;
+      route live, gated by project token'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
@@ -4544,7 +4558,13 @@ nodes:
     - type: source
       ref: metrics/prom_remote_storage.go:registerPrometheusHandler
       supports: route + middleware
+    - type: runtime
+      ref: '2026-11-20: runtime: Prometheus remote-write ingestion (application/x-protobuf + Content-Encoding: snappy) observed
+        -> 401; route live, gated by project token'
+      supports: status=401
     notes: null
+  method: POST
+  path: /api/v1/prometheus/write
 - key: http://localhost:14318/api/v1/prometheus/read
   kind: api
   methods:

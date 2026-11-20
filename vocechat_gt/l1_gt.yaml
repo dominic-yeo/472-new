@@ -17685,8 +17685,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
-  sources: []
+  samples:
+  - method: GET
+    path: /api/doc
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "\n<html charset=\"UTF-8\">\n<head>\n    <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"\
+      >\n    <title>Swagger"
+    captured: '2026-11-20'
+  sources:
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -17697,7 +17706,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3009/api
   gt:
@@ -17710,6 +17719,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/api/doc2
   kind: page
@@ -17731,8 +17743,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
-  sources: []
+  samples:
+  - method: GET
+    path: /api/doc2
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "\n<html charset=\"UTF-8\">\n<head>\n    <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"\
+      >\n    <meta name=\"vi"
+    captured: '2026-11-20'
+  sources:
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -17743,7 +17764,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3009/api
   gt:
@@ -17756,6 +17777,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/api/swagger
   kind: page
@@ -17777,9 +17801,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /api/swagger
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "\n<html charset=\"UTF-8\">\n<head>\n    <meta http-equiv=\"Content-Type\" content=\"text/html;charset=utf-8\"\
+      >\n    <title>Swagger"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers:
   - http://localhost:3009/
   resource_types:
@@ -17792,7 +17825,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3009/api
   gt:
@@ -17805,6 +17838,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/routes/setting/APIDocument.tsx:10
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/api/doc3
   kind: page
@@ -17826,8 +17862,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
-  sources: []
+  samples:
+  - method: GET
+    path: /api/doc3
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "\n<!DOCTYPE html>\n<html>\n  <head>\n    <title>Redoc</title>\n    <!-- needed for adaptive design -->\n\
+      \    <meta charset=\"utf"
+    captured: '2026-11-20'
+  sources:
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -17838,7 +17883,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3009/api
   gt:
@@ -17851,6 +17896,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/api/spec
   kind: api
@@ -29363,9 +29411,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /health
+    identity: anonymous
+    status: 200
+    content_type: ''
+    body_excerpt: ''
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -29376,7 +29432,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -29388,6 +29444,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/server.rs:294
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Liveness probe; no business IO (io_variants intentionally empty).'
 - key: http://localhost:3009/metrics
   kind: api
@@ -29529,9 +29588,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /widget.html
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: <!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,user-scala
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -29542,7 +29609,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -29554,6 +29621,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] Embeddable chat widget page (vocechat-web/public/widget.html).'
 - key: http://localhost:3009/widget_demo.html
   kind: page
@@ -29634,9 +29704,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /github/cb/webapp.html
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"\
+      X-UA-Compatible\" content=\"I"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -29647,7 +29726,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -29659,6 +29738,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] GitHub OAuth callback relay page (public/github/cb/webapp.html).'
 - key: http://localhost:3009/github/cb/widget.html
   kind: page
@@ -29680,9 +29762,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /github/cb/widget.html
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"UTF-8\" />\n    <meta http-equiv=\"\
+      X-UA-Compatible\" content=\"I"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -29693,7 +29784,7 @@ nodes:
     - 200
     admin:
     - 200
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -29705,6 +29796,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: '[GET] GitHub OAuth callback relay for widget (public/github/cb/widget.html).'
 - key: http://localhost:3009/email.tpl.html
   kind: static
@@ -29986,9 +30080,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /favicon-16x16.png
+    identity: anonymous
+    status: 200
+    content_type: image/png
+    body_excerpt: "�PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0\x10\0\0\0\x10\b\x03\0\0\0(-\x0FS\0\0\0�PLTE\0\0\0`��:|�;{�7x�t����o��k��d��A��7x�W��7w�]��J��B��^��y��6u�>��U��7u����F�����W�"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -30002,7 +30104,7 @@ nodes:
     admin:
     - 200
     - 304
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -30014,6 +30116,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/favicon-32x32.png
   kind: static
@@ -30036,9 +30141,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /favicon-32x32.png
+    identity: anonymous
+    status: 200
+    content_type: image/png
+    body_excerpt: "�PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0 \0\0\0 \b\x03\0\0\0D���\0\0\x01�PLTE\0\0\0;��c��k��A��I����m��p��b��H��~��|��4r�=��^��=��f����n��S����5x����n��E��:y�D"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -30052,7 +30165,7 @@ nodes:
     admin:
     - 200
     - 304
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -30064,6 +30177,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/android-chrome-192x192.png
   kind: static
@@ -30154,9 +30270,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /android-chrome-512x512.png
+    identity: anonymous
+    status: 200
+    content_type: image/png
+    body_excerpt: "�PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\x02\0\0\0\x02\0\b\x03\0\0\0æ$�\0\0\x02�PLTE\0\0\0?��?��v��~��A��y��?��e��=�����d��:|�:{�^��\x7F\
+      ����4s�m��j��H��6u����4r�j��8y�9z�"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -30170,7 +30295,7 @@ nodes:
     admin:
     - 200
     - 304
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -30182,6 +30307,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/apple-touch-icon.png
   kind: static
@@ -30204,9 +30332,17 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /apple-touch-icon.png
+    identity: anonymous
+    status: 200
+    content_type: image/png
+    body_excerpt: "�PNG\r\n\x1A\n\0\0\0\rIHDR\0\0\0�\0\0\0�\b\x03\0\0\0\n\x13�\0\0\0\x02�PLTE\0\0\0[��v��=��>��=��C��9y����g��N��p��5u�a����5t�5u�d����k��4t����k����x����7v���"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -30220,7 +30356,7 @@ nodes:
     admin:
     - 200
     - 304
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -30232,6 +30368,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/robots.txt
   kind: static
@@ -30379,9 +30518,19 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /firebase-messaging-sw.js
+    identity: anonymous
+    status: 200
+    content_type: text/javascript
+    body_excerpt: '// This a service worker file for receiving push notifitications.
+
+      // See `Access registration token section` @ https://f'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -30395,7 +30544,7 @@ nodes:
     admin:
     - 200
     - 304
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -30407,6 +30556,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/widget.js
   kind: static
@@ -30429,9 +30581,18 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /widget.js
+    identity: anonymous
+    status: 200
+    content_type: text/javascript
+    body_excerpt: "// IIFC\n((w, d) => {\n  const {\n    id = \"\",\n    hostId = 1,\n    autoReg = \"true\",\n    loginToken\
+      \ = \"\",\n    closeWidth = "
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types: []
   js_sources: []
@@ -30445,7 +30606,7 @@ nodes:
     admin:
     - 200
     - 304
-  route_confirmed: false
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -30457,6 +30618,9 @@ nodes:
     - type: source
       ref: vocechat-web/public/
       supports: Shipped static asset
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3009/splash/{device}_splash.png
   kind: static

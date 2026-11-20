@@ -376,6 +376,10 @@ nodes:
     - type: source
       ref: app/controllers/session_controller.rb:785
       supports: DELETE /session/:id -> reset_session
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/session/{id})'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Optionally detaches a web-push subscription.
 - id: gt-action-005
   name: Read own session identity
@@ -3527,6 +3531,10 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1915
       supports: revoke_associated_account
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/u/{username}/preferences/revoke-account)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-041
   name: Revoke session token(s)
@@ -3608,6 +3616,10 @@ nodes:
     - type: source
       ref: app/controllers/users_controller.rb:1948
       supports: revoke_auth_token
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/u/{username}/preferences/revoke-auth-token)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Logs out other devices.
 - id: gt-action-042
   name: Set user notification level
@@ -13711,6 +13723,10 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:610
       supports: show_invite
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/invites/{id})'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-157
   name: Redeem invite
@@ -14254,6 +14270,10 @@ nodes:
     - type: source
       ref: app/controllers/invites_controller.rb:220
       supports: retrieve_invite
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/invites/retrieve)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-163
   name: List notifications
@@ -16303,6 +16323,10 @@ nodes:
     - type: source
       ref: app/controllers/search_controller.rb:1
       supports: search
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/search)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: Honors per-user visibility.
 - id: gt-action-187
   name: List user directory
@@ -21636,6 +21660,10 @@ nodes:
     - type: source
       ref: app/controllers/admin/users_controller.rb:254
       supports: admin_revoke_admin
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/admin/users/{id}/revoke_admin)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-243
   name: Grant moderation

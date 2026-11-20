@@ -201,16 +201,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/logout
+    identity: anonymous
+    status: 401
+    content_type: application/json
+    body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
+      in to do thi'
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 401
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -224,6 +237,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/ApiClass.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->401; admin POST->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/me
   kind: api
@@ -11162,16 +11178,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: POST
+    path: /api/v1/import.uploadImportFile
+    identity: anonymous
+    status: 404
+    content_type: text/plain; charset=UTF-8
+    body_excerpt: 404 Not Found
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - fetch
   - xhr
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 404
+    admin:
+    - 404
+  route_confirmed: true
   runtime_api_prefixes:
   - http://localhost:3000/api/v1
   gt:
@@ -11185,6 +11213,9 @@ nodes:
     - type: source
       ref: apps/meteor/server/api/v1/misc.ts
       supports: route + authRequired
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: null
 - key: http://localhost:3000/api/v1/statistics.telemetry
   kind: api
@@ -11261,15 +11292,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html>\n<head>\n  <link rel=\"stylesheet\" type=\"text/css\" class=\"__meteor-css__\"\
+      \ href=\"/bf69bff5794d3e1aba1"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -11281,6 +11325,9 @@ nodes:
     - type: source
       ref: apps/meteor/client
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: React SPA shell.
 - key: http://localhost:3000/admin
   kind: page
@@ -11301,15 +11348,28 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /admin
+    identity: anonymous
+    status: 200
+    content_type: text/html; charset=utf-8
+    body_excerpt: "<!DOCTYPE html>\n<html>\n<head>\n  <link rel=\"stylesheet\" type=\"text/css\" class=\"__meteor-css__\"\
+      \ href=\"/bf69bff5794d3e1aba1"
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -11321,6 +11381,9 @@ nodes:
     - type: source
       ref: apps/meteor/client
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: Admin area (API-driven).
 - key: http://localhost:3000/sockjs
   kind: page
@@ -11341,15 +11404,29 @@ nodes:
   semantic_outputs: []
   semantic_input_decisions: []
   semantic_output_decisions: []
-  samples: []
+  samples:
+  - method: GET
+    path: /sockjs
+    identity: anonymous
+    status: 200
+    content_type: text/plain; charset=UTF-8
+    body_excerpt: 'Welcome to SockJS!
+
+      '
+    captured: '2026-11-20'
   sources:
   - source
+  - runtime
   referrers: []
   resource_types:
   - document
   js_sources: []
-  identity_statuses: {}
-  route_confirmed: false
+  identity_statuses:
+    anonymous:
+    - 200
+    admin:
+    - 200
+  route_confirmed: true
   runtime_api_prefixes: []
   gt:
     visibility:
@@ -11361,6 +11438,9 @@ nodes:
     - type: source
       ref: Meteor DDP
       supports: client
+    - type: runtime
+      ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
+      supports: 'runtime: handler reached incl. mutating methods'
     notes: DDP/websocket transport -- a separate real-time surface, out of scope for the REST GT.
 edges:
 - src: http://localhost:3000/

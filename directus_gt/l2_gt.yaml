@@ -6057,6 +6057,10 @@ nodes:
     - type: source
       ref: directus/api/src/controllers/utils.ts
       supports: route + controller
+    - type: runtime
+      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/utils/cache/clear)'
+      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
+        not effect-observed)'
     notes: null
 - id: gt-action-056
   name: Install extension (code)
