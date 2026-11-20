@@ -1882,6 +1882,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:66
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/login_guest)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Creates a new guest user row on every call (token.rs:587-594).
 - id: gt-anonymous_renew_session
   name: Renew a session token pair
@@ -2049,6 +2052,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/base.query.ts:92
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/renew)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: No session header required; validity proven by the token pair (token.rs:1211-1278).
 - id: gt-user_logout_session
   name: Log out the current device session
@@ -2252,6 +2258,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:113
       supports: PUT called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/device_token)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_read_own_credentials
   name: Read linked login credentials
@@ -2351,6 +2360,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:182
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/credentials)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_bind_external_credential
   name: Bind an external login credential
@@ -2489,6 +2501,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/token.rs:1068
       supports: 'POST handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/bind)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_start_oidc_authorization
   name: Start an OIDC authorization flow
@@ -2601,6 +2616,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:123
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/openid/authorize)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Feature-gated: deployment login config has oidc: [] so the handler returns 403 (token.rs:418-424).'
 - id: gt-anonymous_create_metamask_nonce
   name: Create a MetaMask login nonce
@@ -2706,6 +2724,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:172
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/metamask/nonce)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Not gated by LoginConfig.metamask: any caller can upsert a nonce row for an arbitrary address (token.rs:526-545).'
 - id: gt-secret_create_third_party_login_key
   name: Mint a third-party login key
@@ -2848,6 +2869,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/token.rs:548
       supports: 'POST handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/create_third_party_key)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Missing X-SECRET header -> 400 (poem required header); wrong secret -> 403 (token.rs:556).
 - id: gt-anonymous_register_user_account
   name: Register a new user account
@@ -3139,6 +3163,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:131
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/check_magic_token)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_check_email_available
   name: Check whether an e-mail is registered
@@ -3330,6 +3357,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:155
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/send_reg_magic_link)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: With SMTP disabled (deployment) the server signs and returns a confirmed register token embedding the supplied
       email/password without validating the input magic_token (user.rs:526-541, 600-604).
 - id: gt-anonymous_send_login_magic_link
@@ -3418,6 +3448,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:145
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/send_login_magic_link)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Requires working SMTP to be useful; deployment /admin/smtp/enabled=false.
 - id: gt-user_read_own_profile
   name: Read own profile
@@ -3532,6 +3565,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:645
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/me)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_user_profile
   name: Read a user profile by id
@@ -3667,6 +3703,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:656
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/{uid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'No Token parameter: unauthenticated profile (incl. e-mail) lookup by uid (user.rs:656-664).'
 - id: gt-user_change_own_password
   name: Change own password
@@ -3780,6 +3819,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:138
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/change_password)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_own_profile
   name: Update own profile
@@ -4011,6 +4053,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:205
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/avatar)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_list_users
   name: List all users
@@ -4473,6 +4518,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:211
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/{uid}/history)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_subscribe_user_events
   name: Subscribe to the realtime event stream
@@ -4801,6 +4849,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:1002
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/devices)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_delete_own_device
   name: Sign out a device
@@ -4920,6 +4971,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:1013
       supports: 'DELETE handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/devices/{device})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_mute_settings
   name: Update mute settings
@@ -5052,6 +5106,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:190
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/mute)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_burn_after_reading
   name: Update burn-after-reading
@@ -5175,6 +5232,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:145
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/burn-after-reading)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_read_index
   name: Advance read markers
@@ -5297,6 +5357,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:271
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/read-index)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_delete_own_account
   name: Delete own account
@@ -5385,6 +5448,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:210
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/delete)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_register_device_fcm_token
   name: Register a device FCM token
@@ -5484,6 +5550,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:1475
       supports: 'PUT handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/update_fcm_token)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Upserts an arbitrary device row for the caller (user.rs:1475-1516); a fresh device row also satisfies the SSE device
       check.
 - id: gt-user_list_contacts
@@ -5736,6 +5805,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:109
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/search)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_pin_chat
   name: Pin a conversation
@@ -5834,6 +5906,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:116
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/pin_chat)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_unpin_chat
   name: Unpin a conversation
@@ -5931,6 +6006,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:123
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/unpin_chat)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_contact_remark
   name: Set a contact remark
@@ -6054,6 +6132,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:137
       supports: PUT called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/contact_remark)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_add_contact
   name: Add a contact
@@ -6777,6 +6858,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:234
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/join_private)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_create_private_group_group
   name: Create a private group
@@ -8098,6 +8182,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:241
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/avatar)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Unknown gid returns 401 (not 404) (group.rs:256-259).
 - id: gt-user_leave_group
   name: Leave a group
@@ -8246,6 +8333,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:28
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/leave)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_add_group_members
   name: Add members to a group
@@ -8428,6 +8518,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:220
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/members/add)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Any existing member (not only the owner) may add members to a private group (group.rs:731-737).
 - id: gt-user_remove_group_members
   name: Remove members from a group
@@ -8990,6 +9083,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:211
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/history)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_create_invite_link
   name: Create a registration invite link
@@ -9257,6 +9353,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:150
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/create_invite_private_magic_link)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_create_group_call_token
   name: Get a group call token
@@ -9423,6 +9522,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/group.rs:949
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/agora_token)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_pin_group_message
   name: Pin a message
@@ -9592,6 +9694,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:134
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/pin)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Does not check that mid belongs to gid (group.rs:1012-1017).
 - id: gt-user_unpin_group_message
   name: Unpin a message
@@ -9750,6 +9855,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:141
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/unpin)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_clear_group_messages
   name: Clear group messages
@@ -9887,6 +9995,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:130
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/group/{gid}/clear)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_read_group_announcement
   name: Read group announcement
@@ -10619,6 +10730,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:32
       supports: PUT called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/message/{mid}/like)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: can_reaction(Like) returns true for any user; no membership check on target conversation (message.rs:170-174).
 - id: gt-user_delete_message
   name: Delete a message
@@ -10765,6 +10879,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:39
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/message/{mid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_reply_to_message_message
   name: Reply to a message
@@ -10923,6 +11040,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:248
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/message/{mid}/reply)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_bulk_delete_messages
   name: Bulk delete messages
@@ -11166,6 +11286,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:71
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file/prepare)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_upload_file_chunk
   name: Upload a file chunk
@@ -11340,6 +11463,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:85
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file/upload)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: file_id is joined into a filesystem path without validation (resource.rs:206-211); any session can append to any
       pending upload id.
 - id: gt-anonymous_download_file
@@ -11446,6 +11572,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/hooks/useUploadFile.ts:138
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'No auth: anyone with the path can download (resource.rs:341-381). Frontend also issues HEAD (message.ts preCheckFileFromUrl).'
 - id: gt-user_create_message_archive
   name: Archive messages
@@ -11588,6 +11717,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:78
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/archive)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_message_archive
   name: Read a message archive
@@ -11769,6 +11901,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:121
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/archive)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: No auth on archive read (resource.rs:414-430).
 - id: gt-anonymous_download_archive_attachment
   name: Download an archive attachment
@@ -11895,6 +12030,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/utils.tsx:310
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/archive/attachment)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_fetch_url_preview
   name: Fetch an Open-Graph preview
@@ -11986,6 +12124,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:95
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/open_graphic_parse)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Unauthenticated server-side fetch of attacker-chosen URL (SSRF primitive) (resource.rs:467-487).
 - id: gt-anonymous_read_organization_logo
   name: Read organization logo
@@ -12151,6 +12292,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/slices/users.ts:58
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/avatar)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_group_avatar
   name: Read a group avatar
@@ -12317,6 +12461,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:423
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/widget-extra.css)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_update_widget_css
   name: Update widget CSS
@@ -12415,6 +12562,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:429
       supports: PUT called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/widget-extra.css)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_delete_all_files
   name: Delete all files
@@ -12508,6 +12658,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:417
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file/delete)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_create_favorite_archive
   name: Create a favorite archive
@@ -12969,6 +13122,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:179
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/favorite/{id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_delete_favorite
   name: Delete a favorite
@@ -13092,6 +13248,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/message.ts:165
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/favorite/{id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_download_favorite_attachment
   name: Download a favorite attachment
@@ -13223,6 +13382,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/utils.tsx:309
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/favorite/attachment/{uid}/{id}/{attachment_id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: No auth and owner uid supplied by caller (favorite.rs:149-177).
 - id: gt-anonymous_check_license
   name: Validate a license blob
@@ -13333,6 +13495,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:397
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/license/check)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_license
   name: Read the installed license
@@ -13839,6 +14004,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:339
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/create_admin)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_server_metrics
   name: Read server metrics
@@ -13920,6 +14088,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/admin_system.rs:147
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/metrics)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_organization
   name: Read organization info
@@ -14335,6 +14506,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:297
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/organization/logo)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_send_test_mail
   name: Send a test e-mail
@@ -14441,6 +14615,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:122
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/send_mail)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_third_party_secret
   name: Read third-party secret
@@ -14544,6 +14721,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:61
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/third_party_secret)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_rotate_third_party_secret
   name: Rotate third-party secret
@@ -14670,6 +14850,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:68
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/third_party_secret)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_frontend_url
   name: Read frontend URL
@@ -14868,6 +15051,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:352
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/update_frontend_url)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Value is embedded in every invite/login magic link; admin can redirect links (admin_system.rs:293-322).
 - id: gt-user_read_system_settings
   name: Read system settings
@@ -15313,6 +15499,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:283
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/files)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_clear_all_messages
   name: Clear all messages
@@ -15406,6 +15595,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:411
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/message/clear)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_read_agora_config
   name: Read Agora config
@@ -15510,6 +15702,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:139
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Admin check commented out in source (admin_agora.rs:106-108): any session reads app_certificate/rtm_secret.'
 - id: gt-admin_update_agora_config
   name: Update Agora config
@@ -15648,6 +15843,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:193
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_agora_usage
   name: Read Agora usage
@@ -15728,6 +15926,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/admin_agora.rs:117
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/usages)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_read_agora_enabled
   name: Read Agora enabled flag
@@ -15941,6 +16142,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:216
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/token)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_list_voice_channels
   name: List active voice channels
@@ -16035,6 +16239,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:142
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel/{page_no}/{page_size})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_list_voice_channel_users
   name: List users in a voice channel
@@ -16186,6 +16393,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel/user/{channel_name}/{hosts_only})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Canonical spec route; the web client calls it with hosts_only hard-coded to false (server.ts getAgoraUsersByChannel).
 - id: gt-admin_read_fcm_config
   name: Read Firebase config
@@ -16295,6 +16505,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:93
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/fcm/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_update_fcm_config
   name: Update Firebase config
@@ -16427,6 +16640,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:129
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/fcm/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_smtp_config
   name: Read SMTP config
@@ -17098,6 +17314,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:96
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/google_auth/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Source: unauthenticated. Frontend whiteList401 tolerates 401 here, suggesting the deployed build added auth (unverified;
       not in HAR).'
 - id: gt-admin_update_google_auth_config
@@ -17207,6 +17426,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:102
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/google_auth/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_github_auth_config
   name: Read GitHub-auth config
@@ -17286,6 +17508,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:109
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/github_auth/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: 'Source: unauthenticated and returns client_secret (admin_github_auth.rs:59-63). Frontend whiteList401 suggests
       deployed build may require auth (unverified).'
 - id: gt-admin_update_github_auth_config
@@ -17400,6 +17625,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:115
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/github_auth/config)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_google_auth_public_config
   name: Read Google-auth public config
@@ -17896,6 +18124,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:207
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/vocespace/health/{url})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Server probes a caller-supplied URL (SSRF-style primitive) per frontend contract.
 - id: gt-admin_read_tunnel_status
   name: Read tunnel status
@@ -17982,6 +18213,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:490
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/status)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_auto_tunnel_info
   name: Read auto-tunnel info
@@ -18057,6 +18291,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:500
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/auto_info)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_stop_tunnel
   name: Stop the tunnel
@@ -18161,6 +18398,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:493
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/stop)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_start_tunnel
   name: Start the tunnel
@@ -18254,6 +18494,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/routes/setting/Cloudflared/index.tsx:97
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/start)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_stream_auto_tunnel
   name: Stream auto-tunnel progress
@@ -18324,6 +18567,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/routes/onboarding/steps/welcome-page.tsx:58
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/auto_stream)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_page_api_key
   name: Read page API key
@@ -18423,6 +18669,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:503
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/page/apikey)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_rotate_page_api_key
   name: Rotate page API key
@@ -18545,6 +18794,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:507
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/page/apikey)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_read_custom_page
   name: Read a custom page
@@ -18997,6 +19249,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:18
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/notification/channel-types)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_toggle_notification_type
   name: Enable/disable a notification type
@@ -19124,6 +19379,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:22
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/notification/channel-types)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_delete_notification_type
   name: Delete a notification type
@@ -19233,6 +19491,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:30
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/notification/channel-types/{channel_type})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_list_available_notification_types
   name: List available notification types
@@ -19340,6 +19601,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:39
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/available-types)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_list_own_notification_channels
   name: List own notification channels
@@ -19467,6 +19731,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:43
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_create_notification_channel
   name: Create a notification channel
@@ -19617,6 +19884,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:47
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Provider config contains outbound webhook URLs -> server-side requests to user-chosen URLs (see channelSchemas.ts).
 - id: gt-user_update_notification_channel
   name: Update a notification channel
@@ -19774,6 +20044,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:55
       supports: PUT called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels/{id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_delete_notification_channel
   name: Delete a notification channel
@@ -19883,6 +20156,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:63
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels/{id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_test_notification_channel
   name: Test a notification channel
@@ -19995,6 +20271,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/notification.ts:70
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels/{id}/test)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_create_user_account
   name: Create a user
@@ -20167,6 +20446,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:102
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: webhook_url is fetched server-side before save (admin_user.rs:161-170).
 - id: gt-admin_list_users
   name: List users (admin)
@@ -20308,6 +20590,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/admin_user.rs:216
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_user
   name: Read a user (admin)
@@ -20933,6 +21218,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:215
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/{uid}/avatar)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_create_bot_api_key
   name: Create a bot API key
@@ -21080,6 +21368,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:229
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/bot-api-key/{uid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Works for any uid, not only is_bot users (admin_user.rs:508-562).
 - id: gt-admin_list_bot_api_keys
   name: List bot API keys
@@ -21247,6 +21538,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:236
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/bot-api-key/{uid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_delete_bot_api_key
   name: Delete a bot API key
@@ -21389,6 +21683,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/user.ts:239
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user/bot-api-key/{uid}/{kid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_list_bots
   name: List bot accounts
@@ -21510,6 +21807,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/adminBotChat.ts:25
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/bots)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_list_bot_conversations
   name: List a bot's conversations
@@ -21686,6 +21986,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/adminBotChat.ts:37
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/{bot_uid}/conversations)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_bot_dm_history
   name: Read a bot's DM history
@@ -21882,6 +22185,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/adminBotChat.ts:47
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/{bot_uid}/user/{uid}/history)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-admin_read_bot_group_history
   name: Read a bot's group history
@@ -22078,6 +22384,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/adminBotChat.ts:57
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/{bot_uid}/group/{gid}/history)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_list_related_groups
   name: Bot lists related groups
@@ -22247,6 +22556,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:436
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_send_direct_message_message
   name: Bot sends a DM
@@ -22397,6 +22709,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:444
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/send_to_user/{uid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_send_group_message_message
   name: Bot sends a group message
@@ -22545,6 +22860,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:444
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/send_to_group/{gid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_read_user
   name: Bot reads a user
@@ -22684,6 +23002,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/bot.rs:115
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/user/{uid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Handler binds uid from the QUERY string although the route declares :uid (bot.rs:115-131).
 - id: gt-bot_read_group
   name: Bot reads a group
@@ -22868,6 +23189,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/bot.rs:134
       supports: 'GET handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/group/{gid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Returns any group incl. private ones regardless of bot membership (bot.rs:134-150).
 - id: gt-bot_prepare_file_upload
   name: Bot prepares a file upload
@@ -22984,6 +23308,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/bot.rs:153
       supports: 'POST handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/file/prepare)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_upload_file_chunk
   name: Bot uploads a file chunk
@@ -23147,6 +23474,9 @@ nodes:
     - type: source
       ref: vocechat-server-rust-0.5.36/src/api/bot.rs:202
       supports: 'POST handler: route, parameters, auth checks and response type'
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/file/upload)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_start_passkey_registration
   name: Start passkey registration
@@ -23265,6 +23595,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:217
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/register/start)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_finish_passkey_registration
   name: Finish passkey registration
@@ -23394,6 +23727,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:230
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/register/finish)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_start_passkey_login
   name: Start passkey login
@@ -23494,6 +23830,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:243
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/auth/start)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_finish_passkey_login
   name: Finish passkey login
@@ -23688,6 +24027,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:256
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/auth/finish)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_list_own_passkeys
   name: List own passkeys
@@ -23801,6 +24143,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:288
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/list)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_delete_own_passkey
   name: Delete a passkey
@@ -23912,6 +24257,9 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/auth.ts:291
       supports: DELETE called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/passkey/{credential_id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_list_commands
   name: Bot lists its commands
@@ -24033,6 +24381,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_add_command
   name: Bot adds a command
@@ -24157,6 +24508,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_update_command
   name: Bot updates a command
@@ -24294,6 +24648,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: DELETE route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command/{id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_delete_command
   name: Bot deletes a command
@@ -24407,6 +24764,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: DELETE route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/command/{id})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_delete_message
   name: Bot deletes a message
@@ -24525,6 +24885,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: DELETE route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/delete/{mid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_edit_message
   name: Bot edits a message
@@ -24659,6 +25022,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: PUT route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/edit/{mid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_reply_message_message
   name: Bot replies to a message
@@ -24805,6 +25171,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/reply/{mid})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_read_dm_history
   name: Bot reads recent DM messages
@@ -24975,6 +25344,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/user/{uid}/messages)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_read_group_history
   name: Bot reads recent group messages
@@ -25149,6 +25521,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/group/{gid}/messages)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_read_secret
   name: Bot reads its webhook secret
@@ -25253,6 +25628,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: PUT route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/secret)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_set_secret
   name: Bot sets its webhook secret
@@ -25362,6 +25740,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: PUT route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/secret)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-bot_send_mail
   name: Bot sends an e-mail
@@ -25468,6 +25849,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/bot/send_mail)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_read_user_commands
   name: Read a bot user's commands
@@ -25616,6 +26000,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/{uid}/command)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_read_own_avatar_params
   name: Read own avatar (Avo) params
@@ -25702,6 +26089,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: PUT route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/avo)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_own_avatar_params
   name: Update own avatar (Avo) params
@@ -25836,6 +26226,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: PUT route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/avo)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_search_contacts
   name: Search within contacts
@@ -25957,6 +26350,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/contacts/search)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_send_mail_to_user
   name: Send mail to another user
@@ -26089,6 +26485,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/send_mail)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_update_conversation_comment
   name: Update a conversation comment
@@ -26195,6 +26594,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/update_conv)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-user_subscribe_user_events_ws
   name: Subscribe events over WebSocket
@@ -26384,6 +26786,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/events_ws)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: WebSocket variant of /user/events (HTTP 101 upgrade); api-key carried as a query param, same as the SSE variant.
 - id: gt-user_subscribe_voice_events_ws
   name: Subscribe voice/Avo room events over WebSocket
@@ -26486,6 +26891,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/voice/avo/events_ws)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: WebSocket voice/Avo room stream under /api/voice (HTTP 101). room_type/room_id select the room.
 - id: gt-anonymous_parse_tokens
   name: Introspect a token pair
@@ -26585,6 +26993,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/parse_tokens)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Unauthenticated token-introspection endpoint.
 - id: gt-admin_update_webclient
   name: Update the bundled web client
@@ -26676,6 +27087,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/update_webclient)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Admin-triggered self-update of the bundled web client.
 - id: gt-user_read_vocespace_enabled
   name: Read VoceSpace enabled flag
@@ -26760,6 +27174,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/vocespace/enabled)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 - id: gt-anonymous_ingest_agora_channel_event
   name: Ingest an Agora channel event
@@ -26842,6 +27259,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: POST route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel_event_callback)'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: Inbound webhook invoked by Agora's RTC service; unauthenticated public callback that ingests channel events.
 - id: gt-user_read_voice_channel_user_property
   name: Read a user's property in a voice channel
@@ -26986,6 +27406,9 @@ nodes:
     - type: documentation
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
+    - type: runtime
+      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/channel/user/property/{uid}/{channel_name})'
+      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
     notes: null
 edges: []
 annotation_issues: []
