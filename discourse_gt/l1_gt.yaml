@@ -2908,6 +2908,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"user_badges":[],"user":{"id":1,"username":"gtadmin","name":null,"avatar_template":"/letter_avatar_proxy/v4/letter/g/8e'
     captured: '2026-11-20'
+  - method: GET
+    path: /u/{username}.json
+    identity: admin
+    status: 200
+    body_excerpt: '{"user_badges":[],"user":{"id":1,"username":"gtadmin","name":null,"avatar_template":"/letter_avatar_proxy/v4/letter/g/8edcca/{size}.png","email":"gtadmin@gt.loc'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2943,10 +2950,11 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: GROUPS the users#show view aliases (activity/badges/notifications/messages filters). Visibility via Guardian.
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
       - 200
@@ -7494,6 +7502,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"post_stream":{"posts":[{"id":1,"name":"system","username":"system","avatar_template":"/images/discourse-logo-sketch-sm'
     captured: '2026-11-20'
+  - method: GET
+    path: /t/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"post_stream":{"posts":[{"id":15,"name":null,"username":"gtadmin","avatar_template":"/letter_avatar_proxy/v4/letter/g/8edcca/{size}.png","created_at":"2026-11-'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /t/{id}
+    identity: admin
+    status: 200
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7531,14 +7553,16 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: PRIMARY content read. Edit/delete via Guardian; title/category changes are moderation-relevant.
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 3
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
       - 200
       methods:
+      - DELETE
       - GET
 - key: http://localhost/t/{topic_id}/posts
   kind: api
@@ -7805,6 +7829,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":["param is missing or the value is empty or invalid: status"]}'
     captured: '2026-11-20'
+  - method: PUT
+    path: /t/{topic_id}/status
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":"OK","topic_status_update":null}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7832,12 +7863,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Moderation state transitions.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - PUT
@@ -9988,6 +10020,13 @@ nodes:
     body_excerpt: '{"action":"create_post","errors":["Title can''t be blank","Title is too short (minimum is 1 character)","Title
       seems uncl'
     captured: '2026-11-20'
+  - method: POST
+    path: /posts
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":15,"name":null,"username":"gtadmin","avatar_template":"/letter_avatar_proxy/v4/letter/g/8edcca/{size}.png","created_at":"2026-11-20T17:00:44.560Z","cooked'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10023,12 +10062,13 @@ nodes:
     notes: PRIMARY untrusted content entry; raw markdown is cooked to HTML (stored-XSS surface). Rate-limited, spam/newuser
       gated.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 422
       methods:
       - POST
@@ -10181,6 +10221,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"id":1,"name":"system","username":"system","avatar_template":"/images/discourse-logo-sketch-small.png","created_at":"20'
     captured: '2026-11-20'
+  - method: PUT
+    path: /posts/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"post":{"id":15,"name":null,"username":"gtadmin","avatar_template":"/letter_avatar_proxy/v4/letter/g/8edcca/{size}.png","created_at":"2026-11-20T17:00:44.560Z"'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /posts/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":15,"name":null,"username":"gtadmin","avatar_template":"/letter_avatar_proxy/v4/letter/g/8edcca/{size}.png","created_at":"2026-11-20T17:00:44.560Z","cooked'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10220,15 +10274,17 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Edit permission via Guardian#can_edit_post? (author window, wiki, staff). Delete is soft (recoverable).
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 3
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
       - 200
       methods:
       - GET
+      - PUT
 - key: http://localhost/posts/{id}/recover
   kind: api
   methods:
@@ -10590,6 +10646,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":["param is missing or the value is empty or invalid: wiki"]}'
     captured: '2026-11-20'
+  - method: PUT
+    path: /posts/{id}/wiki
+    identity: admin
+    status: 200
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10617,12 +10680,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Wiki posts become editable by any trusted user (widens edit surface).
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - PUT
@@ -10883,6 +10947,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"locked":false}'
     captured: '2026-11-20'
+  - method: PUT
+    path: /posts/{id}/locked
+    identity: admin
+    status: 200
+    body_excerpt: '{"locked":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10911,8 +10982,8 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 1
-      success_2xx: 1
+      samples: 2
+      success_2xx: 2
       identities:
       - admin
       statuses:
@@ -11753,6 +11824,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"category_list":{"can_create_category":false,"can_create_topic":false,"categories":[{"id":4,"name":"General","color":"2'
     captured: '2026-11-20'
+  - method: POST
+    path: /categories
+    identity: admin
+    status: 200
+    body_excerpt: '{"category":{"id":8,"name":"GTcat43720","color":"49d9e9","text_color":"ffffff","style_type":"square","icon":null,"emoji":null,"slug":"gtcat43720","topic_count":'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /categories
+    identity: admin
+    status: 200
+    body_excerpt: '{"category_list":{"can_create_category":true,"can_create_topic":true,"categories":[{"id":3,"name":"Staff","color":"E45735","text_color":"FFFFFF","style_type":"e'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -11791,15 +11876,17 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Create/permissions define read/write access for whole groups (authorization surface).
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 3
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
       - 200
       methods:
       - GET
+      - POST
 - key: http://localhost/categories/{id}
   kind: api
   methods:
@@ -11894,6 +11981,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"success":"OK","category":{"id":1,"name":"Uncategorized","color":"0088CC","text_color":"FFFFFF","style_type":"emoji","i'
     captured: '2026-11-20'
+  - method: PUT
+    path: /categories/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":"OK","category":{"id":8,"name":"GTcat43720b","color":"49d9e9","text_color":"ffffff","style_type":"square","icon":null,"emoji":null,"slug":"gtcat43720'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -11934,8 +12028,8 @@ nodes:
     notes: Permission edits change who can see/post in the category.
     grounding:
       depth: observed
-      samples: 1
-      success_2xx: 1
+      samples: 2
+      success_2xx: 2
       identities:
       - admin
       statuses:
@@ -12399,6 +12493,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"category":{"id":1,"name":"Uncategorized","color":"0088CC","text_color":"FFFFFF","style_type":"emoji","icon":null,"emoj'
     captured: '2026-11-20'
+  - method: GET
+    path: /c/{id}/show
+    identity: admin
+    status: 200
+    body_excerpt: '{"category":{"id":8,"name":"GTcat43720","color":"49d9e9","text_color":"ffffff","style_type":"square","icon":null,"emoji":null,"slug":"gtcat43720","topic_count":'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -12426,10 +12527,11 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
       - 200
@@ -14696,6 +14798,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":["param is missing or the value is empty or invalid: group"]}'
     captured: '2026-11-20'
+  - method: POST
+    path: /admin/groups
+    identity: admin
+    status: 200
+    body_excerpt: '{"basic_group":{"id":43,"automatic":false,"name":"gtgrp43720","user_count":0,"mentionable_level":0,"messageable_level":0,"visibility_level":0,"primary_group":fa'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -14723,12 +14832,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Groups DELETE /admin/groups/:id and /admin/groups/:id/members.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -18068,6 +18178,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"default_archetype":"regular","notification_types":{"mentioned":1,"replied":2,"quoted":3,"edited":4,"liked":5,"private_'
     captured: '2026-11-20'
+  - method: GET
+    path: /site
+    identity: admin
+    status: 200
+    body_excerpt: '{"default_archetype":"regular","notification_types":{"mentioned":1,"replied":2,"quoted":3,"edited":4,"liked":5,"private_message":6,"invited_to_private_message":'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -18095,10 +18212,11 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Groups /site/basic-info and /site/statistics. Exposes client-visible settings.
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
       - 200

@@ -91,11 +91,12 @@ nodes:
       ref: server/endpoints/api/auth/index.js:6
       supports: validApiKey gate + fixed response
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auth)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/auth -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/auth (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-002
   name: Flush settings to .env
@@ -266,11 +267,12 @@ nodes:
       ref: server/endpoints/api/system/index.js:39
       supports: SystemSettings.currentSettings()
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/system)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/system -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/system (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: Discloses which provider credentials are configured (as booleans) and non-secret config values.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-004
   name: Read vector count
@@ -776,11 +778,12 @@ nodes:
       ref: server/endpoints/api/workspace/index.js:28
       supports: Workspace.new()
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/new)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/workspace/new -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/workspace/new (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-009
   name: List workspaces
@@ -869,11 +872,12 @@ nodes:
       ref: server/endpoints/api/workspace/index.js:109
       supports: Workspace._findMany
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspaces)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/workspaces -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/workspaces (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-010
   name: Read workspace
@@ -962,11 +966,12 @@ nodes:
       ref: server/endpoints/api/workspace/index.js:163
       supports: Workspace._findMany by slug
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug})'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/workspace/{slug} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/workspace/{slug} (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-011
   name: Delete workspace
@@ -1056,11 +1061,12 @@ nodes:
       ref: server/endpoints/api/workspace/index.js:228
       supports: cascade delete + delete-namespace
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug})'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via DELETE /api/v1/workspace/{slug} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /api/v1/workspace/{slug} (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: Guarded by workspaceDeletionProtection middleware.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-012
   name: Update workspace
@@ -1171,11 +1177,12 @@ nodes:
       ref: server/endpoints/api/workspace/index.js:279
       supports: Workspace.update(id, data)
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/update)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/workspace/{slug}/update -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/workspace/{slug}/update (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-013
   name: Read workspace chats
@@ -1905,11 +1912,12 @@ nodes:
       ref: server/endpoints/api/workspaceThread/index.js:21
       supports: WorkspaceThread.new
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/new)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/workspace/{slug}/thread/new -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/workspace/{slug}/thread/new (identity=admin) -> resource
+        created; server returned it; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-019
   name: Update thread
@@ -2042,11 +2050,12 @@ nodes:
       ref: server/endpoints/api/workspaceThread/index.js:111
       supports: WorkspaceThread.update
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/update)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/workspace/{slug}/thread/{threadSlug}/update -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/workspace/{slug}/thread/{threadSlug}/update (identity=admin)
+        -> state mutated; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-020
   name: Delete thread
@@ -2147,11 +2156,12 @@ nodes:
       ref: server/endpoints/api/workspaceThread/index.js:197
       supports: WorkspaceThread.delete
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug})'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via DELETE /api/v1/workspace/{slug}/thread/{threadSlug} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /api/v1/workspace/{slug}/thread/{threadSlug} (identity=admin)
+        -> resource removed; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-021
   name: Read thread chats
@@ -2268,11 +2278,12 @@ nodes:
       ref: server/endpoints/api/workspaceThread/index.js:246
       supports: WorkspaceChats for thread
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/workspace/{slug}/thread/{threadSlug}/chats)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/workspace/{slug}/thread/{threadSlug}/chats -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/workspace/{slug}/thread/{threadSlug}/chats (identity=admin)
+        -> representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-022
   name: Chat in thread
@@ -2849,11 +2860,12 @@ nodes:
       ref: server/endpoints/api/document/index.js:669
       supports: list local documents
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/documents)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/documents -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/documents (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-027
   name: List folder documents

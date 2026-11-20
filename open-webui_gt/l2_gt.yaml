@@ -127,11 +127,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:185
       supports: GET / [get_current_user] -> SessionUserInfoResponse; re-issues token
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/auths -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/auths (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: Discloses caller role + effective permissions; re-issues a token on every call.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-002
   name: Update own profile
@@ -261,11 +262,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:253
       supports: POST /update/profile [get_verified_user] -> UserProfileImageResponse
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/profile)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/auths/update/profile -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/auths/update/profile (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: name/bio are stored-reflected (self stored-XSS surface); image URL passes validate_image_url.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-003
   name: Update own timezone
@@ -351,11 +353,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:288
       supports: POST /update/timezone [get_current_user]
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/update/timezone)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/auths/update/timezone -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/auths/update/timezone (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-004
   name: Rotate own password
@@ -1238,11 +1241,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:1051
       supports: POST /add [get_admin_user] -> AddUserResponse (returns a token)
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/add)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/auths/add -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/auths/add (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: Direct privilege assignment; the returned token can bootstrap the new account's session.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-012
   name: Read admin contact
@@ -1335,11 +1339,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:1124
       supports: GET /admin/details [get_current_user]
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/details)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/auths/admin/details -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/auths/admin/details (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: Information disclosure when SHOW_ADMIN_DETAILS is on.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-013
   name: Read auth/admin config
@@ -1432,11 +1437,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:1155
       supports: GET /admin/config [get_admin_user]
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/auths/admin/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/auths/admin/config (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: Includes secret-config presence; GT records config location, not secret values.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-014
   name: Update auth/admin config
@@ -1529,11 +1535,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:1228
       supports: POST /admin/config [get_admin_user] AdminConfig
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via POST /api/v1/auths/admin/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/auths/admin/config (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: 'High-impact: changing these alters who can register and how sessions/keys are governed.'
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-015
   name: Read LDAP server config
@@ -1816,11 +1823,12 @@ nodes:
       ref: backend/open_webui/routers/auths.py:1328
       supports: GET /admin/config/ldap [get_admin_user]
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/v1/auths/admin/config/ldap)'
-      supports: 'runtime: bound interface observed per identity; interface-observed, not effect-observed'
+      ref: '2026-11-21: effect observed via GET /api/v1/auths/admin/config/ldap -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/auths/admin/config/ldap (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-018
   name: Toggle LDAP auth method

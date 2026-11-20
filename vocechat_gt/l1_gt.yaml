@@ -3827,6 +3827,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '[{"admin_guide_completed":false,"avatar_updated_at":0,"birthday":null,"create_by":"password","email":"admin@gt.test","ge'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/user
+    identity: admin
+    status: 200
+    body_excerpt: '[{"admin_guide_completed":false,"avatar_updated_at":0,"birthday":null,"create_by":"password","email":"","gender":0,"is_admin":false,"is_bot":false,"is_public":f'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - runtime
   - source
@@ -3893,8 +3900,8 @@ nodes:
       of all non-guest users with e-mails (user.rs:891-904).'
     grounding:
       depth: exercised
-      samples: 3
-      success_2xx: 3
+      samples: 4
+      success_2xx: 4
       identities:
       - admin
       - user
@@ -6143,6 +6150,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '[]'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/group
+    identity: admin
+    status: 200
+    body_excerpt: '{"created_at":1795194184219,"gid":3}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /api/group
+    identity: admin
+    status: 200
+    body_excerpt: '[{"add_friend":true,"announcement":null,"avatar_updated_at":0,"description":"gt","dm_to_member":true,"ext_settings":null,"gid":1,"is_public":true,"members":[],"'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - runtime
   - source
@@ -6200,8 +6221,8 @@ nodes:
     notes: 'Per-method semantics: POST=create_group, GET=list_related_groups'
     grounding:
       depth: exercised
-      samples: 2
-      success_2xx: 2
+      samples: 4
+      success_2xx: 4
       identities:
       - admin
       statuses:
@@ -6715,6 +6736,20 @@ nodes:
     content_type: ''
     body_excerpt: authorization error
     captured: '2026-11-20'
+  - method: GET
+    path: /api/group/{gid}
+    identity: admin
+    status: 200
+    body_excerpt: '{"add_friend":true,"announcement":null,"avatar_updated_at":0,"description":"gt","dm_to_member":true,"ext_settings":null,"gid":3,"is_public":true,"members":[],"n'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /api/group/{gid}
+    identity: admin
+    status: 200
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - runtime
   - source
@@ -6793,8 +6828,8 @@ nodes:
       read of any group incl. private member lists and pinned content (group.rs:682-692).'
     grounding:
       depth: exercised
-      samples: 4
-      success_2xx: 3
+      samples: 6
+      success_2xx: 5
       identities:
       - admin
       - anon
@@ -12644,6 +12679,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"description":null,"name":null,"server_id":"9328665f-77ff-4176-afc5-d40d4be2f0c0"}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/admin/system/organization
+    identity: admin
+    status: 200
+    body_excerpt: '{"description":null,"name":null,"server_id":"9328665f-77ff-4176-afc5-d40d4be2f0c0"}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - runtime
   - source
@@ -12702,10 +12744,11 @@ nodes:
       source tree (Cargo 0.3.3) but called by vocechat-web 0.9.122 and served by the deployed 0.5.36 binary (confirmed in
       HAR).'
     grounding:
-      depth: observed
-      samples: 2
-      success_2xx: 2
+      depth: exercised
+      samples: 3
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
       - 200
@@ -16005,6 +16048,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '[{"avatar_updated_at":0,"birthday":null,"create_by":"password","created_at":1795179182186,"email":"","gender":0,"in_onli'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/admin/user
+    identity: admin
+    status: 200
+    body_excerpt: '[{"avatar_updated_at":0,"birthday":null,"create_by":"password","created_at":1795179182186,"email":"","gender":0,"in_online":false,"is_admin":false,"is_bot":fals'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -16053,8 +16103,8 @@ nodes:
       save (admin_user.rs:161-170).'
     grounding:
       depth: observed
-      samples: 1
-      success_2xx: 1
+      samples: 2
+      success_2xx: 2
       identities:
       - admin
       statuses:

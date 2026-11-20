@@ -337,6 +337,13 @@ nodes:
     body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
       in to do thi'
     captured: '2026-11-19'
+  - method: GET
+    path: /api/v1/me
+    identity: admin
+    status: 200
+    body_excerpt: '{"_id":"6aff02aefaaa1f23b7fd57f1","avatarOrigin":"none","name":"Administrator","username":"gtadmin","status":"offline","statusDefault":"online","utcOffset":0,"a'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -379,12 +386,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 2
-      success_2xx: 0
+      depth: observed
+      samples: 3
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
@@ -876,6 +885,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''email''"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/users.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"user":{"_id":"26yLFqqSjfTqj9PBX","createdAt":"2026-11-20T16:52:13.472Z","username":"eff38796","emails":[{"address":"eff38796@gt.test","verified":false}],"name'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -911,8 +927,8 @@ nodes:
     notes: roles[] in the body -> privilege assignment surface.
     grounding:
       depth: observed
-      samples: 2
-      success_2xx: 1
+      samples: 3
+      success_2xx: 2
       identities:
       - admin
       statuses:
@@ -1108,6 +1124,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''userId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/users.delete
+    identity: admin
+    status: 200
+    body_excerpt: '{"deletedRooms":[],"success":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1138,12 +1161,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -1598,6 +1622,13 @@ nodes:
     body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
       in to do thi'
     captured: '2026-11-19'
+  - method: GET
+    path: /api/v1/users.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"users":[{"_id":"6aff02aefaaa1f23b7fd57f1","name":"Administrator","username":"gtadmin","status":"offline","active":true,"type":"user","emails":[{"address":"gta'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1638,8 +1669,8 @@ nodes:
     notes: Bulk user/email enumeration for admins.
     grounding:
       depth: observed
-      samples: 2
-      success_2xx: 1
+      samples: 3
+      success_2xx: 2
       identities:
       - admin
       - anon
@@ -2544,6 +2575,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''name''"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/channels.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"channel":{"_id":"6b007abcfaaa1f23b7fd5864","fname":"gt_ch_38796","_updatedAt":"2026-11-20T16:52:12.987Z","name":"gt_ch_38796","t":"c","msgs":0,"usersCount":1,'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2584,8 +2622,8 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
-      success_2xx: 1
+      samples: 3
+      success_2xx: 2
       identities:
       - admin
       statuses:
@@ -2668,6 +2706,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/channels.delete
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2698,12 +2743,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -2791,6 +2837,13 @@ nodes:
     body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
       in to do thi'
     captured: '2026-11-19'
+  - method: GET
+    path: /api/v1/channels.info
+    identity: admin
+    status: 200
+    body_excerpt: '{"channel":{"_id":"6b007abcfaaa1f23b7fd5864","fname":"gt_ch_38796","_updatedAt":"2026-11-20T16:52:12.987Z","name":"gt_ch_38796","t":"c","msgs":0,"usersCount":1,'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2823,12 +2876,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
@@ -2906,6 +2961,13 @@ nodes:
     body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
       in to do thi'
     captured: '2026-11-19'
+  - method: GET
+    path: /api/v1/channels.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"channels":[{"_id":"GENERAL","_updatedAt":"2026-11-20T16:52:14.212Z","default":true,"msgs":3,"name":"general","t":"c","ts":"2026-11-19T14:07:42.347Z","u":{"_id'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2943,12 +3005,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 2
-      success_2xx: 0
+      depth: observed
+      samples: 3
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
@@ -3615,6 +3679,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/channels.archive
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -3645,12 +3716,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -4084,6 +4156,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/channels.setTopic
+    identity: admin
+    status: 200
+    body_excerpt: '{"topic":"gt","success":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -4114,12 +4193,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -5497,6 +5577,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''name''"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/groups.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"group":{"_id":"6b007abdfaaa1f23b7fd5868","fname":"gt_pg_38796","_updatedAt":"2026-11-20T16:52:13.191Z","name":"gt_pg_38796","t":"p","msgs":0,"usersCount":1,"u'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -5527,12 +5614,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -5671,6 +5759,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/groups.delete
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -5701,12 +5796,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -7112,6 +7208,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/chat.postMessage
+    identity: admin
+    status: 200
+    body_excerpt: '{"ts":1795193533365,"channel":"#general","message":{"alias":"","msg":"gt effect","attachments":[],"parseUrls":true,"groupable":false,"ts":"2026-11-20T16:52:13.3'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7142,12 +7245,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: attachments[] -> stored HTML/markdown (XSS/content-injection surface).
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -7366,6 +7470,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''roomId''\n must have
       required propert'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/chat.update
+    identity: admin
+    status: 200
+    body_excerpt: '{"message":{"_id":"ScYCQ637eyyW5ek5n","alias":"","msg":"gt2","attachments":[],"parseUrls":true,"groupable":false,"ts":"2026-11-20T16:52:13.330Z","u":{"_id":"6af'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7396,12 +7507,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -7489,6 +7601,13 @@ nodes:
     body_excerpt: '{"success":false,"errorType":"invalid-params","error":"must have required property ''msgId''\n must have
       required property'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/v1/chat.delete
+    identity: admin
+    status: 200
+    body_excerpt: '{"_id":"ScYCQ637eyyW5ek5n","ts":"1795193533422","message":{"_id":"ScYCQ637eyyW5ek5n","rid":"GENERAL","u":{"_id":"6aff02aefaaa1f23b7fd57f1","username":"gtadmin",'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7519,12 +7638,13 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
       statuses:
+      - 200
       - 400
       methods:
       - POST
@@ -9965,6 +10085,13 @@ nodes:
     body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
       in to do thi'
     captured: '2026-11-19'
+  - method: GET
+    path: /api/v1/settings
+    identity: admin
+    status: 200
+    body_excerpt: '{"settings":[{"_id":"AI_Intelligent_Search_API_Key","enterprise":true,"invalidValue":"","modules":["chat.rocket.rc-ai"],"value":""},{"_id":"AI_Intelligent_Searc'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10005,8 +10132,8 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
-      success_2xx: 1
+      samples: 3
+      success_2xx: 2
       identities:
       - admin
       - anon
@@ -10729,6 +10856,13 @@ nodes:
     body_excerpt: '{"success":false,"error":"You must be logged in to do this.","status":"error","message":"You must be logged
       in to do thi'
     captured: '2026-11-19'
+  - method: GET
+    path: /api/v1/roles.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"roles":[{"_id":"admin","scope":"Users","description":"Admin","mandatory2fa":false,"name":"admin","protected":true},{"_id":"moderator","scope":"Subscriptions",'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10761,12 +10895,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET

@@ -304,12 +304,12 @@ nodes:
       ref: apps/meteor/server/api/v1/misc.ts
       supports: me
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/me)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via GET /api/v1/me -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/me (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-004
   name: Self-register
@@ -892,12 +892,12 @@ nodes:
       ref: apps/meteor/server/api/v1/delete_user.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.delete)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via POST /api/v1/users.delete -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/users.delete (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-009
   name: Set user active status
@@ -1589,12 +1589,12 @@ nodes:
       ref: apps/meteor/server/api/v1/delete_channel.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.delete)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via POST /api/v1/channels.delete -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/channels.delete (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-015
   name: Read channel info
@@ -1707,12 +1707,12 @@ nodes:
       ref: apps/meteor/server/api/v1/read_channel.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via GET /api/v1/channels.info -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/channels.info (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-016
   name: List channels
@@ -1813,12 +1813,12 @@ nodes:
       ref: apps/meteor/server/api/v1/list_channels.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via GET /api/v1/channels.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/channels.list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-017
   name: Invite to channel
@@ -2527,12 +2527,12 @@ nodes:
       ref: apps/meteor/server/api/v1/create_group.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/groups.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via POST /api/v1/groups.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/groups.create (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-023
   name: List groups
@@ -2766,12 +2766,12 @@ nodes:
       ref: apps/meteor/server/api/v1/chat.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.postMessage)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via POST /api/v1/chat.postMessage -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/chat.postMessage (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-025
   name: Send message
@@ -3031,12 +3031,12 @@ nodes:
       ref: apps/meteor/server/api/v1/update_message.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.update)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via POST /api/v1/chat.update -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/chat.update (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-027
   name: Delete message
@@ -3148,12 +3148,12 @@ nodes:
       ref: apps/meteor/server/api/v1/delete_message.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/chat.delete)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via POST /api/v1/chat.delete -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/chat.delete (identity=admin) -> resource removed; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-028
   name: React to message
@@ -4854,12 +4854,12 @@ nodes:
       ref: apps/meteor/server/api/v1/list_roles.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/roles.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-21: effect observed via GET /api/v1/roles.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/roles.list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-043
   name: Create integration/webhook

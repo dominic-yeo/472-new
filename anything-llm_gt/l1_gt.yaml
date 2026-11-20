@@ -56,6 +56,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/auth
+    identity: admin
+    status: 200
+    body_excerpt: '{"authenticated":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -95,12 +102,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: API-key probe; the status flag is not business data (flow=false).
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - GET
@@ -257,6 +266,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/system
+    identity: admin
+    status: 200
+    body_excerpt: '{"settings":{"RequiresAuth":false,"AuthToken":false,"JWTSecret":false,"StorageDir":"/app/server/storage","MultiUserMode":false,"MemoryEnabled":false,"MemoryAuto'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -284,12 +300,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Exposes instance configuration incl. which provider keys are set (presence booleans).
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - GET
@@ -836,6 +854,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/workspace/new
+    identity: admin
+    status: 200
+    body_excerpt: '{"workspace":{"id":6,"name":"gteff46552","slug":"gteff46552","vectorTag":null,"createdAt":"2026-11-20T16:54:03.914Z","openAiTemp":null,"openAiHistory":20,"lastU'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -863,12 +888,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - POST
@@ -937,6 +964,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/workspaces
+    identity: admin
+    status: 200
+    body_excerpt: '{"workspaces":[{"id":1,"name":"gt","slug":"gt","vectorTag":null,"createdAt":"2026-11-19T16:24:58.802Z","openAiTemp":null,"openAiHistory":20,"lastUpdatedAt":"202'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -964,12 +998,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - GET
@@ -1086,6 +1122,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/workspace/{slug}
+    identity: admin
+    status: 200
+    body_excerpt: '{"workspace":[{"id":6,"name":"gteff46552","slug":"gteff46552","vectorTag":null,"createdAt":"2026-11-20T16:54:03.914Z","openAiTemp":null,"openAiHistory":20,"last'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /api/v1/workspace/{slug}
+    identity: admin
+    status: 200
+    body_excerpt: OK
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1114,14 +1164,17 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: DELETE is guarded by workspaceDeletionProtection middleware; cascades to chats/vectors/documents.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: exercised
+      samples: 3
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
+      - DELETE
       - GET
 - key: http://localhost/api/v1/workspace/{slug}/update
   kind: api
@@ -1217,6 +1270,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/workspace/{slug}/update
+    identity: admin
+    status: 200
+    body_excerpt: '{"workspace":{"id":6,"name":"gteff46552","slug":"gteff46552","vectorTag":null,"createdAt":"2026-11-20T16:54:03.914Z","openAiTemp":0.7,"openAiHistory":20,"lastUp'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1244,12 +1304,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - POST
@@ -2228,6 +2290,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/workspace/{slug}/thread/new
+    identity: admin
+    status: 200
+    body_excerpt: '{"thread":{"id":5,"name":"Thread","slug":"de1d0f8e-cad3-4308-95ca-6691c0bfbaa7","workspace_id":6,"user_id":null,"createdAt":"2026-11-20T16:54:03.959Z","lastUpda'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2255,12 +2324,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - POST
@@ -2374,6 +2445,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/workspace/{slug}/thread/{threadSlug}/update
+    identity: admin
+    status: 200
+    body_excerpt: '{"thread":{"id":5,"name":"t2","slug":"de1d0f8e-cad3-4308-95ca-6691c0bfbaa7","workspace_id":6,"user_id":null,"createdAt":"2026-11-20T16:54:03.959Z","lastUpdatedA'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2401,12 +2479,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - POST
@@ -2482,6 +2562,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: DELETE
+    path: /api/v1/workspace/{slug}/thread/{threadSlug}
+    identity: admin
+    status: 200
+    body_excerpt: OK
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2509,12 +2596,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - DELETE
@@ -2597,6 +2686,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/workspace/{slug}/thread/{threadSlug}/chats
+    identity: admin
+    status: 200
+    body_excerpt: '{"history":[]}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2624,12 +2720,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - GET
@@ -3642,6 +3740,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"error":"No valid api key found."}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/documents
+    identity: admin
+    status: 200
+    body_excerpt: '{"localFiles":{"name":"documents","type":"folder","items":[]}}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -3669,12 +3774,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 403
       methods:
       - GET

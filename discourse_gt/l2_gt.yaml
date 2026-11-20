@@ -6721,11 +6721,12 @@ nodes:
       ref: app/controllers/topics_controller.rb:786
       supports: destroy_topic
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via DELETE /t/{id} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /t/{id} (identity=admin) -> resource removed; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-076
   name: Load topic posts
@@ -7010,11 +7011,12 @@ nodes:
       ref: app/controllers/topics_controller.rb:587
       supports: set_topic_status
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/status)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via PUT /t/{topic_id}/status -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /t/{topic_id}/status (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-079
   name: Mute topic
@@ -8969,11 +8971,12 @@ nodes:
       ref: app/controllers/posts_controller.rb:168
       supports: create_post
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via POST /posts -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /posts (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: PRIMARY untrusted content entry; raw markdown cooked to HTML (stored-XSS surface).
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-100
   name: Read post
@@ -9140,11 +9143,12 @@ nodes:
       ref: app/controllers/posts_controller.rb:198
       supports: update_post
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via PUT /posts/{id} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /posts/{id} (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Guardian#can_edit_post? (author window/wiki/staff).
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-102
   name: Delete post
@@ -9626,11 +9630,12 @@ nodes:
       ref: app/controllers/posts_controller.rb:728
       supports: toggle_wiki
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/wiki)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via PUT /posts/{id}/wiki -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /posts/{id}/wiki (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Widens edit surface to trusted users.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-107
   name: Set post type
@@ -10764,11 +10769,12 @@ nodes:
       ref: app/controllers/categories_controller.rb:177
       supports: create_category
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via POST /categories -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /categories (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: Permissions define group-level access.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-119
   name: Update category
@@ -13975,11 +13981,12 @@ nodes:
       ref: app/controllers/groups_controller.rb:1
       supports: admin_create_group
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/groups)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-21: effect observed via POST /admin/groups -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /admin/groups (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: Groups admin group delete.
     grounding:
-      tier: interface
+      tier: effect
       bindings: 1
 - id: gt-action-154
   name: Create invite

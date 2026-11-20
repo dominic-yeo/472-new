@@ -175,6 +175,14 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/auths
+    identity: admin
+    status: 200
+    body_excerpt: '{"status_emoji":null,"status_message":null,"status_expires_at":null,"id":"b06aaf4c-3dbe-4359-b8e1-def59f360959","name":"GT
+      Admin","role":"admin","email":"gtadmi'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -215,12 +223,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Re-issues a session token on every call; discloses caller role + effective permissions.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
@@ -347,6 +357,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/auths/update/profile
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":"b06aaf4c-3dbe-4359-b8e1-def59f360959","name":"GT Admin","role":"admin","email":"gtadmin@gt.local","profile_image_url":"/user.png"}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -386,12 +403,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: profile_image_url passes validate_image_url; bio/name are stored-reflected (self-stored XSS surface).
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - POST
@@ -477,6 +496,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/auths/update/timezone
+    identity: admin
+    status: 200
+    body_excerpt: '{"status":true}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -506,12 +532,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Low-sensitivity preference write.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - POST
@@ -1643,6 +1671,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: POST
+    path: /api/v1/auths/add
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":"428279e5-fb0c-4755-b749-af742128b023","name":"Eff","role":"user","email":"eff50784@gt.test","profile_image_url":"/api/v1/users/428279e5-fb0c-4755-b749-af'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1681,12 +1716,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Admin sets role at creation (privilege assignment); response carries a session token for the new user.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - POST
@@ -1757,6 +1794,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/auths/admin/details
+    identity: admin
+    status: 200
+    body_excerpt: '{"name":"GT Admin","email":"gtadmin@gt.local"}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1786,12 +1830,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Discloses the admin's name/email to any authenticated user when SHOW_ADMIN_DETAILS is on.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
@@ -1901,6 +1947,20 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/auths/admin/config
+    identity: admin
+    status: 200
+    body_excerpt: '{"ENABLE_MFA":false,"MFA_ALLOW_OAUTH_BYPASS":false,"MFA_ALLOW_TRUSTED_HEADER_BYPASS":false,"SHOW_ADMIN_DETAILS":true,"ADMIN_EMAIL":null,"WEBUI_URL":"","ENABLE_L'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: POST
+    path: /api/v1/auths/admin/config
+    identity: admin
+    status: 200
+    body_excerpt: '{"ENABLE_MFA":false,"MFA_ALLOW_OAUTH_BYPASS":false,"MFA_ALLOW_TRUSTED_HEADER_BYPASS":false,"SHOW_ADMIN_DETAILS":true,"ADMIN_EMAIL":null,"WEBUI_URL":"","ENABLE_L'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1934,15 +1994,18 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Controls signup/default-role/api-key policy/JWT expiry; changing these reshapes the auth boundary.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: exercised
+      samples: 3
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
+      - POST
 - key: http://localhost/api/v1/auths/admin/config/ldap/server
   kind: api
   methods:
@@ -2201,6 +2264,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"detail":"Not authenticated"}'
     captured: '2026-11-20'
+  - method: GET
+    path: /api/v1/auths/admin/config/ldap
+    identity: admin
+    status: 200
+    body_excerpt: '{"ENABLE_LDAP":null}'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2234,12 +2304,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: Enables/disables an entire authentication path.
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET

@@ -6235,6 +6235,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":"4db28a17-7f36-443f-bee3-be4160616a0a","realm":"gtrealm","notBefore":1795181428,"defaultSignatureAlgorithm":"RS256","revokeRefreshToken":false,"refreshTok'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6273,12 +6280,14 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 2
-      success_2xx: 0
+      depth: observed
+      samples: 3
+      success_2xx: 1
       identities:
+      - admin
       - anon
       statuses:
+      - 200
       - 401
       methods:
       - GET
@@ -7546,6 +7555,20 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /admin/realms/{realm}/users
+    identity: admin
+    status: 201
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/users
+    identity: admin
+    status: 200
+    body_excerpt: '[{"id":"a5fa9a10-91dc-4f3e-935c-b2ce66647a72","username":"gtuser","emailVerified":false,"createdTimestamp":1795181425829,"enabled":true,"totp":false,"disableabl'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7586,15 +7609,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 2
-      success_2xx: 0
+      depth: exercised
+      samples: 4
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
+      - 200
+      - 201
       - 401
       methods:
       - GET
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}
   kind: api
   methods:
@@ -7717,6 +7744,27 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/users/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":"138918e6-2087-41dd-8bb7-b9922c3babe3","username":"gtu43356","emailVerified":false,"createdTimestamp":1795193644986,"enabled":true,"totp":false,"disableab'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: PUT
+    path: /admin/realms/{realm}/users/{id}
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /admin/realms/{realm}/users/{id}
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -7749,15 +7797,20 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: exercised
+      samples: 4
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
+      - 200
+      - 204
       - 401
       methods:
+      - DELETE
       - GET
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/reset-password
   kind: api
   methods:
@@ -9401,6 +9454,20 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /admin/realms/{realm}/clients
+    identity: admin
+    status: 201
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/clients
+    identity: admin
+    status: 200
+    body_excerpt: '[{"id":"6cc133ab-67d9-45c5-9633-2c7c96bb19c6","clientId":"account","name":"${client_account}","rootUrl":"${authBaseUrl}","baseUrl":"/realms/gtrealm/account/","s'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -9442,15 +9509,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 2
-      success_2xx: 0
+      depth: exercised
+      samples: 4
+      success_2xx: 2
       identities:
+      - admin
       - anon
       statuses:
+      - 200
+      - 201
       - 401
       methods:
       - GET
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}
   kind: api
   methods:
@@ -9573,6 +9644,27 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/clients/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":"677c36c5-af59-4ed2-b3e2-00445f524e8f","clientId":"gtc43356","surrogateAuthRequired":false,"enabled":true,"alwaysDisplayInConsole":false,"clientAuthentica'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: PUT
+    path: /admin/realms/{realm}/clients/{id}
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /admin/realms/{realm}/clients/{id}
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -9606,15 +9698,20 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: exercised
+      samples: 4
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
+      - 200
+      - 204
       - 401
       methods:
+      - DELETE
       - GET
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}/client-secret
   kind: api
   methods:
@@ -10850,6 +10947,20 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /admin/realms/{realm}/roles
+    identity: admin
+    status: 201
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/roles
+    identity: admin
+    status: 200
+    body_excerpt: '[{"id":"0490a2ab-3c2f-4787-81c9-a92935599022","name":"offline_access","description":"${role_offline-access}","composite":false,"clientRole":false,"containerId":'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10885,17 +10996,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: observed
-      samples: 2
-      success_2xx: 1
+      depth: exercised
+      samples: 4
+      success_2xx: 3
       identities:
       - admin
       - anon
       statuses:
       - 200
+      - 201
       - 401
       methods:
       - GET
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/roles/{role-name}/composites
   kind: api
   methods:
@@ -11127,6 +11240,20 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /admin/realms/{realm}/groups
+    identity: admin
+    status: 201
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/groups
+    identity: admin
+    status: 200
+    body_excerpt: '[{"id":"570f6261-76e1-4991-82fc-770178d7405f","name":"gtgroup","path":"/gtgroup","subGroupCount":0,"subGroups":[],"access":{"view":true,"viewMembers":true,"mana'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -11162,17 +11289,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: observed
-      samples: 2
-      success_2xx: 1
+      depth: exercised
+      samples: 4
+      success_2xx: 3
       identities:
       - admin
       - anon
       statuses:
       - 200
+      - 201
       - 401
       methods:
       - GET
+      - POST
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}
   kind: api
   methods:
@@ -11202,6 +11331,27 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/groups/{id}
+    identity: admin
+    status: 200
+    body_excerpt: '{"id":"cb1d63c3-fcb0-436e-9c44-84f6c4d48896","name":"gtg43356","path":"/gtg43356","subGroupCount":0,"subGroups":[],"attributes":{},"realmRoles":[],"clientRoles"'
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: PUT
+    path: /admin/realms/{realm}/groups/{id}
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /admin/realms/{realm}/groups/{id}
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-21'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -11235,15 +11385,20 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: exercised
+      samples: 4
+      success_2xx: 3
       identities:
+      - admin
       - anon
       statuses:
+      - 200
+      - 204
       - 401
       methods:
+      - DELETE
       - GET
+      - PUT
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}/role-mappings/realm
   kind: api
   methods:
