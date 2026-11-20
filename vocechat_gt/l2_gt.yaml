@@ -227,6 +227,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -479,6 +483,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -727,6 +735,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -975,6 +987,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -1224,6 +1240,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -1472,6 +1492,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -1720,6 +1744,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #0 (2026-10-06T08:36:14.273Z)'
       supports: POST http://localhost:3009/api/token/login as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/token/login -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/token/login (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: 'Single endpoint multiplexes 7 credential types via credential.type; only password/magiclink(and thirdparty if
       enabled) are enabled in the deployment (login config: password=true, magic_link=true, google/github/metamask/third_party=false,
       oidc=[]). Status codes from LoginApiResponse (token.rs:264-287) plus 451 license check (license.rs:105).'
@@ -1883,8 +1911,9 @@ nodes:
       ref: vocechat-web/src/app/services/auth.ts:66
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/login_guest)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/token/login_guest -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/token/login_guest (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: Creates a new guest user row on every call (token.rs:587-594).
 - id: gt-anonymous_renew_session
   name: Renew a session token pair
@@ -2149,6 +2178,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #76 (2026-10-06T09:05:12.473Z)'
       supports: GET http://localhost:3009/api/token/logout as user -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/token/logout -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/token/logout (identity=admin) -> resource removed; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: Deletes refresh_token+device rows for (uid, device) and kicks SSE; the stateless access token remains valid until
       expiry (token.rs:1281-1322).
 - id: gt-user_update_device_push_token
@@ -2361,8 +2394,9 @@ nodes:
       ref: vocechat-web/src/app/services/auth.ts:182
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/token/credentials)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/token/credentials -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/token/credentials (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_bind_external_credential
   name: Bind an external login credential
@@ -3071,6 +3105,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #10 (2026-10-06T09:05:05.784Z)'
       supports: POST http://localhost:3009/api/user/register as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/user/register -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /api/user/register (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: who_can_sign_up=EveryOne in deployment, so anonymous self-registration succeeds (runtime auth.har#10). Registering
       with a group invite token adds the new uid to that private group (user.rs:430-459).
 - id: gt-anonymous_validate_magic_token
@@ -3241,6 +3279,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #9 (2026-10-06T09:05:05.781Z)'
       supports: GET http://localhost:3009/api/user/check_email?email=test%40test.com as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/user/check_email -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/check_email (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: Unauthenticated account-enumeration oracle (user.rs:464-468).
 - id: gt-anonymous_send_registration_magic_link
   name: Issue a registration magic link
@@ -3566,8 +3608,9 @@ nodes:
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:645
       supports: 'GET handler: route, parameters, auth checks and response type'
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/me)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/me -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/me (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_user_profile
   name: Read a user profile by id
@@ -3704,8 +3747,9 @@ nodes:
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:656
       supports: 'GET handler: route, parameters, auth checks and response type'
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/{uid})'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/{uid} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/{uid} (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: 'No Token parameter: unauthenticated profile (incl. e-mail) lookup by uid (user.rs:656-664).'
 - id: gt-user_change_own_password
   name: Change own password
@@ -4176,6 +4220,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #91 (2026-10-06T09:05:18.180Z)'
       supports: GET http://localhost:3009/api/user as user -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/user -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user (identity=user) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: Source handler has no Token -> anonymous listing of all non-guest users with e-mails (user.rs:891-904).
 - id: gt-user_send_direct_message_message
   name: Send a direct message to a user
@@ -4346,6 +4394,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #62 (2026-10-06T08:37:15.089Z)'
       supports: POST http://localhost:3009/api/user/3/send as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/user/{uid}/send -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/user/{uid}/send (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_read_direct_message_history
   name: Read DM history with a user
@@ -4519,8 +4571,9 @@ nodes:
       ref: vocechat-web/src/app/services/message.ts:211
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/{uid}/history)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/{uid}/history -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/{uid}/history (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_subscribe_user_events
   name: Subscribe to the realtime event stream
@@ -4742,6 +4795,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #96 (2026-10-06T09:05:18.288Z)'
       supports: GET http://localhost:3009/api/user/events?limit=500&api-key=<redacted>&users_version=13 as user -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/user/events -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/events (identity=user) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: 403 when the token's device has no device row (create_user_event_receiver user.rs:1694-1726). Stream carries uid/gid/mid
       references (and every non-guest user's e-mail in users_snapshot) that enable follow-on actions.
 - id: gt-user_list_own_devices
@@ -4850,8 +4907,9 @@ nodes:
       ref: vocechat-server-rust-0.5.36/src/api/user.rs:1002
       supports: 'GET handler: route, parameters, auth checks and response type'
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/devices)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/devices -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/devices (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_delete_own_device
   name: Sign out a device
@@ -5684,6 +5742,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #9 (2026-10-06T08:36:14.308Z)'
       supports: GET http://localhost:3009/api/user/contacts as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/user/contacts -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/contacts (identity=user) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_search_user
   name: Search for a user
@@ -6274,6 +6336,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #69 (2026-10-06T08:37:17.222Z)'
       supports: POST http://localhost:3009/api/user/update_contact_status as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/user/update_contact_status -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_remove_contact-1
   name: Remove a contact
@@ -6412,6 +6478,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #69 (2026-10-06T08:37:17.222Z)'
       supports: POST http://localhost:3009/api/user/update_contact_status as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/user/update_contact_status -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_block_contact-2
   name: Block a user
@@ -6551,6 +6621,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #69 (2026-10-06T08:37:17.222Z)'
       supports: POST http://localhost:3009/api/user/update_contact_status as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/user/update_contact_status -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_unblock_contact-3
   name: Unblock a user
@@ -6689,6 +6763,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #69 (2026-10-06T08:37:17.222Z)'
       supports: POST http://localhost:3009/api/user/update_contact_status as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/user/update_contact_status -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/user/update_contact_status (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_join_private_group_by_invite
   name: Join a private group via invite
@@ -7053,6 +7131,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #38 (2026-10-06T08:36:52.265Z)'
       supports: POST http://localhost:3009/api/group as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/group -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/group (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_create_public_group_group-1
   name: Create a public group
@@ -7206,6 +7288,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #38 (2026-10-06T08:36:52.265Z)'
       supports: POST http://localhost:3009/api/group as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/group -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/group (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_list_related_groups
   name: List related groups
@@ -7380,6 +7466,10 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:22
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/group -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/group (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_group
   name: Read a group by id
@@ -7570,6 +7660,10 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/channel.ts:25
       supports: GET called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/group/{gid} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/group/{gid} (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: 'No Token extractor in source: anonymous read of any group incl. private member lists and pinned content (group.rs:682-692).'
 - id: gt-user_update_group_group
   name: Update a group
@@ -7741,6 +7835,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #25 (2026-10-06T08:36:33.697Z)'
       supports: PUT http://localhost:3009/api/group/4 as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via PUT /api/group/{gid} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /api/group/{gid} (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Deployed build also accepts show_email/add_friend/only_owner_can_send_msg/dm_to_member/ext_setting (frontend ChannelDTO;
       runtime localhost.har#25 body {only_owner_can_send_msg:true}); not present in this source tree.
 - id: gt-user_delete_group_group
@@ -7884,6 +7982,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #25 (2026-10-06T08:36:33.697Z)'
       supports: PUT http://localhost:3009/api/group/4 as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via DELETE /api/group/{gid} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /api/group/{gid} (identity=admin) -> resource removed; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_change_group_visibility
   name: Change group public/private
@@ -8048,6 +8150,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #24 (2026-10-06T08:36:33.157Z)'
       supports: POST http://localhost:3009/api/group/4/change_type as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/group/{gid}/change_type -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/group/{gid}/change_type (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_upload_group_avatar
   name: Upload group avatar
@@ -8888,6 +8994,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #39 (2026-10-06T08:36:52.294Z)'
       supports: POST http://localhost:3009/api/group/10/send as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/group/{gid}/send -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/group/{gid}/send (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_read_group_message_history
   name: Read group history
@@ -9212,6 +9322,10 @@ nodes:
       ref: 'vocechat_gt/localhost.har entry #31 (2026-10-06T08:36:38.595Z)'
       supports: GET http://localhost:3009/api/group/create_reg_magic_link?expired_in=86400&max_times=10000000 as admin ->
         200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/group/create_reg_magic_link -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/group/create_reg_magic_link (identity=admin) -> resource
+        created; server returned it; effect realized and observed (effect-observed)'
     notes: Any authenticated user can mint invite links (no admin check in source; deployment ext_setting admin_only_can_invite
       may restrict newer build).
 - id: gt-user_create_private_invite_link
@@ -10140,6 +10254,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #29 (2026-10-06T08:36:35.486Z)'
       supports: GET http://localhost:3009/api/group/4/announcement as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/group/{gid}/announcement -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/group/{gid}/announcement (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_upsert_group_announcement
   name: Set group announcement
@@ -10296,6 +10414,10 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:472
       supports: POST called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/group/{gid}/announcement -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/group/{gid}/announcement (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_delete_group_announcement
   name: Delete group announcement
@@ -10595,6 +10717,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #20 (2026-10-06T08:36:26.816Z)'
       supports: PUT http://localhost:3009/api/message/28/edit as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via PUT /api/message/{mid}/edit -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /api/message/{mid}/edit (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: Implemented as an appended Reaction{Edit} message, not an in-place update (message_api.rs:45-63).
 - id: gt-user_react_to_message
   name: React to a message
@@ -11169,6 +11295,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #21 (2026-10-06T08:36:29.686Z)'
       supports: DELETE http://localhost:3009/api/message/bulk/28 as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via DELETE /api/message/bulk/{mids} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /api/message/bulk/{mids} (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_prepare_file_upload
   name: Prepare a file upload
@@ -11287,8 +11417,9 @@ nodes:
       ref: vocechat-web/src/app/services/message.ts:71
       supports: POST called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/resource/file/prepare)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /api/resource/file/prepare -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/resource/file/prepare (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_upload_file_chunk
   name: Upload a file chunk
@@ -12202,6 +12333,10 @@ nodes:
       ref: 'vocechat_gt/auth.har entry #46 (2026-10-06T09:05:05.965Z)'
       supports: GET http://localhost:3009/api/resource/organization/logo?t=1791277505950?ts=1791277505951 as anonymous ->
         200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/resource/organization/logo -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/resource/organization/logo (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_user_avatar
   name: Read a user avatar
@@ -12928,6 +13063,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #92 (2026-10-06T09:05:18.180Z)'
       supports: GET http://localhost:3009/api/favorite as user -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/favorite -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/favorite (identity=user) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_read_favorite
   name: Read a favorite
@@ -13592,6 +13731,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #69 (2026-10-06T09:05:06.614Z)'
       supports: GET http://localhost:3009/api/license as user -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/license -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/license (identity=user) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_save_license
   name: Install a license
@@ -13796,6 +13939,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #49 (2026-10-06T09:05:06.270Z)'
       supports: GET http://localhost:3009/api/admin/system/version as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/system/version -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/version (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_server_initialized
   name: Read initialized flag
@@ -13872,6 +14019,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #29 (2026-10-06T09:05:05.940Z)'
       supports: GET http://localhost:3009/api/admin/system/initialized as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/system/initialized -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/initialized (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_bootstrap_admin_account
   name: Bootstrap the first admin
@@ -14089,8 +14240,9 @@ nodes:
       ref: vocechat-server-rust-0.5.36/src/api/admin_system.rs:147
       supports: 'GET handler: route, parameters, auth checks and response type'
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/metrics)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/system/metrics -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/metrics (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_organization
   name: Read organization info
@@ -14178,6 +14330,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #28 (2026-10-06T09:05:05.940Z)'
       supports: GET http://localhost:3009/api/admin/system/organization as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/system/organization -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/organization (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_organization
   name: Update organization info
@@ -14943,6 +15099,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #71 (2026-10-06T08:37:24.987Z)'
       supports: GET http://localhost:3009/api/admin/system/frontend_url as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/system/frontend_url -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/frontend_url (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_frontend_url
   name: Update frontend URL
@@ -15200,6 +15360,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #5 (2026-10-06T08:36:14.294Z)'
       supports: GET http://localhost:3009/api/admin/system/common as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/system/common -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/common (identity=user) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_system_settings
   name: Update system settings
@@ -15368,6 +15532,10 @@ nodes:
     - type: source
       ref: vocechat-web/src/app/services/server.ts:241
       supports: PUT called by deployed web client; request shape
+    - type: runtime
+      ref: '2026-11-20: effect observed via PUT /api/admin/system/common -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /api/admin/system/common (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_list_files
   name: List uploaded files
@@ -15500,8 +15668,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:283
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/system/files)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/system/files -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/system/files (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_clear_all_messages
   name: Clear all messages
@@ -15703,8 +15872,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:139
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/agora/config)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/agora/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/agora/config (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: 'Admin check commented out in source (admin_agora.rs:106-108): any session reads app_certificate/rtm_secret.'
 - id: gt-admin_update_agora_config
   name: Update Agora config
@@ -16016,6 +16186,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #12 (2026-10-06T08:36:19.665Z)'
       supports: GET http://localhost:3009/api/admin/agora/enabled as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/agora/enabled -> 200 (user)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/agora/enabled (identity=user) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_create_call_token
   name: Generate a call token
@@ -16506,8 +16680,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:93
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/fcm/config)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/fcm/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/fcm/config (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_fcm_config
   name: Update Firebase config
@@ -16758,6 +16933,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #70 (2026-10-06T08:37:24.987Z)'
       supports: GET http://localhost:3009/api/admin/smtp/config as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/smtp/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/smtp/config (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_smtp_config
   name: Update SMTP config
@@ -16974,6 +17153,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #81 (2026-10-06T09:05:12.490Z)'
       supports: GET http://localhost:3009/api/admin/smtp/enabled as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/smtp/enabled -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/smtp/enabled (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_login_policy
   name: Read login policy
@@ -17090,6 +17273,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #30 (2026-10-06T09:05:05.940Z)'
       supports: GET http://localhost:3009/api/admin/login/config as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/login/config -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/login/config (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_login_policy
   name: Update login policy
@@ -17315,8 +17502,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:96
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/google_auth/config)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/google_auth/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/google_auth/config (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: 'Source: unauthenticated. Frontend whiteList401 tolerates 401 here, suggesting the deployed build added auth (unverified;
       not in HAR).'
 - id: gt-admin_update_google_auth_config
@@ -17509,8 +17697,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:109
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/github_auth/config)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/github_auth/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/github_auth/config (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: 'Source: unauthenticated and returns client_secret (admin_github_auth.rs:59-63). Frontend whiteList401 suggests
       deployed build may require auth (unverified).'
 - id: gt-admin_update_github_auth_config
@@ -17707,6 +17896,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #88 (2026-10-06T09:05:12.502Z)'
       supports: GET http://localhost:3009/api/admin/google_auth/public_config as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/google_auth/public_config -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/google_auth/public_config (identity=anonymous) ->
+        representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_github_auth_public_config
   name: Read GitHub-auth public config
@@ -17786,6 +17979,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/auth.har entry #87 (2026-10-06T09:05:12.502Z)'
       supports: GET http://localhost:3009/api/admin/github_auth/public_config as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/github_auth/public_config -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/github_auth/public_config (identity=anonymous) ->
+        representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_read_vocespace_config
   name: Read VoceSpace config
@@ -17891,6 +18088,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #13 (2026-10-06T08:36:19.666Z)'
       supports: GET http://localhost:3009/api/admin/vocespace/config as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/admin/vocespace/config -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/vocespace/config (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_vocespace_config
   name: Update VoceSpace config
@@ -18125,8 +18326,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:207
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/vocespace/health/{url})'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/vocespace/health/{url} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/vocespace/health/{url} (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: Server probes a caller-supplied URL (SSRF-style primitive) per frontend contract.
 - id: gt-admin_read_tunnel_status
   name: Read tunnel status
@@ -18214,8 +18416,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:490
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/status)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/cloudflared/status -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/cloudflared/status (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_read_auto_tunnel_info
   name: Read auto-tunnel info
@@ -18292,8 +18495,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:500
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/auto_info)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/cloudflared/auto_info -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/cloudflared/auto_info (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_stop_tunnel
   name: Stop the tunnel
@@ -18399,8 +18603,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:493
       supports: POST called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/cloudflared/stop)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /api/admin/cloudflared/stop -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/admin/cloudflared/stop (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_start_tunnel
   name: Start the tunnel
@@ -18795,8 +19000,9 @@ nodes:
       ref: vocechat-web/src/app/services/server.ts:507
       supports: POST called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/page/apikey)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /api/page/apikey -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/page/apikey (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_read_custom_page
   name: Read a custom page
@@ -18899,6 +19105,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #59 (2026-10-06T08:37:07.480Z)'
       supports: GET http://localhost:3009/api/page/after_signin as anonymous -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via GET /api/page/{page} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/page/{page} (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_custom_page
   name: Set a custom page
@@ -19250,8 +19460,9 @@ nodes:
       ref: vocechat-web/src/app/services/notification.ts:18
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/notification/channel-types)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/notification/channel-types -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/notification/channel-types (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_toggle_notification_type
   name: Enable/disable a notification type
@@ -19492,8 +19703,9 @@ nodes:
       ref: vocechat-web/src/app/services/notification.ts:30
       supports: DELETE called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/notification/channel-types/{channel_type})'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via DELETE /api/admin/notification/channel-types/{channel_type} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /api/admin/notification/channel-types/{channel_type} (identity=admin)
+        -> resource removed; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_list_available_notification_types
   name: List available notification types
@@ -19602,8 +19814,9 @@ nodes:
       ref: vocechat-web/src/app/services/notification.ts:39
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/available-types)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/notification/available-types -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/notification/available-types (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_list_own_notification_channels
   name: List own notification channels
@@ -19732,8 +19945,9 @@ nodes:
       ref: vocechat-web/src/app/services/notification.ts:43
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/notification/channels)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/notification/channels -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/notification/channels (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_create_notification_channel
   name: Create a notification channel
@@ -20591,8 +20805,9 @@ nodes:
       ref: vocechat-server-rust-0.5.36/src/api/admin_user.rs:216
       supports: 'GET handler: route, parameters, auth checks and response type'
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/user)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/user -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/user (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_read_user
   name: Read a user (admin)
@@ -20890,6 +21105,10 @@ nodes:
     - type: runtime
       ref: 'vocechat_gt/localhost.har entry #51 (2026-10-06T08:37:00.754Z)'
       supports: DELETE http://localhost:3009/api/admin/user/2 as admin -> 200
+    - type: runtime
+      ref: '2026-11-20: effect observed via DELETE /api/admin/user/{uid} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to DELETE /api/admin/user/{uid} (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_update_user_account
   name: Update a user (admin)
@@ -21808,8 +22027,9 @@ nodes:
       ref: vocechat-web/src/app/services/adminBotChat.ts:25
       supports: GET called by deployed web client; request shape
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/bot_chat/bots)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/bot_chat/bots -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/bot_chat/bots (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-admin_list_bot_conversations
   name: List a bot's conversations
@@ -26001,8 +26221,9 @@ nodes:
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/user/{uid}/command)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/user/{uid}/command -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/user/{uid}/command (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-user_read_own_avatar_params
   name: Read own avatar (Avo) params
@@ -27175,8 +27396,9 @@ nodes:
       ref: GET http://localhost:3009/api/spec (OpenAPI, server 0.5.36)
       supports: GET route, parameters and request/response schema
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/api/admin/vocespace/enabled)'
-      supports: 'runtime: bound interface observed per identity (x-api-key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /api/admin/vocespace/enabled -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/admin/vocespace/enabled (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-anonymous_ingest_agora_channel_event
   name: Ingest an Agora channel event

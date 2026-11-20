@@ -169,9 +169,9 @@ nodes:
       ref: server/endpoints/api/system/index.js:16
       supports: no auth middleware; dumpENV() in production
     - type: runtime
-      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/api/v1/system/env-dump)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/system/env-dump -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/system/env-dump (identity=anonymous) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: Unauthenticated by design (SECURITY.md); no secret values returned, but it persists config state.
 - id: gt-action-003
   name: Read system settings

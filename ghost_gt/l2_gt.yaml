@@ -112,9 +112,9 @@ nodes:
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/posts)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/content/posts -> 200 (contentkey)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/content/posts (identity=contentkey) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-002
   name: 'Content: pages'
@@ -516,9 +516,9 @@ nodes:
       ref: ghost/core/server/web/api/endpoints/content/routes.js
       supports: authenticatePublic + browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/content/settings)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/content/settings -> 200 (contentkey)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/content/settings (identity=contentkey) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-006
   name: 'Content: tiers'
@@ -742,9 +742,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin/session
       supports: verify + set cookie
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/session)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /ghost/api/admin/session -> 201 (anon)'
+      supports: 'runtime: bound interface returned 201 to POST /ghost/api/admin/session (identity=anon) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-008
   name: Admin log out
@@ -1019,9 +1019,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin/authentication
       supports: isSetup
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/authentication/setup)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/authentication/setup -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/authentication/setup (identity=anon) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-011
   name: Request password reset
@@ -1669,9 +1669,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin/site
       supports: publicAdminApi
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/site)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/site -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/site (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-018
   name: List posts
@@ -1761,9 +1761,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin
       supports: posts.browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/posts)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/posts -> 200 (owner)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/posts (identity=owner) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-019
   name: Create post
@@ -2518,9 +2518,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin
       supports: members.browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/members)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/members -> 200 (owner)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/members (identity=owner) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-026
   name: Create member
@@ -2953,9 +2953,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin
       supports: integrations.browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/integrations)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/integrations -> 200 (owner)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/integrations (identity=owner) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-030
   name: Create integration
@@ -3364,9 +3364,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin
       supports: users.browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/users)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/users -> 200 (owner)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/users (identity=owner) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-034
   name: List roles
@@ -4095,9 +4095,9 @@ nodes:
       ref: ghost/core/server/api/endpoints/admin/settings
       supports: browse
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/ghost/api/admin/settings)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /ghost/api/admin/settings -> 200 (owner)'
+      supports: 'runtime: bound interface returned 200 to GET /ghost/api/admin/settings (identity=owner) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-041
   name: Edit settings
@@ -5572,9 +5572,9 @@ nodes:
       ref: ghost/core/server/web/members/app.js
       supports: getIdentityToken
     - type: runtime
-      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/members/api/session)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /members/api/session -> 204 (anonymous)'
+      supports: 'runtime: bound interface returned 204 to GET /members/api/session (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-056
   name: Member log out
@@ -5742,9 +5742,9 @@ nodes:
       ref: ghost/core/server/web/members/account
       supports: read self
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/member)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /members/api/member -> 204 (anon)'
+      supports: 'runtime: bound interface returned 204 to GET /members/api/member (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-058
   name: Create Stripe checkout
@@ -5895,9 +5895,9 @@ nodes:
       ref: ghost/core/server/web/members/app.js
       supports: site.read
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/members/api/site)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /members/api/site -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /members/api/site (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

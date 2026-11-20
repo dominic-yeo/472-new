@@ -222,6 +222,10 @@ nodes:
     - type: runtime
       ref: upload token=Yt7r1RFGP -> 201
       supports: Create confirmed
+    - type: runtime
+      ref: '2026-11-20: effect observed via POST /api/v1/media -> 201 (user)'
+      supports: 'runtime: bound interface returned 201 to POST /api/v1/media (identity=user) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-003
   name: View media

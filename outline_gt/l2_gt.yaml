@@ -89,9 +89,9 @@ nodes:
       ref: outline/server/routes/api/auth/auth.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth.config)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/auth.config -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/auth.config (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-002
   name: Read my session
@@ -185,9 +185,9 @@ nodes:
       ref: outline/server/routes/api/auth/auth.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth.info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/auth.info -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/auth.info (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-003
   name: Log out
@@ -594,9 +594,9 @@ nodes:
       ref: outline/server/../plugins/email/server/auth/email.ts
       supports: magic link
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/email)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /auth/email -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /auth/email (identity=anon) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-007
   name: Start SSO sign-in
@@ -801,9 +801,9 @@ nodes:
       ref: outline/server/../plugins/google/server/auth/google.ts
       supports: callback
     - type: runtime
-      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/auth/:provider.callback)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /auth/:provider.callback -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /auth/:provider.callback (identity=anonymous) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-009
   name: Post-login redirect
@@ -995,9 +995,9 @@ nodes:
       ref: outline/server/routes/oauth/index.ts
       supports: authorize
     - type: runtime
-      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/oauth/authorize)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /oauth/authorize -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /oauth/authorize (identity=anonymous) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-011
   name: OAuth token exchange
@@ -1300,9 +1300,9 @@ nodes:
       ref: outline/server/routes/api/users/users.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/users.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/users.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/users.list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-014
   name: Read a user
@@ -2585,9 +2585,9 @@ nodes:
       ref: outline/server/routes/api/apiKeys/apiKeys.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/apiKeys.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/apiKeys.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/apiKeys.create (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: The created token value is returned once; it is a bearer credential.
 - id: gt-action-025
   name: List API keys
@@ -3660,9 +3660,9 @@ nodes:
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections.create (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-035
   name: Read collection
@@ -3788,9 +3788,9 @@ nodes:
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections.info -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections.info (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-036
   name: List collections
@@ -3880,9 +3880,9 @@ nodes:
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections.list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-037
   name: Update collection
@@ -3998,9 +3998,9 @@ nodes:
       ref: outline/server/routes/api/collections/collections.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections.update)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections.update -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections.update (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-038
   name: Delete collection
@@ -4867,9 +4867,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.create (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-045
   name: Read a document
@@ -4991,9 +4991,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: info
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.info -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.info (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: The same route also serves shareId reads (documents_info_share).
 - id: gt-action-046
   name: Read a document via a public share
@@ -5096,9 +5096,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: shares.ts
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.info -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.info (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Core public-read surface; shareId guess/leak => content exposure.
 - id: gt-action-047
   name: List documents
@@ -5188,9 +5188,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-048
   name: Search documents
@@ -5280,9 +5280,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.search)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.search -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.search (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-049
   name: Edit a document
@@ -5398,9 +5398,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.update)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.update -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.update (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-050
   name: Delete a document
@@ -5513,9 +5513,9 @@ nodes:
       ref: outline/server/routes/api/documents/documents.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/documents.delete)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/documents.delete -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/documents.delete (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-051
   name: Move a document
@@ -6726,9 +6726,9 @@ nodes:
       ref: outline/server/routes/api/shares/shares.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/shares.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/shares.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/shares.create (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-061
   name: Read share info
@@ -6834,9 +6834,9 @@ nodes:
       ref: outline/server/routes/api/shares/shares.ts
       supports: info auth optional
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/shares.info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/shares.info -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/shares.info (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-062
   name: Update a share
@@ -7900,9 +7900,9 @@ nodes:
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/groups.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/groups.create (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-071
   name: Add user to group
@@ -8136,9 +8136,9 @@ nodes:
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.update)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/groups.update -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/groups.update (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-073
   name: Delete a group
@@ -8251,9 +8251,9 @@ nodes:
       ref: outline/server/routes/api/groups/groups.ts
       supports: route + policy
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/groups.delete)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/groups.delete -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/groups.delete (identity=admin) -> resource removed; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-074
   name: Pre-sign an upload

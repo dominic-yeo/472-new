@@ -322,9 +322,9 @@ nodes:
       ref: uptrace/pkg/org/user_handler.go:Current
       supports: self + projects
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/users/current)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /internal/v1/users/current -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /internal/v1/users/current (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-004
   name: Read project + DSN
@@ -2062,9 +2062,9 @@ nodes:
       ref: uptrace/pkg/metrics/dash_handler.go:Show
       supports: dashboard detail
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/internal/v1/metrics/:project_id/dashboards/:dash_id)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /internal/v1/metrics/:project_id/dashboards/:dash_id -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /internal/v1/metrics/:project_id/dashboards/:dash_id (identity=anonymous)
+        -> representation returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-020
   name: Clone dashboard
@@ -3406,9 +3406,9 @@ nodes:
       ref: uptrace/pkg/tracing/init.go:initOTLP
       supports: DSN ingest
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/v1/traces)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /v1/traces -> 200 (dsn)'
+      supports: 'runtime: bound interface returned 200 to POST /v1/traces (identity=dsn) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-031
   name: Ingest OTLP logs
@@ -3506,9 +3506,9 @@ nodes:
       ref: uptrace/pkg/tracing/init.go:initOTLP
       supports: DSN ingest
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/v1/logs)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /v1/logs -> 200 (dsn)'
+      supports: 'runtime: bound interface returned 200 to POST /v1/logs (identity=dsn) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-032
   name: Ingest OTLP metrics
@@ -3606,9 +3606,9 @@ nodes:
       ref: uptrace/pkg/metrics/init.go:initOTLP
       supports: DSN ingest
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/v1/metrics)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /v1/metrics -> 200 (dsn)'
+      supports: 'runtime: bound interface returned 200 to POST /v1/metrics (identity=dsn) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-033
   name: Ingest Vector logs

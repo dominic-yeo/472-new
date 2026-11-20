@@ -88,8 +88,9 @@ nodes:
       ref: app/controllers/session_controller.rb:50
       supports: GET /session/csrf -> {csrf}
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/csrf)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /session/csrf -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /session/csrf (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-002
   name: Get signup honeypot
@@ -168,8 +169,9 @@ nodes:
       ref: app/controllers/session_controller.rb:838
       supports: GET /session/hp -> {value, challenge}
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/hp)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /session/hp -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /session/hp (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-003
   name: Log in with password
@@ -455,8 +457,9 @@ nodes:
       ref: app/controllers/session_controller.rb:777
       supports: GET /session/current -> CurrentUserSerializer
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/current)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /session/current -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /session/current (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-006
   name: Read API-key scopes
@@ -539,8 +542,9 @@ nodes:
       ref: app/controllers/session_controller.rb:849
       supports: GET /session/scopes -> scopes or 404
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/scopes)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /session/scopes -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /session/scopes (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-007
   name: Request password reset
@@ -724,8 +728,9 @@ nodes:
       ref: app/controllers/session_controller.rb:754
       supports: POST /session/password-reset-code/verify
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/password-reset-code/verify)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /session/password-reset-code/verify -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /session/password-reset-code/verify (identity=admin) -> state
+        mutated; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-009
   name: Check email-login token
@@ -822,8 +827,9 @@ nodes:
       ref: app/controllers/session_controller.rb:456
       supports: GET /session/email-login/:token -> info
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/email-login/{token})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /session/email-login/{token} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /session/email-login/{token} (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-010
   name: Log in via email token
@@ -1010,8 +1016,9 @@ nodes:
       ref: app/controllers/session_controller.rb:525
       supports: POST /session/login-code; honeypot + rate limit
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/login-code)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /session/login-code -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /session/login-code (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-012
   name: Verify login code
@@ -1115,8 +1122,9 @@ nodes:
       ref: app/controllers/session_controller.rb:548
       supports: POST /session/login-code/verify; rate limit
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/login-code/verify)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /session/login-code/verify -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /session/login-code/verify (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-013
   name: Show OTP confirmation
@@ -1560,8 +1568,9 @@ nodes:
       ref: app/controllers/session_controller.rb:419
       supports: GET /session/passkey/challenge
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/session/passkey/challenge)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /session/passkey/challenge -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /session/passkey/challenge (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-018
   name: Log in with passkey
@@ -2030,8 +2039,9 @@ nodes:
       ref: app/controllers/users_controller.rb:737
       supports: register_account
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /u -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /u (identity=anonymous) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: Honeypot + approval/activation gated; name/user_fields stored-reflected.
 - id: gt-action-023
   name: Check username availability
@@ -2192,8 +2202,9 @@ nodes:
       ref: app/controllers/users_controller.rb:697
       supports: check_email
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/check_email)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/check_email -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /u/check_email (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Email enumeration surface; rate-limited.
 - id: gt-action-025
   name: Search users
@@ -2271,8 +2282,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1342
       supports: search_users
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/search/users)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/search/users -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /u/search/users (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Directory enumeration surface.
 - id: gt-action-026
   name: View user profile
@@ -2350,8 +2362,9 @@ nodes:
       ref: app/controllers/users_controller.rb:134
       supports: show_user
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}.json)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/{username}.json -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /u/{username}.json (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Groups the users#show view aliases.
 - id: gt-action-027
   name: View user summary
@@ -2429,8 +2442,9 @@ nodes:
       ref: app/controllers/users_controller.rb:526
       supports: user_summary
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/summary)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/{username}/summary -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /u/{username}/summary (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-028
   name: Read account preferences
@@ -2688,8 +2702,9 @@ nodes:
       ref: app/controllers/users_controller.rb:219
       supports: update_user
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /u/{username} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /u/{username} (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: bio/website/user_fields stored-reflected.
 - id: gt-action-031
   name: Change username
@@ -3283,8 +3298,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1430
       supports: pick_avatar
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/{username}/preferences/avatar/pick)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /u/{username}/preferences/avatar/pick -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /u/{username}/preferences/avatar/pick (identity=admin) -> state
+        mutated; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-038
   name: Select avatar by URL
@@ -3617,9 +3633,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1948
       supports: revoke_auth_token
     - type: runtime
-      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/u/{username}/preferences/revoke-auth-token)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /u/{username}/preferences/revoke-auth-token -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /u/{username}/preferences/revoke-auth-token (identity=admin)
+        -> resource removed; server acknowledged; effect realized and observed (effect-observed)'
     notes: Logs out other devices.
 - id: gt-action-042
   name: Set user notification level
@@ -3790,8 +3806,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1673
       supports: list_second_factors
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/second_factors)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /u/second_factors -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /u/second_factors (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Requires a confirmed session.
 - id: gt-action-044
   name: Edit second factor
@@ -4550,8 +4567,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1756
       supports: create_passkey
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/create_passkey)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /u/create_passkey -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /u/create_passkey (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-053
   name: Register passkey
@@ -5069,8 +5087,9 @@ nodes:
       ref: app/controllers/users_controller.rb:897
       supports: password_reset_show
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/password-reset/{token})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/password-reset/{token} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /u/password-reset/{token} (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-059
   name: Redeem password reset
@@ -5567,8 +5586,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1066
       supports: confirm_email_token
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/confirm-email-token/{token})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/confirm-email-token/{token} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /u/confirm-email-token/{token} (identity=anonymous) -> state
+        mutated; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-065
   name: Show admin recovery login
@@ -5646,8 +5666,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1086
       supports: admin_login_show
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/admin-login)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /u/admin-login -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /u/admin-login (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-066
   name: Request admin login link
@@ -5975,8 +5996,9 @@ nodes:
       ref: app/controllers/users_controller.rb:1112
       supports: request_email_login
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/u/email-login)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /u/email-login -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /u/email-login (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: Enumeration-resistant.
 - id: gt-action-070
   name: Toggle anonymous mode
@@ -6309,8 +6331,9 @@ nodes:
       ref: app/controllers/topics_controller.rb:77
       supports: show_topic
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /t/{id} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /t/{id} (identity=anonymous) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: Groups print/summary/feed/external-id views.
 - id: gt-action-074
   name: Edit topic
@@ -6555,8 +6578,9 @@ nodes:
       ref: app/controllers/topics_controller.rb:309
       supports: topic_posts
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/posts)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /t/{topic_id}/posts -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /t/{topic_id}/posts (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Groups post_ids/excerpts.
 - id: gt-action-077
   name: Recover topic
@@ -7415,8 +7439,9 @@ nodes:
       ref: app/controllers/topics_controller.rb:529
       supports: update_topic_tags
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/tags)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /t/{topic_id}/tags -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /t/{topic_id}/tags (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-086
   name: Invite to topic
@@ -8310,8 +8335,9 @@ nodes:
       ref: app/controllers/topics_controller.rb:955
       supports: set_topic_notifications
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/t/{topic_id}/notifications)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /t/{topic_id}/notifications -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /t/{topic_id}/notifications (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-096
   name: Archive PM
@@ -8565,8 +8591,9 @@ nodes:
       ref: app/controllers/topics_controller.rb:1239
       supports: reset_new
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/topics/reset-new)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /topics/reset-new -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /topics/reset-new (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-099
   name: Create post
@@ -8727,8 +8754,9 @@ nodes:
       ref: app/controllers/posts_controller.rb:297
       supports: read_post
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /posts/{id} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /posts/{id} (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-101
   name: Edit post
@@ -9577,8 +9605,9 @@ nodes:
       ref: app/controllers/posts_controller.rb:677
       supports: lock_post
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/locked)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /posts/{id}/locked -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /posts/{id}/locked (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-110
   name: Set post notice
@@ -9675,8 +9704,9 @@ nodes:
       ref: app/controllers/posts_controller.rb:684
       supports: set_post_notice
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/notice)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /posts/{id}/notice -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /posts/{id}/notice (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-111
   name: List post replies
@@ -9754,8 +9784,9 @@ nodes:
       ref: app/controllers/posts_controller.rb:436
       supports: post_replies
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/posts/{id}/replies)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /posts/{id}/replies -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /posts/{id}/replies (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-112
   name: Read post revision
@@ -10285,8 +10316,9 @@ nodes:
       ref: app/controllers/categories_controller.rb:45
       supports: list_categories
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /categories -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /categories (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-118
   name: Create category
@@ -10479,8 +10511,9 @@ nodes:
       ref: app/controllers/categories_controller.rb:249
       supports: update_category
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /categories/{id} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /categories/{id} (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Permission edits change visibility/posting rights.
 - id: gt-action-120
   name: Delete category
@@ -10953,8 +10986,9 @@ nodes:
       ref: app/controllers/categories_controller.rb:347
       supports: set_category_notifications
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/category/{category_id}/notifications)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /category/{category_id}/notifications -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /category/{category_id}/notifications (identity=admin) -> state
+        mutated; server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-125
   name: Read category
@@ -11032,8 +11066,9 @@ nodes:
       ref: app/controllers/categories_controller.rb:150
       supports: show_category
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/c/{id}/show)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /c/{id}/show -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /c/{id}/show (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-126
   name: List category visible groups
@@ -11111,8 +11146,9 @@ nodes:
       ref: app/controllers/categories_controller.rb:400
       supports: category_visible_groups
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/c/{id}/visible_groups)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /c/{id}/visible_groups -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /c/{id}/visible_groups (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-127
   name: Search categories
@@ -11190,8 +11226,9 @@ nodes:
       ref: app/controllers/categories_controller.rb:458
       supports: search_categories
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/categories/search)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /categories/search -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to POST /categories/search (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-128
   name: Hierarchical category search
@@ -11427,8 +11464,9 @@ nodes:
       ref: app/controllers/tags_controller.rb:107
       supports: list_tags
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tags)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /tags -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /tags (identity=anonymous) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-131
   name: Show tag topics
@@ -12046,8 +12084,9 @@ nodes:
       ref: app/controllers/tags_controller.rb:400
       supports: search_tags
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/tags/filter/search)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /tags/filter/search -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /tags/filter/search (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-138
   name: Import tags CSV
@@ -14707,8 +14746,9 @@ nodes:
       ref: app/controllers/notifications_controller.rb:120
       supports: mark_read
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/notifications/mark-read)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /notifications/mark-read -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /notifications/mark-read (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-168
   name: Read notification totals
@@ -15654,8 +15694,9 @@ nodes:
       ref: app/controllers/bookmarks_controller.rb:49
       supports: update_bookmark
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/bookmarks/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /bookmarks/{id} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /bookmarks/{id} (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-179
   name: Delete bookmark
@@ -16324,9 +16365,9 @@ nodes:
       ref: app/controllers/search_controller.rb:1
       supports: search
     - type: runtime
-      ref: '2026-11-20: underlying L1 interface(s) observed at runtime (/search)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /search -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /search (identity=anonymous) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: Honors per-user visibility.
 - id: gt-action-187
   name: List user directory
@@ -16483,8 +16524,9 @@ nodes:
       ref: app/controllers/about_controller.rb:1
       supports: about
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/about)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /about -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /about (identity=anonymous) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-189
   name: Read site bootstrap
@@ -16562,8 +16604,9 @@ nodes:
       ref: app/controllers/site_controller.rb:1
       supports: site
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/site)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /site -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /site (identity=anonymous) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: Exposes client-visible settings.
 - id: gt-action-190
   name: Like/flag post
@@ -18415,8 +18458,9 @@ nodes:
       ref: app/controllers/admin/site_settings_controller.rb:1
       supports: list_site_settings
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/site_settings)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/site_settings -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/site_settings (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Full config disclosure.
 - id: gt-action-210
   name: Update site setting
@@ -18613,8 +18657,9 @@ nodes:
       ref: app/controllers/admin/dashboard_controller.rb:1
       supports: admin_dashboard
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/dashboard)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/dashboard -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/dashboard (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-212
   name: List API keys
@@ -18713,8 +18758,9 @@ nodes:
       ref: app/controllers/admin/api_controller.rb:1
       supports: list_api_keys
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/api/keys -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/api/keys (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-213
   name: Create API key
@@ -18909,8 +18955,9 @@ nodes:
       ref: app/controllers/admin/api_controller.rb:1
       supports: read_api_key
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/keys/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/api/keys/{id} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/api/keys/{id} (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-215
   name: Update API key
@@ -19202,8 +19249,9 @@ nodes:
       ref: app/controllers/admin/web_hooks_controller.rb:1
       supports: list_web_hooks
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/api/web_hooks)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/api/web_hooks -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/api/web_hooks (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-218
   name: Create webhook
@@ -19883,8 +19931,9 @@ nodes:
       ref: app/controllers/admin/backups_controller.rb:1
       supports: list_backups
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/backups)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/backups -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/backups (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-225
   name: Create backup
@@ -21050,8 +21099,9 @@ nodes:
       ref: app/controllers/admin/users_controller.rb:1
       supports: admin_list_users
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/list)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/users/list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/users/list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Discloses emails/IPs/flags.
 - id: gt-action-237
   name: Read user (admin)
@@ -21150,8 +21200,9 @@ nodes:
       ref: app/controllers/admin/users_controller.rb:1
       supports: admin_show_user
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}.json)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/users/{id}.json -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/users/{id}.json (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Sensitive PII + security history.
 - id: gt-action-238
   name: Delete user (admin)
@@ -21761,8 +21812,9 @@ nodes:
       ref: app/controllers/admin/users_controller.rb:277
       supports: admin_grant_moderation
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/grant_moderation)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /admin/users/{id}/grant_moderation -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /admin/users/{id}/grant_moderation (identity=admin) -> state
+        mutated; server acknowledged; effect realized and observed (effect-observed)'
     notes: Groups revoke_moderation.
 - id: gt-action-244
   name: Log out user
@@ -21854,8 +21906,9 @@ nodes:
       ref: app/controllers/admin/users_controller.rb:243
       supports: admin_log_out_user
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/log_out)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via POST /admin/users/{id}/log_out -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /admin/users/{id}/log_out (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-245
   name: Approve user
@@ -22151,8 +22204,9 @@ nodes:
       ref: app/controllers/admin/users_controller.rb:329
       supports: admin_set_trust_level
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/users/{id}/trust_level)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /admin/users/{id}/trust_level -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /admin/users/{id}/trust_level (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: Governs capabilities; groups trust_level_lock.
 - id: gt-action-248
   name: Set primary group
@@ -23221,8 +23275,9 @@ nodes:
       ref: app/controllers/admin/themes_controller.rb:1
       supports: list_themes
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/themes)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/themes -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/themes (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-259
   name: Create theme
@@ -23806,8 +23861,9 @@ nodes:
       ref: app/controllers/admin/badges_controller.rb:1
       supports: list_badges
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/badges)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/badges -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/badges (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-265
   name: Create badge
@@ -24000,8 +24056,9 @@ nodes:
       ref: app/controllers/admin/badges_controller.rb:1
       supports: update_badge
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/badges/{id})'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via PUT /admin/badges/{id} -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PUT /admin/badges/{id} (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-267
   name: Delete badge
@@ -25163,8 +25220,9 @@ nodes:
       ref: app/controllers/admin/permalinks_controller.rb:1
       supports: list_permalinks
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/permalinks)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/permalinks -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/permalinks (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-279
   name: Create permalink
@@ -25359,8 +25417,9 @@ nodes:
       ref: app/controllers/admin/user_fields_controller.rb:1
       supports: list_user_fields
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/config/user_fields)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/config/user_fields -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/config/user_fields (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-281
   name: Create user field
@@ -25746,8 +25805,9 @@ nodes:
       ref: app/controllers/admin/screened_ip_addresses_controller.rb:1
       supports: list_screened_ips
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/logs/screened_ip_addresses)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/logs/screened_ip_addresses -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/logs/screened_ip_addresses (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-285
   name: Add screened IP
@@ -25942,8 +26002,9 @@ nodes:
       ref: app/controllers/admin/staff_action_logs_controller.rb:1
       supports: staff_action_logs
     - type: runtime
-      ref: '2026-11-20: bound L1 interface(s) observed at runtime (/admin/logs/staff_action_logs)'
-      supports: 'runtime: bound interface observed per identity (Api-Key admin + anon); interface-observed'
+      ref: '2026-11-20: effect observed via GET /admin/logs/staff_action_logs -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /admin/logs/staff_action_logs (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-287
   name: Override UI string

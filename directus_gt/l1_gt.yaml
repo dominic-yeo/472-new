@@ -1563,6 +1563,34 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
       Queried in root'
     captured: '2026-11-19'
+  - method: POST
+    path: /items/:collection
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"title":"a"}}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /items/:collection
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[]}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: PATCH
+    path: /items/:collection
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":[]}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /items/:collection
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1806,6 +1834,27 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"gt_probe\" or it does not exist.
       Queried in root'
     captured: '2026-11-19'
+  - method: GET
+    path: /items/:collection/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"title":"a"}}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: PATCH
+    path: /items/:collection/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"title":"b"}}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /items/:collection/:pk
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -2421,6 +2470,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"Invalid user credentials.","extensions":{"code":"INVALID_CREDENTIALS"}}]}'
     captured: '2026-11-19'
+  - method: GET
+    path: /users/me
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"906111d2-def2-4f22-b1ec-8c20f17d72f6","first_name":"Admin","last_name":"User","email":"gtadmin@example.com","password":"**********","location":nu'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: PATCH
+    path: /users/me
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"906111d2-def2-4f22-b1ec-8c20f17d72f6","first_name":"Admin","last_name":"User","email":"gtadmin@example.com","password":"**********","location":nu'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -3327,6 +3390,13 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_roles\" or it does not
       exist. Queried i'
     captured: '2026-11-19'
+  - method: POST
+    path: /roles
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"9918defe-89d8-45e5-9986-bb4d745dc320","name":"gt_role","icon":"supervised_user_circle","description":null,"parent":null,"children":[],"policies":'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -3449,6 +3519,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
     captured: '2026-11-19'
+  - method: PATCH
+    path: /roles/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"9918defe-89d8-45e5-9986-bb4d745dc320","name":"z","icon":"supervised_user_circle","description":null,"parent":null,"children":[],"policies":[],"us'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /roles/:pk
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -5075,6 +5159,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"Validation failed for field \"name\". Value is required.","extensions":{"field":"name","path":[],'
     captured: '2026-11-19'
+  - method: POST
+    path: /folders
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"0ac1b5c1-959b-4f48-a4a9-7069837acac5","name":"gt_folder","parent":null}}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -5247,6 +5338,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
     captured: '2026-11-19'
+  - method: PATCH
+    path: /folders/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"0ac1b5c1-959b-4f48-a4a9-7069837acac5","name":"z","parent":null}}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /folders/:pk
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -5533,6 +5638,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"Validation failed for field \"name\". Value is required.","extensions":{"field":"name","path":[],'
     captured: '2026-11-19'
+  - method: POST
+    path: /flows
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"808acb1c-9aab-4e16-bb38-3d28d3a52901","name":"gt_flow","icon":null,"color":null,"description":null,"status":"active","trigger":"manual","accounta'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -8564,6 +8676,20 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_settings\" or it does
       not exist. Querie'
     captured: '2026-11-19'
+  - method: PATCH
+    path: /settings
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"project_name":"GT","project_url":null,"project_color":"#6644FF","project_logo":null,"public_foreground":null,"public_background":null,"public_n'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /settings
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":1,"project_name":"GT","project_url":null,"project_color":"#6644FF","project_logo":null,"public_foreground":null,"public_background":null,"public_n'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -8936,6 +9062,13 @@ nodes:
     body_excerpt: '{"errors":[{"message":"Invalid payload. \"comment\" is required.","extensions":{"reason":"\"comment\" is
       required","code'
     captured: '2026-11-19'
+  - method: POST
+    path: /comments
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"c08fd668-b844-4c12-a6e8-7c5b88c206e1","collection":"gt_effect","item":"1","comment":"gt","date_created":"2026-11-20T13:39:30.926Z","date_updated"'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -9284,6 +9417,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
     captured: '2026-11-19'
+  - method: PATCH
+    path: /comments/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"c08fd668-b844-4c12-a6e8-7c5b88c206e1","collection":"gt_effect","item":"1","comment":"y","date_created":"2026-11-20T13:39:30.926Z","date_updated":'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /comments/:pk
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -9408,6 +9555,13 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_presets\" or it does
       not exist. Queried'
     captured: '2026-11-19'
+  - method: POST
+    path: /presets
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":3,"bookmark":"gt_bm","user":null,"role":null,"collection":"gt_effect","search":null,"layout":"tabular","layout_query":null,"layout_options":null,"'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -9471,6 +9625,20 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_presets\" or it does
       not exist. Queried'
     captured: '2026-11-19'
+  - method: PATCH
+    path: /presets/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":3,"bookmark":"gt_bm","user":null,"role":null,"collection":"gt_effect","search":null,"layout":"tabular","layout_query":null,"layout_options":null,"'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /presets/:pk
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -9945,6 +10113,13 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_dashboards\" or it does
       not exist. Quer'
     captured: '2026-11-19'
+  - method: POST
+    path: /dashboards
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"fff4cf6a-630b-4c36-a586-5a5e80abf819","name":"gt_dash","icon":"dashboard","note":null,"date_created":"2026-11-20T13:39:30.815Z","user_created":"9'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10008,6 +10183,20 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
     captured: '2026-11-19'
+  - method: PATCH
+    path: /dashboards/:pk
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"fff4cf6a-630b-4c36-a586-5a5e80abf819","name":"z","icon":"dashboard","note":null,"date_created":"2026-11-20T13:39:30.815Z","user_created":"906111d'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: DELETE
+    path: /dashboards/:pk
+    identity: admin
+    status: 204
+    body_excerpt: ''
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime

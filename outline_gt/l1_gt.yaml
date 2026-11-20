@@ -219,6 +219,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/auth.info
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"user":{"id":"8e7fa2d8-746a-4f12-81b8-043963bf4dca","name":"GT Admin","avatarUrl":null,"color":"#0300cc","role":"admin","isSuspended":false,"createdAt"'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -1741,6 +1748,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/users.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"pagination":{"limit":25,"offset":0,"nextPath":"/api/users.list?limit=25&offset=25","total":1},"data":[{"id":"8e7fa2d8-746a-4f12-81b8-043963bf4dca","name":"GT '
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -4423,6 +4437,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/collections.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"74cdad75-5f77-4b95-8a0a-9d399f602941","url":"/collection/gt-effect-Gc5vLq71Ry","urlId":"Gc5vLq71Ry","name":"GT
+      Effect","description":null,"sort":'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -4532,6 +4554,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/collections.info
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"74cdad75-5f77-4b95-8a0a-9d399f602941","url":"/collection/gt-effect-Gc5vLq71Ry","urlId":"Gc5vLq71Ry","name":"GT
+      Effect","description":null,"sort":'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -4643,6 +4673,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/collections.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"pagination":{"limit":25,"offset":0,"nextPath":"/api/collections.list?limit=25&offset=25","total":1},"data":[{"id":"74cdad75-5f77-4b95-8a0a-9d399f602941","url"'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -4780,6 +4817,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/collections.update
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"74cdad75-5f77-4b95-8a0a-9d399f602941","url":"/collection/gt-effect-2-Gc5vLq71Ry","urlId":"Gc5vLq71Ry","name":"GT
+      Effect 2","description":null,"so'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6157,6 +6202,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"32905868-ebc7-4dce-bae7-d8f048dedd09","url":"/doc/gt-doc-AVEXq8Okky","urlId":"AVEXq8Okky","title":"GT
+      Doc","text":"hello","icon":null,"color":nul'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6298,6 +6351,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"validation_error","status":400,"message":"one of id or shareId is required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.info
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"32905868-ebc7-4dce-bae7-d8f048dedd09","url":"/doc/gt-doc-AVEXq8Okky","urlId":"AVEXq8Okky","title":"GT
+      Doc","text":"hello","icon":null,"color":nul'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6472,6 +6533,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"pagination":{"limit":25,"offset":0,"nextPath":"/api/documents.list?limit=25&offset=25","total":1},"data":[{"id":"32905868-ebc7-4dce-bae7-d8f048dedd09","url":"'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6634,6 +6702,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication error"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.search
+    identity: admin
+    status: 200
+    body_excerpt: '{"pagination":{"limit":25,"offset":0,"nextPath":"/api/documents.search?limit=25&offset=25","total":1},"data":[{"ranking":0.6079270839691162,"context":"world","d'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6784,6 +6859,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.update
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"32905868-ebc7-4dce-bae7-d8f048dedd09","url":"/doc/gt-doc-AVEXq8Okky","urlId":"AVEXq8Okky","title":"GT
+      Doc","text":"world","icon":null,"color":nul'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -6898,6 +6981,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.delete
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":true,"status":200,"ok":true}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -8431,6 +8521,14 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/documents.archive
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"32905868-ebc7-4dce-bae7-d8f048dedd09","url":"/doc/gt-doc-AVEXq8Okky","urlId":"AVEXq8Okky","title":"GT
+      Doc","text":"world","icon":null,"color":nul'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10547,6 +10645,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/groups.create
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"1bd53ffa-db33-4d1e-8bdc-20e0696db103","name":"gt_group","description":null,"icon":null,"color":null,"externalId":null,"memberCount":0,"disableMen'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10798,6 +10903,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/groups.update
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":{"id":"1bd53ffa-db33-4d1e-8bdc-20e0696db103","name":"gt_group2","description":null,"icon":null,"color":null,"externalId":null,"memberCount":0,"disableMe'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -10903,6 +11015,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/groups.delete
+    identity: admin
+    status: 200
+    body_excerpt: '{"success":true,"status":200,"ok":true}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -11024,6 +11143,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/groups.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"pagination":{"limit":25,"offset":0,"nextPath":"/api/groups.list?limit=25&offset=25","total":0},"data":{"groups":[],"groupMemberships":[]},"policies":[],"statu'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime
@@ -14962,6 +15088,13 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"ok":false,"error":"authentication_required","status":401,"message":"Authentication required"}'
     captured: '2026-11-19'
+  - method: POST
+    path: /api/stars.list
+    identity: admin
+    status: 200
+    body_excerpt: '{"pagination":{"limit":25,"offset":0,"nextPath":"/api/stars.list?limit=25&offset=25"},"data":{"stars":[],"documents":[]},"policies":[],"status":200,"ok":true}'
+    captured: '2026-11-20'
+    note: 'effect: valid-body op succeeded, read-back confirmed'
   sources:
   - source
   - runtime

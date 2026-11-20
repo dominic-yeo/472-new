@@ -125,9 +125,9 @@ nodes:
       ref: directus/api/src/controllers/auth.ts
       supports: login
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth/login)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /auth/login -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /auth/login (identity=anon) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-002
   name: Refresh token
@@ -591,9 +591,9 @@ nodes:
       ref: directus/api/src/controllers/auth.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/auth)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /auth -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /auth (identity=anon) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-007
   name: Bootstrap first admin
@@ -802,9 +802,9 @@ nodes:
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/server/specs/oas)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /server/specs/oas -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /server/specs/oas (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-009
   name: Read server info
@@ -889,9 +889,9 @@ nodes:
       ref: directus/api/src/controllers/server.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/server/info)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /server/info -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /server/info (identity=anon) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-010
   name: Read collection items
@@ -1021,9 +1021,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: readHandler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /items/:collection -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /items/:collection (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-011
   name: Create collection item
@@ -1164,9 +1164,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: POST
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /items/:collection -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /items/:collection (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-012
   name: Update items (batch/query)
@@ -1281,9 +1281,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via PATCH /items/:collection -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PATCH /items/:collection (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: updateByQuery mutates every matching row.
 - id: gt-action-013
   name: Delete items (batch/query)
@@ -1395,9 +1395,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via DELETE /items/:collection -> 204 (admin)'
+      supports: 'runtime: bound interface returned 204 to DELETE /items/:collection (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-014
   name: Read one item
@@ -1518,9 +1518,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection/:pk)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /items/:collection/:pk -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /items/:collection/:pk (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: Row-level access = permission filter; missing filter -> IDOR.
 - id: gt-action-015
   name: Update one item
@@ -1635,9 +1635,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection/:pk)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via PATCH /items/:collection/:pk -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PATCH /items/:collection/:pk (identity=admin) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-016
   name: Delete one item
@@ -1749,9 +1749,9 @@ nodes:
       ref: directus/api/src/controllers/items.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/items/:collection/:pk)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via DELETE /items/:collection/:pk -> 204 (admin)'
+      supports: 'runtime: bound interface returned 204 to DELETE /items/:collection/:pk (identity=admin) -> resource removed;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-017
   name: List users
@@ -1853,9 +1853,9 @@ nodes:
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /users -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /users (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-018
   name: Create user
@@ -2093,9 +2093,9 @@ nodes:
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/:pk)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /users/:pk -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /users/:pk (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-020
   name: Update one user
@@ -2415,9 +2415,9 @@ nodes:
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/me)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /users/me -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /users/me (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-023
   name: Update own account
@@ -2498,9 +2498,9 @@ nodes:
       ref: directus/api/src/controllers/users.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/users/me)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via PATCH /users/me -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PATCH /users/me (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Must not expose role/policies for self-edit.
 - id: gt-action-024
   name: Invite user
@@ -3057,9 +3057,9 @@ nodes:
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/roles)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /roles -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /roles (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-029
   name: Create role
@@ -3170,9 +3170,9 @@ nodes:
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/roles)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /roles -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /roles (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-030
   name: Update role (attach policies)
@@ -3287,9 +3287,9 @@ nodes:
       ref: directus/api/src/controllers/roles.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/roles/:pk)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via PATCH /roles/:pk -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PATCH /roles/:pk (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Role<->policy link is an escalation lever.
 - id: gt-action-031
   name: Create policy (admin_access)
@@ -3504,9 +3504,9 @@ nodes:
       ref: directus/api/src/controllers/policies.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/policies)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /policies -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /policies (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-033
   name: Update policy flags
@@ -3838,9 +3838,9 @@ nodes:
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/permissions)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /permissions -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /permissions (identity=admin) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-036
   name: Edit permission rule
@@ -3955,9 +3955,9 @@ nodes:
       ref: directus/api/src/controllers/permissions.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/permissions/:pk)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via PATCH /permissions/:pk -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PATCH /permissions/:pk (identity=admin) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-037
   name: Read own permissions
@@ -4382,9 +4382,9 @@ nodes:
       ref: directus/api/src/controllers/files.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/files)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /files -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /files (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-041
   name: Import file from URL (SSRF)
@@ -4843,9 +4843,9 @@ nodes:
       ref: directus/api/src/controllers/folders.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/folders)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /folders -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /folders (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-045
   name: Trigger flow
@@ -5062,9 +5062,9 @@ nodes:
       ref: directus/api/src/controllers/flows.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/flows)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /flows -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /flows (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: Flow authoring = server-side automation authoring.
 - id: gt-action-047
   name: Create flow operation
@@ -5278,9 +5278,9 @@ nodes:
       ref: directus/api/src/controllers/schema.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/schema/snapshot)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /schema/snapshot -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /schema/snapshot (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-049
   name: Apply schema changes
@@ -5621,9 +5621,9 @@ nodes:
       ref: directus/api/src/controllers/fields.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/fields/:collection)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /fields/:collection -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /fields/:collection (identity=admin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-052
   name: Export collection data
@@ -6380,9 +6380,9 @@ nodes:
       ref: directus/api/src/controllers/extensions.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/extensions)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /extensions -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /extensions (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-059
   name: Authenticate to a share
@@ -6819,9 +6819,9 @@ nodes:
       ref: directus/api/src/controllers/settings.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/settings)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /settings -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /settings (identity=admin) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-063
   name: Update project settings
@@ -6912,9 +6912,9 @@ nodes:
       ref: directus/api/src/controllers/settings.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/settings)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via PATCH /settings -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to PATCH /settings (identity=admin) -> state mutated; server acknowledged;
+        effect realized and observed (effect-observed)'
     notes: Controls registration, default roles, storage and CORS.
 - id: gt-action-064
   name: Promote content version
@@ -7255,9 +7255,9 @@ nodes:
       ref: directus/api/src/controllers/comments.ts
       supports: route + controller
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/comments)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /comments -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /comments (identity=admin) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-067
   name: Send notification

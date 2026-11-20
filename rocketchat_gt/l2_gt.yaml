@@ -125,9 +125,9 @@ nodes:
       ref: apps/meteor/server/api/v1/../ApiClass.ts
       supports: login
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/login)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/v1/login -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/login (identity=anon) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-002
   name: Log out
@@ -415,9 +415,9 @@ nodes:
       ref: apps/meteor/server/api/v1/users.ts
       supports: register
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.register)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/v1/users.register -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/users.register (identity=anon) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-005
   name: Generate personal access token
@@ -640,9 +640,9 @@ nodes:
       ref: apps/meteor/server/api/v1/create_user.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/v1/users.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/users.create (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: roles[] in the body assigns privileges at creation -> escalation if 'admin'.
 - id: gt-action-007
   name: Update user
@@ -1323,9 +1323,9 @@ nodes:
       ref: apps/meteor/server/api/v1/list_users.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/users.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/users.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/users.list (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-013
   name: Create channel
@@ -1436,9 +1436,9 @@ nodes:
       ref: apps/meteor/server/api/v1/create_channel.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/channels.create)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/v1/channels.create -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/v1/channels.create (identity=admin) -> resource created;
+        server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-014
   name: Delete channel
@@ -3542,9 +3542,9 @@ nodes:
       ref: apps/meteor/server/api/v1/admin_list_rooms.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/rooms.adminRooms)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/rooms.adminRooms -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/rooms.adminRooms (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-032
   name: Save room settings
@@ -3983,9 +3983,9 @@ nodes:
       ref: apps/meteor/server/api/v1/settings.ts
       supports: public
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/settings.public)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/settings.public -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/settings.public (identity=anon) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-036
   name: List settings
@@ -4086,9 +4086,9 @@ nodes:
       ref: apps/meteor/server/api/v1/list_settings.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/settings)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/settings -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/settings (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-037
   name: Read a setting
@@ -4423,9 +4423,9 @@ nodes:
       ref: apps/meteor/server/api/v1/list_permissions.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/permissions.listAll)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/permissions.listAll -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/permissions.listAll (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-040
   name: Rewrite permissions
@@ -4947,9 +4947,9 @@ nodes:
       ref: apps/meteor/server/api/v1/list_integrations.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/integrations.list)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/integrations.list -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/integrations.list (identity=admin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-045
   name: Call server method (DDP bridge)
@@ -5131,9 +5131,9 @@ nodes:
       ref: apps/meteor/server/api/v1/read_statistics.ts
       supports: route + handler
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/v1/statistics)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/v1/statistics -> 200 (admin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/v1/statistics (identity=admin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 edges: []
 annotation_issues: []

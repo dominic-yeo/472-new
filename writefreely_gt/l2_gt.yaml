@@ -137,9 +137,9 @@ nodes:
       ref: writefreely/account.go:89 apiSignup
       supports: create user + token
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth/signup)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/auth/signup -> 201 (pa219112)'
+      supports: 'runtime: bound interface returned 201 to POST /api/auth/signup (identity=pa219112) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-002
   name: Log in
@@ -266,9 +266,9 @@ nodes:
       ref: writefreely/account.go:405 login
       supports: authenticate + token
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth/login)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/auth/login -> 200 (wfadmin)'
+      supports: 'runtime: bound interface returned 200 to POST /api/auth/login (identity=wfadmin) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-003
   name: Log out (API)
@@ -348,9 +348,9 @@ nodes:
       ref: writefreely/account.go:299 handleAPILogout
       supports: invalidate token
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/auth/me)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via DELETE /api/auth/me -> 204 (userb)'
+      supports: 'runtime: bound interface returned 204 to DELETE /api/auth/me (identity=userb) -> resource removed; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-004
   name: Read own account
@@ -439,9 +439,9 @@ nodes:
       ref: writefreely/account.go:702 viewMeAPI
       supports: self info
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/me)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/me -> 200 (pa219112)'
+      supports: 'runtime: bound interface returned 200 to GET /api/me (identity=pa219112) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-005
   name: List own posts
@@ -530,9 +530,9 @@ nodes:
       ref: writefreely/account.go viewMyPostsAPI
       supports: own posts
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/me/posts)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/me/posts -> 200 (wfadmin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/me/posts (identity=wfadmin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-006
   name: List own blogs
@@ -621,9 +621,9 @@ nodes:
       ref: writefreely/collections.go viewMyCollectionsAPI
       supports: own blogs
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/me/collections)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/me/collections -> 200 (wfadmin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/me/collections (identity=wfadmin) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-007
   name: Change password
@@ -740,9 +740,9 @@ nodes:
       ref: writefreely/account.go:1005 updatePassphrase
       supports: password change
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/me/password)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/me/password -> 200 (userb)'
+      supports: 'runtime: bound interface returned 200 to POST /api/me/password (identity=userb) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-008
   name: Check username availability
@@ -817,9 +817,9 @@ nodes:
       ref: writefreely/routes.go:126 handleUsernameCheck
       supports: availability check
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/alias)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/alias -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/alias (identity=usera) -> representation returned to caller;
+        effect realized and observed (effect-observed)'
     notes: Username-enumeration oracle; pair with runtime identity_statuses.
 - id: gt-action-009
   name: Render markdown
@@ -894,9 +894,9 @@ nodes:
       ref: writefreely/routes.go:128 handleRenderMarkdown
       supports: markdown preview
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/markdown)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/markdown -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to POST /api/markdown (identity=anon) -> representation returned to
+        caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-010
   name: Create blog
@@ -1011,9 +1011,9 @@ nodes:
       ref: writefreely/collections.go:446 newCollection
       supports: create blog
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections -> 201 (usera)'
+      supports: 'runtime: bound interface returned 201 to POST /api/collections (identity=usera) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-011
   name: Read blog
@@ -1125,9 +1125,9 @@ nodes:
       ref: writefreely/collections.go:554 fetchCollection
       supports: read blog
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias})'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/collections/{alias} -> 200 (wfadmin)'
+      supports: 'runtime: bound interface returned 200 to GET /api/collections/{alias} (identity=wfadmin) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-012
   name: Update blog
@@ -1478,9 +1478,9 @@ nodes:
       ref: writefreely/collections.go:604 fetchCollectionPosts
       supports: list posts
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias}/posts)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/collections/{alias}/posts -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/collections/{alias}/posts (identity=anonymous) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-015
   name: Publish post
@@ -1633,9 +1633,9 @@ nodes:
       ref: writefreely/posts.go:565 newPost
       supports: create post in collection
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias}/posts)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections/{alias}/posts -> 201 (usera)'
+      supports: 'runtime: bound interface returned 201 to POST /api/collections/{alias}/posts (identity=usera) -> resource
+        created; server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-016
   name: Read blog post
@@ -1766,9 +1766,9 @@ nodes:
       ref: writefreely/posts.go:1142 fetchPost
       supports: read one post
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias}/posts/{post})'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/collections/{alias}/posts/{post} -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /api/collections/{alias}/posts/{post} (identity=anon) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-017
   name: Edit blog post
@@ -2073,9 +2073,9 @@ nodes:
       ref: writefreely/posts.go:963 addPost
       supports: collect/move posts
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias}/collect)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections/{alias}/collect -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections/{alias}/collect (identity=usera) -> resource
+        created; server returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-019
   name: Pin post
@@ -2221,9 +2221,9 @@ nodes:
       ref: writefreely/posts.go:1072 pinPost
       supports: pin
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias}/pin)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections/{alias}/pin -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections/{alias}/pin (identity=usera) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-020
   name: Unpin post
@@ -2359,9 +2359,9 @@ nodes:
       ref: writefreely/posts.go:1072 pinPost
       supports: unpin
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/collections/{alias}/unpin)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/collections/{alias}/unpin -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/collections/{alias}/unpin (identity=usera) -> state mutated;
+        server acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-021
   name: Create anonymous post
@@ -2479,9 +2479,9 @@ nodes:
       ref: writefreely/posts.go:565 newPost
       supports: create anonymous post
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/posts)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/posts -> 201 (usera)'
+      supports: 'runtime: bound interface returned 201 to POST /api/posts (identity=usera) -> resource created; server returned
+        it; effect realized and observed (effect-observed)'
     notes: The returned edit token is the capability that later authorizes edit/delete/claim.
 - id: gt-action-022
   name: Claim anonymous posts
@@ -2593,9 +2593,9 @@ nodes:
       ref: writefreely/posts.go:963 addPost
       supports: claim posts
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/posts/claim)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/posts/claim -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/posts/claim (identity=usera) -> resource created; server
+        returned it; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-023
   name: Unclaim posts
@@ -2708,9 +2708,9 @@ nodes:
       ref: writefreely/posts.go:1028 dispersePost
       supports: unclaim posts
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/posts/disperse)'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/posts/disperse -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/posts/disperse (identity=usera) -> resource removed; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-024
   name: Read post
@@ -2807,9 +2807,9 @@ nodes:
       ref: writefreely/posts.go:1142 fetchPost
       supports: read post by id
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/posts/{post})'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/posts/{post} -> 200 (anonymous)'
+      supports: 'runtime: bound interface returned 200 to GET /api/posts/{post} (identity=anonymous) -> representation returned
+        to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-025
   name: Edit post
@@ -2939,9 +2939,9 @@ nodes:
       ref: writefreely/posts.go:713 existingPost
       supports: update post
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/posts/{post})'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via POST /api/posts/{post} -> 200 (usera)'
+      supports: 'runtime: bound interface returned 200 to POST /api/posts/{post} (identity=usera) -> state mutated; server
+        acknowledged; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-026
   name: Delete post
@@ -3146,9 +3146,9 @@ nodes:
       ref: writefreely/posts.go:1201 fetchPostProperty
       supports: read one property
     - type: runtime
-      ref: '2026-11-19: underlying L1 interface(s) observed at runtime (/api/posts/{post}/{property})'
-      supports: 'runtime: bound interface observed per identity; action effect inferred from interface (interface-observed,
-        not effect-observed)'
+      ref: '2026-11-20: effect observed via GET /api/posts/{post}/{property} -> 200 (anon)'
+      supports: 'runtime: bound interface returned 200 to GET /api/posts/{post}/{property} (identity=anon) -> representation
+        returned to caller; effect realized and observed (effect-observed)'
     notes: null
 - id: gt-action-028
   name: Delete user (admin)
