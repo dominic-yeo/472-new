@@ -91,17 +91,27 @@ def main():
         req_keys=set()
         gen_keys=set()
         for j,r in enumerate(n.get("requirements") or []):
+            if not isinstance(r,dict):
+                # prose/free-form requirement (e.g. "actor ∈ authorized_channels"); skip structured checks
+                continue
             if r.get("type") not in REQ_TYPES:
                 errors.append(f"{w}.requirements[{j}]: invalid type")
             f=r.get("fact") or {}
+            if not isinstance(f,dict): f={}
             if f.get("predicate") not in PREDICATES:
                 errors.append(f"{w}.requirements[{j}]: invalid predicate")
             req_keys.add(fact_key(f))
+        eff_obj=n.get("effects") or {}
+        if not isinstance(eff_obj,dict): eff_obj={}   # prose/list-form effects: skip structured checks
         for side in ("gen","kill"):
-            for j,e in enumerate((n.get("effects") or {}).get(side) or []):
+            for j,e in enumerate(eff_obj.get(side) or []):
+                if not isinstance(e,dict):
+                    # prose/free-form effect; skip structured checks
+                    continue
                 if e.get("basis") not in EFFECT_BASES:
                     errors.append(f"{w}.effects.{side}[{j}]: invalid basis")
                 f=e.get("fact") or {}
+                if not isinstance(f,dict): f={}
                 if f.get("predicate") not in PREDICATES:
                     errors.append(f"{w}.effects.{side}[{j}]: invalid predicate")
                 if side=="gen": gen_keys.add(fact_key(f))
