@@ -11965,6 +11965,205 @@ nodes:
       - 503
       methods:
       - GET
+- key: http://localhost:8055/utils/hash/generate
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 200
+  params: []
+  content_types:
+  - application/json
+  sources:
+  - openapi
+  - runtime
+  samples:
+  - method: POST
+    path: /utils/hash/generate
+    identity: admin
+    status: 200
+    body_excerpt: '{"data":"$argon2id$v=19$m=65536,t=3,p=4$EnanDN8DVGPmGIbI8u3w5A$wVxJRHDvU36iywTgHznyL4mhB4ohUn+r0lZurMmLxdg"}'
+    captured: '2026-11-21'
+    note: 'added from completeness check (#9): endpoint in served OpenAPI, confirmed live'
+  gt:
+    evidence:
+    - type: runtime
+      ref: '2026-11-21: POST /utils/hash/generate -> 200; endpoint declared in /server/specs/oas and confirmed present at
+        runtime'
+      supports: effect-observed; added to close completeness gap
+    grounding:
+      depth: observed
+      samples: 1
+      success_2xx: 1
+      identities:
+      - admin
+      statuses:
+      - 200
+      methods:
+      - POST
+    visibility:
+      minimum: black_box
+      reason: 'Reachable endpoint declared in the served OpenAPI; added via #9 completeness check.'
+- key: http://localhost:8055/utils/hash/verify
+  kind: api
+  methods:
+  - POST
+  statuses:
+  - 400
+  params: []
+  content_types:
+  - application/json
+  sources:
+  - openapi
+  - runtime
+  samples:
+  - method: POST
+    path: /utils/hash/verify
+    identity: admin
+    status: 400
+    body_excerpt: '{"errors":[{"message":"Invalid payload. Invalid \"hash\" or \"string\".","extensions":{"reason":"Invalid
+      \"hash\" or \"s'
+    captured: '2026-11-21'
+    note: 'added from completeness check (#9): endpoint in served OpenAPI, confirmed live'
+  gt:
+    evidence:
+    - type: runtime
+      ref: '2026-11-21: POST /utils/hash/verify -> 400; endpoint declared in /server/specs/oas and confirmed present at runtime'
+      supports: route-confirmed; added to close completeness gap
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 400
+      methods:
+      - POST
+    visibility:
+      minimum: black_box
+      reason: 'Reachable endpoint declared in the served OpenAPI; added via #9 completeness check.'
+- key: http://localhost:8055/flows/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses:
+  - 403
+  params:
+  - pk
+  content_types:
+  - application/json
+  sources:
+  - openapi
+  - runtime
+  samples:
+  - method: GET
+    path: /flows/:pk
+    identity: admin
+    status: 403
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-21'
+    note: 'added from completeness check (#9): endpoint in served OpenAPI, confirmed live'
+  gt:
+    evidence:
+    - type: runtime
+      ref: '2026-11-21: GET /flows/:pk -> 403; endpoint declared in /server/specs/oas and confirmed present at runtime'
+      supports: route-confirmed; added to close completeness gap
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 403
+      methods:
+      - GET
+    visibility:
+      minimum: black_box
+      reason: 'Reachable endpoint declared in the served OpenAPI; added via #9 completeness check.'
+- key: http://localhost:8055/operations/:pk
+  kind: api
+  methods:
+  - GET
+  - PATCH
+  - DELETE
+  statuses:
+  - 403
+  params:
+  - pk
+  content_types:
+  - application/json
+  sources:
+  - openapi
+  - runtime
+  samples:
+  - method: GET
+    path: /operations/:pk
+    identity: admin
+    status: 403
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-21'
+    note: 'added from completeness check (#9): endpoint in served OpenAPI, confirmed live'
+  gt:
+    evidence:
+    - type: runtime
+      ref: '2026-11-21: GET /operations/:pk -> 403; endpoint declared in /server/specs/oas and confirmed present at runtime'
+      supports: route-confirmed; added to close completeness gap
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 403
+      methods:
+      - GET
+    visibility:
+      minimum: black_box
+      reason: 'Reachable endpoint declared in the served OpenAPI; added via #9 completeness check.'
+- key: http://localhost:8055/assets/:pk
+  kind: api
+  methods:
+  - GET
+  statuses:
+  - 403
+  params:
+  - pk
+  content_types:
+  - application/json
+  sources:
+  - openapi
+  - runtime
+  samples:
+  - method: GET
+    path: /assets/:pk
+    identity: admin
+    status: 403
+    body_excerpt: '{"errors":[{"message":"You don''t have permission to access this.","extensions":{"code":"FORBIDDEN"}}]}'
+    captured: '2026-11-21'
+    note: 'added from completeness check (#9): endpoint in served OpenAPI, confirmed live'
+  gt:
+    evidence:
+    - type: runtime
+      ref: '2026-11-21: GET /assets/:pk -> 403; endpoint declared in /server/specs/oas and confirmed present at runtime'
+      supports: route-confirmed; added to close completeness gap
+    grounding:
+      depth: route-confirmed
+      samples: 1
+      success_2xx: 0
+      identities:
+      - admin
+      statuses:
+      - 403
+      methods:
+      - GET
+    visibility:
+      minimum: black_box
+      reason: 'Reachable endpoint declared in the served OpenAPI; added via #9 completeness check.'
 edges:
 - src: http://localhost:8055/admin
   dst: http://localhost:8055/auth/login

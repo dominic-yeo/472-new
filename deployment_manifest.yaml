@@ -1,0 +1,80 @@
+generated: '2026-11-21'
+note: Reproducibility manifest for the runtime-grounding snapshot (#6). Pins the exact image each app's
+  L1/L2 was grounded against. mediacms has no live container (sample/HAR grounded).
+apps:
+  anything-llm:
+    container: gt-anythingllm
+    image: mintplexlabs/anythingllm
+    image_id: sha256:a9125e8eea833d609d0fdbefccb4ac2f99d725300f5aefebad1462317fa07486
+    repo_digest: mintplexlabs/anythingllm@sha256:a9125e8eea833d609d0fdbefccb4ac2f99d725300f5aefebad1462317fa07486
+    container_created: '2026-11-19T16:24:32'
+  directus:
+    container: runtime-directus-1
+    image: directus/directus:11
+    image_id: sha256:eb326f679ae847c0a776f93b972761dc2ebe84980e0b9d274a6bc31cd62809f7
+    repo_digest: directus/directus@sha256:eb326f679ae847c0a776f93b972761dc2ebe84980e0b9d274a6bc31cd62809f7
+    container_created: '2026-11-19T14:04:12'
+  discourse:
+    container: discourse_dev
+    image: discourse/discourse_dev:release
+    image_id: sha256:999a233cdbcf9dab5fb801429005ed188247ba4ab8b09750d765a717780fbea7
+    repo_digest: discourse/discourse_dev@sha256:999a233cdbcf9dab5fb801429005ed188247ba4ab8b09750d765a717780fbea7
+    container_created: '2026-11-20T03:52:31'
+  ghost:
+    container: gt-ghost
+    image: ghost:6
+    image_id: sha256:985ef9f30fb897a29050a9ef956bff1737ff1f2cd955aa5b759b88251f9c8735
+    repo_digest: ghost@sha256:985ef9f30fb897a29050a9ef956bff1737ff1f2cd955aa5b759b88251f9c8735
+    container_created: '2026-11-19T15:46:11'
+  keycloak:
+    container: gt-keycloak
+    image: quay.io/keycloak/keycloak:26.0.8
+    image_id: sha256:09a381c715ab0b111835b70f2905955274843a219c6f27efb348e4d9f4086858
+    repo_digest: quay.io/keycloak/keycloak@sha256:09a381c715ab0b111835b70f2905955274843a219c6f27efb348e4d9f4086858
+    container_created: '2026-11-20T13:29:01'
+  open-webui:
+    container: gt-openwebui
+    image: ghcr.io/open-webui/open-webui:main
+    image_id: sha256:d6c085678f7e3f474aa2a92ac9831cb68759dcfd951de250ebbb37dac5cd0255
+    repo_digest: ghcr.io/open-webui/open-webui@sha256:d6c085678f7e3f474aa2a92ac9831cb68759dcfd951de250ebbb37dac5cd0255
+    container_created: '2026-11-20T02:15:53'
+  openclaw:
+    container: gt-openclaw
+    image: openclaw:local
+    image_id: sha256:4518863cfb414e9d6d1fd4e456373f8d84f215b7f83dda4062b7f92a9631afb7
+    repo_digest: openclaw@sha256:4518863cfb414e9d6d1fd4e456373f8d84f215b7f83dda4062b7f92a9631afb7
+    container_created: '2026-11-20T11:51:28'
+  outline:
+    container: runtime-outline-1
+    image: outlinewiki/outline:1.12.0
+    image_id: sha256:25d6a2ced2f1f0cf03c09abd776d87ba31941ed96d3a99992aa84b3bd0afc074
+    repo_digest: outlinewiki/outline@sha256:25d6a2ced2f1f0cf03c09abd776d87ba31941ed96d3a99992aa84b3bd0afc074
+    container_created: '2026-11-19T14:37:52'
+  rocketchat:
+    container: runtime-rocketchat-1
+    image: rocket.chat:latest
+    image_id: sha256:32475edb80f091f6a8e79cf940a34a5a46d55e076755bfb7d5b8cae3cc102293
+    repo_digest: rocket.chat@sha256:32475edb80f091f6a8e79cf940a34a5a46d55e076755bfb7d5b8cae3cc102293
+    container_created: '2026-11-19T14:07:17'
+  uptrace:
+    container: docker-uptrace-1
+    image: uptrace/uptrace:2.1.0-rc.1
+    image_id: sha256:7677d2f5df8680c3fe71232b9985f4323fc1d62b496cba6b34688009c1abb7f8
+    repo_digest: uptrace/uptrace@sha256:7677d2f5df8680c3fe71232b9985f4323fc1d62b496cba6b34688009c1abb7f8
+    container_created: '2026-11-09T15:18:33'
+  vocechat:
+    container: gt-vocechat
+    image: privoce/vocechat-server:latest
+    image_id: sha256:bb324e9ce9ba5e53d863e381d7c272688a377aff39e7063438ab7fe5df7b29c5
+    repo_digest: privoce/vocechat-server@sha256:bb324e9ce9ba5e53d863e381d7c272688a377aff39e7063438ab7fe5df7b29c5
+    container_created: '2026-11-20T12:52:18'
+  writefreely:
+    container: gt-writefreely
+    image: writeas/writefreely:latest
+    image_id: sha256:81cd72cc54bf9549c65b81c6a0f5693cdd066e23879dd9bf51533faf7403bd0e
+    repo_digest: writeas/writefreely@sha256:81cd72cc54bf9549c65b81c6a0f5693cdd066e23879dd9bf51533faf7403bd0e
+    container_created: '2026-11-19T14:46:56'
+  mediacms:
+    container: null
+    image: null
+    note: no live container -- grounded from samples/HAR only

@@ -24711,7 +24711,7 @@ nodes:
       - 400
       methods:
       - PUT
-- key: http://localhost/admin/watched_words
+- key: http://localhost/admin/customize/watched_words
   kind: api
   methods:
   - GET
@@ -24853,6 +24853,9 @@ nodes:
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->404; admin GET->404; anonymous POST->404; admin
         POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
+    - type: note
+      ref: '2026-11-21: path corrected via #9 completeness check -- live route is under /admin/customize/ (was /admin/)'
+      supports: validity fix
     notes: '`word` may be a regex applied to all posts (ReDoS surface); replacement can auto-link.'
     grounding:
       depth: route-confirmed
@@ -24864,7 +24867,7 @@ nodes:
       - 404
       methods:
       - GET
-- key: http://localhost/admin/watched_words/{id}
+- key: http://localhost/admin/customize/watched_words/{id}
   kind: api
   methods:
   - DELETE
@@ -24946,6 +24949,9 @@ nodes:
     - type: runtime
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous DELETE->404; admin DELETE->404'
       supports: 'runtime: handler reached incl. mutating methods'
+    - type: note
+      ref: '2026-11-21: path corrected via #9 completeness check -- live route is under /admin/customize/ (was /admin/)'
+      supports: validity fix
     notes: Groups /upload (CSV import) + action clear_all.
     grounding:
       depth: route-confirmed
@@ -24957,7 +24963,7 @@ nodes:
       - 404
       methods:
       - DELETE
-- key: http://localhost/admin/watched_words/upload
+- key: http://localhost/admin/customize/watched_words/upload
   kind: api
   methods:
   - POST
@@ -25042,6 +25048,9 @@ nodes:
     - type: runtime
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous POST->404; admin POST->404'
       supports: 'runtime: handler reached incl. mutating methods'
+    - type: note
+      ref: '2026-11-21: path corrected via #9 completeness check -- live route is under /admin/customize/ (was /admin/)'
+      supports: validity fix
     notes: null
     grounding:
       depth: route-confirmed

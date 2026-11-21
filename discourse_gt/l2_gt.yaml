@@ -25430,7 +25430,7 @@ nodes:
     kill: []
   io_accounting: []
   l1_bindings:
-  - l1_key: http://localhost/admin/watched_words
+  - l1_key: http://localhost/admin/customize/watched_words
     methods:
     - GET
     selector:
@@ -25529,7 +25529,7 @@ nodes:
     kill: []
   io_accounting: []
   l1_bindings:
-  - l1_key: http://localhost/admin/watched_words
+  - l1_key: http://localhost/admin/customize/watched_words
     methods:
     - POST
     selector:
@@ -25628,7 +25628,7 @@ nodes:
       reason: The WatchedWord is removed.
   io_accounting: []
   l1_bindings:
-  - l1_key: http://localhost/admin/watched_words/{id}
+  - l1_key: http://localhost/admin/customize/watched_words/{id}
     methods:
     - DELETE
     selector:
@@ -25726,7 +25726,7 @@ nodes:
     kill: []
   io_accounting: []
   l1_bindings:
-  - l1_key: http://localhost/admin/watched_words/upload
+  - l1_key: http://localhost/admin/customize/watched_words/upload
     methods:
     - POST
     selector:
