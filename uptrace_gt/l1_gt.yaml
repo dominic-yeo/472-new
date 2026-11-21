@@ -4516,6 +4516,14 @@ nodes:
     content_type: application/json
     body_excerpt: '{}'
     captured: '2026-11-19'
+  - method: POST
+    path: v1/traces
+    identity: token
+    status: 200
+    captured: '2026-11-21'
+    note: OTLP span export accepted (200) via uptrace-dsn token; real trace ingested over the OpenTelemetry protocol (not
+      REST)
+    transport: OTLP/HTTP
   sources:
   - source
   - runtime
@@ -4546,17 +4554,23 @@ nodes:
     - type: runtime
       ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
       supports: 'runtime: handler/router reached'
+    - type: runtime
+      ref: '2026-11-21: OTLP span export accepted (200) via uptrace-dsn token; real trace ingested over the OpenTelemetry
+        protocol (not REST)'
+      supports: 'runtime: non-HTTP OTLP/HTTP transport exercised at protocol level (effect-observed)'
     notes: protobuf/json OTLP body; project resolved from DSN, not user session.
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
       - dsn
+      - token
       statuses:
       - 200
       methods:
       - POST
+  transport: OTLP/HTTP
 - key: http://localhost:14318/v1/logs
   kind: api
   methods:
@@ -4632,6 +4646,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{}'
     captured: '2026-11-19'
+  - method: POST
+    path: v1/logs
+    identity: token
+    status: 200
+    captured: '2026-11-21'
+    note: OTLP log export accepted (200); real log record ingested over the OpenTelemetry protocol
+    transport: OTLP/HTTP
   sources:
   - source
   - runtime
@@ -4662,17 +4683,22 @@ nodes:
     - type: runtime
       ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
       supports: 'runtime: handler/router reached'
+    - type: runtime
+      ref: '2026-11-21: OTLP log export accepted (200); real log record ingested over the OpenTelemetry protocol'
+      supports: 'runtime: non-HTTP OTLP/HTTP transport exercised at protocol level (effect-observed)'
     notes: null
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
       - dsn
+      - token
       statuses:
       - 200
       methods:
       - POST
+  transport: OTLP/HTTP
 - key: http://localhost:14318/v1/metrics
   kind: api
   methods:
@@ -4748,6 +4774,13 @@ nodes:
     content_type: application/json
     body_excerpt: '{}'
     captured: '2026-11-19'
+  - method: POST
+    path: v1/metrics
+    identity: token
+    status: 200
+    captured: '2026-11-21'
+    note: OTLP metric export accepted (200); real gauge datapoint ingested over the OpenTelemetry protocol
+    transport: OTLP/HTTP
   sources:
   - source
   - runtime
@@ -4778,17 +4811,22 @@ nodes:
     - type: runtime
       ref: '2026-11-19 probe (admin Bearer, mutations driven): dsn POST->200'
       supports: 'runtime: handler/router reached'
+    - type: runtime
+      ref: '2026-11-21: OTLP metric export accepted (200); real gauge datapoint ingested over the OpenTelemetry protocol'
+      supports: 'runtime: non-HTTP OTLP/HTTP transport exercised at protocol level (effect-observed)'
     notes: null
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
       - dsn
+      - token
       statuses:
       - 200
       methods:
       - POST
+  transport: OTLP/HTTP
 - key: http://localhost:14318/api/v1/vector-logs
   kind: api
   methods:

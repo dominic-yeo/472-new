@@ -1153,6 +1153,12 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"data":{"project":{"project_name":"Directus","project_descriptor":null,"project_logo":null,"project_color":"#6644FF","d'
     captured: '2026-11-19'
+  - method: GET
+    path: /server/info
+    identity: member
+    status: 200
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -1190,15 +1196,19 @@ nodes:
       supports: 'runtime: handler reached incl. mutating methods'
     notes: null
     grounding:
-      depth: observed
-      samples: 2
-      success_2xx: 2
+      depth: exercised
+      samples: 3
+      success_2xx: 3
       identities:
       - anon
+      - member
       statuses:
       - 200
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 200
 - key: http://localhost:8055/server/health
   kind: api
   methods:
@@ -1725,6 +1735,18 @@ nodes:
     body_excerpt: ''
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /items/:collection
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
+  - method: POST
+    path: /items/:collection
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -1771,11 +1793,12 @@ nodes:
       exposure; batch update/delete by query are high-blast-radius.
     grounding:
       depth: exercised
-      samples: 6
+      samples: 8
       success_2xx: 5
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 204
@@ -1785,6 +1808,9 @@ nodes:
       - GET
       - PATCH
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/items/:collection/:pk
   kind: api
   methods:
@@ -2308,6 +2334,18 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_users\" or it does not
       exist. Queried i'
     captured: '2026-11-19'
+  - method: GET
+    path: /users
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
+  - method: POST
+    path: /users
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -2349,16 +2387,21 @@ nodes:
     notes: Role assignment here is the escalation primitive; password can be set on update.
     grounding:
       depth: observed
-      samples: 2
+      samples: 4
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 403
       methods:
       - GET
+      - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/users/:pk
   kind: api
   methods:
@@ -2673,6 +2716,12 @@ nodes:
     body_excerpt: '{"data":{"id":"906111d2-def2-4f22-b1ec-8c20f17d72f6","first_name":"Admin","last_name":"User","email":"gtadmin@example.com","password":"**********","location":nu'
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /users/me
+    identity: member
+    status: 200
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -2706,17 +2755,21 @@ nodes:
     notes: Self-update must not allow editing role/policies -- verify the editable-field set.
     grounding:
       depth: exercised
-      samples: 3
-      success_2xx: 2
+      samples: 4
+      success_2xx: 3
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 401
       methods:
       - GET
       - PATCH
+    identity_statuses:
+      member:
+      - 200
 - key: http://localhost:8055/users/invite
   kind: api
   methods:
@@ -3691,6 +3744,18 @@ nodes:
     body_excerpt: '{"data":{"id":"9918defe-89d8-45e5-9986-bb4d745dc320","name":"gt_role","icon":"supervised_user_circle","description":null,"parent":null,"children":[],"policies":'
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /roles
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
+  - method: POST
+    path: /roles
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -3730,17 +3795,21 @@ nodes:
     notes: null
     grounding:
       depth: exercised
-      samples: 3
+      samples: 5
       success_2xx: 2
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/roles/:pk
   kind: api
   methods:
@@ -4337,6 +4406,12 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_permissions\" or it does
       not exist. Que'
     captured: '2026-11-19'
+  - method: GET
+    path: /permissions
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -4377,16 +4452,20 @@ nodes:
     notes: Permission rows define the content-API grants; mis-set filters -> exposure.
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/permissions/:pk
   kind: api
   methods:
@@ -5069,6 +5148,12 @@ nodes:
     content_type: application/json; charset=utf-8
     body_excerpt: '{"errors":[{"message":"Invalid payload. \"type\" is required.","extensions":{"reason":"\"type\" is required","code":"INV'
     captured: '2026-11-19'
+  - method: GET
+    path: /files
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -5108,16 +5193,21 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
+      - member
       statuses:
       - 200
       - 400
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/files/import
   kind: api
   methods:
@@ -6157,6 +6247,12 @@ nodes:
     body_excerpt: '{"data":{"id":"808acb1c-9aab-4e16-bb38-3d28d3a52901","name":"gt_flow","icon":null,"color":null,"description":null,"status":"active","trigger":"manual","accounta'
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /flows
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -6193,16 +6289,21 @@ nodes:
     notes: Creating flows is effectively server-side automation authoring.
     grounding:
       depth: exercised
-      samples: 3
+      samples: 4
       success_2xx: 2
       identities:
       - admin
+      - member
       statuses:
       - 200
       - 400
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/operations
   kind: api
   methods:
@@ -9571,6 +9672,12 @@ nodes:
     body_excerpt: '{"data":{"id":1,"project_name":"GT","project_url":null,"project_color":"#6644FF","project_logo":null,"public_foreground":null,"public_background":null,"public_n'
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /settings
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -9610,17 +9717,21 @@ nodes:
     notes: Settings writes control registration, default roles, storage and CORS.
     grounding:
       depth: exercised
-      samples: 4
+      samples: 5
       success_2xx: 3
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 403
       methods:
       - GET
       - PATCH
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/versions/:pk/promote
   kind: api
   methods:
@@ -10552,6 +10663,12 @@ nodes:
     body_excerpt: '{"data":{"id":3,"bookmark":"gt_bm","user":null,"role":null,"collection":"gt_effect","search":null,"layout":"tabular","layout_query":null,"layout_options":null,"'
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /presets
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -10587,17 +10704,21 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/presets/:pk
   kind: api
   methods:
@@ -10857,6 +10978,12 @@ nodes:
     body_excerpt: '{"errors":[{"message":"You don''t have permission to access collection \"directus_activity\" or it does
       not exist. Querie'
     captured: '2026-11-19'
+  - method: GET
+    path: /activity
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -10890,14 +11017,18 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/activity/:pk
   kind: api
   methods:
@@ -11198,6 +11329,12 @@ nodes:
     body_excerpt: '{"data":{"id":"fff4cf6a-630b-4c36-a586-5a5e80abf819","name":"gt_dash","icon":"dashboard","note":null,"date_created":"2026-11-20T13:39:30.815Z","user_created":"9'
     captured: '2026-11-20'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /dashboards
+    identity: member
+    status: 403
+    captured: '2026-11-21'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -11234,17 +11371,21 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8055/dashboards/:pk
   kind: api
   methods:

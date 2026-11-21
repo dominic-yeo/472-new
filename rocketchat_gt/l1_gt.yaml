@@ -13099,6 +13099,14 @@ nodes:
 
       '
     captured: '2026-11-20'
+  - method: WS
+    path: sockjs
+    identity: token
+    status: 200
+    captured: '2026-11-21'
+    note: 'DDP over SockJS WebSocket: open frame ''o'' -> DDP connect -> ''connected'' (session id) -> method ''public-settings/get''
+      ack observed; real-time RPC transport exercised'
+    transport: DDP/WebSocket
   sources:
   - source
   - runtime
@@ -13126,17 +13134,24 @@ nodes:
     - type: runtime
       ref: '2026-11-20 probe (admin auth, mutations driven): anonymous GET->200; admin GET->200'
       supports: 'runtime: handler reached incl. mutating methods'
+    - type: runtime
+      ref: '2026-11-21: DDP over SockJS WebSocket: open frame ''o'' -> DDP connect -> ''connected'' (session id) -> method
+        ''public-settings/get'' ack observed; real-time RPC transport exercised'
+      supports: 'runtime: non-HTTP DDP/WebSocket transport exercised at protocol level (effect-observed)'
     notes: DDP/websocket transport -- a separate real-time surface, out of scope for the REST GT.
     grounding:
-      depth: observed
-      samples: 1
-      success_2xx: 1
+      depth: exercised
+      samples: 2
+      success_2xx: 2
       identities:
       - anon
+      - token
       statuses:
       - 200
       methods:
       - GET
+      - WS
+  transport: DDP/WebSocket
 edges:
 - src: http://localhost:3000/
   dst: http://localhost:3000/api/v1/login
