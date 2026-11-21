@@ -775,9 +775,13 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: src/agents/agent-bundle-mcp-manager.ts; agent-bundle-mcp-combined.ts; src/agents/native-mcp-runtime-client.ts;
     src/mcp/openclaw-tools-serve.ts
-  notes: Remote tool descriptions are model-facing -> rug-pull; MCP can also be bundled inside the sandbox. openclaw is MCP
-    client (calls servers) and server (exposes built-ins); no MCP sampling path observed in source.
-  runtime_blocker: external_integration
+  notes: 'Remote tool descriptions are model-facing -> rug-pull; MCP can also be bundled inside the sandbox. openclaw is MCP
+    client (calls servers) and server (exposes built-ins); no MCP sampling path observed in source | 2026-11-22: a local streamable-HTTP
+    MCP stand-in CONNECTS to openclaw and the tool is discovered (openclaw mcp probe: ''1 tools''); so this needs no 3rd-party
+    credential. Reclassified external_integration -> local_not_driven: the only remaining gap is the local model emitting
+    a NATIVE structured tool call (qwen2.5-32k emitted it as text under openclaw''s harness), i.e. the model-reliability limit,
+    not an integration one.'
+  runtime_blocker: local_not_driven
 - id: tool.primary.skills
   agent_id: agent.openclaw.primary
   l1_ids: []
@@ -1133,8 +1137,11 @@ tool_bindings:
     notes: MCP configured + allowed for subagent
   evidence_status: source_confirmed
   source_ref: src/agents/agent-bundle-mcp-manager.ts (subagent surface)
-  notes: ''
-  runtime_blocker: external_integration
+  notes: '2026-11-22: a local streamable-HTTP MCP stand-in CONNECTS to openclaw and the tool is discovered (openclaw mcp probe:
+    ''1 tools''); so this needs no 3rd-party credential. Reclassified external_integration -> local_not_driven: the only remaining
+    gap is the local model emitting a NATIVE structured tool call (qwen2.5-32k emitted it as text under openclaw''s harness),
+    i.e. the model-reliability limit, not an integration one.'
+  runtime_blocker: local_not_driven
 - id: tool.system.system_agent
   agent_id: agent.openclaw.system
   l1_ids: []
