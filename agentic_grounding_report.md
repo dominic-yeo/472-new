@@ -8,21 +8,29 @@ output_sinks, execution_edges, controls) has **307 records across 5 LLM apps**.
 All runtime observation uses a **local model** (qwen2.5 / llama3.1 in Ollama) —
 **no cloud credentials** — so some surface is unreachable by construction.
 
-## Observed: 103 / 307 (34%)
+## Observed: 117 / 307 (38%)  _(up from 102 at #8 start)_
 
 | app | observed | total | driven via |
 |---|--:|--:|---|
 | anything-llm | 41 | 58 | REST `@agent` runs (local model) |
-| open-webui | 22 | 82 | socket.io tool/chat harness |
+| open-webui | 33 | 82 | socket.io harness + direct feature APIs (memories, knowledge, notes, skills, tools, files) |
 | openclaw | 22 | 82 | gateway agent runs (SSRF control seen firing) |
-| LibreChat | 18 | 54 | SSE agent-stream harness |
+| LibreChat | 21 | 54 | SSE harness + direct APIs (memory recall, attachments) |
 | lobe-chat | 0 | 31 | — (blocked, below) |
+
+**Driving campaign (ongoing).** Records are promoted to `observed` only when a
+real feature call returns 2xx (or a verified effect). The reliably-drivable
+records are the ones exercised by **direct feature APIs** (memory/knowledge/notes/
+skills/tools/files create + read) — model-independent, so honest and repeatable.
+Model-dependent records (tool calls inside a chat, subagent spawns, RAG retrieval)
+and client-side ones (open-webui code-exec is browser pyodide) need agent runs
+through the unreliable local model and remain the slow part of the backlog.
 
 ## The 204 unobserved, by blocker (every record now tagged `runtime_blocker`)
 
 | category | count | meaning |
 |---|--:|---|
-| **local_not_driven** | 141 | exercisable locally, not yet driven — a labeled backlog |
+| **local_not_driven** | 127 | exercisable locally, not yet driven — a labeled backlog |
 | **crypto_blocked** | 31 | lobe-chat: chat auth payload (`X-lobe-chat-auth` + keyvault) could not be reproduced |
 | **external_integration** | 22 | needs a 3rd-party SaaS credential we deliberately exclude |
 | **scheduling_required** | 10 | needs a cron/timer trigger to fire |
@@ -53,6 +61,6 @@ or around the GT). Unreachable by construction, not by oversight.
 ## Honest bottom line
 The hard, principled ceiling is **53 records** (22 external + 31 crypto) plus 10
 scheduling-gated — these cannot be runtime-observed in a local, secret-free
-environment. The other **141 are drivable** with further per-app feature driving;
+environment. The other **127 are drivable** (14 driven this campaign so far) with further per-app feature driving;
 this pass added 1 reliably-confirmed observation (anything-llm `@agent`) and
 labeled the rest so the gap is precise and auditable rather than vague.

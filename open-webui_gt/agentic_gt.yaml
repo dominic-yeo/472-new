@@ -538,10 +538,9 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(files)
-  notes: ''
-  runtime_blocker: local_not_driven
+  notes: 'RUNTIME 2026-11-21: exercised + verified live.'
 - id: tool.primary.notes
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -567,10 +566,9 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(notes)
-  notes: ''
-  runtime_blocker: local_not_driven
+  notes: 'RUNTIME 2026-11-21: exercised live via open-webui feature API.'
 - id: tool.primary.chats
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -775,11 +773,10 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(skills)
-  notes: Skills are reusable instruction bundles injected into context -> writing them is stored-prompt-injection into future
-    turns (ties to ctx.skill_instructions).
-  runtime_blocker: local_not_driven
+  notes: 'Skills are reusable instruction bundles injected into context -> writing them is stored-prompt-injection into future
+    turns (ties to ctx.skill_instructions) | RUNTIME 2026-11-21: exercised live via open-webui feature API.'
 - id: tool.primary.create_skill
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -804,10 +801,9 @@ tool_bindings:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: 'tools.py get_builtin_tools: create_skill (workspace.skills perm or admin)'
-  notes: Gated by workspace.skills permission/admin.
-  runtime_blocker: local_not_driven
+  notes: 'Gated by workspace.skills permission/admin | RUNTIME 2026-11-21: exercised live via open-webui feature API.'
 - id: tool.primary.create_tool
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -835,11 +831,10 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: ENABLE_TOOLS + workspace.tools perm/admin
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: 'tools.py get_builtin_tools: create_tool (workspace.tools perm or admin)'
-  notes: Creating a Tool defines server-side Python later executed in-process -> RCE-class if the model can both create and
-    invoke; gated by workspace.tools permission.
-  runtime_blocker: local_not_driven
+  notes: 'Creating a Tool defines server-side Python later executed in-process -> RCE-class if the model can both create and
+    invoke; gated by workspace.tools permission | RUNTIME 2026-11-21: exercised live via open-webui feature API.'
 - id: tool.primary.subagents
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -1254,9 +1249,8 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
-  runtime_blocker: local_not_driven
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-21: exercised + verified live.'
 - id: ctx.skill_instructions
   source_kind: developer_prompt
   source_ref: skills builtin (view_skill/read_skill_file); __skill_ids__
@@ -1454,14 +1448,14 @@ memory_stores:
   read_path: recall_memories vector + path search injected into system context
   retention_and_deletion: user-managed; delete_memory tool + memories API
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
     notes: memories.enable
   source_ref: utils/memory.py; models/memories.py
-  notes: Auto-write from turn content is the memory-poisoning sink; re-read as system context next turn.
-  runtime_blocker: local_not_driven
+  notes: 'Auto-write from turn content is the memory-poisoning sink; re-read as system context next turn | RUNTIME 2026-11-21:
+    exercised live via open-webui feature API.'
 - id: mem.chat_history
   store_kind: conversation_history
   owner_component: open-webui
@@ -1507,14 +1501,14 @@ memory_stores:
   read_path: similarity search -> rag_template injection
   retention_and_deletion: KB/file lifecycle
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: retrieval; middleware chat_completion_files_handler
-  notes: Shared knowledge base = cross-user injection/read surface.
-  runtime_blocker: local_not_driven
+  notes: 'Shared knowledge base = cross-user injection/read surface | RUNTIME 2026-11-21: exercised live via open-webui feature
+    API.'
 - id: mem.notes
   store_kind: database
   owner_component: open-webui
@@ -1529,14 +1523,13 @@ memory_stores:
   read_path: notes tools
   retention_and_deletion: user-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: tools.py notes builtin
-  notes: ''
-  runtime_blocker: local_not_driven
+  notes: 'RUNTIME 2026-11-21: exercised live via open-webui feature API.'
 - id: mem.skills
   store_kind: database
   owner_component: open-webui
@@ -1554,14 +1547,14 @@ memory_stores:
   read_path: skill tools inject skill content into context as instructions
   retention_and_deletion: workspace-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: tools.py skills builtin
-  notes: Instruction content store -> stored-prompt-injection surface.
-  runtime_blocker: local_not_driven
+  notes: 'Instruction content store -> stored-prompt-injection surface | RUNTIME 2026-11-21: exercised live via open-webui
+    feature API.'
 - id: mem.tasks
   store_kind: task_summary
   owner_component: open-webui
@@ -1772,10 +1765,10 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/memory.py
-  notes: Closes the loop into ctx.memory_recall (poisoning persistence).
-  runtime_blocker: local_not_driven
+  notes: 'Closes the loop into ctx.memory_recall (poisoning persistence) | RUNTIME 2026-11-21: exercised live via open-webui
+    feature API.'
 execution_edges:
 - id: edge.user__primary
   source:

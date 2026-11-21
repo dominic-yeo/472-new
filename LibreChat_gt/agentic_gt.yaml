@@ -603,9 +603,8 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
-  runtime_blocker: local_not_driven
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-21: exercised live via LibreChat API.'
 - id: ctx.user_message
   source_kind: user_input
   source_ref: chat message
@@ -734,9 +733,8 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: Turn-derived memory re-injected -> poisoning persistence.
-  runtime_blocker: local_not_driven
+  evidence_status: observed
+  notes: 'Turn-derived memory re-injected -> poisoning persistence | RUNTIME 2026-11-21: exercised live via LibreChat API.'
 - id: ctx.ocr_context
   source_kind: document
   source_ref: ocr/context capability file content injection
@@ -820,9 +818,8 @@ context_sources:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
-  notes: ''
-  runtime_blocker: local_not_driven
+  evidence_status: observed
+  notes: 'RUNTIME 2026-11-21: exercised live via LibreChat API.'
 memory_stores:
 - id: mem.conversations
   store_kind: conversation_history
