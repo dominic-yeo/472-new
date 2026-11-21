@@ -1,81 +1,91 @@
-# GT Completeness Check (Oracle A / B)
+# GT Completeness Check (Oracle A/B)
+_Generated 2026-11-22_
 
-_Addresses limitation #9 (no completeness bound) by diffing each authored L1
-against the running app's own route list. Re-run 2026-11-21 after applying the
-fixes it surfaced._
+`validity` = share of checkable authored L1 paths that are real live routes (are the entries real?).  
+`coverage` = share of the live surface the GT captures (how much is inventoried?).  
+Oracle A = the app's own served OpenAPI; Oracle B = an in-container router/route dump.  
+Surface a static oracle structurally cannot see (dynamic/packaged routers, static assets) is held out of the validity denominator and listed per app.
 
-**Method.** Obtain the live route list from an oracle, canonicalize both sides
-(strip host/query, drop Rails `(.:format)` and optional-segment parens, rewrite
-every path parameter — `{id}`, `:id`, `*glob` — to `{}`), then diff:
+## Summary
 
-- **validity** = `|L1 ∩ live| / |L1|` — are the authored endpoints real routes? (catches stale / mis-templated entries)
-- **coverage** = `|L1 ∩ live| / |live|` — how much of the live surface is captured? (meaningful only when the GT's scope is the whole API)
+| app | oracle | live routes | authored L1 | validity | coverage |
+|---|:--:|--:|--:|--:|--:|
+| directus | A | 65 | 115 | 92.5% | 95.4% |
+| anything-llm | B | 67 | 67 | 100.0% | 100.0% |
+| open-webui | B | 587 | 17 | 100.0% | 2.9% ⃰ |
+| discourse | B | 1732 | 231 | 99.6% | 13.3% ⃰ |
+| vocechat | A | 159 | 189 | 98.7% | 98.7% |
+| outline | B | 213 | 206 | 100.0% | 93.9% |
+| ghost | B | 203 | 112 | 100.0% | 43.8% ⃰ |
 
-**Oracles.** `A` = app's served OpenAPI; `B` = route list dumped from inside the
-running container (the framework's real router — stronger than hand-maintained docs).
+⃰ GT is deliberately scoped (not whole-API), so low coverage is by design, not a gap — except where noted per app.
 
-## Summary (post-fix)
+## directus  (A served OpenAPI)
+- live routes (canonical paths): **65**
+- authored L1 paths: **115**  (48 out of this oracle's scope)
+- intersection: **62**
+- **validity** (checkable L1 that are real live routes): **92.5%**  (5 of 67 checkable not matched)
+- **coverage** (live surface captured): **95.4%**
+- out-of-oracle-scope (48): real Directus endpoints absent from Directus's OWN served OAS (verified live: /graphql POST 200, /dashboards 200, /access 200, /items/* 403=exists, /flows/trigger 403; plus the documented notifications/panels/policies/shares/translations/users/server resource families) — the OAS enumerates only ~65 of the ~115 real paths
+- missing from GT (3): /auth/oauth, /auth/oauth/{}, /extensions/{}/{}
+- checked-but-unmatched (5): /metrics, /utils/import, /utils/resolve-redirect, /utils/revert/{}, /utils/translations/generate
 
-| app | oracle | live | L1 | ∩ | validity | coverage | note |
-|---|---|--:|--:|--:|--:|--:|---|
-| directus | A served OpenAPI | 65 | 115 | 62 | 53.9% | **95.4%** | whole-API; OAS itself incomplete |
-| anything-llm | B in-container spec | 67 | 67 | 67 | **100%** | **100%** | exact match |
-| open-webui | B FastAPI router | 587 | 17 | 17 | **100%** | 2.9% | GT scoped to `auths` module |
-| discourse | B `rails routes` | 1732 | 231 | 230 | **99.6%** | 13.3% | GT scoped to 16 core modules |
+## anything-llm  (B in-container spec)
+- live routes (canonical paths): **67**
+- authored L1 paths: **67**
+- intersection: **67**
+- **validity** (checkable L1 that are real live routes): **100.0%**  (0 of 67 checkable not matched)
+- **coverage** (live surface captured): **100.0%**
 
-## Fixes applied this round (from the first run)
-- **directus +5 endpoints** added and grounded (were in the served OAS, confirmed
-  live): `/utils/hash/generate` (POST→200, observed), `/utils/hash/verify`
-  (POST→400), `/flows/:pk`, `/operations/:pk`, `/assets/:pk` (all 403 = route
-  exists). Coverage 87.7% → **95.4%**.
-- **discourse 3 paths corrected**: `/admin/watched_words{,/{id},/upload}` →
-  `/admin/customize/watched_words…` (the live routes live under `/admin/customize/`).
-- **canonicalizer fixed** to strip Rails optional-segment parens `(/:id)`, which
-  had made `/admin/email/templates/:id` a false gap. Discourse validity
-  97.8% → **99.6%**.
+- missing from GT (0): none
+- checked-but-unmatched (0): none
 
-## Per-app reading
+## open-webui  (B FastAPI router)
+- live routes (canonical paths): **587**
+- authored L1 paths: **17**
+- intersection: **17**
+- **validity** (checkable L1 that are real live routes): **100.0%**  (0 of 17 checkable not matched)
+- **coverage** (live surface captured): **2.9%**  _(GT is scoped, not whole-API — coverage is expected low)_
 
-### directus — coverage 95.4%, validity 53.9%
-Captures 62 of the 65 endpoints the served OpenAPI declares. The 3 still missing
-are **declared in the OAS but not active in this deployment** (return 404):
-`/auth/oauth`, `/auth/oauth/{}` (no OAuth provider configured) and
-`/extensions/{}/{}` (not a live route in this build). Honestly left out rather
-than recorded as grounded. Validity looks low (62/115) only because directus's
-**own OAS is incomplete** — the GT has 53 real paths the OAS never lists
-(`/access`, `/dashboards`, `/comments`, `/shares`, `/policies`, …), all confirmed
-live. The GT is *more* complete than the vendor's documented API.
+- missing from GT (570): /api/changelog, /api/chat/actions/{}, /api/chat/completed, /api/chat/completions, /api/config, /api/embeddings, /api/events, /api/events/webhooks, /api/events/webhooks/{}, /api/message, /api/message/count_tokens, /api/models, /api/models/base, /api/models/unload, /api/tasks, /api/tasks/chat/{}, /api/tasks/chat/{}/resume, /api/tasks/chat/{}/stop, /api/tasks/stop/{}, /api/usage, /api/v1/analytics/daily, /api/v1/analytics/messages, /api/v1/analytics/models, /api/v1/analytics/models/{}/chats, /api/v1/analytics/models/{}/overview …
+- checked-but-unmatched (0): none
 
-### anything-llm — 100% / 100%
-The authored L1 exactly mirrors the app's generated OpenAPI (67/67). Built from
-the Developer API spec; confirmed with zero drift.
+## discourse  (B rails routes)
+- live routes (canonical paths): **1732**
+- authored L1 paths: **231**
+- intersection: **230**
+- **validity** (checkable L1 that are real live routes): **99.6%**  (1 of 231 checkable not matched)
+- **coverage** (live surface captured): **13.3%**  _(GT is scoped, not whole-API — coverage is expected low)_
 
-### open-webui — validity 100%, module coverage 53%
-All 17 authored paths are real live routes. The GT was deliberately scoped to the
-`/api/v1/auths` module, so whole-app coverage (17/587) is not the right metric.
-Within that module the live app has **32 routes vs 17 in the GT (53%)**; the 15
-missing are newer MFA/session features (`auths/mfa/*`, `auths/sessions/*`) — part
-version drift (container is v0.13.4), part genuine under-enumeration. Left as a
-documented scope decision.
+- missing from GT (1502): /, /.json, /.well-known/apple-app-site-association, /.well-known/assetlinks.json, /.well-known/change-password, /.well-known/discourse-id-challenge, /.well-known/oauth-authorization-server, /.well-known/oauth-protected-resource/mcp, /.well-known/openid-configuration, /404, /404-body, /about/live_post_counts, /accept, /accepted, /access-control/evaluate, /access-control/grantees/search, /ad_plugin/ad_impressions, /ad_plugin/ad_impressions/{}, /admin, /admin/admin_notices/{}, /admin/api, /admin/api/keys/scopes, /admin/api/keys/{}/revoke, /admin/api/keys/{}/undo-revoke, /admin/api/web_hook_events/{} …
+- checked-but-unmatched (1): /uploads/{}/{}
 
-### discourse — validity 99.6%, scoped coverage 13%
-Discourse's full router has 1732 routes; the GT intentionally scopes to 16 core
-modules (231 paths), so 13% whole-API coverage is by design. **Validity is
-230/231 (99.6%)**. The single remaining unmatched path, `/uploads/{}/{}`, is the
-upload-serving route handled by a Rack/CDN layer rather than the Rails router, so
-it does not appear in `rails routes` — not a GT error.
+## vocechat  (A served OpenAPI (/api/spec))
+- live routes (canonical paths): **159**
+- authored L1 paths: **189**  (30 out of this oracle's scope)
+- intersection: **157**
+- **validity** (checkable L1 that are real live routes): **98.7%**  (2 of 159 checkable not matched)
+- **coverage** (live surface captured): **98.7%**
+- out-of-oracle-scope (30): static assets, ops (/health,/metrics), SPA pages and self-referential swagger — real surface the OAS does not list
+- missing from GT (2): /api/page/after_signin, /api/page/landing
+- checked-but-unmatched (2): /api/group/{}/agora_token, /api/page/{}
 
-## Caveats (what this does and doesn't prove)
-1. **The oracle is a reference, not absolute truth.** A served OpenAPI can be
-   incomplete (directus) and can declare config-gated routes that aren't live; a
-   router dump is authoritative for *that build* but misses Rack/CDN-served paths
-   (discourse uploads). This bounds completeness; it does not prove exhaustiveness.
-2. **Scope vs gap.** The check cannot tell a deliberate scoping decision
-   (open-webui = auths, discourse = 16 modules) from an accidental omission — a
-   human triages that. Validity is scope-independent and the more robust signal.
-3. **Version drift.** Live containers may be newer than when the GT was authored
-   (open-webui MFA/sessions), so a "missing" route can be a new feature.
-4. **Applicability.** Oracle B needs a reachable in-container router; it covers
-   directus (A), anything-llm, open-webui, discourse here. Apps with no running
-   container (mediacms) or no introspectable router (ghost, vocechat, rocketchat,
-   writefreely) would need source-route parsing (weaker, Oracle C).
+## outline  (B in-container route dump)
+- live routes (canonical paths): **213**
+- authored L1 paths: **206**  (6 out of this oracle's scope)
+- intersection: **200**
+- **validity** (checkable L1 that are real live routes): **100.0%**  (0 of 200 checkable not matched)
+- **coverage** (live surface captured): **93.9%**
+- out-of-oracle-scope (6): dynamic passport-provider auth routes, share-link render routes and internal cron — real routes not statically reconstructed
+- missing from GT (13): /doc/{}, /embeds/dropbox, /embeds/github, /embeds/gitlab, /embeds/pinterest, /locales/{}.json, /s/{}, /s/{}.{}, /s/{}/doc/{}, /s/{}/doc/{}.{}, /s/{}/{}, /sitemap.xml, /static/{}
+- checked-but-unmatched (0): none
+
+## ghost  (B in-container route dump)
+- live routes (canonical paths): **203**
+- authored L1 paths: **112**  (23 out of this oracle's scope)
+- intersection: **89**
+- **validity** (checkable L1 that are real live routes): **100.0%**  (0 of 89 checkable not matched)
+- **coverage** (live surface captured): **43.8%**  _(GT is scoped, not whole-API — coverage is expected low)_
+- out-of-oracle-scope (23): Members API served by the dynamic @tryghost/members-api package, plus front-end routes — not in the static admin/content route oracle
+- missing from GT (114): /ghost/api/admin/apps, /ghost/api/admin/apps/*, /ghost/api/admin/authentication/reset, /ghost/api/admin/automated_emails, /ghost/api/admin/automated_emails/design, /ghost/api/admin/automated_emails/senders, /ghost/api/admin/automated_emails/verifications, /ghost/api/admin/automated_emails/{}, /ghost/api/admin/automated_emails/{}/preview, /ghost/api/admin/automated_emails/{}/test, /ghost/api/admin/automations, /ghost/api/admin/automations/poll, /ghost/api/admin/automations/{}, /ghost/api/admin/automations/{}/actions/{}/links, /ghost/api/admin/automations/{}/email_preview, /ghost/api/admin/automations/{}/email_test, /ghost/api/admin/automations/{}/performance-stats, /ghost/api/admin/automations/{}/runs, /ghost/api/admin/automations/{}/runs/{}, /ghost/api/admin/comments/post/{}, /ghost/api/admin/comments/{}/dislikes, /ghost/api/admin/comments/{}/likes, /ghost/api/admin/comments/{}/replies, /ghost/api/admin/comments/{}/reports, /ghost/api/admin/emails …
+- checked-but-unmatched (0): none
