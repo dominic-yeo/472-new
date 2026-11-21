@@ -569,10 +569,11 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: skill enabled
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: aibitat/plugins/generate-image.js
-  notes: ''
-  runtime_blocker: external_integration
+  notes: 'RUNTIME 2026-11-22: generate-image agent tool invoked by qwen2.5 and fired against a local OpenAI-compatible image
+    stand-in (host.docker.internal:8099/images/generations); image returned + agent confirmed ''image is ready'' (effect-observed),
+    no cloud provider or secret'
 - id: tool.ws.rechart
   agent_id: agent.anythingllm.workspace
   l1_ids: []
@@ -784,10 +785,11 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: MCP server configured + tool not suppressed
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: utils/MCP/index.js MCPCompatibilityLayer (listTools/callTool)
-  notes: MCP compat layer exposes TOOLS only (callTool) -> no resources/prompts/sampling channel.
-  runtime_blocker: external_integration
+  notes: 'MCP compat layer exposes TOOLS only (callTool) -> no resources/prompts/sampling channel | RUNTIME 2026-11-22: MCP
+    integration exercised: qwen2.5 agent invoked an MCP tool, anything-llm proxied JSON-RPC tools/call to a local streamable-HTTP
+    MCP stand-in (host.docker.internal:8100/mcp), result returned (effect-observed); no external SaaS/secret'
 context_sources:
 - id: ctx.system_prompt
   source_kind: system_prompt
@@ -1303,10 +1305,11 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: generate-image plugin
-  notes: ''
-  runtime_blocker: external_integration
+  notes: 'RUNTIME 2026-11-22: generate-image agent tool invoked by qwen2.5 and fired against a local OpenAI-compatible image
+    stand-in (host.docker.internal:8099/images/generations); image returned + agent confirmed ''image is ready'' (effect-observed),
+    no cloud provider or secret'
 - id: sink.sql_write
   sink_kind: database_record
   producer_ids:

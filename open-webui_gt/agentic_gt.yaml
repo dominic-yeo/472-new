@@ -444,10 +444,10 @@ tool_bindings:
   reachability:
     status: conditionally_mounted
     notes: image_generation.enable + cap + feature + perm
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: tools.py get_builtin_tools(image_generation)
-  notes: ''
-  runtime_blocker: external_integration
+  notes: 'RUNTIME 2026-11-22: image-generation integration fired against a local OpenAI-compatible stand-in (host.docker.internal:8099);
+    image file produced (effect-observed), no cloud provider or secret'
 - id: tool.primary.memory
   agent_id: agent.openwebui.primary
   l1_ids: []
@@ -1664,10 +1664,10 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: image generation backend
-  notes: ''
-  runtime_blocker: external_integration
+  notes: 'RUNTIME 2026-11-22: image-generation integration fired against a local OpenAI-compatible stand-in (host.docker.internal:8099);
+    image file produced (effect-observed), no cloud provider or secret'
 - id: sink.external_tool_call
   sink_kind: external_api
   producer_ids:
