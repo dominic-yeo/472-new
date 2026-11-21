@@ -6,8 +6,8 @@ meta:
   git_ref: see source_root
   applicability:
     verdict: qualifies
-    evidence: client tool-call loop (store/chat/slices/plugin/action.ts triggerToolCalls) over builtin/plugin/custom
-      tools; plugin calls proxied through the server gateway (services/chat.ts runPluginApi).
+    evidence: client tool-call loop (store/chat/slices/plugin/action.ts triggerToolCalls) over builtin/plugin/custom tools;
+      plugin calls proxied through the server gateway (services/chat.ts runPluginApi).
   phase_status:
     static_A_to_D: complete
     runtime_E: pending (no live grounding yet)
@@ -17,8 +17,8 @@ agents:
   name: Assistant (agent session)
   component: lobe-chat
   agent_kind: interactive
-  purpose: Per-session assistant defined by an agent config (systemRole + enabled plugins/model); runs
-    a client tool-call loop, dispatching plugin calls through the server gateway.
+  purpose: Per-session assistant defined by an agent config (systemRole + enabled plugins/model); runs a client tool-call
+    loop, dispatching plugin calls through the server gateway.
   invocation_surfaces:
   - l1_id: l1.api.chat.completion
     trigger: chat send -> model stream; tool_calls dispatched client-side
@@ -74,8 +74,7 @@ agents:
   - ctl.plugin_settings_auth
   - ctl.abort
   resource_limits:
-    max_iterations: tool-call loop continues while the model emits tool_calls; no explicit hard cap found
-      in web source
+    max_iterations: tool-call loop continues while the model emits tool_calls; no explicit hard cap found in web source
     recursion: n/a
     token_or_cost_budget: none in core
     loop_detection: user abort / stream cancel
@@ -94,8 +93,9 @@ agents:
     notes: ''
   source_ref: src/store/chat/slices/plugin/action.ts; src/services/chat.ts runPluginApi; src/tools/index.ts
   evidence_status: source_confirmed
-  notes: Agent config (systemRole + plugins) can be installed from the plugin/agent MARKET -> external
-    authorship of the system prompt and tool set.
+  notes: Agent config (systemRole + plugins) can be installed from the plugin/agent MARKET -> external authorship of the system
+    prompt and tool set.
+  runtime_blocker: crypto_blocked
 tool_bindings:
 - id: tool.dalle
   agent_id: agent.lobechat.assistant
@@ -126,6 +126,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: src/tools/dalle; builtinTools
   notes: Only built-in tool in web source.
+  runtime_blocker: crypto_blocked
 - id: tool.web_browsing
   agent_id: agent.lobechat.assistant
   l1_ids: []
@@ -160,6 +161,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: lobe web-browsing plugin
   notes: Model-composed URL crawled server-side -> SSRF + indirect injection via page content.
+  runtime_blocker: crypto_blocked
 - id: tool.plugin_default
   agent_id: agent.lobechat.assistant
   l1_ids:
@@ -203,8 +205,8 @@ tool_bindings:
     notes: plugin installed + enabled on the agent
   evidence_status: source_confirmed
   source_ref: services/chat.ts runPluginApi -> API_ENDPOINTS.gateway
-  notes: Server gateway fetches the plugin's manifest url -> SSRF-class; description from remote manifest
-    -> rug-pull.
+  notes: Server gateway fetches the plugin's manifest url -> SSRF-class; description from remote manifest -> rug-pull.
+  runtime_blocker: crypto_blocked
 - id: tool.plugin_standalone
   agent_id: agent.lobechat.assistant
   l1_ids: []
@@ -238,6 +240,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: invokeStandaloneTypePlugin
   notes: Renders third-party iframe content in the app origin boundary.
+  runtime_blocker: crypto_blocked
 - id: tool.custom_plugin
   agent_id: agent.lobechat.assistant
   l1_ids: []
@@ -275,6 +278,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: store/tool/slices/customPlugin/action.ts
   notes: User supplies an arbitrary manifest URL -> model-facing description + gateway target both attacker-choosable.
+  runtime_blocker: crypto_blocked
 context_sources:
 - id: ctx.system_role
   source_kind: system_prompt
@@ -298,6 +302,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: systemRole is user-set OR installed from the market -> market agents carry external system prompts.
+  runtime_blocker: crypto_blocked
 - id: ctx.user_message
   source_kind: user_input
   source_ref: chat input
@@ -317,6 +322,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: crypto_blocked
 - id: ctx.chat_history
   source_kind: chat_history
   source_ref: messages/topics store
@@ -338,6 +344,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: crypto_blocked
 - id: ctx.knowledge
   source_kind: retrieval
   source_ref: files/knowledge base RAG injection
@@ -357,6 +364,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Uploaded document chunks injected -> indirect injection.
+  runtime_blocker: crypto_blocked
 - id: ctx.tool_results
   source_kind: tool_result
   source_ref: plugin/tool responses re-fed to the model
@@ -378,6 +386,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: crypto_blocked
 - id: ctx.web_content
   source_kind: external
   source_ref: web-browsing crawl/search results
@@ -397,6 +406,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Crawled page content -> indirect injection + SSRF reflection.
+  runtime_blocker: crypto_blocked
 - id: ctx.plugin_manifest_desc
   source_kind: external
   source_ref: plugin/custom-plugin manifest descriptions + schemas presented to the model
@@ -418,6 +428,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Remote/user manifests are model-facing -> rug-pull / tool-description injection.
+  runtime_blocker: crypto_blocked
 - id: ctx.file_attachments
   source_kind: document
   source_ref: message file/image attachments
@@ -437,6 +448,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: crypto_blocked
 memory_stores:
 - id: mem.messages
   store_kind: conversation_history
@@ -461,6 +473,7 @@ memory_stores:
     notes: ''
   source_ref: database/schemas messages/topics
   notes: No dedicated agent-memory skill; persistence/poisoning rides on chat history + knowledge.
+  runtime_blocker: crypto_blocked
 - id: mem.knowledge_vector
   store_kind: vector_store
   owner_component: lobe-chat
@@ -482,6 +495,7 @@ memory_stores:
     notes: ''
   source_ref: files/knowledge RAG
   notes: ''
+  runtime_blocker: crypto_blocked
 - id: mem.agents
   store_kind: database
   owner_component: lobe-chat
@@ -505,6 +519,7 @@ memory_stores:
     notes: ''
   source_ref: store/agent; sessions
   notes: Installing a market agent writes systemRole + enabled plugins = instruction+tool provisioning.
+  runtime_blocker: crypto_blocked
 output_sinks:
 - id: sink.chat_response
   sink_kind: chat_response
@@ -528,6 +543,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: fetchSSE; message render
   notes: Markdown image/link auto-load = exfil-on-render channel.
+  runtime_blocker: crypto_blocked
 - id: sink.artifacts
   sink_kind: file
   producer_ids:
@@ -550,6 +566,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: artifacts render; standalone plugin iframe
   notes: Client-side code execution of model output -> XSS/exfil class bounded by iframe sandbox.
+  runtime_blocker: crypto_blocked
 - id: sink.plugin_gateway
   sink_kind: external_api
   producer_ids:
@@ -570,6 +587,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: services/chat.ts runPluginApi
   notes: Model-composed args + user plugin secrets leave to third-party/user-chosen URLs via the gateway.
+  runtime_blocker: crypto_blocked
 - id: sink.dalle
   sink_kind: external_api
   producer_ids:
@@ -588,6 +606,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: dalle tool
   notes: ''
+  runtime_blocker: crypto_blocked
 execution_edges:
 - id: edge.user__assistant
   source:
@@ -622,6 +641,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: store/chat message action
   notes: ''
+  runtime_blocker: crypto_blocked
 - id: edge.assistant__tool
   source:
     agent_id: agent.lobechat.assistant
@@ -661,6 +681,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: store/chat/slices/plugin/action.ts triggerToolCalls
   notes: Auto-run, no human approval -> model-directed tool use executes without a gate.
+  runtime_blocker: crypto_blocked
 - id: edge.tool__assistant
   source:
     agent_id: agent.lobechat.assistant
@@ -691,6 +712,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: invoke*TypePlugin result handling
   notes: ''
+  runtime_blocker: crypto_blocked
 - id: edge.assistant__gateway
   source:
     agent_id: agent.lobechat.assistant
@@ -723,6 +745,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: services/chat.ts runPluginApi
   notes: Server gateway is the SSRF sink (fetches manifest url); no MCP edge (MCP absent in web source).
+  runtime_blocker: crypto_blocked
 - id: edge.assistant__artifacts
   source:
     agent_id: agent.lobechat.assistant
@@ -751,6 +774,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: artifacts render
   notes: Model output executed/rendered client-side in an iframe.
+  runtime_blocker: crypto_blocked
 - id: edge.assistant__output
   source:
     agent_id: agent.lobechat.assistant
@@ -781,6 +805,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: fetchSSE finalize
   notes: ''
+  runtime_blocker: crypto_blocked
 controls:
 - id: ctl.plugin_enablement
   control_kind: tool_policy
@@ -800,6 +825,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: Only plugins enabled on the agent are exposed to the model.
+  runtime_blocker: crypto_blocked
 - id: ctl.gateway_proxy
   control_kind: authorization
   applies_at: before_tool
@@ -819,8 +845,8 @@ controls:
   reachability:
     status: black_box_reachable
     notes: ''
-  notes: Server gateway mediates plugin calls and attaches auth; also the SSRF sink (fetches manifest
-    url).
+  notes: Server gateway mediates plugin calls and attaches auth; also the SSRF sink (fetches manifest url).
+  runtime_blocker: crypto_blocked
 - id: ctl.plugin_settings_auth
   control_kind: authorization
   applies_at: before_tool
@@ -839,6 +865,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: Injects the user's plugin settings/secrets as request headers (execution identity).
+  runtime_blocker: crypto_blocked
 - id: ctl.abort
   control_kind: monitoring
   applies_at: after_model
@@ -857,3 +884,4 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: User can cancel the stream; no automatic per-tool approval or loop cap.
+  runtime_blocker: crypto_blocked

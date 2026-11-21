@@ -6,8 +6,8 @@ meta:
   git_ref: see source_root
   applicability:
     verdict: qualifies
-    evidence: 'Agents endpoint: @librechat/agents LangGraph run (Runs/StreamRunManager.js, createRunBody.js)
-      over ToolService.loadAgentTools; MCP + OpenAPI Actions + sub-agents.'
+    evidence: 'Agents endpoint: @librechat/agents LangGraph run (Runs/StreamRunManager.js, createRunBody.js) over ToolService.loadAgentTools;
+      MCP + OpenAPI Actions + sub-agents.'
   phase_status:
     static_A_to_D: complete
     runtime_E: pending (no live grounding yet)
@@ -17,8 +17,8 @@ agents:
   name: Agent (Agents endpoint)
   component: LibreChat
   agent_kind: interactive
-  purpose: User-configured agent run over a LangGraph loop; tools gated by AgentCapabilities; can call
-    MCP servers, OpenAPI Actions, and sub-agents.
+  purpose: User-configured agent run over a LangGraph loop; tools gated by AgentCapabilities; can call MCP servers, OpenAPI
+    Actions, and sub-agents.
   invocation_surfaces:
   - l1_id: l1.api.agents.chat
     trigger: POST agents chat (EModelEndpoint.agents) run
@@ -93,8 +93,8 @@ agents:
     principal_source: session JWT -> req.user
     tenant_scope: per-user; shared agents by permission
     resource_scope: user's files/memories; agent's actions/MCP
-    delegated_identity: MCP/Actions use PER-USER OAuth/OBO identity (AuthIdentityContext); Actions may
-      also use stored apiKey auth
+    delegated_identity: MCP/Actions use PER-USER OAuth/OBO identity (AuthIdentityContext); Actions may also use stored apiKey
+      auth
     authz_enforcement: code (AgentCapabilities + resolveToolRoleGrants + per-tool auth)
   related_l2_ids:
   - l2.agents.chat
@@ -104,10 +104,10 @@ agents:
     notes: ''
   source_ref: api/server/services/ToolService.js loadAgentTools; createRunBody.js; Runs/StreamRunManager.js
   evidence_status: observed
-  notes: 'Tool set = native capability tools + agent.tools (plugins) + agent actions + MCP servers, each
-    gated by AgentCapabilities and tool role grants | RUNTIME 2026-11-20: observed via LibreChat server-side
-    agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
-    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'Tool set = native capability tools + agent.tools (plugins) + agent actions + MCP servers, each gated by AgentCapabilities
+    and tool role grants | RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
+    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE
+    events on /api/agents/chat/stream/{streamId}).'
 - id: agent.librechat.subagent
   name: Sub-agent (delegated)
   component: LibreChat
@@ -184,6 +184,7 @@ agents:
   source_ref: packages/api/src/agents/{subagentIdentity,subagentTaskRouting,subagentDelivery}.ts
   evidence_status: source_confirmed
   notes: Child content + identity buffered and delivered back to the parent (subagentContent/Delivery).
+  runtime_blocker: local_not_driven
 - id: agent.librechat.memory
   name: Memory agent
   component: LibreChat
@@ -237,6 +238,7 @@ agents:
   source_ref: packages/api memory processing; Tools memory
   evidence_status: source_confirmed
   notes: Turn-derived memory extraction -> poisoning persistence into ctx.memory_recall.
+  runtime_blocker: local_not_driven
 tool_bindings:
 - id: tool.execute_code
   agent_id: agent.librechat.primary
@@ -278,10 +280,9 @@ tool_bindings:
     notes: AgentCapabilities.execute_code enabled + code resource
   evidence_status: observed
   source_ref: ToolService; app/clients/tools code/agent.ts
-  notes: 'Sandboxed interpreter (stronger isolation than in-process evaluators) | RUNTIME 2026-11-20:
-    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
-    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
-    on /api/agents/chat/stream/{streamId}).'
+  notes: 'Sandboxed interpreter (stronger isolation than in-process evaluators) | RUNTIME 2026-11-20: observed via LibreChat
+    server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked execute_code
+    (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: tool.file_search
   agent_id: agent.librechat.primary
   l1_ids:
@@ -314,6 +315,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: ToolService file_search; RAG API
   notes: Retrieved file chunks are untrusted -> indirect injection.
+  runtime_blocker: local_not_driven
 - id: tool.web_search
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -348,10 +350,9 @@ tool_bindings:
     notes: AgentCapabilities.web_search enabled
   evidence_status: observed
   source_ref: app/clients/tools web/agent.ts
-  notes: 'Scrapes model-reachable URLs -> SSRF + indirect injection via page content | RUNTIME 2026-11-20:
-    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
-    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
-    on /api/agents/chat/stream/{streamId}).'
+  notes: 'Scrapes model-reachable URLs -> SSRF + indirect injection via page content | RUNTIME 2026-11-20: observed via LibreChat
+    server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked execute_code
+    (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: tool.image_gen
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -382,6 +383,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: ToolService imageGenTools
   notes: ''
+  runtime_blocker: external_integration
 - id: tool.memory
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -410,6 +412,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: ToolService memory; packages/api memory
   notes: Agent/turn-written memory re-injected (poisoning loop).
+  runtime_blocker: local_not_driven
 - id: tool.mcp
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -451,8 +454,9 @@ tool_bindings:
     notes: MCP server configured + (per-user) OAuth connected
   evidence_status: source_confirmed
   source_ref: api/server/services/Tools/mcp.js; packages/api/src/mcp; getMCPManager
-  notes: PER-USER OAuth/OBO identity (AuthIdentityContext) -> not a shared-cred confused deputy; remote
-    tool descriptions still a rug-pull/injection channel.
+  notes: PER-USER OAuth/OBO identity (AuthIdentityContext) -> not a shared-cred confused deputy; remote tool descriptions
+    still a rug-pull/injection channel.
+  runtime_blocker: external_integration
 - id: tool.actions
   agent_id: agent.librechat.primary
   l1_ids:
@@ -494,8 +498,9 @@ tool_bindings:
     notes: AgentCapabilities.actions + agent has action sets
   evidence_status: source_confirmed
   source_ref: ToolService loadActionSets/processActions
-  notes: Model-composed args to agent-defined OpenAPI domains -> SSRF/abuse scoped by action auth; OpenAPI
-    description is model-facing.
+  notes: Model-composed args to agent-defined OpenAPI domains -> SSRF/abuse scoped by action auth; OpenAPI description is
+    model-facing.
+  runtime_blocker: local_not_driven
 - id: tool.plugins
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -526,6 +531,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: app/clients/tools/manifest; loadTools
   notes: ''
+  runtime_blocker: local_not_driven
 - id: tool.subagent
   agent_id: agent.librechat.primary
   l1_ids: []
@@ -554,6 +560,7 @@ tool_bindings:
   evidence_status: source_confirmed
   source_ref: packages/api/src/agents/* (subagent delegation)
   notes: Delegation edge; sub-agent carries the real effects.
+  runtime_blocker: local_not_driven
 context_sources:
 - id: ctx.system_prompt
   source_kind: system_prompt
@@ -575,10 +582,9 @@ context_sources:
     status: black_box_reachable
     notes: ''
   evidence_status: observed
-  notes: 'Agent instructions authored by the agent owner; shared agents expose this to other users | RUNTIME
-    2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent
-    ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'Agent instructions authored by the agent owner; shared agents expose this to other users | RUNTIME 2026-11-20: observed
+    via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
+    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.memory_prompt
   source_kind: system_prompt
   source_ref: librechat.yaml memory prompt
@@ -599,6 +605,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: local_not_driven
 - id: ctx.user_message
   source_kind: user_input
   source_ref: chat message
@@ -619,9 +626,8 @@ context_sources:
     status: black_box_reachable
     notes: ''
   evidence_status: observed
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.chat_history
   source_kind: chat_history
   source_ref: conversations/messages
@@ -644,9 +650,8 @@ context_sources:
     status: black_box_reachable
     notes: ''
   evidence_status: observed
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.file_search_rag
   source_kind: retrieval
   source_ref: RAG API file_search results
@@ -666,6 +671,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Retrieved file chunks -> indirect injection.
+  runtime_blocker: local_not_driven
 - id: ctx.tool_results
   source_kind: tool_result
   source_ref: tool outputs re-fed to the graph
@@ -686,9 +692,8 @@ context_sources:
     status: black_box_reachable
     notes: ''
   evidence_status: observed
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.web_content
   source_kind: external
   source_ref: web_search scrape results
@@ -708,6 +713,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Scraped page content -> indirect injection + SSRF reflection.
+  runtime_blocker: local_not_driven
 - id: ctx.memory_recall
   source_kind: retrieval
   source_ref: memory injected into context
@@ -730,6 +736,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Turn-derived memory re-injected -> poisoning persistence.
+  runtime_blocker: local_not_driven
 - id: ctx.ocr_context
   source_kind: document
   source_ref: ocr/context capability file content injection
@@ -750,6 +757,7 @@ context_sources:
     notes: AgentCapabilities.ocr / context
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: local_not_driven
 - id: ctx.tool_descriptions
   source_kind: external
   source_ref: MCP tool listings + OpenAPI action descriptions shown to the model
@@ -770,10 +778,9 @@ context_sources:
     status: black_box_reachable
     notes: ''
   evidence_status: observed
-  notes: 'Remote MCP/action descriptions are model-facing -> rug-pull / description injection | RUNTIME
-    2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent
-    ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'Remote MCP/action descriptions are model-facing -> rug-pull / description injection | RUNTIME 2026-11-20: observed
+    via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
+    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctx.delegated_task
   source_kind: delegated_summary
   source_ref: parent -> sub-agent task
@@ -794,6 +801,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: Parent-composed sub-agent task -> parent->child injection path.
+  runtime_blocker: local_not_driven
 - id: ctx.attachments
   source_kind: document
   source_ref: message file/image attachments
@@ -814,6 +822,7 @@ context_sources:
     notes: ''
   evidence_status: source_confirmed
   notes: ''
+  runtime_blocker: local_not_driven
 memory_stores:
 - id: mem.conversations
   store_kind: conversation_history
@@ -839,9 +848,8 @@ memory_stores:
     status: black_box_reachable
     notes: ''
   source_ref: packages/data-schemas conversations/messages
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: mem.vectordb
   store_kind: vector_store
   owner_component: LibreChat
@@ -864,6 +872,7 @@ memory_stores:
     notes: ''
   source_ref: RAG API; Files service
   notes: Shared-agent file resources can cross users.
+  runtime_blocker: local_not_driven
 - id: mem.agent_memory
   store_kind: agent_notes
   owner_component: LibreChat
@@ -888,6 +897,7 @@ memory_stores:
     notes: memory capability
   source_ref: packages/api memory
   notes: Poisoning sink -> ctx.memory_recall.
+  runtime_blocker: local_not_driven
 - id: mem.agents_config
   store_kind: database
   owner_component: LibreChat
@@ -910,10 +920,9 @@ memory_stores:
     status: black_box_reachable
     notes: ''
   source_ref: agents schema
-  notes: 'Editing a shared agent = provisioning instructions + tools for its users | RUNTIME 2026-11-20:
-    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
-    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
-    on /api/agents/chat/stream/{streamId}).'
+  notes: 'Editing a shared agent = provisioning instructions + tools for its users | RUNTIME 2026-11-20: observed via LibreChat
+    server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked execute_code
+    (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: mem.actions
   store_kind: database
   owner_component: LibreChat
@@ -935,6 +944,7 @@ memory_stores:
     notes: ''
   source_ref: ToolService loadActionSets; actions schema (auth encrypted)
   notes: Action auth (apiKey/OAuth) stored encrypted; defines outbound domains.
+  runtime_blocker: local_not_driven
 output_sinks:
 - id: sink.chat_response
   sink_kind: chat_response
@@ -957,9 +967,9 @@ output_sinks:
     notes: ''
   evidence_status: observed
   source_ref: StreamRunManager
-  notes: 'Markdown image/link auto-load = exfil-on-render channel | RUNTIME 2026-11-20: observed via LibreChat
-    server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively
-    invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'Markdown image/link auto-load = exfil-on-render channel | RUNTIME 2026-11-20: observed via LibreChat server-side
+    agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked execute_code (bash_tool)
+    and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: sink.artifacts
   sink_kind: file
   producer_ids:
@@ -981,6 +991,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: artifacts capability
   notes: Client-side code execution of model output; gated by artifacts capability.
+  runtime_blocker: local_not_driven
 - id: sink.code_exec
   sink_kind: external_api
   producer_ids:
@@ -999,6 +1010,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: code/agent.ts
   notes: Sandboxed remote execution; per-user session.
+  runtime_blocker: local_not_driven
 - id: sink.image
   sink_kind: external_api
   producer_ids:
@@ -1017,6 +1029,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: image gen tools
   notes: ''
+  runtime_blocker: external_integration
 - id: sink.action_call
   sink_kind: external_api
   producer_ids:
@@ -1037,6 +1050,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: processActions
   notes: Model-composed args to agent-defined domains under stored action auth.
+  runtime_blocker: local_not_driven
 - id: sink.mcp_call
   sink_kind: external_api
   producer_ids:
@@ -1055,6 +1069,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: Tools/mcp.js
   notes: Per-user OAuth identity (not shared creds).
+  runtime_blocker: local_not_driven
 - id: sink.web_fetch
   sink_kind: external_api
   producer_ids:
@@ -1074,6 +1089,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: web/agent.ts
   notes: ''
+  runtime_blocker: local_not_driven
 - id: sink.delegated_result
   sink_kind: delegated_result
   producer_ids:
@@ -1093,6 +1109,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: subagentDelivery/subagentContent
   notes: Child->parent path.
+  runtime_blocker: local_not_driven
 - id: sink.memory_write
   sink_kind: database_record
   producer_ids:
@@ -1113,6 +1130,7 @@ output_sinks:
   evidence_status: source_confirmed
   source_ref: packages/api memory
   notes: Closes poisoning loop into ctx.memory_recall.
+  runtime_blocker: local_not_driven
 execution_edges:
 - id: edge.user__primary
   source:
@@ -1146,9 +1164,8 @@ execution_edges:
     notes: ''
   evidence_status: observed
   source_ref: agents endpoint; createRunBody.js
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.primary__tool
   source:
     agent_id: agent.librechat.primary
@@ -1190,10 +1207,9 @@ execution_edges:
     notes: ''
   evidence_status: observed
   source_ref: Runs/StreamRunManager.js; @librechat/agents graph
-  notes: 'Tool use gated by capability + auth, but no interactive human approval per call | RUNTIME 2026-11-20:
-    observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted
-    conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events
-    on /api/agents/chat/stream/{streamId}).'
+  notes: 'Tool use gated by capability + auth, but no interactive human approval per call | RUNTIME 2026-11-20: observed via
+    LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
+    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.tool__primary
   source:
     agent_id: agent.librechat.primary
@@ -1223,9 +1239,8 @@ execution_edges:
     notes: ''
   evidence_status: observed
   source_ref: RunManager
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.primary__subagent
   source:
     agent_id: agent.librechat.primary
@@ -1258,6 +1273,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: subagentTaskRouting.ts
   notes: subagentIdentity captured; parent->child task injection path.
+  runtime_blocker: local_not_driven
 - id: edge.subagent__primary
   source:
     agent_id: agent.librechat.subagent
@@ -1288,6 +1304,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: subagentDelivery.ts
   notes: ''
+  runtime_blocker: local_not_driven
 - id: edge.primary__external
   source:
     agent_id: agent.librechat.primary
@@ -1320,10 +1337,9 @@ execution_edges:
     notes: ''
   evidence_status: observed
   source_ref: Tools/mcp.js; processActions
-  notes: 'MCP under per-user OBO; Actions under stored action auth. No MCP sampling edge observed | RUNTIME
-    2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent
-    ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'MCP under per-user OBO; Actions under stored action auth. No MCP sampling edge observed | RUNTIME 2026-11-20: observed
+    via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
+    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.primary__code
   source:
     agent_id: agent.librechat.primary
@@ -1354,9 +1370,8 @@ execution_edges:
     notes: ''
   evidence_status: observed
   source_ref: code/agent.ts
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: edge.memory_extract
   source:
     agent_id: agent.librechat.memory
@@ -1389,6 +1404,7 @@ execution_edges:
   evidence_status: source_confirmed
   source_ref: packages/api memory processing
   notes: Turn-derived memory write; poisoning persistence edge.
+  runtime_blocker: local_not_driven
 - id: edge.primary__output
   source:
     agent_id: agent.librechat.primary
@@ -1418,9 +1434,8 @@ execution_edges:
     notes: ''
   evidence_status: observed
   source_ref: StreamRunManager finalize
-  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint).
-    Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step
-    SSE events on /api/agents/chat/stream/{streamId}).'
+  notes: 'RUNTIME 2026-11-20: observed via LibreChat server-side agent on local qwen2.5:7b (Ollama endpoint). Agent ran +
+    persisted conversations; natively invoked execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 controls:
 - id: ctl.agent_capabilities
   control_kind: tool_policy
@@ -1442,9 +1457,9 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: 'Admin enables capability classes (execute_code/file_search/web_search/actions/tools/artifacts/ocr/context/memory/chain);
-    a disabled capability''s tools are never loaded | RUNTIME 2026-11-20: observed via LibreChat server-side
-    agent on local qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked
-    execute_code (bash_tool) and web_search (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
+    a disabled capability''s tools are never loaded | RUNTIME 2026-11-20: observed via LibreChat server-side agent on local
+    qwen2.5:7b (Ollama endpoint). Agent ran + persisted conversations; natively invoked execute_code (bash_tool) and web_search
+    (tool_call/run_step SSE events on /api/agents/chat/stream/{streamId}).'
 - id: ctl.tool_role_grants
   control_kind: authorization
   applies_at: before_tool
@@ -1462,6 +1477,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: Per-role grants decide which tools a user/agent may load.
+  runtime_blocker: local_not_driven
 - id: ctl.code_sandbox
   control_kind: tool_policy
   applies_at: before_tool
@@ -1482,6 +1498,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: Code runs in the remote Code API sandbox, not in the app process.
+  runtime_blocker: local_not_driven
 - id: ctl.mcp_oauth
   control_kind: authorization
   applies_at: before_tool
@@ -1502,6 +1519,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: MCP calls use the REAL request user's OAuth identity (per-user), not a shared credential.
+  runtime_blocker: external_integration
 - id: ctl.action_auth
   control_kind: authorization
   applies_at: before_tool
@@ -1522,6 +1540,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: Each action set carries its own stored auth and domain scope.
+  runtime_blocker: local_not_driven
 - id: ctl.subagent_routing
   control_kind: tool_policy
   applies_at: delegation
@@ -1541,6 +1560,7 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: Routes/bounds delegation to allowed sub-agents.
+  runtime_blocker: local_not_driven
 - id: ctl.abort
   control_kind: monitoring
   applies_at: after_model
@@ -1558,3 +1578,4 @@ controls:
     status: black_box_reachable
     notes: ''
   notes: User can cancel the run; no interactive per-tool approval gate.
+  runtime_blocker: local_not_driven

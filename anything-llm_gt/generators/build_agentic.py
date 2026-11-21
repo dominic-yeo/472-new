@@ -20,6 +20,7 @@ import agentic_data as D  # noqa: E402
 # EphemeralAgentHandler/AIbitat logs. No secrets recorded; evidence is the runtime
 # observation that the record was exercised. Re-applied on every build.
 _RUNTIME_OBSERVED = {
+    "agent.anythingllm.workspace",  # @agent run observed 2026-11-21
     "agent.anythingllm.ephemeral",
     # tools invoked across the @agent runs
     "tool.ws.web_browsing", "tool.ws.web_scraping", "tool.ws.memory", "tool.ws.rag_docs",
