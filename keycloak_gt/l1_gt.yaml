@@ -1281,6 +1281,12 @@ nodes:
     path: /realms/master/protocol/openid-connect/userinfo
     identity: admin
     status: 403
+  - method: GET
+    path: /realms/{realm}/protocol/openid-connect/userinfo
+    identity: member
+    status: 200
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -1311,15 +1317,20 @@ nodes:
       supports: 'runtime: observed status per identity'
     notes: null
     grounding:
-      depth: route-confirmed
-      samples: 1
-      success_2xx: 0
+      depth: observed
+      samples: 2
+      success_2xx: 1
       identities:
       - admin
+      - member
       statuses:
+      - 200
       - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 200
 - key: http://localhost:8080/realms/{realm}/protocol/openid-connect/logout
   kind: api
   methods:
@@ -6076,6 +6087,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -6117,14 +6134,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 2
+      samples: 3
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}
   kind: api
   methods:
@@ -6242,6 +6264,12 @@ nodes:
     body_excerpt: '{"id":"4db28a17-7f36-443f-bee3-be4160616a0a","realm":"gtrealm","notBefore":1795181428,"defaultSignatureAlgorithm":"RS256","revokeRefreshToken":false,"refreshTok'
     captured: '2026-11-21'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -6281,16 +6309,21 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 3
+      samples: 4
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/testSMTPConnection
   kind: api
   methods:
@@ -6759,6 +6792,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/events
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -6794,14 +6833,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/admin-events
   kind: api
   methods:
@@ -6830,6 +6874,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/admin-events
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -6865,14 +6915,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/events/config
   kind: api
   methods:
@@ -6901,6 +6956,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/events/config
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -6936,14 +6997,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/client-session-stats
   kind: api
   methods:
@@ -6971,6 +7037,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/client-session-stats
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7004,14 +7076,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/keys
   kind: api
   methods:
@@ -7039,6 +7116,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/keys
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7072,14 +7155,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/client-policies/policies
   kind: api
   methods:
@@ -7108,6 +7196,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/client-policies/policies
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7143,14 +7237,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/client-policies/profiles
   kind: api
   methods:
@@ -7179,6 +7278,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/client-policies/profiles
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7214,14 +7319,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/localization
   kind: api
   methods:
@@ -7249,6 +7359,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/localization
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7282,14 +7398,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/client-description-converter
   kind: api
   methods:
@@ -7569,6 +7690,12 @@ nodes:
     body_excerpt: '[{"id":"a5fa9a10-91dc-4f3e-935c-b2ce66647a72","username":"gtuser","emailVerified":false,"createdTimestamp":1795181425829,"enabled":true,"totp":false,"disableabl'
     captured: '2026-11-21'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/users
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7610,18 +7737,23 @@ nodes:
     notes: null
     grounding:
       depth: exercised
-      samples: 4
+      samples: 5
       success_2xx: 2
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 201
       - 401
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}
   kind: api
   methods:
@@ -7765,6 +7897,12 @@ nodes:
     body_excerpt: ''
     captured: '2026-11-21'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/users/{id}
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -7798,19 +7936,24 @@ nodes:
     notes: null
     grounding:
       depth: exercised
-      samples: 4
+      samples: 5
       success_2xx: 3
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 204
       - 401
+      - 403
       methods:
       - DELETE
       - GET
       - PUT
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/reset-password
   kind: api
   methods:
@@ -8622,6 +8765,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/users/{id}/credentials
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -8655,14 +8804,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/groups
   kind: api
   methods:
@@ -8690,6 +8844,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/users/{id}/groups
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -8723,14 +8883,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/groups/{groupId}
   kind: api
   methods:
@@ -8828,6 +8993,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/users/{id}/sessions
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -8861,14 +9032,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/federated-identity/{provider}
   kind: api
   methods:
@@ -8967,6 +9143,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/users/{id}/consents
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -9001,14 +9183,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/users/{id}/disable-credential-types
   kind: api
   methods:
@@ -9468,6 +9655,12 @@ nodes:
     body_excerpt: '[{"id":"6cc133ab-67d9-45c5-9633-2c7c96bb19c6","clientId":"account","name":"${client_account}","rootUrl":"${authBaseUrl}","baseUrl":"/realms/gtrealm/account/","s'
     captured: '2026-11-21'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/clients
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -9510,18 +9703,23 @@ nodes:
     notes: null
     grounding:
       depth: exercised
-      samples: 4
+      samples: 5
       success_2xx: 2
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 201
       - 401
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/clients/{id}
   kind: api
   methods:
@@ -10961,6 +11159,12 @@ nodes:
     body_excerpt: '[{"id":"0490a2ab-3c2f-4787-81c9-a92935599022","name":"offline_access","description":"${role_offline-access}","composite":false,"clientRole":false,"containerId":'
     captured: '2026-11-21'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/roles
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -10997,18 +11201,23 @@ nodes:
     notes: null
     grounding:
       depth: exercised
-      samples: 4
+      samples: 5
       success_2xx: 3
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 201
       - 401
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/roles/{role-name}/composites
   kind: api
   methods:
@@ -11254,6 +11463,12 @@ nodes:
     body_excerpt: '[{"id":"570f6261-76e1-4991-82fc-770178d7405f","name":"gtgroup","path":"/gtgroup","subGroupCount":0,"subGroups":[],"access":{"view":true,"viewMembers":true,"mana'
     captured: '2026-11-21'
     note: 'effect: valid-body op succeeded, read-back confirmed'
+  - method: GET
+    path: /admin/realms/{realm}/groups
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -11290,18 +11505,23 @@ nodes:
     notes: null
     grounding:
       depth: exercised
-      samples: 4
+      samples: 5
       success_2xx: 3
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 201
       - 401
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/groups/{id}
   kind: api
   methods:
@@ -11777,6 +11997,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/identity-provider/instances
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -11814,17 +12040,22 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 401
+      - 403
       methods:
       - GET
       - POST
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/components
   kind: api
   methods:
@@ -11923,6 +12154,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/components
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -11961,16 +12198,21 @@ nodes:
     notes: 'LDAP federation config = SSRF sink #3.'
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/components/{id}
   kind: api
   methods:
@@ -12190,6 +12432,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/authentication/flows
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -12226,16 +12474,21 @@ nodes:
     notes: null
     grounding:
       depth: observed
-      samples: 2
+      samples: 3
       success_2xx: 1
       identities:
       - admin
       - anon
+      - member
       statuses:
       - 200
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/authentication/executions
   kind: api
   methods:
@@ -12684,6 +12937,12 @@ nodes:
     content_type: application/json
     body_excerpt: '{"error":"HTTP 401 Unauthorized"}'
     captured: '2026-11-19'
+  - method: GET
+    path: /admin/realms/{realm}/client-scopes
+    identity: member
+    status: 403
+    captured: '2026-11-22'
+    note: 'identity probe: non-admin member credential'
   sources:
   - source
   - runtime
@@ -12719,14 +12978,19 @@ nodes:
     notes: null
     grounding:
       depth: route-confirmed
-      samples: 1
+      samples: 2
       success_2xx: 0
       identities:
       - anon
+      - member
       statuses:
       - 401
+      - 403
       methods:
       - GET
+    identity_statuses:
+      member:
+      - 403
 - key: http://localhost:8080/admin/realms/{realm}/client-registration-policy/providers
   kind: api
   methods:
