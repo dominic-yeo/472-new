@@ -25439,7 +25439,7 @@ nodes:
   confidence: 0.9
   reasoning: Lists watched words.
   l1_keys:
-  - http://localhost/admin/watched_words
+  - http://localhost/admin/customize/watched_words
   consumes:
   - Authenticated(actor:User[SELF],Session)
   - Can(actor:User[SELF],Administer,instance:Instance{authority})
@@ -25538,7 +25538,7 @@ nodes:
   confidence: 0.9
   reasoning: Adds a watched word/regex rule.
   l1_keys:
-  - http://localhost/admin/watched_words
+  - http://localhost/admin/customize/watched_words
   consumes:
   - Authenticated(actor:User[SELF],Session)
   - Can(actor:User[SELF],Administer,instance:Instance{authority})
@@ -25637,7 +25637,7 @@ nodes:
   confidence: 0.9
   reasoning: Deletes a watched word.
   l1_keys:
-  - http://localhost/admin/watched_words/{id}
+  - http://localhost/admin/customize/watched_words/{id}
   consumes:
   - Authenticated(actor:User[SELF],Session)
   - Can(actor:User[SELF],Administer,instance:Instance{authority})
@@ -25735,7 +25735,7 @@ nodes:
   confidence: 0.9
   reasoning: Bulk-imports watched words from CSV.
   l1_keys:
-  - http://localhost/admin/watched_words/upload
+  - http://localhost/admin/customize/watched_words/upload
   consumes:
   - Authenticated(actor:User[SELF],Session)
   - Can(actor:User[SELF],Administer,instance:Instance{authority})
