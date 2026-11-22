@@ -1593,14 +1593,15 @@ memory_stores:
   read_path: scheduler triggers later agent runs
   retention_and_deletion: user-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
     notes: automations.enable
   source_ref: tools.py automations builtin; utils/automations.py
-  notes: Persistent scheduled triggers = durable re-invocation / foothold.
-  runtime_blocker: local_not_driven
+  notes: 'Persistent scheduled triggers = durable re-invocation / foothold | RUNTIME 2026-11-22: direct automations CRUD:
+    POST /api/v1/automations/create 200 persisted durable automation w/ rrule trigger (next_runs computed), GET read-back,
+    POST /{id}/run -> AutomationRun status=success (created chat, ran model). Store+trigger exercised; local.'
 output_sinks:
 - id: sink.chat_stream
   sink_kind: chat_response

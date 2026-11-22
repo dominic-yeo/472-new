@@ -1166,14 +1166,15 @@ memory_stores:
   read_path: scheduler triggers ephemeral agent runs
   retention_and_deletion: user-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
     notes: single-user mode
   source_ref: create-scheduled-job; models/agentSchedule
-  notes: Durable re-invocation / foothold.
-  runtime_blocker: scheduling_required
+  notes: 'Durable re-invocation / foothold | RUNTIME 2026-11-22: scheduler fired on ''* * * * *'' cron timer: ScheduledJobRun
+    1/2/3 at consecutive minutes, run 3 completed with EphemeralAgentHandler output ''SCHEDULED'' (qwen2.5:7b, 22.9s); job
+    created POST /api/scheduled-jobs/new 201, persisted+durable, deleted 200. Local Ollama, no cloud.'
 - id: mem.filesystem
   store_kind: database
   owner_component: anything-llm
@@ -1369,10 +1370,11 @@ output_sinks:
   reachability:
     status: conditionally_mounted
     notes: single-user mode
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: create-scheduled-job
-  notes: ''
-  runtime_blocker: scheduling_required
+  notes: 'RUNTIME 2026-11-22: scheduler fired on ''* * * * *'' cron timer: ScheduledJobRun 1/2/3 at consecutive minutes, run
+    3 completed with EphemeralAgentHandler output ''SCHEDULED'' (qwen2.5:7b, 22.9s); job created POST /api/scheduled-jobs/new
+    201, persisted+durable, deleted 200. Local Ollama, no cloud.'
 execution_edges:
 - id: edge.user__workspace
   source:
@@ -1618,10 +1620,11 @@ execution_edges:
   reachability:
     status: conditionally_mounted
     notes: single-user mode; a job exists
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: create-scheduled-job runner
-  notes: Autonomous re-invocation without human oversight.
-  runtime_blocker: scheduling_required
+  notes: 'Autonomous re-invocation without human oversight | RUNTIME 2026-11-22: scheduler fired on ''* * * * *'' cron timer:
+    ScheduledJobRun 1/2/3 at consecutive minutes, run 3 completed with EphemeralAgentHandler output ''SCHEDULED'' (qwen2.5:7b,
+    22.9s); job created POST /api/scheduled-jobs/new 201, persisted+durable, deleted 200. Local Ollama, no cloud.'
 - id: edge.workspace__output
   source:
     agent_id: agent.anythingllm.workspace

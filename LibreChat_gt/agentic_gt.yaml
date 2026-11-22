@@ -887,14 +887,15 @@ memory_stores:
   read_path: memory injected into context
   retention_and_deletion: user-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: conditionally_mounted
     notes: memory capability
   source_ref: packages/api memory
-  notes: Poisoning sink -> ctx.memory_recall.
-  runtime_blocker: local_not_driven
+  notes: 'Poisoning sink -> ctx.memory_recall | RUNTIME 2026-11-22: direct memory CRUD (packages/api memory): POST /api/memories
+    201 persisted entry gt_probe, GET /api/memories 200 read it back, DELETE 200. Store write+read genuinely exercised; local,
+    no model needed.'
 - id: mem.agents_config
   store_kind: database
   owner_component: LibreChat
@@ -934,14 +935,16 @@ memory_stores:
   read_path: loadActionSets -> tools
   retention_and_deletion: owner-managed
   related_l2_ids: []
-  evidence_status: source_confirmed
+  evidence_status: observed
   visibility: white_box_required
   reachability:
     status: black_box_reachable
     notes: ''
   source_ref: ToolService loadActionSets; actions schema (auth encrypted)
-  notes: Action auth (apiKey/OAuth) stored encrypted; defines outbound domains.
-  runtime_blocker: local_not_driven
+  notes: 'Action auth (apiKey/OAuth) stored encrypted; defines outbound domains | RUNTIME 2026-11-22: direct action-set CRUD:
+    POST /api/agents/actions/{agent_id} stored an action (encryptMetadata ran; action_id issued, agent.tools updated), GET
+    /api/agents/actions 200 returned the persisted record with encrypted auth + outbound domain. Definition store exercised;
+    model-independent (action not invoked).'
 output_sinks:
 - id: sink.chat_response
   sink_kind: chat_response
@@ -1124,10 +1127,11 @@ output_sinks:
   reachability:
     status: black_box_reachable
     notes: ''
-  evidence_status: source_confirmed
+  evidence_status: observed
   source_ref: packages/api memory
-  notes: Closes poisoning loop into ctx.memory_recall.
-  runtime_blocker: local_not_driven
+  notes: 'Closes poisoning loop into ctx.memory_recall | RUNTIME 2026-11-22: direct memory CRUD (packages/api memory): POST
+    /api/memories 201 persisted entry gt_probe, GET /api/memories 200 read it back, DELETE 200. Store write+read genuinely
+    exercised; local, no model needed.'
 execution_edges:
 - id: edge.user__primary
   source:
