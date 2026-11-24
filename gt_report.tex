@@ -87,10 +87,16 @@ contracts, (ii)~semantic business actions and the state they depend on, and
 white-box source analysis with black-box runtime capture and enforces cross-layer
 referential integrity, we produce an evidence-backed dataset across \textbf{fifteen}
 open-source vulnerable applications (ten traditional web applications and five
-LLM-integrated systems). The resulting dataset records \textbf{1{,}392 deployed
+LLM-integrated systems). The resulting dataset records \textbf{1{,}397 deployed
 endpoints}, \textbf{980 business semantic flows}, and \textbf{327 agentic capability
-records}. Beyond the artefact, the project contributes a reusable annotation-and-review
-methodology and surfaces two findings: the same business action is frequently exposed
+records}. The dataset is \emph{evidence-graded}: every interface and action carries a
+runtime-observation depth and every agentic capability a runtime status, so that
+across the traditional-web corpus all 1{,}397 interfaces and 980 actions are
+runtime-grounded (the actions split 276 confirmed by observed effect and 704 by
+interface), while the agentic layer is grounded for 129 of 307 records with each
+remaining record labelled by the precise reason it cannot be observed in a local,
+credential-free environment. Beyond the artefact, the project contributes a reusable
+annotation-and-review methodology and surfaces two findings: the same business action is frequently exposed
 through multiple surfaces that automated crawlers under-count, and the root cause of
 agentic attack vectors is \emph{authority}---an untrusted input reaching a privileged
 tool---which the schema makes directly enumerable and checkable for enforced controls.
@@ -155,13 +161,20 @@ between them.
       application-specific surfaces with version and deployment context, observed
       behaviour, semantic annotations, and supporting evidence:
       \begin{itemize}[leftmargin=1.4em,itemsep=0pt]
-        \item \textbf{1{,}392} deployed endpoints (\L1);
+        \item \textbf{1{,}397} deployed endpoints (\L1);
         \item \textbf{980} business semantic flows (\L2);
         \item \textbf{327} agentic capability records.
       \end{itemize}
 \item \textbf{A repeatable annotation and review workflow} that reconciles source and
       runtime evidence, generates structured records, tracks unresolved cases, and
       automatically checks cross-layer references.
+\item \textbf{An evidence-grading method for runtime grounding.} Each record is assigned
+      a runtime-observation depth from a fixed ladder; a completeness oracle measures
+      authored surface against each application's own route list; a multi-identity probe
+      records per-role reachability; and every agentic record that cannot be observed in
+      a local, credential-free environment is tagged with a blocker from a closed
+      taxonomy. The grading is honest by construction: a record is marked observed only
+      when a real response or effect is captured, never for a source-only path.
 \end{enumerate}
 
 % ======================================================================
@@ -384,6 +397,44 @@ vectors is authority on this path.}
 \label{fig:ece}
 \end{figure}
 
+\subsection{Runtime grounding and its measurement}\label{sec:ground}
+Both pipelines end by reconciling the authored records against a live, pinned
+deployment. We make the \emph{strength} of that reconciliation explicit rather than
+binary, through four instruments.
+
+\paragraph{Evidence-depth ladder.} Each \L1 interface carries a grounding depth on a
+fixed ladder---\cd{none} $\prec$ \cd{route-confirmed} (a request reached the handler,
+e.g.\ a $4xx$ that proves the route exists) $\prec$ \cd{observed} (at least one $2xx$)
+$\prec$ \cd{exercised} (observed across more than one identity or method). Each \L2
+action carries a tier of \cd{interface} (its bound \L1 routes were observed) or
+\cd{effect} (the action's state change was itself confirmed at runtime). The depth is a
+property of the evidence, so a reader can see not only \emph{whether} a record is
+grounded but \emph{how far}.
+
+\paragraph{Completeness oracle.} To check that the authored surface is neither invented
+nor badly under-counted, each \L1 set is diffed against the application's own route
+list---either the served OpenAPI document (Oracle~A) or an in-container router dump
+(Oracle~B). We report \emph{validity} (the share of checkable authored routes that are
+real live routes) separately from \emph{coverage} (the share of the live surface that is
+inventoried), and hold surface a static oracle structurally cannot enumerate (dynamically
+mounted routers, packaged sub-APIs, static assets) out of the validity denominator so the
+measure is not understated.
+
+\paragraph{Multi-identity probing.} Interfaces are driven under more than one identity
+(anonymous, user, admin, and application-specific roles such as Vocechat's
+\cd{bot}/\cd{secret_holder}) and the per-identity status is recorded on the node, so an
+authorization wall (e.g.\ $403$ as a member, $200$ as an admin) is captured as evidence
+rather than inferred. Across the corpus \textbf{1{,}311} \L1 nodes carry status under two
+or more identities.
+
+\paragraph{Blocker taxonomy.} An agentic record that is not observed is tagged with
+exactly one reason from a closed set: \cd{local_not_driven} (exercisable locally, not yet
+driven), \cd{scheduling_required} (needs a timer/cron fire), \cd{external_integration}
+(needs a real third-party credential a local stand-in cannot supply), or
+\cd{crypto_blocked} (an auth/encryption payload that could not be reproduced). This turns
+``not observed'' from a silence into a stated, checkable cause, and separates a
+\emph{reachability} limit from a \emph{principled} one.
+
 \subsection{Validation}\label{sec:val}
 Validation enforces agreement automatically; a record that fails any check is not shipped.
 \begin{itemize}[leftmargin=1.5em,itemsep=1pt]
@@ -392,9 +443,13 @@ Validation enforces agreement automatically; a record that fails any check is no
       cross-layer closure (every \L2 \cd{l1_binding} resolves to a real \L1 route);
       uniqueness (no duplicate \L1 keys or action keys).
 \item \textbf{Agentic.} Referential integrity (every \cd{*_id} points to a real record);
-      lineage closure (every writer/output resolves); enum validity; and existence of
-      all referenced L1/L2 nodes.
+      lineage closure (every writer/output resolves); enum validity; existence of
+      all referenced L1/L2 nodes; and evidence invariants (an observed record carries no
+      blocker; every unobserved record carries exactly one valid blocker).
 \end{itemize}
+These checks run as committed scripts over the whole dataset, so an integrity regression
+is caught rather than assumed; the current dataset passes with zero duplicate keys, zero
+dangling cross-layer references, and all evidence invariants satisfied.
 
 % ======================================================================
 \section{Environments (Dataset)}
@@ -442,7 +497,7 @@ OpenClaw    & Node gateway (WS/HTTP/Control UI), chat channels + webhooks, exec 
 % ======================================================================
 
 \begin{table}[ht]\centering\small
-\caption{Captured traditional-web attack surface ($\Sigma$ = 1{,}392 endpoints,
+\caption{Captured traditional-web attack surface ($\Sigma$ = 1{,}397 endpoints,
 980 semantic flows).}\label{tab:resweb}
 \begin{tabular}{@{}lrr@{}}
 \toprule
@@ -456,10 +511,10 @@ Discourse   & 231 & 287\\
 Ghost       & 112 &  59\\
 Rocket.Chat & 154 &  46\\
 Keycloak    & 125 &  50\\
-Directus    & 110 &  68\\
+Directus    & 115 &  68\\
 Outline     & 206 &  95\\
 \midrule
-\textbf{Total} & \textbf{1{,}392} & \textbf{980}\\
+\textbf{Total} & \textbf{1{,}397} & \textbf{980}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -482,6 +537,98 @@ OpenClaw    & 3 & 27 & 7 & 12 & 5 & 10 & 12 & 13\\
 & \textbf{39} & \textbf{48} & \textbf{43}\\
 \bottomrule
 \end{tabular}
+\end{table}
+
+\subsection{Runtime grounding and evidence depth}
+The counts above are the \emph{size} of the dataset; this section reports its
+\emph{evidence}. Table~\ref{tab:ground} grades the traditional-web corpus by the depth
+ladder of Section~\ref{sec:ground}: every one of the 1{,}397 interfaces and 980 actions
+is grounded (no ungrounded record), and the grading shows how far---358 interfaces
+confirmed by an observed response ($2xx$), the remainder confirmed as reachable routes,
+and 276 of the 980 actions confirmed by their observed effect rather than only through a
+bound interface.
+
+\begin{table}[ht]\centering\small
+\caption{Traditional-web runtime grounding by evidence depth (all 1{,}397 \L1 / 980 \L2
+records grounded).}\label{tab:ground}
+\begin{tabular}{@{}lr@{\hspace{2.2em}}lr@{}}
+\toprule
+\textbf{\L1 interface depth} & \textbf{count} & \textbf{\L2 action tier} & \textbf{count}\\
+\midrule
+exercised ($2xx$, $\ge2$ identities/methods) &  55 & effect-observed    & 276\\
+observed (at least one $2xx$)                 & 303 & interface-observed & 704\\
+route-confirmed (handler reached)             & 1{,}039 & ---            & ---\\
+not grounded                                  &   0 & not grounded       &   0\\
+\midrule
+\textbf{Total} & \textbf{1{,}397} & \textbf{Total} & \textbf{980}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The agentic layer is harder to ground because all observation uses a \emph{local} model
+with no cloud credentials, so some surface is unreachable by construction.
+Table~\ref{tab:aground} reports, per application, how many of the gradable agentic
+records\footnote{The 20 \texttt{invocation\_surfaces} are sub-fields of agent records and
+are not independently graded, leaving 307 gradable records.} are runtime-observed, and
+accounts for every unobserved record by its blocker.
+
+\begin{table}[ht]\centering\small
+\caption{Agentic runtime grounding: observed records per application, and the blocker
+accounting for the 178 unobserved.}\label{tab:aground}
+\begin{tabular}{@{}lr@{\hspace{2.6em}}lr@{}}
+\toprule
+\textbf{Application} & \textbf{observed\,/\,total} & \textbf{Unobserved by blocker} & \textbf{count}\\
+\midrule
+AnythingLLM & 47 / 58 & \cd{local_not_driven} (exercisable, not yet driven) & 125\\
+Open WebUI  & 36 / 82 & \cd{crypto_blocked} (irreproducible auth payload)   &  31\\
+OpenClaw    & 22 / 82 & \cd{external_integration} (needs real OAuth)        &  15\\
+LibreChat   & 24 / 54 & \cd{scheduling_required} (needs a timer fire)       &   7\\
+LobeChat    &  0 / 31 & & \\
+\midrule
+\textbf{Total} & \textbf{129 / 307} & \textbf{Total unobserved} & \textbf{178}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Separating the blockers distinguishes a \emph{principled} ceiling from a
+\emph{reachability} limit. Only 38 records are a principled ceiling---the 31
+\cd{crypto_blocked} (LobeChat's encrypted auth payload could not be reproduced) and the 7
+of the external integrations that require a genuine third-party OAuth identity a local
+stand-in cannot mint. The remaining 140 are reachability-limited: they are observable in
+principle but were not driven here because they depend on the reliability of a local
+model emitting a native tool call, or on activating a dormant service. Where a local
+stand-in \emph{can} substitute for an external service without a secret (image
+generation, a Model Context Protocol server, a scheduler, or a direct create/read of a
+store), those records were driven to an observed effect; image generation and MCP are
+therefore no longer categorical blockers.
+
+\paragraph{Completeness.} Table~\ref{tab:complete} reports, for the applications whose
+own route list could be dumped, the validity and coverage of the authored \L1 set
+(Section~\ref{sec:ground}). High validity confirms the authored routes are real; coverage
+is reported against the whole live surface and is deliberately partial where the dataset
+scopes to a subset of a very large API (e.g.\ Discourse, Open WebUI), which the table
+marks.
+
+\begin{table}[ht]\centering\small
+\caption{Authored-surface completeness against each application's own route oracle
+(A = served OpenAPI, B = in-container router dump).}\label{tab:complete}
+\begin{tabular}{@{}lccrr@{}}
+\toprule
+\textbf{Application} & \textbf{Oracle} & \textbf{live routes} & \textbf{validity} & \textbf{coverage}\\
+\midrule
+AnythingLLM & B &   67 & 100.0\% & 100.0\%\\
+VoceChat    & A &  159 &  98.7\% &  98.7\%\\
+Outline     & B &  213 & 100.0\% &  93.9\%\\
+Directus    & A &   65 &  92.5\% &  95.4\%\\
+Ghost       & B &  203 & 100.0\% &  43.8\%$^\ast$\\
+Discourse   & B & 1{,}732 &  99.6\% &  13.3\%$^\ast$\\
+Open WebUI  & B &  587 & 100.0\% &   2.9\%$^\ast$\\
+\bottomrule
+\end{tabular}
+
+{\footnotesize $^\ast$ Dataset is deliberately scoped to a subset of the live API, so low
+coverage is by design; for Ghost the oracle also surfaced a genuine gap (admin-API
+families not yet inventoried).}
 \end{table}
 
 % ======================================================================
@@ -522,17 +669,23 @@ OpenClaw    & 3 & 27 & 7 & 12 & 5 & 10 & 12 & 13\\
       applications, scored against this ground truth.
 \item \textbf{Extend schema coverage} to transports modelled only partially here:
       WebSocket/DDP, gRPC, and GraphQL.
-\item \textbf{Complete runtime grounding} for the applications currently captured
-      source-first, reconciling source and runtime records on pinned containers.
+\item \textbf{Close the reachability-limited grounding gap.} Runtime grounding is now
+      established across the corpus (Table~\ref{tab:ground}); the residual is the 140
+      reachability-limited agentic records---driving the model-dependent tool calls with
+      a more reliable local model, activating the dormant services, and standing up the
+      remaining secret-free local stand-ins---and the small set of source-first LLM web
+      surfaces not yet driven. The 38 principled-ceiling records (irreproducible crypto
+      and genuine third-party OAuth) are documented as out of scope for a local,
+      credential-free environment.
 \end{enumerate}
 
 % ======================================================================
 \section{Conclusion}
 % ======================================================================
 This project delivers an evidence-backed, multi-application ground-truth dataset
-(1{,}392 endpoints, 980 semantic flows, 327 agentic records) and a repeatable
-annotation-and-review workflow that reconciles source and runtime evidence and checks
-every cross-layer reference. It enables rigorous benchmarking of security agents'
+(1{,}397 endpoints, 980 semantic flows, 327 agentic records) and a repeatable
+annotation-and-review workflow that reconciles source and runtime evidence, grades each
+record by observation depth, and checks every cross-layer reference. It enables rigorous benchmarking of security agents'
 ability to \emph{generate} an attack surface, provides a concrete framework for
 measuring agentic risk, and offers a reusable methodology and dataset for future
 extensions.
