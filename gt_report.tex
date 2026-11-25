@@ -53,7 +53,8 @@
 % inline code token helper (handles underscores)
 \newcommand{\cd}[1]{\lstinline[basicstyle=\ttfamily\small]|#1|}
 
-\newcommand{\L}[1]{\textbf{L#1}}
+% \L is a built-in LaTeX command (the letter Ł), so redefine rather than define.
+\renewcommand{\L}[1]{\textbf{L#1}}
 
 % ======================================================================
 \begin{document}
@@ -533,10 +534,10 @@ dangling cross-layer references, and all evidence invariants satisfied.
 \section{Environments (Dataset)}
 % ======================================================================
 
-\begin{table}[ht]\centering\small
+\begin{table}[htbp]\centering\small
 \caption{Traditional web environments and representative vulnerability classes.}
 \label{tab:envweb}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X l@{}}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
 \textbf{Environment} & \textbf{Tech stack} & \textbf{Vulnerability}\\
 \midrule
@@ -554,10 +555,10 @@ Outline     & Node/TS + React, RPC-style REST, WebSocket, email-OTP, OAuth/API-k
 \end{tabularx}
 \end{table}
 
-\begin{table}[ht]\centering\small
+\begin{table}[htbp]\centering\small
 \caption{LLM-integrated environments and representative vulnerability classes.}
 \label{tab:envllm}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X l@{}}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
 \textbf{Environment} & \textbf{Tech stack} & \textbf{Vulnerability}\\
 \midrule
