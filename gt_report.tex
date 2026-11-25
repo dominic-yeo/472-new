@@ -110,33 +110,63 @@ tool---which the schema makes directly enumerable and checkable for enforced con
 % ======================================================================
 
 \subsection{What is an attack surface?}
-An application exposes functionality through UI pages, APIs, and state-dependent
-workflows. Each of these is an entry point that a specific attack vector can target,
-and together they form the application's \emph{attack surface}. LLM-driven applications
-expand this surface with non-deterministic interfaces and context pipelines---system
-prompts, retrieval-augmented-generation (RAG) datastores, and tool-calling
-hooks---that a conventional, route-centric surface map does not capture.
+An application's \emph{attack surface} is the set of points at which an adversary can
+attempt to interact with, supply data to, or extract data from the system. The notion
+was formalised by Howard, Pincus and Wing and later refined into a quantitative metric
+by Manadhata and Wing, who characterise the surface in terms of the resources through
+which attacker-controlled data can enter or leave a system---its entry and exit
+\emph{methods}, \emph{channels}, and \emph{data items}~\cite{howard,manadhata}. In web
+terms these resources manifest as UI pages, API endpoints, and the state-dependent
+workflows that connect them: each is an entry point that a specific attack vector can
+target, and together they form the surface. OWASP's testing methodology adopts the same
+operational view---mapping the surface is the first phase of a structured
+assessment---and supplies the vocabulary this report uses for authentication state,
+authorization boundaries, and object handling~\cite{wstg,owaspapi}.
+
+LLM-driven applications enlarge this surface along a dimension the classical definition
+does not reach. Beyond deterministic routes they expose non-deterministic
+natural-language interfaces and \emph{context pipelines}---system prompts,
+retrieval-augmented-generation (RAG) datastores, tool-calling hooks, and agent
+memory---through which untrusted content can reach a privileged action. The OWASP Top~10
+for LLM Applications and MITRE ATLAS catalogue precisely these new entry points (prompt
+injection, insecure tool use, training- and RAG-data poisoning), none of which a
+conventional, route-centric surface map captures~\cite{owaspllm,atlas}.
 
 \subsection{AI in attack surface generation}
-AI is increasingly used in security tooling to analyse software and explore web
-applications. Multimodal language-model crawlers can use page state and functional
-context to guide discovery. However, state-dependent workflows, event-driven
-interfaces, and API-only functionality that never appears in the browser are routinely
-missed by automated discovery.
+AI is increasingly used both to attack and to map software. Language-model and
+multimodal agents can now drive a browser, read rendered page state, and plan multi-step
+interactions; a line of web-agent benchmarks---Mind2Web and WebArena among them---shows
+such agents navigating realistic applications from functional goals rather than fixed
+scripts~\cite{mind2web,webarena}. Applied to surface discovery, an agent of this kind can
+in principle use page context to reach interfaces a signature-based crawler would miss.
+In practice, however, three categories remain systematically under-discovered by any
+browser-driven method: state-dependent workflows that appear only after a precondition is
+met, event-driven and non-HTTP interfaces (WebSocket/DDP, gRPC, server-sent events), and
+API-only functionality that is never rendered in a page at all. Measuring how much of the
+true surface an agent recovers therefore demands a reference that already contains these
+hard-to-see entries.
 
 \subsection{Limitation of existing benchmarks}
-Existing agent-security benchmarks tend to measure \emph{downstream} task completion or
-vulnerability-exploitation outcomes. They therefore leave limited evidence about how
-effectively an agent discovers and describes an application's attack surface---and
-discovery recall varies substantially across models, which is precisely the quantity
-that a reliable reference is needed to score.
+Existing agent-security benchmarks measure \emph{downstream} outcomes---whether an agent
+completes a task while under attack, or whether it can exploit a known vulnerability.
+AgentDojo evaluates whether tool-using agents resist prompt injection while carrying out
+tasks~\cite{agentdojo}; Cybench scores whether agents can solve professional
+capture-the-flag exploitation challenges~\cite{cybench}. Both are valuable, but neither
+evaluates the prior step of \emph{discovery}: how completely and how accurately an agent
+enumerates and describes the surface in the first place. Because discovery recall varies
+substantially across models, and because a vector that is never discovered is never
+scored, this is exactly the quantity for which a reliable, evidence-backed reference is
+missing.
 
 \subsection{Motivation}
-This project aims to establish a ground-truth foundation for the future evaluation of
-agents' effectiveness at discovering attack surfaces. It gives future evaluations a
-reference for assessing not only \emph{which} surfaces an agent finds, but also
-\emph{how accurately} it describes their application context and the relationships
-between them.
+This project establishes that reference. It provides a ground-truth foundation for
+evaluating an agent's effectiveness at \emph{discovering and describing} attack surfaces,
+so that future evaluations can score not only \emph{which} surfaces an agent finds, but
+also \emph{how accurately} it characterises each surface's application context and
+\emph{how correctly} it reconstructs the relationships between them. Grounding every
+record in observed evidence, and grading that evidence by depth, makes the reference
+itself defensible---an evaluation is only as trustworthy as the ground truth it is scored
+against.
 
 % ======================================================================
 \section{Research Scope and Contributions}
@@ -180,9 +210,19 @@ between them.
 % ======================================================================
 \section{The Three-Layer Schema}
 % ======================================================================
-The schema is the central contribution. It is deliberately grounded in recognised
-standards so that labels are defensible rather than ad hoc. Figure~\ref{fig:layers}
-shows the three layers and the identifier fields that bind them.
+The schema is the central contribution. Its design follows one principle: every field
+should derive from an established, independently recognised standard, so that a label is
+\emph{defensible}---traceable to a published definition---rather than ad hoc. The same
+principle motivates the split into three layers by level of abstraction: L1 captures the
+deployed interface exactly as HTTP exposes it, L2 the business meaning of an action
+independent of how it is called, and the agentic layer the capability and data-flow
+structure specific to LLM-integrated systems. This mirrors how the surface is actually
+discovered---wire evidence first, meaning second, agent-specific lineage third---and lets
+each layer reuse the modelling vocabulary of its own mature source discipline
+(HTTP/OpenAPI for L1; access-control and AI-planning formalisms for L2; LLM threat
+modelling for the agentic layer), with each provenance made explicit below.
+Figure~\ref{fig:layers} shows the three layers and the identifier fields that bind them
+into one connected, validatable graph.
 
 \begin{figure}[ht]\centering
 \begin{tikzpicture}[
@@ -222,12 +262,22 @@ pages, and static resources. It maps \emph{where} an actor can interact with the
 deployment, \emph{what} can be sent or received, and \emph{under what conditions} each
 interaction point is reachable.
 
-\paragraph{How it is built.} Fields are derived from OpenAPI/Swagger and REST/HTTP
-semantics. The security labels draw on OWASP: object-tracking labels (\cd{mergeable},
-\cd{reference_capable}, \cd{value_kind}$\in$\{identifier, attribute, \dots\}) follow the
-OWASP API Security Top~10 entry API1:2023 \emph{Broken Object Level Authorization}; the
-visibility/reachability labels follow OWASP WSTG authentication/authorization
-state modelling.
+\paragraph{How it is built.} The interface fields derive from two interface contracts:
+the HTTP semantics standard---methods, status classes, content-types, and the
+header/query/path/body parameter locations~\cite{httpsem}---and the OpenAPI
+Specification, whose operation/parameter/response object model supplies the per-method IO
+structure (\cd{io_variants}, request/response \cd{fields[]})~\cite{openapi}. The security
+labels are drawn from OWASP. The object-tracking labels---\cd{value_kind}
+$\in$\{identifier, attribute, \dots\}, \cd{reference_capable}, \cd{mergeable},
+\cd{reference_fields}---operationalise the OWASP API Security Top~10 entry API1:2023
+\emph{Broken Object Level Authorization}, which turns on whether a request field names an
+object some other subject could reference; recording that property at the field level is
+what later lets L2 state an authorization requirement over it~\cite{owaspapi}. The
+visibility and reachability labels (\cd{gt.visibility.minimum} $\in$\{black\_box,
+grey\_box, white\_box\}, \cd{gt.black_box_reachable}, \cd{gt.reachability_conditions})
+follow the authentication- and authorization-state modelling of the OWASP Web Security
+Testing Guide, so that \emph{where} and \emph{under which identity} an interface is
+reachable is captured as structured evidence rather than prose~\cite{wstg}.
 
 \begin{table}[ht]\centering\small
 \caption{L1 field groups.}\label{tab:l1}
@@ -252,11 +302,27 @@ Evidence/notes  & \cd{gt.evidence[]}\{\cd{type},\cd{ref},\cd{supports}\}, \cd{gt
 by several \L1 calls. It maps what an actor can cause the application to do, what objects
 they can act on, and how the action depends on prior state.
 
-\paragraph{How it is built.} The descriptor structure is drawn from access-control /
-authorization modelling (Subject--Operation--Object). The requirements/effects
-structure---used to chain operations into multi-step semantic flows---is borrowed from
-classical AI planning (STRIPS/PDDL). Facts use a closed predicate vocabulary
-(\cd{Exists}, \cd{Know}, \cd{State}, \cd{Relation}, \cd{Can}, \cd{Authenticated}).
+\paragraph{How it is built.} L2 composes two well-established models. The descriptor is
+the \emph{Subject--Operation--Object} triple of access-control modelling: a subject (an
+identity in a role and auth context) performs an operation (a business verb with a CRUD
+class) on an object (an entity, state, or relation). This is the decomposition at the
+heart of role-based access control, where authorization is decided over exactly these
+three elements~\cite{rbac}; treating distinct subjects as distinct actions is what lets
+the dataset represent an authorization wall---the same operation permitted for an admin
+and denied for a member---as two first-class records rather than a side note.
+
+The requirements/effects structure---which chains operations into multi-step semantic
+flows---is borrowed directly from classical AI planning. An action's \cd{requirements[]}
+are its preconditions and its \cd{effects} are its add/delete lists, exactly as an
+operator is specified in STRIPS~\cite{strips} and its successor, the Planning Domain
+Definition Language (PDDL)~\cite{pddl}: \cd{effects.gen[]} are facts added to the world
+state and \cd{effects.kill[]} are facts removed (old state on an Update, existence on a
+Delete). Facts are written in a closed predicate vocabulary---\cd{Exists}, \cd{Know},
+\cd{State}, \cd{Relation}, \cd{Can}, \cd{Authenticated}---so the effect of one action can
+be unified against the precondition of another and a multi-step attack path becomes
+machine-checkable rather than asserted. Grounding the dependency structure in a planning
+formalism is precisely what makes an L2 flow executable as a graph instead of a static
+list.
 
 \begin{table}[ht]\centering\small
 \caption{L2 field groups.}\label{tab:l2}
@@ -281,9 +347,21 @@ The agentic layer describes agent capabilities and data paths. It captures how e
 or untrusted content can influence a decision, how authority is applied to tool calls,
 and how data or side effects move across multiple steps.
 
-\paragraph{How it is built.} The layer is derived from the OWASP Top~10 for LLM
-Applications (2025); the structure for tracing an object from entry to exit is derived
-from MITRE ATLAS.
+\paragraph{How it is built.} The record types derive from the OWASP Top~10 for LLM
+Applications (2025): the layer makes each leading risk category directly
+enumerable---untrusted \cd{context_sources} carrying \cd{trust_class: untrusted_data}
+(LLM01 Prompt Injection), \cd{tool_bindings} with an \cd{effect_class} and
+\cd{execution_identity} (insecure tool use / excessive agency), and
+\cd{context_sources}/\cd{memory_stores} with recorded \cd{writers} and \cd{provenance}
+(training- and RAG-data poisoning)~\cite{owaspllm}. The lineage structure---tracing a
+single object from entry (a \cd{context_source}) through the model decision and tool call
+(an \cd{execution_edge}) to exit (an \cd{output_sink}), with
+\cd{becomes_context_source_ids} closing feedback loops---follows the staged adversary
+model of MITRE ATLAS, which describes compromise of an AI system as a progression across
+reconnaissance, access, and exfiltration stages rather than a single point of
+failure~\cite{atlas}. Representing the path explicitly is what lets the \emph{authority}
+question---can untrusted input reach a privileged tool, and is a control enforced on that
+edge---be read directly off the graph.
 
 \begin{table}[ht]\centering\small
 \caption{Agentic record types and their principal fields.}\label{tab:ag}
@@ -706,6 +784,24 @@ extensions.
 \bibitem{pddl} D.~McDermott et al. \emph{PDDL --- The Planning Domain Definition
   Language}. 1998.
 \bibitem{openapi} OpenAPI Initiative. \emph{OpenAPI Specification}.
+\bibitem{httpsem} R.~Fielding, M.~Nottingham, and J.~Reschke, eds. \emph{HTTP
+  Semantics}. RFC~9110, Internet Engineering Task Force, 2022.
+\bibitem{howard} M.~Howard, J.~Pincus, and J.~M. Wing. Measuring Relative Attack
+  Surfaces. In \emph{Computer Security in the 21st Century}, Springer, 2005.
+\bibitem{manadhata} P.~K. Manadhata and J.~M. Wing. An Attack Surface Metric.
+  \emph{IEEE Transactions on Software Engineering}, 37(3):371--386, 2011.
+\bibitem{rbac} R.~S. Sandhu, E.~J. Coyne, H.~L. Feinstein, and C.~E. Youman.
+  Role-Based Access Control Models. \emph{IEEE Computer}, 29(2):38--47, 1996.
+\bibitem{mind2web} X.~Deng et al. Mind2Web: Towards a Generalist Agent for the Web.
+  In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
+\bibitem{webarena} S.~Zhou et al. WebArena: A Realistic Web Environment for Building
+  Autonomous Agents. In \emph{International Conference on Learning Representations
+  (ICLR)}, 2024.
+\bibitem{agentdojo} E.~Debenedetti et al. AgentDojo: A Dynamic Environment to Evaluate
+  Prompt Injection Attacks and Defenses for LLM Agents. In \emph{Advances in Neural
+  Information Processing Systems (NeurIPS)}, 2024.
+\bibitem{cybench} A.~K. Zhang et al. Cybench: A Framework for Evaluating Cybersecurity
+  Capabilities and Risks of Language Models. arXiv:2408.08926, 2024.
 \end{thebibliography}
 
 \end{document}
