@@ -24,6 +24,7 @@
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,shapes.geometric}
+\usepackage[round,authoryear,sort]{natbib}  % APA-style author--date citations
 \usepackage[hidelinks]{hyperref}
 
 % ---- palette (deck-inspired navy + gold) -----------------------------
@@ -113,16 +114,17 @@ tool---which the schema makes directly enumerable and checkable for enforced con
 \subsection{What is an attack surface?}
 An application's \emph{attack surface} is the set of points at which an adversary can
 attempt to interact with, supply data to, or extract data from the system. The notion
-was formalised by Howard, Pincus and Wing and later refined into a quantitative metric
-by Manadhata and Wing, who characterise the surface in terms of the resources through
-which attacker-controlled data can enter or leave a system---its entry and exit
-\emph{methods}, \emph{channels}, and \emph{data items}~\cite{howard,manadhata}. In web
+was formalised by Howard et~al.~\citeyearpar{howard} and later refined into a
+quantitative metric by Manadhata and Wing~\citeyearpar{manadhata}, who characterise the
+surface in terms of the resources through which attacker-controlled data can enter or
+leave a system---its entry and exit \emph{methods}, \emph{channels}, and \emph{data
+items}. In web
 terms these resources manifest as UI pages, API endpoints, and the state-dependent
 workflows that connect them: each is an entry point that a specific attack vector can
 target, and together they form the surface. OWASP's testing methodology adopts the same
 operational view---mapping the surface is the first phase of a structured
 assessment---and supplies the vocabulary this report uses for authentication state,
-authorization boundaries, and object handling~\cite{wstg,owaspapi}.
+authorization boundaries, and object handling~\citep{wstg,owaspapi}.
 
 LLM-driven applications enlarge this surface along a dimension the classical definition
 does not reach. Beyond deterministic routes they expose non-deterministic
@@ -131,14 +133,14 @@ retrieval-augmented-generation (RAG) datastores, tool-calling hooks, and agent
 memory---through which untrusted content can reach a privileged action. The OWASP Top~10
 for LLM Applications and MITRE ATLAS catalogue precisely these new entry points (prompt
 injection, insecure tool use, training- and RAG-data poisoning), none of which a
-conventional, route-centric surface map captures~\cite{owaspllm,atlas}.
+conventional, route-centric surface map captures~\citep{owaspllm,atlas}.
 
 \subsection{AI in attack surface generation}
 AI is increasingly used both to attack and to map software. Language-model and
 multimodal agents can now drive a browser, read rendered page state, and plan multi-step
 interactions; a line of web-agent benchmarks---Mind2Web and WebArena among them---shows
 such agents navigating realistic applications from functional goals rather than fixed
-scripts~\cite{mind2web,webarena}. Applied to surface discovery, an agent of this kind can
+scripts~\citep{mind2web,webarena}. Applied to surface discovery, an agent of this kind can
 in principle use page context to reach interfaces a signature-based crawler would miss.
 In practice, however, three categories remain systematically under-discovered by any
 browser-driven method: state-dependent workflows that appear only after a precondition is
@@ -151,8 +153,8 @@ hard-to-see entries.
 Existing agent-security benchmarks measure \emph{downstream} outcomes---whether an agent
 completes a task while under attack, or whether it can exploit a known vulnerability.
 AgentDojo evaluates whether tool-using agents resist prompt injection while carrying out
-tasks~\cite{agentdojo}; Cybench scores whether agents can solve professional
-capture-the-flag exploitation challenges~\cite{cybench}. Both are valuable, but neither
+tasks~\citep{agentdojo}; Cybench scores whether agents can solve professional
+capture-the-flag exploitation challenges~\citep{cybench}. Both are valuable, but neither
 evaluates the prior step of \emph{discovery}: how completely and how accurately an agent
 enumerates and describes the surface in the first place. Because discovery recall varies
 substantially across models, and because a vector that is never discovered is never
@@ -265,20 +267,20 @@ interaction point is reachable.
 
 \paragraph{How it is built.} The interface fields derive from two interface contracts:
 the HTTP semantics standard---methods, status classes, content-types, and the
-header/query/path/body parameter locations~\cite{httpsem}---and the OpenAPI
+header/query/path/body parameter locations~\citep{httpsem}---and the OpenAPI
 Specification, whose operation/parameter/response object model supplies the per-method IO
-structure (\cd{io_variants}, request/response \cd{fields[]})~\cite{openapi}. The security
+structure (\cd{io_variants}, request/response \cd{fields[]})~\citep{openapi}. The security
 labels are drawn from OWASP. The object-tracking labels---\cd{value_kind}
 $\in$\{identifier, attribute, \dots\}, \cd{reference_capable}, \cd{mergeable},
 \cd{reference_fields}---operationalise the OWASP API Security Top~10 entry API1:2023
 \emph{Broken Object Level Authorization}, which turns on whether a request field names an
 object some other subject could reference; recording that property at the field level is
-what later lets L2 state an authorization requirement over it~\cite{owaspapi}. The
+what later lets L2 state an authorization requirement over it~\citep{owaspapi}. The
 visibility and reachability labels (\cd{gt.visibility.minimum} $\in$\{black\_box,
 grey\_box, white\_box\}, \cd{gt.black_box_reachable}, \cd{gt.reachability_conditions})
 follow the authentication- and authorization-state modelling of the OWASP Web Security
 Testing Guide, so that \emph{where} and \emph{under which identity} an interface is
-reachable is captured as structured evidence rather than prose~\cite{wstg}.
+reachable is captured as structured evidence rather than prose~\citep{wstg}.
 
 \begin{table}[ht]\centering\small
 \caption{L1 field groups.}\label{tab:l1}
@@ -308,15 +310,15 @@ the \emph{Subject--Operation--Object} triple of access-control modelling: a subj
 identity in a role and auth context) performs an operation (a business verb with a CRUD
 class) on an object (an entity, state, or relation). This is the decomposition at the
 heart of role-based access control, where authorization is decided over exactly these
-three elements~\cite{rbac}; treating distinct subjects as distinct actions is what lets
+three elements~\citep{rbac}; treating distinct subjects as distinct actions is what lets
 the dataset represent an authorization wall---the same operation permitted for an admin
 and denied for a member---as two first-class records rather than a side note.
 
 The requirements/effects structure---which chains operations into multi-step semantic
 flows---is borrowed directly from classical AI planning. An action's \cd{requirements[]}
 are its preconditions and its \cd{effects} are its add/delete lists, exactly as an
-operator is specified in STRIPS~\cite{strips} and its successor, the Planning Domain
-Definition Language (PDDL)~\cite{pddl}: \cd{effects.gen[]} are facts added to the world
+operator is specified in STRIPS~\citep{strips} and its successor, the Planning Domain
+Definition Language (PDDL)~\citep{pddl}: \cd{effects.gen[]} are facts added to the world
 state and \cd{effects.kill[]} are facts removed (old state on an Update, existence on a
 Delete). Facts are written in a closed predicate vocabulary---\cd{Exists}, \cd{Know},
 \cd{State}, \cd{Relation}, \cd{Can}, \cd{Authenticated}---so the effect of one action can
@@ -354,13 +356,13 @@ enumerable---untrusted \cd{context_sources} carrying \cd{trust_class: untrusted_
 (LLM01 Prompt Injection), \cd{tool_bindings} with an \cd{effect_class} and
 \cd{execution_identity} (insecure tool use / excessive agency), and
 \cd{context_sources}/\cd{memory_stores} with recorded \cd{writers} and \cd{provenance}
-(training- and RAG-data poisoning)~\cite{owaspllm}. The lineage structure---tracing a
+(training- and RAG-data poisoning)~\citep{owaspllm}. The lineage structure---tracing a
 single object from entry (a \cd{context_source}) through the model decision and tool call
 (an \cd{execution_edge}) to exit (an \cd{output_sink}), with
 \cd{becomes_context_source_ids} closing feedback loops---follows the staged adversary
 model of MITRE ATLAS, which describes compromise of an AI system as a progression across
 reconnaissance, access, and exfiltration stages rather than a single point of
-failure~\cite{atlas}. Representing the path explicitly is what lets the \emph{authority}
+failure~\citep{atlas}. Representing the path explicitly is what lets the \emph{authority}
 question---can untrusted input reach a privileged tool, and is a control enforced on that
 edge---be read directly off the graph.
 
@@ -770,39 +772,76 @@ measuring agentic risk, and offers a reusable methodology and dataset for future
 extensions.
 
 % ======================================================================
-\begin{thebibliography}{9}
-\bibitem{owaspapi} OWASP Foundation. \emph{OWASP API Security Top 10 (2023)} ---
-  API1:2023 Broken Object Level Authorization.
-\bibitem{wstg} OWASP Foundation. \emph{Web Security Testing Guide (WSTG)} ---
-  authentication and authorization testing.
-\bibitem{owaspllm} OWASP Foundation. \emph{OWASP Top 10 for Large Language Model
-  Applications} (2025).
-\bibitem{atlas} MITRE. \emph{ATLAS: Adversarial Threat Landscape for Artificial
-  Intelligence Systems}.
-\bibitem{strips} R.~E. Fikes and N.~J. Nilsson. STRIPS: A New Approach to the
-  Application of Theorem Proving to Problem Solving. \emph{Artificial Intelligence},
-  1971.
-\bibitem{pddl} D.~McDermott et al. \emph{PDDL --- The Planning Domain Definition
-  Language}. 1998.
-\bibitem{openapi} OpenAPI Initiative. \emph{OpenAPI Specification}.
-\bibitem{httpsem} R.~Fielding, M.~Nottingham, and J.~Reschke, eds. \emph{HTTP
-  Semantics}. RFC~9110, Internet Engineering Task Force, 2022.
-\bibitem{howard} M.~Howard, J.~Pincus, and J.~M. Wing. Measuring Relative Attack
-  Surfaces. In \emph{Computer Security in the 21st Century}, Springer, 2005.
-\bibitem{manadhata} P.~K. Manadhata and J.~M. Wing. An Attack Surface Metric.
-  \emph{IEEE Transactions on Software Engineering}, 37(3):371--386, 2011.
-\bibitem{rbac} R.~S. Sandhu, E.~J. Coyne, H.~L. Feinstein, and C.~E. Youman.
-  Role-Based Access Control Models. \emph{IEEE Computer}, 29(2):38--47, 1996.
-\bibitem{mind2web} X.~Deng et al. Mind2Web: Towards a Generalist Agent for the Web.
-  In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2023.
-\bibitem{webarena} S.~Zhou et al. WebArena: A Realistic Web Environment for Building
-  Autonomous Agents. In \emph{International Conference on Learning Representations
-  (ICLR)}, 2024.
-\bibitem{agentdojo} E.~Debenedetti et al. AgentDojo: A Dynamic Environment to Evaluate
-  Prompt Injection Attacks and Defenses for LLM Agents. In \emph{Advances in Neural
-  Information Processing Systems (NeurIPS)}, 2024.
-\bibitem{cybench} A.~K. Zhang et al. Cybench: A Framework for Evaluating Cybersecurity
-  Capabilities and Risks of Language Models. arXiv:2408.08926, 2024.
+\begin{thebibliography}{OWASP Foundation(2025)}
+
+\bibitem[Debenedetti et~al.(2024)]{agentdojo}
+Debenedetti, E., Zhang, J., Balunovi\'c, M., Beurer-Kellner, L., Fischer, M., \&
+Tram\`er, F. (2024). AgentDojo: A dynamic environment to evaluate prompt injection
+attacks and defenses for LLM agents. In \emph{Advances in Neural Information Processing
+Systems (NeurIPS)}.
+
+\bibitem[Deng et~al.(2023)]{mind2web}
+Deng, X., Gu, Y., Zheng, B., Chen, S., Stevens, S., Wang, B., Sun, H., \& Su, Y.
+(2023). Mind2Web: Towards a generalist agent for the web. In \emph{Advances in Neural
+Information Processing Systems (NeurIPS)}.
+
+\bibitem[Fielding et~al.(2022)]{httpsem}
+Fielding, R., Nottingham, M., \& Reschke, J. (Eds.). (2022). \emph{HTTP semantics}
+(RFC~9110). Internet Engineering Task Force. https://doi.org/10.17487/RFC9110
+
+\bibitem[Fikes \& Nilsson(1971)]{strips}
+Fikes, R.~E., \& Nilsson, N.~J. (1971). STRIPS: A new approach to the application of
+theorem proving to problem solving. \emph{Artificial Intelligence}, \emph{2}(3--4),
+189--208.
+
+\bibitem[Howard et~al.(2005)]{howard}
+Howard, M., Pincus, J., \& Wing, J.~M. (2005). Measuring relative attack surfaces. In
+D.~T. Lee, S.~P. Shieh, \& J.~D. Tygar (Eds.), \emph{Computer security in the 21st
+century} (pp.~109--137). Springer.
+
+\bibitem[Manadhata \& Wing(2011)]{manadhata}
+Manadhata, P.~K., \& Wing, J.~M. (2011). An attack surface metric. \emph{IEEE
+Transactions on Software Engineering}, \emph{37}(3), 371--386.
+
+\bibitem[McDermott et~al.(1998)]{pddl}
+McDermott, D., Ghallab, M., Howe, A., Knoblock, C., Ram, A., Veloso, M., Weld, D., \&
+Wilkins, D. (1998). \emph{PDDL---The planning domain definition language} (Tech.\ Rep.\
+CVC TR-98-003). Yale Center for Computational Vision and Control.
+
+\bibitem[MITRE(2021)]{atlas}
+MITRE. (2021). \emph{ATLAS: Adversarial threat landscape for artificial-intelligence
+systems}. https://atlas.mitre.org
+
+\bibitem[OpenAPI Initiative(2021)]{openapi}
+OpenAPI Initiative. (2021). \emph{OpenAPI specification} (Version~3.1.0).
+https://spec.openapis.org/oas/v3.1.0
+
+\bibitem[OWASP Foundation(2020)]{wstg}
+OWASP Foundation. (2020). \emph{Web security testing guide} (Version~4.2).
+https://owasp.org/www-project-web-security-testing-guide/
+
+\bibitem[OWASP Foundation(2023)]{owaspapi}
+OWASP Foundation. (2023). \emph{OWASP API security top 10}---API1:2023 Broken object
+level authorization. https://owasp.org/API-Security/
+
+\bibitem[OWASP Foundation(2025)]{owaspllm}
+OWASP Foundation. (2025). \emph{OWASP top 10 for large language model applications}.
+https://genai.owasp.org/
+
+\bibitem[Sandhu et~al.(1996)]{rbac}
+Sandhu, R.~S., Coyne, E.~J., Feinstein, H.~L., \& Youman, C.~E. (1996). Role-based
+access control models. \emph{Computer}, \emph{29}(2), 38--47.
+
+\bibitem[Zhang et~al.(2024)]{cybench}
+Zhang, A.~K., Perry, N., Dulepet, R., Ji, J., \ldots Liang, P. (2024). \emph{Cybench: A
+framework for evaluating cybersecurity capabilities and risks of language models}.
+arXiv. https://arxiv.org/abs/2408.08926
+
+\bibitem[Zhou et~al.(2024)]{webarena}
+Zhou, S., Xu, F.~F., Zhu, H., Zhou, X., Lo, R., Sridhar, A., \ldots Neubig, G. (2024).
+WebArena: A realistic web environment for building autonomous agents. In
+\emph{International Conference on Learning Representations (ICLR)}.
+
 \end{thebibliography}
 
 \end{document}
