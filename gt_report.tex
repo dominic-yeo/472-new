@@ -92,16 +92,21 @@ open-source vulnerable applications (ten traditional web applications and five
 LLM-integrated systems). The resulting dataset records \textbf{1{,}397 deployed
 endpoints}, \textbf{980 business semantic flows}, and \textbf{327 agentic capability
 records}. The dataset is \emph{evidence-graded}: every interface and action carries a
-runtime-observation depth and every agentic capability a runtime status, so that
-across the traditional-web corpus all 1{,}397 interfaces and 980 actions are
-runtime-grounded (the actions split 276 confirmed by observed effect and 704 by
-interface), while the agentic layer is grounded for 129 of 307 records with each
+runtime-observation depth and every agentic capability a runtime status, so that across
+the traditional-web corpus every interface and action is grounded at a graded depth: of
+the 1{,}397 interfaces, 358 are confirmed by an observed response and the remaining 1{,}039
+as reachable routes; of the 980 actions, 276 are confirmed by observed effect and 704
+through a bound interface. The agentic layer is grounded for 129 of 307 records, each
 remaining record labelled by the precise reason it cannot be observed in a local,
 credential-free environment. Beyond the artefact, the project contributes a reusable
-annotation-and-review methodology and surfaces two findings: the same business action is frequently exposed
-through multiple surfaces that automated crawlers under-count, and the root cause of
-agentic attack vectors is \emph{authority}---an untrusted input reaching a privileged
-tool---which the schema makes directly enumerable and checkable for enforced controls.
+annotation-and-review methodology and an evidence-grading discipline. We are careful to
+distinguish what the dataset demonstrates from what it enables: no crawler or agent is run
+here, so the dataset \emph{frames}---rather than proves---two propositions it is built to
+test: that a single business action can be exposed through several interfaces a crawler
+would under-count (which the schema represents explicitly, and which the present corpus
+exercises only in a handful of cases), and that the root cause of agentic attack vectors
+is \emph{authority}---an untrusted input reaching a privileged tool---which the schema
+makes enumerable and checkable for enforced controls.
 \end{abstract}
 
 \tableofcontents
@@ -147,7 +152,11 @@ browser-driven method: state-dependent workflows that appear only after a precon
 met, event-driven and non-HTTP interfaces (WebSocket/DDP, gRPC, server-sent events), and
 API-only functionality that is never rendered in a page at all. Measuring how much of the
 true surface an agent recovers therefore demands a reference that already contains these
-hard-to-see entries.
+hard-to-see entries. Coverage benchmarks do exist for narrower settings---the WIVET
+benchmark scores how many injected input vectors a crawler reaches, and API-fuzzing corpora
+measure endpoint reach---but they target a crawler's input coverage rather than the
+semantic, cross-layer description that an evaluation of attack-surface \emph{understanding}
+requires.
 
 \subsection{Limitation of existing benchmarks}
 Existing agent-security benchmarks measure \emph{downstream} outcomes---whether an agent
@@ -156,10 +165,10 @@ AgentDojo evaluates whether tool-using agents resist prompt injection while carr
 tasks~\citep{agentdojo}; Cybench scores whether agents can solve professional
 capture-the-flag exploitation challenges~\citep{cybench}. Both are valuable, but neither
 evaluates the prior step of \emph{discovery}: how completely and how accurately an agent
-enumerates and describes the surface in the first place. Because discovery recall varies
-substantially across models, and because a vector that is never discovered is never
-scored, this is exactly the quantity for which a reliable, evidence-backed reference is
-missing.
+enumerates and describes the surface in the first place. Because discovery is the step on
+which everything downstream depends---a vector that is never discovered is never
+exploited, defended, or scored---this is exactly the quantity for which a reliable,
+evidence-backed reference is missing.
 
 \subsection{Motivation}
 This project establishes that reference. It provides a ground-truth foundation for
@@ -322,10 +331,11 @@ Definition Language (PDDL)~\citep{pddl}: \cd{effects.gen[]} are facts added to t
 state and \cd{effects.kill[]} are facts removed (old state on an Update, existence on a
 Delete). Facts are written in a closed predicate vocabulary---\cd{Exists}, \cd{Know},
 \cd{State}, \cd{Relation}, \cd{Can}, \cd{Authenticated}---so the effect of one action can
-be unified against the precondition of another and a multi-step attack path becomes
-machine-checkable rather than asserted. Grounding the dependency structure in a planning
-formalism is precisely what makes an L2 flow executable as a graph instead of a static
-list.
+be unified against the precondition of another, which makes a multi-step attack path
+amenable to machine checking (by a planner or a reachability query over the fact graph)
+rather than something merely asserted. Grounding the dependency structure in a planning
+formalism is what lets an \L2 flow be represented as a dependency graph instead of a static
+list; running an actual planner over it is left to future work.
 
 \begin{table}[ht]\centering\small
 \caption{L2 field groups.}\label{tab:l2}
@@ -583,8 +593,11 @@ WebSocket/DDP, gRPC, server-sent events, OTLP, and ActivityPub), and the authent
 model (session cookies, bearer and API keys, email-OTP, and full OIDC/SAML/OAuth flows).
 Each application is additionally anchored to genuine, publicly-documented
 vulnerabilities, so the inventoried surface is known to be security-relevant rather than
-incidental. Every traditional-web environment is pinned to an exact version (shown in the
-tables); the right-hand column names the published CVEs associated with each application,
+incidental. Every environment is pinned to a specific build---a version tag or image
+digest recorded in its \cd{environment.yaml}, though several are snapshot, \texttt{-develop}
+or source-checkout builds whose commit SHAs are a reproducibility gap
+(Section~\ref{sec:limits})---and the version shown in the tables; the right-hand column
+names the published CVEs associated with each application,
 listed \emph{regardless} of whether this exact build is patched against them, together
 with the vulnerability class where an issue is not tied to a single CVE. Consistent with
 the dataset's attack-surface-only design, the ground truth inventories the \emph{surface}
@@ -748,15 +761,27 @@ LobeChat    &  0 / 31 & & \\
 \textbf{Total} & \textbf{129 / 307} & \textbf{Total unobserved} & \textbf{178}\\
 \bottomrule
 \end{tabular}
+
+{\footnotesize The left pair of columns is per application; the right pair is the global
+blocker total across all five applications (each row's blocker is \emph{not} aligned to the
+application on its left). Of the 178 unobserved, 38 are a principled ceiling (31
+\cd{crypto_blocked} $+$ 7 OAuth-gated of the 15 \cd{external_integration}); the other 140
+are reachability-limited.}
 \end{table}
 
 Separating the blockers distinguishes a \emph{principled} ceiling from a
-\emph{reachability} limit. Only 38 records are a principled ceiling---the 31
-\cd{crypto_blocked} (LobeChat's encrypted auth payload could not be reproduced) and the 7
-of the external integrations that require a genuine third-party OAuth identity a local
-stand-in cannot mint. The remaining 140 are reachability-limited: they are observable in
-principle but were not driven here because they depend on the reliability of a local
-model emitting a native tool call, or on activating a dormant service. Where a local
+\emph{reachability} limit. The 15 \cd{external_integration} records split in two: 7 need a
+genuine third-party OAuth identity that a local stand-in cannot mint (a principled block),
+while the other 8 a secret-free local stand-in could reach but still require the local
+model to emit a native tool call. The principled ceiling is therefore \textbf{38}
+records---the 31 \cd{crypto_blocked} (LobeChat's encrypted auth payload could not be
+reproduced) plus those 7 OAuth-gated integrations. The other \textbf{140} are
+reachability-limited: the 125 \cd{local_not_driven} (a labelled backlog of records the
+local model \emph{can} exercise but has not yet been driven to), the 7
+\cd{scheduling_required} (which need only a timer fire, not a credential, and so are not a
+principled ceiling), and those 8 stand-in-reachable external integrations. They are
+observable in principle but were not driven here because they depend on the reliability of
+a local model emitting a native tool call, or on activating a dormant service. Where a local
 stand-in \emph{can} substitute for an external service without a secret (image
 generation, a Model Context Protocol server, a scheduler, or a direct create/read of a
 store), those records were driven to an observed effect; image generation and MCP are
@@ -792,37 +817,50 @@ families not yet inventoried).}
 \end{table}
 
 % ======================================================================
-\section{Discussion and Key Insights}
+\section{Discussion and Key Insights}\label{sec:disc}
 % ======================================================================
 
 \subsection{Traditional attack surface}
+These observations are properties of the dataset; each becomes a measurable claim only once
+a crawler or agent is scored against it (Section~\ref{sec:future}), which this project does
+not yet do.
 \begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
-\item \textbf{The exhaustive ground truth exposes surfaces crawlers miss.} A large part
-      of the 1{,}397 interfaces is API-only or event-driven and never appears in a
-      browser-centric crawl: the DDP WebSocket of Rocket.Chat, the gRPC/OTLP ingestion of
-      Uptrace, the WebSockets of Directus and Outline, VoceChat's SSE streams, and---across
-      every application---endpoints that are reachable only after a precondition is met
-      (an object exists, a role is held, a prior step has run). Because the dataset is
-      built from source \emph{and} runtime rather than from a crawl, these are first-class
-      records with the same evidence as any page.
-\item \textbf{The same business action is exposed through several surfaces.} The 1{,}397
-      interfaces realise only 980 \L2 actions, so on average an action is reachable
-      through more than one interface---an internal UI API, a developer/API-key API, and
-      an embed widget can all realise one action. This is exactly where an automated
-      scanner under-counts: it finds one surface and stops. The schema binds every such
-      surface to a single \L2 action through \cd{l1_bindings}, so the duplication becomes a
-      counted, checkable property of the ground truth rather than a footnote, and a
-      future benchmark can reward an agent for finding \emph{all} of an action's surfaces.
+\item \textbf{The ground truth includes surfaces a browser-centric crawl would miss.}
+      Most \L1 records are API or event-driven interfaces rather than browser pages: the
+      DDP WebSocket of Rocket.Chat, the gRPC/OTLP ingestion of Uptrace, the WebSockets of
+      Directus and Outline, VoceChat's SSE streams, and---across every application---endpoints
+      reachable only after a precondition is met (an object exists, a role is held, a prior
+      step has run). Because the dataset is built from source \emph{and} runtime rather than
+      from a crawl, these are first-class records with the same evidence as any page. Whether
+      a given crawler actually under-counts them is an empirical question for the benchmark,
+      not something this report measures; we state only that the reference contains them.
+\item \textbf{The schema represents multi-surface duplication, which the current corpus
+      barely exercises.} One business action can in principle be realised by several
+      interfaces---an internal UI API, a developer/API-key API, and an embed widget---and
+      the schema binds all of them to a single \L2 action through \cd{l1_bindings}, making
+      the duplication a counted, checkable property. In the present dataset, however, this
+      is rare: only four \L2 actions bind two or more distinct \L1 interfaces, so the
+      corpus demonstrates the schema's \emph{ability} to capture multi-surface exposure
+      rather than establishing its prevalence. Measuring prevalence---the share of actions
+      with multiple bindings, and the under-count a baseline crawler (e.g.\ ZAP or Katana)
+      exhibits against it---requires both denser multi-binding annotation and an actual
+      crawler run, and is left to future work (Section~\ref{sec:future}).
 \end{enumerate}
 
 \subsection{Agentic attack surface}
 \begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
-\item \textbf{The root cause of attack vectors is authority.} Untrusted data reaches a
-      model decision, which reaches a privileged tool. By modelling the execution edges as
-      a traversable path (Figure~\ref{fig:ece}), the schema lets an investigator enumerate
-      every untrusted$\to$privileged path directly rather than inferring it---and the
-      environments bear this out, from OpenClaw's owner-only tools reachable through an
-      ordinary agent run to AnythingLLM's injected-response XSS$\to$RCE.
+\item \textbf{Authority is the organising thesis, not yet a measured result.} The schema
+      is built on the hypothesis that the root cause of agentic attack vectors is
+      authority---untrusted data reaching a model decision that reaches a privileged
+      tool---and it operationalises that hypothesis by modelling the execution edges as a
+      traversable path (Figure~\ref{fig:ece}) so every untrusted$\to$privileged path can be
+      enumerated directly rather than inferred. We do not yet report the resulting counts
+      (how many such paths each application exposes, or how many carry a
+      declared-but-unenforced control); extracting them is a query the schema is designed
+      to answer and is the natural next analysis. The CVE classes in Tables~\ref{tab:envweb}
+      and~\ref{tab:envllm} are ordinary web and application bugs---not all of them
+      untrusted-input-to-privileged-tool cases---and establish that the inventoried surface
+      is security-relevant, not that authority explains every one.
 \item \textbf{Controls must be enforced, not merely present.} For each
       untrusted$\to$privileged path the schema records whether the controls on that path
       (\cd{edge.control_ids} / \cd{tool.control_ids}) are actually enforced, with an
@@ -857,7 +895,63 @@ families not yet inventoried).}
 \end{enumerate}
 
 % ======================================================================
-\section{Future Work}
+\section{Threats to Validity and Limitations}\label{sec:limits}
+% ======================================================================
+This project is a dataset-and-methodology contribution, and its claims should be read as
+such. We set out the main limitations explicitly.
+
+\paragraph{No evaluation is run.} No crawler or agent is scored against the ground truth
+in this report. The two propositions in Section~\ref{sec:disc}---crawler under-count of
+multi-surface actions, and authority as the root cause of agentic vectors---are therefore
+\emph{framed} by the dataset, not demonstrated by it. Establishing either requires running
+a baseline tool (and reporting counts), which is the first item of future work.
+
+\paragraph{Grounding is mostly reachability-tier, and route-confirmation has limits.} Of
+the 1{,}397 \L1 interfaces, 1{,}039 (74\%) are route-confirmed only; just 358 returned an
+observed $2xx$. ``Route-confirmed'' means a request reached a handler, inferred from the
+response's status and shape; for the seven applications with a route oracle this is
+cross-checked against the application's own router table, but for an application without an
+oracle an authentication middleware or a catch-all/SPA fallback could in principle return a
+$4xx$ that is mistaken for a real route. The agentic layer is weaker still: 129 of 307
+records observed (42\%), with LobeChat at $0/31$. These depths are reported per record, but
+a reader should not read ``grounded'' as ``exercised''.
+
+\paragraph{Coverage is deliberately partial, so scoring must be scoped.} Authored-surface
+coverage is intentionally a subset of the live API for several applications (Ghost
+$43.8\%$, Discourse $13.3\%$, Open~WebUI $2.9\%$; Table~\ref{tab:complete}). A benchmark
+that scored raw precision against such a reference would penalise an agent for discovering a
+real route that the dataset deliberately omits. Any evaluation must therefore be restricted
+to a published, per-application \emph{scoped surface} rather than the whole live
+application. The route oracle itself covers only seven of the fifteen applications, and the
+size of the \cd{UNCHECKED} class (surface a static oracle cannot enumerate---for example
+the difference between Directus's 115 authored routes and its 65 OpenAPI-oracle routes,
+which is GraphQL, WebSocket and dynamically mounted surface) is not yet tabulated.
+
+\paragraph{Validation checks consistency, not semantic correctness.} The committed scripts
+(Section~\ref{sec:val}) verify closed vocabularies, referential integrity, cross-layer
+closure and uniqueness. They do \emph{not} establish that the \L2 requirements and effects,
+or the agentic trust/authority labels, are themselves correct---that remains a matter of
+author judgement. There is as yet no inter-annotator agreement study and no independently
+audited sample. The records are emitted by committed, deterministic generator scripts
+(\cd{build_l1.py}, \cd{l1_data.py}, \cd{build_l2.py}, \cd{l2_data.py}, and the agentic
+equivalents) that encode manual source analysis and runtime capture rather than a model
+invoked at build time. Because a benchmark that scored a language model against records a
+language model had itself authored would be circular, the provenance of the underlying data
+tables---how much, if any, was drafted with model assistance versus by hand---should be
+documented explicitly as part of the release; we flag this as the single most important
+provenance question for a future audit, alongside the human-audited sample that is planned.
+
+\paragraph{Reproducibility and CVE context.} Each environment is pinned by a version tag or
+image digest recorded in its \cd{environment.yaml} (for example VoceChat's image digest is
+stored there); some are snapshot, \texttt{-develop} or source-checkout builds (Keycloak
+\texttt{main}, Rocket.Chat \texttt{9.1.0-develop}, the five LLM checkouts) whose exact
+commit SHAs should be recorded for bit-for-bit reproduction. The CVE columns in
+Tables~\ref{tab:envweb} and~\ref{tab:envllm} establish that each application is
+security-relevant, but they are contextual: they are not linked to individual \L1/\L2
+records, and several recent pinned builds are already patched against the advisories listed.
+
+% ======================================================================
+\section{Future Work}\label{sec:future}
 % ======================================================================
 \begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
 \item \textbf{Benchmark agents against the ground truth.} The dataset is built to be
@@ -867,10 +961,15 @@ families not yet inventoried).}
       the semantic description an agent produces (Subject--Operation--Object, requirements
       and effects) against the authored record; and correctness of the cross-layer
       relationships it reconstructs (does it bind the surfaces of one action together, and
-      trace an agentic lineage end to end). Scoring should also be stratified by the
-      evidence depth of each target record, so an agent is not penalised for missing a
-      record the ground truth itself only route-confirmed. These metrics would be run over
-      LLM crawlers and agentic scanners across all fifteen applications.
+      trace an agentic lineage end to end). Two guards are essential: scoring must run
+      against a published per-application \emph{scoped surface} (Section~\ref{sec:limits}),
+      not the whole live application, so an agent is not marked wrong for finding a real
+      route the dataset deliberately omits; and scoring should be stratified by the evidence
+      depth of each target record, so an agent is not penalised for missing a record the
+      ground truth itself only route-confirmed. A baseline non-LLM crawler (e.g.\ OWASP ZAP
+      or Katana) should be run first, both to calibrate the metrics and to quantify the
+      multi-surface under-count claimed only qualitatively here. These metrics would then be
+      run over LLM crawlers and agentic scanners across all fifteen applications.
 \item \textbf{Extend schema coverage to the partially-modelled transports.} WebSocket/DDP,
       gRPC/OTLP, and GraphQL (including subscriptions) are present in the environments but
       inventoried at \L1/\L2 less completely than REST; bringing them to full parity---with
@@ -908,6 +1007,15 @@ record by observation depth, and checks every cross-layer reference. It enables 
 ability to \emph{generate} an attack surface, provides a concrete framework for
 measuring agentic risk, and offers a reusable methodology and dataset for future
 extensions.
+
+% ======================================================================
+\section*{Data, Code, and Licence Availability}
+% ======================================================================
+The dataset (the \L1, \L2 and agentic YAML), the committed generator scripts that produce
+it, the validation and completeness-oracle tooling, and each environment's
+\cd{environment.yaml} (recording the pinned version and, where available, the image digest)
+are maintained in the project repository. \emph{[A public availability link and an
+open-source licence are to be finalised before release.]}
 
 % ======================================================================
 \begin{thebibliography}{OWASP Foundation(2025)}
