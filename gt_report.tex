@@ -581,73 +581,75 @@ the implementation stack (Rust, Go, Python, Ruby, Java, and Node/TypeScript back
 the transport and interaction model (classical REST, GraphQL, RPC-style REST,
 WebSocket/DDP, gRPC, server-sent events, OTLP, and ActivityPub), and the authentication
 model (session cookies, bearer and API keys, email-OTP, and full OIDC/SAML/OAuth flows).
-Each application is additionally anchored to at least one genuine, publicly-documented
-vulnerability class, so the inventoried surface is known to be security-relevant rather
-than incidental. Every traditional-web environment is pinned to an exact version (shown in
-the tables); a CVE identifier is given only where a published advisory's affected range
-includes that pinned version, and otherwise the representative vulnerability \emph{class}
-is named. This is consistent with the dataset's attack-surface-only design: the ground
-truth inventories the \emph{surface} an issue lives on, not an exploit for it.
+Each application is additionally anchored to genuine, publicly-documented
+vulnerabilities, so the inventoried surface is known to be security-relevant rather than
+incidental. Every traditional-web environment is pinned to an exact version (shown in the
+tables); the right-hand column names the published CVEs associated with each application,
+listed \emph{regardless} of whether this exact build is patched against them, together
+with the vulnerability class where an issue is not tied to a single CVE. Consistent with
+the dataset's attack-surface-only design, the ground truth inventories the \emph{surface}
+these issues live on, not an exploit for any of them.
 
 \subsection{Traditional web applications}
 Table~\ref{tab:envweb} lists the ten traditional-web environments with their exact pinned
-version, implementation stack and transports, and the representative vulnerability class
-each was chosen to exercise---with a CVE identifier where a published advisory's affected
-range includes the pinned version.
+version and implementation stack, and the published CVEs associated with each
+application (listed regardless of this build's patch status), plus the vulnerability class
+where an issue is not tied to a single CVE.
 
 \begin{table}[htbp]\centering\footnotesize
 \caption{Traditional web environments: pinned version, tech stack/transports, and
-representative vulnerability classes (CVE given only where it affects the pinned
-version).}\label{tab:envweb}
+published CVEs / vulnerability classes.}\label{tab:envweb}
 \begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{Environment} & \textbf{Pinned version \& tech stack} & \textbf{Representative vulnerability class(es)}\\
+\textbf{Environment} & \textbf{Pinned version \& tech stack} & \textbf{Published CVEs / vulnerability classes}\\
 \midrule
-VoceChat    & \textbf{0.5.36} (server) / vocechat-web 0.9.122; Rust; OpenAPI REST; SSE streams; Bot API (\cd{x-api-key}); SQLite & SSRF in open-graph URL fetch (CVE-2026-100893; affects $\le$0.5.36, unpatched upstream)\\
-MediaCMS    & \textbf{9.2.1}; Django + React; Celery; PostgreSQL 17.2 + Redis; upload-driven media transcoding & RCE via media upload (class; the CVE-2024-52004 fix in 4.1.0 predates this build)\\
-WriteFreely & \textbf{0.17.2}; Go (server-rendered templates); SQLite; token REST; ActivityPub; OAuth & Local credential / config disclosure (class)\\
-Uptrace     & \textbf{2.1.0-rc.2}; Go; OTLP over gRPC/HTTP; ClickHouse + PostgreSQL + Redis & SQL injection (class; DB-driver layer)\\
-Discourse   & \textbf{2026.11.0}; Ruby on Rails + Ember.js SPA; PostgreSQL + Redis + Sidekiq; nginx & SSRF; IDOR; stored XSS (classes)\\
-Ghost       & \textbf{6.76.0-rc.0}; Node; Ember admin; Content + Admin APIs; theme upload; S3/GCS; webhooks & SQLi; token / 2FA bypass; SSRF; RCE; path traversal (classes)\\
-Rocket.Chat & \textbf{9.1.0-develop}; Meteor/Node; MongoDB 7; REST + DDP WebSocket; Apps-Engine; SAML/CAS/OAuth & NoSQL injection; unauthenticated file deletion (classes)\\
-Keycloak    & \textbf{26.x} (main, 999.0.0-SNAPSHOT); Java/Quarkus; React admin console; admin REST; OIDC + SAML & Authentication / session bypass (class)\\
-Directus    & \textbf{11.x} (\cd{@directus/api} 41.0.1); Node/Vue; REST + GraphQL; WebSocket; TUS uploads; URL import; Flows; SQLite & SSRF via file-import-from-URL (CVE-2026-61835; all 11.x, fixed in 12.0.0)\\
-Outline     & \textbf{1.12.0}; Node/TS + React; PostgreSQL 16 + Redis 7; RPC-style REST; WebSocket; email-OTP; OAuth/API-key & Broken access control / IDOR; OTP brute force; OAuth scope smuggling; path traversal; XSS (classes)\\
+VoceChat    & \textbf{0.5.36} (server) / vocechat-web 0.9.122; Rust; OpenAPI REST; SSE streams; Bot API (\cd{x-api-key}); SQLite & SSRF in open-graph URL fetch (CVE-2026-100893)\\
+MediaCMS    & \textbf{9.2.1}; Django + React; Celery; PostgreSQL 17.2 + Redis; upload-driven media transcoding & RCE via media upload (CVE-2024-52004)\\
+WriteFreely & \textbf{0.17.2}; Go (server-rendered templates); SQLite; token REST; ActivityPub; OAuth & Local credential / config disclosure (CVE-2025-24337)\\
+Uptrace     & \textbf{2.1.0-rc.2}; Go; OTLP over gRPC/HTTP; ClickHouse + PostgreSQL + Redis & SQL injection, DB-driver layer (CVE-2024-44905, CVE-2024-44906)\\
+Discourse   & \textbf{2026.11.0}; Ruby on Rails + Ember.js SPA; PostgreSQL + Redis + Sidekiq; nginx & SSRF (CVE-2025-68662); IDOR (CVE-2026-26265); stored XSS (CVE-2025-48954)\\
+Ghost       & \textbf{6.76.0-rc.0}; Node; Ember admin; Content + Admin APIs; theme upload; S3/GCS; webhooks & Unauth.\ SQLi (CVE-2026-26980); SSRF (CVE-2026-53946, CVE-2026-53944, CVE-2026-70591, CVE-2026-22597, CVE-2025-9862); plus token/2FA-bypass, RCE and path-traversal classes\\
+Rocket.Chat & \textbf{9.1.0-develop}; Meteor/Node; MongoDB 7; REST + DDP WebSocket; Apps-Engine; SAML/CAS/OAuth & Unauth.\ file deletion (CVE-2026-48929); NoSQL injection (CVE-2026-30833, CVE-2026-29198)\\
+Keycloak    & \textbf{26.x} (main, 999.0.0-SNAPSHOT); Java/Quarkus; React admin console; admin REST; OIDC + SAML & 2FA/auth bypass (CVE-2025-3910, CVE-2025-14777); session takeover (CVE-2025-12390, CVE-2025-11429); SAML broker bypass (CVE-2026-2603); password-reset (CVE-2026-18963)\\
+Directus    & \textbf{11.x} (\cd{@directus/api} 41.0.1); Node/Vue; REST + GraphQL; WebSocket; TUS uploads; URL import; Flows; SQLite & SSRF via file-import-from-URL (CVE-2026-61835, CVE-2026-35409, CVE-2024-46990, CVE-2024-39699); plus path-traversal class\\
+Outline     & \textbf{1.12.0}; Node/TS + React; PostgreSQL 16 + Redis 7; RPC-style REST; WebSocket; email-OTP; OAuth/API-key & Broken access control / IDOR (CVE-2026-120489, CVE-2026-120449, CVE-2025-64487); open redirect (CVE-2024-37830); plus OTP-brute-force, OAuth-scope-smuggling and XSS classes\\
 \bottomrule
 \end{tabularx}
 
-{\footnotesize A CVE is listed only where the published advisory's affected range includes
-the pinned version. Two qualify: VoceChat~0.5.36 (CVE-2026-100893, unpatched upstream) and
-Directus~11.x (CVE-2026-61835, fixed only in 12.0.0). Other rows name the representative
-vulnerability class the application was chosen to exercise; the pinned build post-dates the
-relevant fix (e.g.\ MediaCMS 9.2.1 vs the 4.1.0 RCE fix; Discourse 2026.11 vs its
-SSRF/IDOR/XSS fixes in 2026.1--2026.2; Rocket.Chat 9.1 vs the 8.5.1 file-deletion fix;
-Outline 1.12.0, which \emph{is} the fix for its 2026 access-control CVEs), the issue is
-dependency-level (Uptrace), or it is not tied to a single CVE.}
+{\footnotesize CVE identifiers are the published advisories associated with each
+application and are listed regardless of whether the pinned build above is patched against
+them (several recent builds are: e.g.\ MediaCMS 9.2.1 post-dates the CVE-2024-52004 fix in
+4.1.0, and Outline 1.12.0 is itself the fix for CVE-2026-120489/120449). Sub-items without
+a CVE name the representative vulnerability class. The list reflects advisories identified
+at the time of writing and is not guaranteed exhaustive.}
 \end{table}
 
 \subsection{LLM-integrated applications}
 Table~\ref{tab:envllm} lists the five LLM-integrated environments with their agentic
-stack and the agentic vulnerability class each exercises; every class maps onto an OWASP
-LLM Top~10 category and onto a concrete entry$\to$carry$\to$exit lineage path in the
-agentic layer. These applications are pinned to source checkouts rather than numbered
-releases, so no advisory range can be matched to a specific build; the column therefore
-names the vulnerability class rather than a CVE.
+stack and published CVEs; every vulnerability maps onto an OWASP LLM Top~10 category and
+onto a concrete entry$\to$carry$\to$exit lineage path in the agentic layer. These
+applications are pinned to source checkouts rather than numbered releases, so the CVEs are
+the published advisories for each project, listed regardless of build.
 
 \begin{table}[htbp]\centering\footnotesize
-\caption{LLM-integrated environments: build, agentic stack, and representative
+\caption{LLM-integrated environments: build, agentic stack, and published CVEs /
 vulnerability classes.}\label{tab:envllm}
 \begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{Environment} & \textbf{Build \& agentic stack} & \textbf{Representative vulnerability class(es)}\\
+\textbf{Environment} & \textbf{Build \& agentic stack} & \textbf{Published CVEs / vulnerability classes}\\
 \midrule
-Open WebUI  & \textbf{0.13.3}; Python; Socket.IO; server-side Python execution; MCP tools; RAG / vector store; scheduled automations & Agentic tool abuse; exposed server-side code-execution surface\\
-LibreChat   & source checkout (danny-avila); Node/Express + React; Code + RAG APIs; agents with permission/file models; MCP & MCP tool issues; unvalidated OAuth callback session\\
-AnythingLLM & source checkout (mintplexlabs); Node + React; HTTP API + agent WebSocket; workspaces; vector DBs; agent skills; MCP & SQL-agent injection; streaming-phase XSS$\to$RCE via LLM response injection; AgentFlows path traversal\\
-LobeChat    & source checkout (lobehub); Next.js + tRPC; OIDC / Better~Auth; PG/Redis/S3; agent \& MCP markets; URL/GitHub skill import; RAG & BOLA via chat-group agent operations; cross-user document disclosure via unscoped RAG; SSRF \& ReDoS in skill import\\
-OpenClaw    & source checkout; Node gateway (WS/HTTP/Control UI); exec tool (allowlist/approval); browser tool; skills registry; sub-agents; MCP + vector memory & Prompt injection; excessive agency (owner-only tools via agent runs); env-variable allowlist bypass; working-directory prompt leakage\\
+Open WebUI  & \textbf{0.13.3}; Python; Socket.IO; server-side Python execution; MCP tools; RAG / vector store; scheduled automations & Code injection$\to$RCE (CVE-2025-64496); missing authentication (CVE-2024-8053); arbitrary file upload (CVE-2026-44566); SSRF (CVE-2026-45401)\\
+LibreChat   & source checkout (danny-avila); Node/Express + React; Code + RAG APIs; agents with permission/file models; MCP & SSRF via MCP / agent actions (CVE-2026-31945, CVE-2026-54033, CVE-2025-69222); MCP env/secret exposure (CVE-2026-32625, CVE-2026-44653)\\
+AnythingLLM & source checkout (mintplexlabs); Node + React; HTTP API + agent WebSocket; workspaces; vector DBs; agent skills; MCP & AgentFlows path traversal (CVE-2026-5627); path traversal (CVE-2024-8248, CVE-2024-5211, CVE-2024-3025); SSRF (CVE-2024-3149, CVE-2024-4084); Prisma injection (CVE-2024-8251); plus SQL-agent-injection and XSS$\to$RCE-via-response-injection classes\\
+LobeChat    & source checkout (lobehub); Next.js + tRPC; OIDC / Better~Auth; PG/Redis/S3; agent \& MCP markets; URL/GitHub skill import; RAG & SSRF in skill import (CVE-2026-59095, CVE-2024-32965); cross-user RAG document access (CVE-2026-59098); plus chat-group BOLA and skill-import ReDoS classes\\
+OpenClaw    & source checkout; Node gateway (WS/HTTP/Control UI); exec tool (allowlist/approval); browser tool; skills registry; sub-agents; MCP + vector memory & No published CVE; classes: prompt injection; excessive agency (owner-only tools via agent runs); env-variable allowlist bypass; working-directory prompt leakage\\
 \bottomrule
 \end{tabularx}
+
+{\footnotesize CVEs are the published advisories for each project, listed regardless of the
+checked-out build. OpenClaw has no public advisory under that name, so only its
+vulnerability classes are given. The list reflects advisories identified at the time of
+writing and is not guaranteed exhaustive.}
 \end{table}
 
 % ======================================================================
