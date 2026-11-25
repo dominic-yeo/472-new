@@ -588,81 +588,50 @@ the tables name the representative issue each application was chosen to exercise
 dataset records the \emph{surface} that issue lives on, never an exploit for it.
 
 \subsection{Traditional web applications}
-Table~\ref{tab:envweb} lists the ten traditional-web environments, chosen to cross
-language runtimes, frameworks and transports. VoceChat is a Rust service with an OpenAPI
-REST surface plus SSE streams and a bot API keyed by \cd{x-api-key}; MediaCMS is
-Django/React with upload-driven media handling; WriteFreely is Go templates with a token
-REST API, anonymous publishing, ActivityPub federation and OAuth; Uptrace ingests OTLP
-over gRPC and HTTP behind ClickHouse and Postgres; Discourse is Rails/Ember on PostgreSQL,
-Redis and Sidekiq behind nginx; Ghost is Node/Ember with two separate APIs, theme upload
-and S3/GCS storage; Rocket.Chat is Meteor/Node exposing both REST and a DDP WebSocket, an
-Apps-Engine, and SAML/CAS/OAuth; Keycloak is Java/Quarkus implementing OIDC and SAML
-flows; Directus is Node/Vue with REST, GraphQL, WebSocket, TUS resumable uploads, URL
-import and a Flows automation engine; and Outline is Node/TypeScript with an RPC-style
-REST API, WebSocket, email-OTP and OAuth/API-key auth. The representative vulnerability
-classes are correspondingly broad---server-side request forgery (VoceChat, Discourse,
-Ghost, Directus), remote code execution (MediaCMS, Ghost), SQL injection (Uptrace, Ghost),
-insecure direct object reference (Discourse, Outline), path traversal (Ghost, Directus,
-Outline), stored and reflected XSS (Discourse, Outline), authentication and 2FA bypass
-(Ghost, Keycloak), OTP brute force and OAuth scope smuggling (Outline), unauthenticated
-file deletion (Rocket.Chat), and local credential disclosure (WriteFreely)---so the ground
-truth is exercised against every major OWASP entry-point family rather than a single one.
+Table~\ref{tab:envweb} lists the ten traditional-web environments. Each row gives the
+implementation stack and transports alongside the representative vulnerability class(es)
+the application was chosen to exercise.
 
-\begin{table}[htbp]\centering\small
-\caption{Traditional web environments and representative vulnerability classes.}
-\label{tab:envweb}
+\begin{table}[htbp]\centering\footnotesize
+\caption{Traditional web environments: tech stack, transports, and representative
+vulnerability classes.}\label{tab:envweb}
 \begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{Environment} & \textbf{Tech stack} & \textbf{Vulnerability}\\
+\textbf{Environment} & \textbf{Tech stack \& transports} & \textbf{Representative vulnerability class(es)}\\
 \midrule
-VoceChat    & Rust REST (OpenAPI), SSE streams, Bot API (\cd{x-api-key}), admin webhooks & SSRF (CVE-2026-100893)\\
-MediaCMS    & Django + React, REST, upload-driven media handling & RCE (CVE-2024-52004)\\
-WriteFreely & Go templates, token REST, anonymous publishing, ActivityPub, OAuth & Local credential read (CVE-2025-24337)\\
-Uptrace     & OTLP over gRPC/HTTP (project-DSN token), ClickHouse, Postgres & SQLi (CVE-2024-44905/44906)\\
-Discourse   & Rails, Ember SPA, PSQL, Redis, Sidekiq, nginx & SSRF (CVE-2025-68662), IDOR (CVE-2026-26265), XSS (CVE-2025-48954)\\
-Ghost       & Node, Ember admin, two APIs, theme upload, S3/GCS, webhooks & SQLi, token/2FA bypass, SSRF, RCE, path traversal\\
-Rocket.Chat & Meteor/Node, REST + DDP WebSocket, Apps-Engine, SAML/CAS/OAuth & NoSQLi, unauthenticated file deletion\\
-Keycloak    & Java/Quarkus, React console, admin REST, OIDC/SAML flows & Multiple authentication CVEs\\
-Directus    & Node/Vue, REST + GraphQL, WebSocket, TUS uploads, URL import, Flows & Unauth.\ file upload/modification, SSRF, path traversal\\
-Outline     & Node/TS + React, RPC-style REST, WebSocket, email-OTP, OAuth/API-key & OTP brute force, OAuth scope smuggling, IDOR, path traversal, XSS\\
+VoceChat    & Rust service; OpenAPI REST; SSE event streams; Bot API (\cd{x-api-key}); admin webhooks & SSRF via admin webhook / URL fetch (CVE-2026-100893)\\
+MediaCMS    & Django + React; REST; upload-driven media handling and transcoding & RCE via media upload processing (CVE-2024-52004)\\
+WriteFreely & Go (server-rendered templates); token REST; anonymous publishing; ActivityPub federation; OAuth & Local credential / file disclosure (CVE-2025-24337)\\
+Uptrace     & OTLP ingest over gRPC/HTTP (project-DSN token); ClickHouse; Postgres & SQL injection on the query/ingest path (CVE-2024-44905/44906)\\
+Discourse   & Rails + Ember SPA; PostgreSQL; Redis; Sidekiq; nginx & SSRF (CVE-2025-68662); IDOR (CVE-2026-26265); stored XSS (CVE-2025-48954)\\
+Ghost       & Node; Ember admin; separate Content + Admin APIs; theme upload; S3/GCS; webhooks & SQLi; token / 2FA bypass; SSRF; RCE; path traversal\\
+Rocket.Chat & Meteor/Node; REST + DDP WebSocket; Apps-Engine; SAML/CAS/OAuth & NoSQL injection; unauthenticated file deletion\\
+Keycloak    & Java/Quarkus; React admin console; admin REST; OIDC + SAML flows & Multiple authentication / session CVEs\\
+Directus    & Node/Vue; REST + GraphQL; WebSocket; TUS resumable uploads; URL import; Flows automation engine & Unauth.\ file upload/modification; SSRF; path traversal\\
+Outline     & Node/TS + React; RPC-style REST; WebSocket; email-OTP; OAuth/API-key & OTP brute force; OAuth scope smuggling; IDOR; path traversal; XSS\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{LLM-integrated applications}
-Table~\ref{tab:envllm} lists the five LLM-integrated environments, chosen to cover the
-distinctive components of an agentic stack: tool-calling via the Model Context Protocol
-(all five), retrieval-augmented generation over vector stores (Open~WebUI, AnythingLLM,
-LobeChat, OpenClaw), server-side code execution (Open~WebUI's Python runtime, OpenClaw's
-allowlisted exec tool), sub-agents and agent skills (AnythingLLM, OpenClaw),
-scheduler/cron automation (AnythingLLM, Open~WebUI), and agent- or skill-\emph{markets}
-with URL or GitHub import (LobeChat, OpenClaw). The back ends again vary---Python for
-Open~WebUI, Node/Express for LibreChat, Node for AnythingLLM, Next.js/tRPC for LobeChat,
-and a Node WS/HTTP gateway with a Control UI for OpenClaw---as do the auth models
-(OIDC/Better~Auth for LobeChat, developer and extension keys for AnythingLLM). The
-vulnerability classes are the ones specific to agentic systems, and are exactly what the
-agentic layer is built to enumerate: prompt injection and working-directory-into-prompt
-leakage (OpenClaw), excessive agency where owner-only tools become reachable through an
-ordinary agent run (OpenClaw), SQL-agent injection and a streaming-phase XSS$\to$RCE via
-injected LLM response (AnythingLLM), broken object-level authorization through chat-group
-agent operations and cross-user document disclosure via an unscoped RAG index (LobeChat),
-SSRF and ReDoS in skill import (LobeChat), environment-variable allowlist bypass
-(OpenClaw), MCP callback and session-handling flaws (LibreChat), and AgentFlows path
-traversal (AnythingLLM). Each maps onto an OWASP LLM Top~10 category and onto a concrete
-entry$\to$carry$\to$exit lineage path in the agentic layer.
+Table~\ref{tab:envllm} lists the five LLM-integrated environments. Each row gives the
+agentic stack (tool-calling, RAG, code execution, scheduling, skill/agent markets)
+alongside the agentic vulnerability class(es) the application exercises; each class maps
+onto an OWASP LLM Top~10 category and onto a concrete entry$\to$carry$\to$exit lineage
+path in the agentic layer.
 
-\begin{table}[htbp]\centering\small
-\caption{LLM-integrated environments and representative vulnerability classes.}
-\label{tab:envllm}
+\begin{table}[htbp]\centering\footnotesize
+\caption{LLM-integrated environments: agentic stack and representative vulnerability
+classes.}\label{tab:envllm}
 \begin{tabularx}{\textwidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
 \toprule
-\textbf{Environment} & \textbf{Tech stack} & \textbf{Vulnerability}\\
+\textbf{Environment} & \textbf{Tech stack \& agentic components} & \textbf{Representative vulnerability class(es)}\\
 \midrule
-Open WebUI  & Python backend, Socket.IO, server-side Python, MCP tools, RAG & Multiple agentic tool vulnerabilities\\
-LibreChat   & Node/Express + React, agents with permission/file models, MCP & Multiple MCP issues, unvalidated callback session\\
-AnythingLLM & Node + React, HTTP API, agent WebSocket, developer/extension keys, workspaces, vector DBs, agent skills & SQL-agent injection; streaming-phase XSS$\to$RCE via LLM response injection; AgentFlows path traversal\\
-LobeChat    & Next.js, tRPC, OIDC/Better Auth, PG/Redis/S3, agent \& MCP markets, URL/GitHub skill import, RAG & BOLA via chat-group agent operations; cross-user document disclosure via unscoped RAG; SSRF \& ReDoS in skill import\\
-OpenClaw    & Node gateway (WS/HTTP/Control UI), chat channels + webhooks, exec tool (allowlist/approval), browser tool, skills registry, sub-agents, MCP + vector memory & Env-variable allowlist bypass; working directory injected into prompts; owner-only tools reachable via agent runs; prompt injection\\
+Open WebUI  & Python backend; Socket.IO; server-side Python execution; MCP tools; RAG / vector store; scheduled automations & Multiple agentic tool vulnerabilities; exposed server-side code-execution surface\\
+LibreChat   & Node/Express + React; agents with permission and file models; MCP tools & Multiple MCP issues; unvalidated OAuth callback session\\
+AnythingLLM & Node + React; HTTP API + agent WebSocket; developer/extension keys; workspaces; vector DBs; agent skills; scheduler & SQL-agent injection; streaming-phase XSS$\to$RCE via LLM response injection; AgentFlows path traversal\\
+LobeChat    & Next.js + tRPC; OIDC / Better~Auth; PG/Redis/S3; agent \& MCP markets; URL/GitHub skill import; RAG & BOLA via chat-group agent operations; cross-user document disclosure via unscoped RAG; SSRF \& ReDoS in skill import\\
+OpenClaw    & Node gateway (WS/HTTP/Control UI); chat channels + webhooks; exec tool (allowlist/approval); browser tool; skills registry; sub-agents; MCP + vector memory & Env-variable allowlist bypass; working directory injected into prompts; owner-only tools reachable via agent runs; prompt injection\\
 \bottomrule
 \end{tabularx}
 \end{table}
