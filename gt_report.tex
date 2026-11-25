@@ -492,14 +492,33 @@ action carries a tier of \cd{interface} (its bound \L1 routes were observed) or
 property of the evidence, so a reader can see not only \emph{whether} a record is
 grounded but \emph{how far}.
 
-\paragraph{Completeness oracle.} To check that the authored surface is neither invented
-nor badly under-counted, each \L1 set is diffed against the application's own route
-list---either the served OpenAPI document (Oracle~A) or an in-container router dump
-(Oracle~B). We report \emph{validity} (the share of checkable authored routes that are
-real live routes) separately from \emph{coverage} (the share of the live surface that is
-inventoried), and hold surface a static oracle structurally cannot enumerate (dynamically
-mounted routers, packaged sub-APIs, static assets) out of the validity denominator so the
-measure is not understated.
+\paragraph{Completeness oracle.} Completeness is established by forcing \emph{two
+independent derivations to agree and then checking both against a third, authoritative
+source}. The white-box source list (handlers, route tables, and OpenAPI specs read from
+the code) and the black-box runtime capture (traffic driven against the live deployment)
+are built separately and reconciled: a route in one but not the other is investigated
+until explained. Because both could share a blind spot, each \L1 set is additionally
+diffed against the application's \emph{own} route list, obtained in one of two ways---the
+served OpenAPI document (Oracle~A, for apps that publish one, e.g.\ VoceChat, Directus) or
+a dump of the live router table extracted from inside the running container (Oracle~B,
+e.g.\ a mounted Express/Rails/FastAPI route list). Paths are normalised on both sides to
+the same URL template (concrete ids collapsed to \cd{/{n}}, method sets unioned) so the
+comparison is like-for-like.
+
+The diff is read in \emph{both} directions, and the two directions measure different
+things. \emph{Validity} is the share of checkable authored routes that the oracle
+confirms: an authored route the oracle does not contain is a phantom---a transcription
+error or a route that no longer exists at the pinned version---and is corrected at source.
+\emph{Coverage} is the share of the oracle's live routes that the dataset inventories: an
+oracle route the dataset lacks is a genuine omission. The two fail for opposite reasons,
+so collapsing them into one number would hide both. Surface that a static oracle
+structurally cannot enumerate---dynamically mounted routers, sub-APIs packaged behind a
+single catch-all, static assets, and non-HTTP transports (WebSocket/DDP, gRPC, SSE)---is
+held out of the validity denominator as an \cd{UNCHECKED} class, so a route the oracle
+simply cannot see is never scored as invalid. Where the dataset deliberately scopes to a
+subset of a very large API (Discourse, Open~WebUI), low coverage is recorded as intentional
+rather than as a defect; where it is not intentional, the oracle surfaces a real gap to
+close---as it did for Ghost's admin-API families (Table~\ref{tab:complete}).
 
 \paragraph{Multi-identity probing.} Interfaces are driven under more than one identity
 (anonymous, user, admin, and application-specific roles such as Vocechat's
@@ -517,24 +536,77 @@ driven), \cd{scheduling_required} (needs a timer/cron fire), \cd{external_integr
 \emph{reachability} limit from a \emph{principled} one.
 
 \subsection{Validation}\label{sec:val}
-Validation enforces agreement automatically; a record that fails any check is not shipped.
-\begin{itemize}[leftmargin=1.5em,itemsep=1pt]
-\item \textbf{Traditional (L1/L2).} Closed vocabularies (predicates $\in$ the fixed set);
-      semantic consistency (\cd{semantic_outputs} $=$ the set of mergeable resources);
-      cross-layer closure (every \L2 \cd{l1_binding} resolves to a real \L1 route);
-      uniqueness (no duplicate \L1 keys or action keys).
-\item \textbf{Agentic.} Referential integrity (every \cd{*_id} points to a real record);
-      lineage closure (every writer/output resolves); enum validity; existence of
-      all referenced L1/L2 nodes; and evidence invariants (an observed record carries no
-      blocker; every unobserved record carries exactly one valid blocker).
+Validity is enforced not by manual review but by a set of committed scripts run over the
+entire dataset; a record that fails any check is not shipped, and because the checks are
+version-controlled, an integrity regression is caught on the next run rather than assumed
+away. The checks fall into three groups.
+\begin{itemize}[leftmargin=1.5em,itemsep=3pt]
+\item \textbf{Traditional (L1/L2).}
+      \emph{Closed vocabularies}---every predicate, \cd{value_kind}, parameter
+      \cd{location}, \cd{crud} class and visibility value must come from its fixed
+      enumeration, so a typo cannot silently invent a new category.
+      \emph{Semantic consistency}---an \L1 node's \cd{semantic_outputs} must equal the set
+      of mergeable resources it declares, and every \cd{flow=true} field must lift to a
+      semantic input or output.
+      \emph{Cross-layer closure}---every \L2 \cd{l1_binding} must resolve to a real \L1
+      key, and its bound methods must be a subset of that node's observed methods.
+      \emph{Uniqueness}---no duplicate \L1 keys and no duplicate \L2 action ids anywhere in
+      the corpus.
+\item \textbf{Agentic.}
+      \emph{Referential integrity}---every \cd{*_id} (tool, context, memory, sink, edge,
+      control) resolves to a record that exists.
+      \emph{Lineage closure}---every writer, producer and output declared on a context
+      source, memory store, sink or edge resolves, so no data path dangles.
+      \emph{Enum validity}---\cd{trust_class}, \cd{effect_class}, \cd{execution_identity},
+      \cd{enforcement_mode} and the other labels are in range.
+      \emph{Cross-layer existence}---every \cd{l1_id} and \cd{related_l2_id} on an agentic
+      record points to a real L1/L2 node.
+      \emph{Evidence invariants}---an \cd{observed} record carries no blocker, and every
+      unobserved record carries exactly one blocker from the closed taxonomy, so the
+      grounding ledger can never be silently inconsistent.
+\item \textbf{Completeness.} The oracle diff of Section~\ref{sec:ground} runs in the same
+      pass, so validity and coverage are recomputed whenever the dataset changes and a
+      newly-introduced phantom route is rejected immediately.
 \end{itemize}
-These checks run as committed scripts over the whole dataset, so an integrity regression
-is caught rather than assumed; the current dataset passes with zero duplicate keys, zero
-dangling cross-layer references, and all evidence invariants satisfied.
+The current dataset passes every check: zero duplicate \L1 keys, zero duplicate \L2 ids,
+zero dangling cross-layer references, every enumeration in range, and all evidence
+invariants satisfied---a clean state that the committed scripts re-verify on each change.
 
 % ======================================================================
 \section{Environments (Dataset)}
 % ======================================================================
+Fifteen open-source applications were selected so that the dataset spans a wide range of
+\emph{surface shapes}, not merely a list of popular projects. Three axes drove the choice:
+the implementation stack (Rust, Go, Python, Ruby, Java, and Node/TypeScript back ends),
+the transport and interaction model (classical REST, GraphQL, RPC-style REST,
+WebSocket/DDP, gRPC, server-sent events, OTLP, and ActivityPub), and the authentication
+model (session cookies, bearer and API keys, email-OTP, and full OIDC/SAML/OAuth flows).
+Each application is additionally anchored to at least one genuine, publicly-documented
+vulnerability class, so the inventoried surface is known to be security-relevant rather
+than incidental. Every environment is pinned to an exact version, and the identifiers in
+the tables name the representative issue each application was chosen to exercise; the
+dataset records the \emph{surface} that issue lives on, never an exploit for it.
+
+\subsection{Traditional web applications}
+Table~\ref{tab:envweb} lists the ten traditional-web environments, chosen to cross
+language runtimes, frameworks and transports. VoceChat is a Rust service with an OpenAPI
+REST surface plus SSE streams and a bot API keyed by \cd{x-api-key}; MediaCMS is
+Django/React with upload-driven media handling; WriteFreely is Go templates with a token
+REST API, anonymous publishing, ActivityPub federation and OAuth; Uptrace ingests OTLP
+over gRPC and HTTP behind ClickHouse and Postgres; Discourse is Rails/Ember on PostgreSQL,
+Redis and Sidekiq behind nginx; Ghost is Node/Ember with two separate APIs, theme upload
+and S3/GCS storage; Rocket.Chat is Meteor/Node exposing both REST and a DDP WebSocket, an
+Apps-Engine, and SAML/CAS/OAuth; Keycloak is Java/Quarkus implementing OIDC and SAML
+flows; Directus is Node/Vue with REST, GraphQL, WebSocket, TUS resumable uploads, URL
+import and a Flows automation engine; and Outline is Node/TypeScript with an RPC-style
+REST API, WebSocket, email-OTP and OAuth/API-key auth. The representative vulnerability
+classes are correspondingly broad---server-side request forgery (VoceChat, Discourse,
+Ghost, Directus), remote code execution (MediaCMS, Ghost), SQL injection (Uptrace, Ghost),
+insecure direct object reference (Discourse, Outline), path traversal (Ghost, Directus,
+Outline), stored and reflected XSS (Discourse, Outline), authentication and 2FA bypass
+(Ghost, Keycloak), OTP brute force and OAuth scope smuggling (Outline), unauthenticated
+file deletion (Rocket.Chat), and local credential disclosure (WriteFreely)---so the ground
+truth is exercised against every major OWASP entry-point family rather than a single one.
 
 \begin{table}[htbp]\centering\small
 \caption{Traditional web environments and representative vulnerability classes.}
@@ -556,6 +628,28 @@ Outline     & Node/TS + React, RPC-style REST, WebSocket, email-OTP, OAuth/API-k
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\subsection{LLM-integrated applications}
+Table~\ref{tab:envllm} lists the five LLM-integrated environments, chosen to cover the
+distinctive components of an agentic stack: tool-calling via the Model Context Protocol
+(all five), retrieval-augmented generation over vector stores (Open~WebUI, AnythingLLM,
+LobeChat, OpenClaw), server-side code execution (Open~WebUI's Python runtime, OpenClaw's
+allowlisted exec tool), sub-agents and agent skills (AnythingLLM, OpenClaw),
+scheduler/cron automation (AnythingLLM, Open~WebUI), and agent- or skill-\emph{markets}
+with URL or GitHub import (LobeChat, OpenClaw). The back ends again vary---Python for
+Open~WebUI, Node/Express for LibreChat, Node for AnythingLLM, Next.js/tRPC for LobeChat,
+and a Node WS/HTTP gateway with a Control UI for OpenClaw---as do the auth models
+(OIDC/Better~Auth for LobeChat, developer and extension keys for AnythingLLM). The
+vulnerability classes are the ones specific to agentic systems, and are exactly what the
+agentic layer is built to enumerate: prompt injection and working-directory-into-prompt
+leakage (OpenClaw), excessive agency where owner-only tools become reachable through an
+ordinary agent run (OpenClaw), SQL-agent injection and a streaming-phase XSS$\to$RCE via
+injected LLM response (AnythingLLM), broken object-level authorization through chat-group
+agent operations and cross-user document disclosure via an unscoped RAG index (LobeChat),
+SSRF and ReDoS in skill import (LobeChat), environment-variable allowlist bypass
+(OpenClaw), MCP callback and session-handling flaws (LibreChat), and AgentFlows path
+traversal (AnythingLLM). Each maps onto an OWASP LLM Top~10 category and onto a concrete
+entry$\to$carry$\to$exit lineage path in the agentic layer.
 
 \begin{table}[htbp]\centering\small
 \caption{LLM-integrated environments and representative vulnerability classes.}
@@ -717,47 +811,106 @@ families not yet inventoried).}
 % ======================================================================
 
 \subsection{Traditional attack surface}
-\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
-\item \textbf{The exhaustive ground truth exposes surfaces crawlers miss}---notably
-      non-HTTP entries (WebSocket/DDP, gRPC) and endpoints gated behind state or a
-      workflow. These do not appear in a browser-centric crawl.
-\item \textbf{The same business action is exposed through different surfaces}---an
-      internal UI API, a developer/API-key API, and an embed widget can all realise one
-      action. This is exactly where an automated scanner under-counts: it discovers one
-      surface and stops. The schema binds all three to a single \L2 action, making the
-      duplication explicit.
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+\item \textbf{The exhaustive ground truth exposes surfaces crawlers miss.} A large part
+      of the 1{,}397 interfaces is API-only or event-driven and never appears in a
+      browser-centric crawl: the DDP WebSocket of Rocket.Chat, the gRPC/OTLP ingestion of
+      Uptrace, the WebSockets of Directus and Outline, VoceChat's SSE streams, and---across
+      every application---endpoints that are reachable only after a precondition is met
+      (an object exists, a role is held, a prior step has run). Because the dataset is
+      built from source \emph{and} runtime rather than from a crawl, these are first-class
+      records with the same evidence as any page.
+\item \textbf{The same business action is exposed through several surfaces.} The 1{,}397
+      interfaces realise only 980 \L2 actions, so on average an action is reachable
+      through more than one interface---an internal UI API, a developer/API-key API, and
+      an embed widget can all realise one action. This is exactly where an automated
+      scanner under-counts: it finds one surface and stops. The schema binds every such
+      surface to a single \L2 action through \cd{l1_bindings}, so the duplication becomes a
+      counted, checkable property of the ground truth rather than a footnote, and a
+      future benchmark can reward an agent for finding \emph{all} of an action's surfaces.
 \end{enumerate}
 
 \subsection{Agentic attack surface}
-\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
-\item \textbf{The root cause of attack vectors is authority}: untrusted data reaches a
-      model decision, which reaches a privileged tool. By treating the execution edges
-      as a traversable path, the schema lets an investigator enumerate these vectors
-      directly rather than inferring them.
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+\item \textbf{The root cause of attack vectors is authority.} Untrusted data reaches a
+      model decision, which reaches a privileged tool. By modelling the execution edges as
+      a traversable path (Figure~\ref{fig:ece}), the schema lets an investigator enumerate
+      every untrusted$\to$privileged path directly rather than inferring it---and the
+      environments bear this out, from OpenClaw's owner-only tools reachable through an
+      ordinary agent run to AnythingLLM's injected-response XSS$\to$RCE.
 \item \textbf{Controls must be enforced, not merely present.} For each
-      untrusted$\to$privileged path, the schema records whether the controls on that
-      path (\cd{edge.control_ids} / \cd{tool.control_ids}) are actually enforced---turning
-      a qualitative safety question into a checkable property.
+      untrusted$\to$privileged path the schema records whether the controls on that path
+      (\cd{edge.control_ids} / \cd{tool.control_ids}) are actually enforced, with an
+      \cd{enforcement_mode} and \cd{failure_mode}, turning a qualitative safety question
+      into a checkable property: a control that is declared but not enforced is now
+      visible as such.
+\item \textbf{The honest ceiling on agentic observation is small and stated.} Of the 307
+      gradable agentic records, only 38 (31 irreproducible crypto, 7 genuine third-party
+      OAuth) are a \emph{principled} ceiling for a local, credential-free environment; the
+      other 140 unobserved records are reachability-limited and each carries a labelled
+      blocker. Forcing every non-observation to name its cause---rather than leaving it a
+      silence---is what makes the agentic layer's coverage auditable instead of merely
+      asserted.
+\end{enumerate}
+
+\subsection{Evidence grading is the load-bearing contribution}
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+\item \textbf{Grounding is mostly reachability, not effect---and saying so matters.} All
+      1{,}397 interfaces and 980 actions are grounded, but only 358 interfaces returned an
+      observed $2xx$ and only 276 of the 980 actions were confirmed by their own observed
+      effect; the remainder are route-confirmed or interface-tier. A benchmark scored
+      against this ground truth must know which records are effect-proven and which are
+      only reachability-proven, and the depth ladder makes that distinction explicit on
+      every record rather than hiding it behind a single ``grounded'' flag.
+\item \textbf{The completeness oracle both validates and corrects.} Across the seven
+      applications whose own route list could be dumped, authored-route validity is
+      $92.5$--$100\%$, confirming the surface is real and not invented; at the same time
+      the oracle earns its keep by finding genuine defects---a real coverage gap in
+      Ghost's admin API, and stale cross-layer mirrors caught by the same automated
+      pass---demonstrating that an instrument which can only confirm is worth less than one
+      that can also fail the dataset.
 \end{enumerate}
 
 % ======================================================================
 \section{Future Work}
 % ======================================================================
-\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
-\item \textbf{Benchmark agents.} Define discovery metrics---precision/recall of surface
-      discovery, accuracy of semantic descriptions, and correctness of cross-layer
-      relationships---and run LLM crawlers and agentic scanners against all fifteen
-      applications, scored against this ground truth.
-\item \textbf{Extend schema coverage} to transports modelled only partially here:
-      WebSocket/DDP, gRPC, and GraphQL.
-\item \textbf{Close the reachability-limited grounding gap.} Runtime grounding is now
-      established across the corpus (Table~\ref{tab:ground}); the residual is the 140
-      reachability-limited agentic records---driving the model-dependent tool calls with
-      a more reliable local model, activating the dormant services, and standing up the
-      remaining secret-free local stand-ins---and the small set of source-first LLM web
-      surfaces not yet driven. The 38 principled-ceiling records (irreproducible crypto
-      and genuine third-party OAuth) are documented as out of scope for a local,
-      credential-free environment.
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+\item \textbf{Benchmark agents against the ground truth.} The dataset is built to be
+      scored against, and the schema makes a richer metric set possible than discovery
+      recall alone: per-layer precision and recall of surface discovery; the fraction of
+      an \L2 action's \emph{multiple} surfaces an agent finds (not just one); accuracy of
+      the semantic description an agent produces (Subject--Operation--Object, requirements
+      and effects) against the authored record; and correctness of the cross-layer
+      relationships it reconstructs (does it bind the surfaces of one action together, and
+      trace an agentic lineage end to end). Scoring should also be stratified by the
+      evidence depth of each target record, so an agent is not penalised for missing a
+      record the ground truth itself only route-confirmed. These metrics would be run over
+      LLM crawlers and agentic scanners across all fifteen applications.
+\item \textbf{Extend schema coverage to the partially-modelled transports.} WebSocket/DDP,
+      gRPC/OTLP, and GraphQL (including subscriptions) are present in the environments but
+      inventoried at \L1/\L2 less completely than REST; bringing them to full parity---with
+      the same request/response contracts, semantic lifting and runtime grounding---would
+      remove the main structural gap in coverage and strengthen the non-HTTP insight from
+      the discussion.
+\item \textbf{Deepen evidence, not just breadth.} Grounding is established across the
+      corpus, but most of it is reachability-tier: raising \L1 nodes from route-confirmed
+      to \cd{observed}/\cd{exercised} and lifting \L2 actions from the interface tier to the
+      \cd{effect} tier (currently 276 of 980) would make more of the ground truth
+      effect-proven, which directly raises the confidence of any benchmark scored against
+      it.
+\item \textbf{Close the reachability-limited agentic grounding gap.} The residual is the
+      140 reachability-limited agentic records---driving the model-dependent tool calls
+      with a more reliable local model, activating the dormant services (e.g.\ the
+      OpenClaw gateway), and standing up the remaining secret-free local stand-ins---plus
+      the small set of source-first LLM web surfaces not yet driven. The 38
+      principled-ceiling records (irreproducible crypto and genuine third-party OAuth) are
+      documented as out of scope for a local, credential-free environment, and would move
+      only with real credentials in a controlled setting.
+\item \textbf{Generalise and automate the completeness oracle.} The oracle currently
+      covers the seven applications whose route list could be dumped; extending it to the
+      remainder, and running it (with the validation scripts) as a continuous-integration
+      gate, would make both validity and coverage regression-checked on every change rather
+      than measured once.
 \end{enumerate}
 
 % ======================================================================
