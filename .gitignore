@@ -1,0 +1,20 @@
+# --- Deployment / runtime data (not part of the deliverable) ---
+postgres_data/
+*/data/
+**/pg_data/
+**/pgdata/
+
+# --- Runtime captures may contain session cookies / API keys ---
+*.har
+
+# --- Secrets & local config ---
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+*.p12
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
