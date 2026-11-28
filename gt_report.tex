@@ -145,9 +145,9 @@ browser-driven method: state-dependent workflows that appear only after a precon
 met, event-driven and non-HTTP interfaces (WebSocket/DDP, gRPC, server-sent events), and
 API-only functionality that is never rendered in a page at all. Measuring how much of the
 true surface an agent recovers therefore demands a reference that already contains these
-hard-to-see entries. Coverage benchmarks do exist for narrower settings---the WIVET
-benchmark scores how many injected input vectors a crawler reaches, and API-fuzzing corpora
-measure endpoint reach---but they target a crawler's input coverage rather than the
+hard-to-see entries. Coverage benchmarks exist for narrower settings---for example,
+input-vector-coverage suites for crawlers and API-fuzzing corpora that measure endpoint
+reach---but they target a crawler's input coverage rather than the
 semantic, cross-layer description that an evaluation of attack-surface \emph{understanding}
 requires.
 
@@ -624,7 +624,7 @@ driven), \cd{scheduling_required} (needs a timer/cron fire), \cd{external_integr
 (needs a real third-party credential a local stand-in cannot supply), or
 \cd{crypto_blocked} (an auth/encryption payload that could not be reproduced). This turns
 ``not observed'' from a silence into a stated, checkable cause, and separates a
-\emph{reachability} limit from a \emph{principled} one.
+\emph{reachability} limit from a limit of the experimental configuration.
 
 \subsection{Validation}\label{sec:val}
 Structural validity is enforced by committed scripts rather than by manual review: a
@@ -736,12 +736,13 @@ Outline     & \textbf{1.12.0}; Node/TS + React; PostgreSQL 16 + Redis 7; RPC-sty
 \bottomrule
 \end{tabularx}
 
-{\footnotesize CVE identifiers are the published advisories associated with each
-application and are listed regardless of whether the pinned build above is patched against
-them (several recent builds are: e.g.\ MediaCMS 9.2.1 post-dates the CVE-2024-52004 fix in
-4.1.0, and Outline 1.12.0 is itself the fix for CVE-2026-120489/120449). Sub-items without
-a CVE name the representative vulnerability class. The list reflects advisories identified
-at the time of writing and is not guaranteed exhaustive.}
+{\footnotesize CVE identifiers are published advisories associated with each application,
+listed as \emph{selection context} (Section~\ref{sec:env}): they are not verified against the
+studied build by this project and are not necessarily present in it---several listed builds
+post-date the relevant fix (e.g.\ MediaCMS 9.2.1 post-dates the CVE-2024-52004 fix in 4.1.0,
+and Outline 1.12.0 is itself the fix for CVE-2026-120489/120449). Sub-items without a CVE name
+the representative vulnerability class. The list reflects advisories identified at the time of
+writing and is not guaranteed exhaustive.}
 \end{table}
 
 \subsection{LLM-integrated applications}
@@ -762,14 +763,15 @@ Open WebUI  & \textbf{0.13.3}; Python; Socket.IO; server-side Python execution; 
 LibreChat   & source checkout (danny-avila); Node/Express + React; Code + RAG APIs; agents with permission/file models; MCP & SSRF via MCP / agent actions (CVE-2026-31945, CVE-2026-54033, CVE-2025-69222); MCP env/secret exposure (CVE-2026-32625, CVE-2026-44653)\\
 AnythingLLM & source checkout (mintplexlabs); Node + React; HTTP API + agent WebSocket; workspaces; vector DBs; agent skills; MCP & AgentFlows path traversal (CVE-2026-5627); path traversal (CVE-2024-8248, CVE-2024-5211, CVE-2024-3025); SSRF (CVE-2024-3149, CVE-2024-4084); Prisma injection (CVE-2024-8251); plus SQL-agent-injection and XSS$\to$RCE-via-response-injection classes\\
 LobeChat    & source checkout (lobehub); Next.js + tRPC; OIDC / Better~Auth; PG/Redis/S3; agent \& MCP markets; URL/GitHub skill import; RAG & SSRF in skill import (CVE-2026-59095, CVE-2024-32965); cross-user RAG document access (CVE-2026-59098); plus chat-group BOLA and skill-import ReDoS classes\\
-OpenClaw    & source checkout; Node gateway (WS/HTTP/Control UI); exec tool (allowlist/approval); browser tool; skills registry; sub-agents; MCP + vector memory & No published CVE; classes: prompt injection; excessive agency (owner-only tools via agent runs); env-variable allowlist bypass; working-directory prompt leakage\\
+OpenClaw    & source checkout; Node gateway (WS/HTTP/Control UI); exec tool (allowlist/approval); browser tool; skills registry; sub-agents; MCP + vector memory & No specific advisory included in this study; classes: prompt injection; excessive agency (owner-only tools via agent runs); env-variable allowlist bypass; working-directory prompt leakage\\
 \bottomrule
 \end{tabularx}
 
-{\footnotesize CVEs are the published advisories for each project, listed regardless of the
-checked-out build. OpenClaw has no public advisory under that name, so only its
-vulnerability classes are given. The list reflects advisories identified at the time of
-writing and is not guaranteed exhaustive.}
+{\footnotesize CVEs are published advisories for each project, listed as selection context
+(Section~\ref{sec:env}) and not verified against the checked-out build by this project. For
+OpenClaw no specific advisory is included in this study, so only its vulnerability classes are
+given. The list reflects advisories identified at the time of writing and is not guaranteed
+exhaustive.}
 \end{table}
 
 % ======================================================================
@@ -909,7 +911,7 @@ OAuth-gated integrations. The other \textbf{140} are
 reachability-limited: the 125 \cd{local_not_driven} (a labelled backlog of records the
 local model \emph{can} exercise but has not yet been driven to), the 7
 \cd{scheduling_required} (which need only a timer fire, not a credential, and so are not a
-principled ceiling), and those 8 stand-in-reachable external integrations. They are
+configuration ceiling), and those 8 stand-in-reachable external integrations. They are
 observable in principle but were not driven here because they depend on the reliability of
 a local model emitting a native tool call, or on activating a dormant service. Where a local
 stand-in \emph{can} substitute for an external service without a secret (image
@@ -1015,7 +1017,7 @@ not yet do.
       a given crawler actually under-counts them is an empirical question for the benchmark,
       not something this report measures; we state only that the reference contains them.
 \item \textbf{The schema represents multi-surface duplication, which the current corpus
-      barely exercises.} One business action can in principle be realised by several
+      exercises only rarely.} One business action can in principle be realised by several
       interfaces---an internal UI API, a developer/API-key API, and an embed widget---and
       the schema binds all of them to a single \L2 action through \cd{l1_bindings}, making
       the duplication a counted, checkable property. In the present dataset, however, this
@@ -1199,9 +1201,9 @@ listed advisories are already fixed in the build used.
       with a more reliable local model, activating the dormant services (e.g.\ the
       OpenClaw gateway), and standing up the remaining secret-free local stand-ins---plus
       the small set of source-first LLM web surfaces not yet driven. The 38
-      principled-ceiling records (irreproducible crypto and genuine third-party OAuth) are
-      documented as out of scope for a local, credential-free environment, and would move
-      only with real credentials in a controlled setting.
+      configuration-ceiling records (irreproducible encrypted-auth payloads and genuine
+      third-party OAuth) are documented as out of scope for a local, credential-free
+      environment, and would move only with real credentials in a controlled setting.
 \item \textbf{Generalise and automate the completeness oracle.} The oracle currently
       covers the seven applications whose route list could be dumped; extending it to the
       remainder, and running it (with the validation scripts) as a continuous-integration
