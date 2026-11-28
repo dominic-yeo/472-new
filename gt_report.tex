@@ -449,6 +449,41 @@ media'' action---evidence to interface to meaning to business action.}
 \label{fig:worked}
 \end{figure}
 
+\paragraph{A worked dependency.} The value of the \L2 layer is not only that it names an
+action but that it records the \emph{state dependency} between actions, so one action's effect
+can be unified against another's precondition. Figure~\ref{fig:l2dep} shows a real pair from
+the MediaCMS dataset. \emph{Upload media} (a Create) has effects
+\cd{gen}\,$=\{$\cd{Exists(media)}, \cd{Know(actor, MediaToken(media))}$\}$: it creates the row
+and returns the new item's \cd{friendly_token}. \emph{View media} (a Read) has requirements
+$\{$\cd{Exists(media)}, \cd{Know(actor, MediaToken(media))}$\}$: it is reachable only once the
+media exists and the caller knows its token. Upload's two \cd{gen} facts discharge exactly
+View's two preconditions, so the dependency ``View is reachable only after Upload (or another
+action that creates the media and reveals its token)'' is represented as a machine-checkable
+edge over the fact graph, not asserted in prose.
+
+\begin{figure}[ht]\centering\footnotesize
+\begin{tabularx}{\textwidth}{@{}l l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X c@{}}
+\toprule
+\textbf{\L2 action} & \textbf{\L1 binding} & \textbf{Requirements (preconditions)} &
+\textbf{Effects \cd{gen}} & \textbf{Depth}\\
+\midrule
+Upload media \emph{(Create)} & \ttfamily POST /api/v1/media &
+\cd{Authenticated(actor)}; \cd{Can(actor,Create,media)} &
+\cd{Exists(media)}; \cd{Know(actor,MediaToken(media))} & effect\\[2pt]
+View media \emph{(Read)} & \ttfamily GET /api/v1/media/\{friendly\_token\} &
+\cd{Know(actor,MediaToken(media))}; \cd{Exists(media)} &
+\cd{Know(actor,MediaToken(media))} & interface\\
+\bottomrule
+\end{tabularx}
+\caption{An \L2 state dependency (MediaCMS). The \cd{gen} facts of \emph{Upload media}
+(\cd{Exists(media)} and \cd{Know(MediaToken)}) are exactly the preconditions of \emph{View
+media}, so the two actions chain through the shared fact vocabulary: an attack path reaches
+\emph{View} only after an action that produces those facts. Each action is independently
+grounded (Upload at the \cd{effect} tier---a $201$ create was observed; View at the
+\cd{interface} tier).}
+\label{fig:l2dep}
+\end{figure}
+
 \subsection{Agentic generation pipeline}
 \begin{enumerate}[leftmargin=1.7em,itemsep=2pt]
 \item \textbf{Freeze and deploy} (as above).
@@ -643,7 +678,7 @@ Section~\ref{sec:ground} runs in the same workflow (\cd{completeness_report.md})
 and coverage are recomputed whenever the dataset changes.
 
 % ======================================================================
-\section{Environments (Dataset)}
+\section{Environments (Dataset)}\label{sec:env}
 % ======================================================================
 Fifteen open-source applications were selected so that the dataset spans a wide range of
 \emph{surface shapes}, not merely a list of popular projects. Three axes drove the choice:
@@ -858,18 +893,19 @@ LobeChat    &  0 / 31 & & \\
 
 {\footnotesize The left pair of columns is per application; the right pair is the global
 blocker total across all five applications (each row's blocker is \emph{not} aligned to the
-application on its left). Of the 178 unobserved, 38 are a principled ceiling (31
-\cd{crypto_blocked} $+$ 7 OAuth-gated of the 15 \cd{external_integration}); the other 140
-are reachability-limited.}
+application on its left). Of the 178 unobserved, 38 are a ceiling under the current local,
+credential-free configuration (31 \cd{crypto_blocked} $+$ 7 OAuth-gated of the 15
+\cd{external_integration}); the other 140 are reachability-limited.}
 \end{table}
 
-Separating the blockers distinguishes a \emph{principled} ceiling from a
-\emph{reachability} limit. The 15 \cd{external_integration} records split in two: 7 need a
-genuine third-party OAuth identity that a local stand-in cannot mint (a principled block),
-while the other 8 a secret-free local stand-in could reach but still require the local
-model to emit a native tool call. The principled ceiling is therefore \textbf{38}
-records---the 31 \cd{crypto_blocked} (LobeChat's encrypted auth payload could not be
-reproduced) plus those 7 OAuth-gated integrations. The other \textbf{140} are
+Separating the blockers distinguishes a ceiling \emph{under the current local,
+credential-free configuration} from a \emph{reachability} limit. The 15
+\cd{external_integration} records split in two: 7 need a genuine third-party OAuth identity
+that a local stand-in cannot mint (a hard block in this configuration), while the other 8 a
+secret-free local stand-in could reach but still require the local model to emit a native
+tool call. The configuration ceiling is therefore \textbf{38} records---the 31
+\cd{crypto_blocked} (LobeChat's encrypted auth payload could not be reproduced) plus those 7
+OAuth-gated integrations. The other \textbf{140} are
 reachability-limited: the 125 \cd{local_not_driven} (a labelled backlog of records the
 local model \emph{can} exercise but has not yet been driven to), the 7
 \cd{scheduling_required} (which need only a timer fire, not a credential, and so are not a
@@ -881,38 +917,84 @@ generation, a Model Context Protocol server, a scheduler, or a direct create/rea
 store), those records were driven to an observed effect; image generation and MCP are
 therefore no longer categorical blockers.
 
-\paragraph{Completeness.} Table~\ref{tab:complete} reports, for the applications whose
-own route list could be dumped, the validity and coverage of the authored \L1 set
-(Section~\ref{sec:ground}). High validity confirms the authored routes are real; coverage
-is reported against the whole live surface and is deliberately partial where the dataset
-scopes to a subset of a very large API (e.g.\ Discourse, Open WebUI), which the table
-marks.
+\paragraph{Route-inventory agreement.} Table~\ref{tab:complete} reports, for the seven
+applications whose own route list could be dumped, the validity and route-inventory coverage
+of the authored \L1 set, together with the authored, unchecked, checkable, matched and live
+counts the two ratios are computed from (Section~\ref{sec:ground}). High validity indicates
+the checkable authored routes agree with the application's own inventory; coverage indicates
+how much of that inventory the dataset reproduces, and is deliberately partial where the
+dataset scopes to a subset of a large API (e.g.\ Discourse, Open~WebUI), which the table
+marks. This instrument measures agreement with each application's route inventory; it does
+not establish whole-surface completeness or \L2 semantic correctness.
 
-\begin{table}[ht]\centering\small
-\caption{Authored-surface completeness against each application's own route oracle
-(A = served OpenAPI, B = in-container router dump).}\label{tab:complete}
-\begin{tabular}{@{}lccrr@{}}
+\begin{table}[ht]\centering\footnotesize
+\caption{Authored-surface agreement against each application's own route oracle
+(A $=$ served OpenAPI, B $=$ in-container router dump). \emph{checkable} $=$ authored
+$-$ unchecked; \emph{validity} $=$ matched\,/\,checkable; \emph{coverage} (route-inventory
+agreement) $=$ matched\,/\,live.}\label{tab:complete}
+\begin{tabular}{@{}lcrrrrrrr@{}}
 \toprule
-\textbf{Application} & \textbf{Oracle} & \textbf{live routes} & \textbf{validity} & \textbf{coverage}\\
+\textbf{Application} & \textbf{Oracle} & \textbf{auth.} & \textbf{unchk.} &
+\textbf{check.} & \textbf{match.} & \textbf{live} & \textbf{validity} & \textbf{coverage}\\
 \midrule
-AnythingLLM & B &   67 & 100.0\% & 100.0\%\\
-VoceChat    & A &  159 &  98.7\% &  98.7\%\\
-Outline     & B &  213 & 100.0\% &  93.9\%\\
-Directus    & A &   65 &  92.5\% &  95.4\%\\
-Ghost       & B &  203 & 100.0\% &  43.8\%$^\ast$\\
-Discourse   & B & 1{,}732 &  99.6\% &  13.3\%$^\ast$\\
-Open WebUI  & B &  587 & 100.0\% &   2.9\%$^\ast$\\
+AnythingLLM & B &  67 &  0 &  67 &  67 &      67 & 100.0\% & 100.0\%\\
+VoceChat    & A & 189 & 30 & 159 & 157 &     159 &  98.7\% &  98.7\%\\
+Outline     & B & 206 &  6 & 200 & 200 &     213 & 100.0\% &  93.9\%\\
+Directus    & A & 115 & 48 &  67 &  62 &      65 &  92.5\% &  95.4\%\\
+Ghost       & B & 112 & 23 &  89 &  89 &     203 & 100.0\% &  43.8\%$^\ast$\\
+Discourse   & B & 231 &  0 & 231 & 230 & 1{,}732 &  99.6\% &  13.3\%$^\ast$\\
+Open WebUI  & B &  17 &  0 &  17 &  17 &     587 & 100.0\% &   2.9\%$^\ast$\\
 \bottomrule
 \end{tabular}
 
 {\footnotesize $^\ast$ Dataset is deliberately scoped to a subset of the live API, so low
-coverage is by design; for Ghost the oracle also surfaced a genuine gap (admin-API
-families not yet inventoried). AnythingLLM and Open~WebUI are LLM-integrated applications:
-their authored \L1 sets (AnythingLLM's 67-route Developer API; a scoped subset of
-Open~WebUI's 587-route API) are the web surfaces that their agentic records resolve
-\cd{l1_id} references to, and are counted \emph{separately} from the 1{,}397 traditional-web
-endpoints of Table~\ref{tab:resweb}.}
+coverage is by design; for Ghost the oracle also surfaced a genuine gap (admin-API families
+not yet inventoried). AnythingLLM and Open~WebUI are LLM-integrated applications: their
+authored \L1 sets (AnythingLLM's 67-route Developer API; a 17-route scoped subset of
+Open~WebUI's 587-route API) are the web surfaces their agentic records resolve \cd{l1_id}
+references to, so each $100\%$ figure is agreement with \emph{that} focused inventory, not the
+whole application; both are counted \emph{separately} from the 1{,}397 traditional-web records
+of Table~\ref{tab:resweb}.}
 \end{table}
+
+\subsection{Author-led semantic spot-check}\label{sec:audit}
+The automated validation of Section~\ref{sec:val} establishes structural consistency but not
+semantic correctness. To give some direct evidence of annotation quality, the author conducted
+a manual spot-check of \textbf{20} records---5 \L1 interfaces, 10 \L2 semantic actions, and 5
+agentic records---selected to span eight applications, all four CRUD classes, and every
+evidence tier (effect, interface, observed, and source-confirmed). For each \L1 record the
+route, method, IO contract and supporting evidence were checked; for each \L2 record the
+subject, operation, object, requirements, effects and \L1 bindings; and for each agentic
+record the capability, trust classification, authority context and associated controls, each
+against the record's cited \cd{source_ref} and runtime evidence. This is an author-led spot
+check on a small, deliberately-chosen sample; it is \emph{not} an independent validation and
+its result does not generalise to the whole dataset.
+
+\begin{table}[ht]\centering\small
+\caption{Author-led semantic spot-check (20 records across 8 applications).}\label{tab:audit}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Record type} & \textbf{reviewed} & \textbf{issues found} & \textbf{corrections}\\
+\midrule
+\L1 interface       &  5 & 0 & 0\\
+\L2 semantic action & 10 & 0 & 0\\
+Agentic             &  5 & 0 & 0\\
+\midrule
+\textbf{Total}      & \textbf{20} & \textbf{0} & \textbf{0}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The sampled records were found internally coherent and consistent with their cited evidence.
+For example, the MediaCMS pair \emph{Upload media}\,/\,\emph{View media} chains correctly
+through the fact vocabulary (Figure~\ref{fig:l2dep}), and the OpenClaw \cd{terminal} tool is
+correctly recorded as \cd{effect_class: code_execution} with a sandbox identity and an approval
+control, matching the runtime trace in which its companion SSRF control was observed blocking an
+internal-IP fetch. No sampled record required correction. One cross-check refined a
+\emph{discussion} claim rather than a record: comparing the agentic records against the
+authority query (Section~\ref{sec:disc}) showed that the privileged tools with no recorded
+control span three applications (AnythingLLM, LobeChat and Open~WebUI), not two as an earlier
+draft stated. A full inter-annotator study remains future work (Section~\ref{sec:limits}).
 
 % ======================================================================
 \section{Discussion and Key Insights}\label{sec:disc}
@@ -947,58 +1029,63 @@ not yet do.
 
 \subsection{Agentic attack surface}
 \begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
-\item \textbf{Authority, measured.} The schema turns the authority hypothesis into a query,
-      and running it over the five agentic applications yields concrete counts rather than an
-      assertion. The layer records \textbf{49} untrusted-or-mixed \cd{context_sources}
-      feeding agents and \textbf{60} \cd{tool_bindings} whose \cd{effect_class} can act on
-      the world (code execution, external send, or write)---privileged capabilities
-      reachable from untrusted input, present in every application. Of those 60, \textbf{47}
-      carry at least one declared control and \textbf{13} carry none, the gap concentrated in
-      two applications (7 of AnythingLLM's 14 privileged tools, and all 5 of LobeChat's); the
-      \textbf{10} code-execution tools---the sharpest case---all carry a control or an
-      approval gate. Of the 43 controls in total, 42 are declared \emph{blocking} or
-      \emph{modifying} and only one is advisory, so declared-but-unenforced controls are rare
-      in the current data. These are properties declared in the records (and reconciled
-      against source), not yet runtime-confirmed firings---confirming enforcement at runtime
-      is the next step---but the thesis is now a number: untrusted input can reach a
-      privileged tool in every application, and the schema makes the control on each such
-      path explicit and countable. The CVE classes in Tables~\ref{tab:envweb}
-      and~\ref{tab:envllm}, by contrast, are ordinary web and application bugs, not all of
-      them untrusted-input-to-privileged-tool cases; they establish that the surface is
-      security-relevant, not that authority explains every one.
-\item \textbf{Controls must be enforced, not merely present.} For each
-      untrusted$\to$privileged path the schema records whether the controls on that path
-      (\cd{edge.control_ids} / \cd{tool.control_ids}) are actually enforced, with an
-      \cd{enforcement_mode} and \cd{failure_mode}, turning a qualitative safety question
-      into a checkable property: a control that is declared but not enforced is now
-      visible as such.
-\item \textbf{Most of the agentic layer is unobserved; the principled ceiling is a small
-      subset of that.} Only 129 of 307 gradable records are runtime-observed (42\%), and one
-      application, LobeChat, is at $0/31$. The headline figure is therefore the \textbf{178}
-      unobserved records, not the ceiling: of those 178, 125 are plain \cd{local_not_driven}
-      backlog---unfinished driving work rather than a ceiling---and only \textbf{38} are a
-      \emph{principled} ceiling (31 irreproducible crypto, 7 third-party OAuth) that a local,
-      credential-free environment cannot cross. Reporting all 178 openly, each with a
-      labelled cause, is what makes the layer's coverage auditable rather than asserted, and
-      makes explicit how much driving work remains.
+\item \textbf{Authority paths, quantified.} The schema lets the authority question be read
+      off the annotated graph as a query (implemented in \cd{agentic_authority.py}), which we
+      report in three deliberately separate tiers rather than as a single ``root cause''
+      claim. \emph{(i) Capability.} \textbf{60} of the 80 \cd{tool_bindings} have an
+      \cd{effect_class} that can act on the world---code execution, external send, write, or
+      mixed; this is a capability classification, not a vulnerability. \emph{(ii) Structural
+      path.} Joining each privileged tool to its agent and that agent's context sources, all
+      \textbf{60} are reachable from at least one \cd{context_source} with
+      \cd{trust_class} in \{\cd{untrusted_data}, \cd{mixed}\} (there are 49 such sources, and
+      every application contains both an untrusted source and a privileged tool on a shared
+      agent). This establishes a \emph{structural} untrusted-input-to-privileged-tool path in
+      the annotated graph; it is not evidence that the path was exercised or is exploitable.
+      \emph{(iii) Runtime.} Only \textbf{27} of the 60 are runtime-observed, and ``observed''
+      means the tool was seen to run---not that any control was seen to fire. On controls,
+      \textbf{13} of the 60 carry \emph{no recorded control} (7 in AnythingLLM, 5 in LobeChat,
+      1 in Open~WebUI); this means no control is recorded in the dataset for that binding, not
+      that the application has none. The remaining 47 carry at least one recorded control, and
+      all \textbf{10} code-execution tools carry a recorded control or an approval flag. Of the
+      43 controls, 42 declare a \emph{blocking} or \emph{modifying} \cd{enforcement_mode} and
+      one is advisory---but this is the declared mode, not a runtime-verified firing. The
+      contribution here is thus a \emph{quantitative characterization of potentially
+      security-relevant paths} in the annotated graphs, which a runtime enforcement study
+      (future work) would need to confirm. The CVE classes in Tables~\ref{tab:envweb}
+      and~\ref{tab:envllm}, by contrast, are ordinary web and application bugs and are not all
+      untrusted-input-to-privileged-tool cases.
+\item \textbf{The schema distinguishes present from enforced controls.} For each
+      untrusted-to-privileged path the schema records the controls attached to it
+      (\cd{edge.control_ids} / \cd{tool.control_ids}) together with a declared
+      \cd{enforcement_mode} and \cd{failure_mode}. This makes a missing or advisory-only
+      control visible in the data; it does not by itself establish that a declared
+      blocking control actually fires at runtime, which would require driving each path and
+      observing the control act.
+\item \textbf{Most of the agentic layer is unobserved; the hard ceiling is a small subset.}
+      Only 129 of 307 gradable records are runtime-observed ($42\%$), and one application,
+      LobeChat, is at $0/31$. The headline figure is therefore the \textbf{178} unobserved
+      records, not the ceiling: 125 are \cd{local_not_driven} backlog (unfinished driving
+      work), and only \textbf{38} are a ceiling under the current local, credential-free
+      configuration (31 irreproducible encrypted-auth payloads, 7 third-party OAuth)---a
+      limit of this experimental setup, not a proof that local verification is impossible.
+      Reporting all 178 openly, each with a labelled cause, is what makes the layer's coverage
+      auditable rather than asserted.
 \end{enumerate}
 
-\subsection{Evidence grading is the load-bearing contribution}
+\subsection{Implications of evidence grading}
 \begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
-\item \textbf{Grounding is mostly reachability, not effect---and saying so matters.} All
-      1{,}397 interfaces and 980 actions are grounded, but only 358 interfaces returned an
-      observed $2xx$ and only 276 of the 980 actions were confirmed by their own observed
-      effect; the remainder are route-confirmed or interface-tier. A benchmark scored
-      against this ground truth must know which records are effect-proven and which are
-      only reachability-proven, and the depth ladder makes that distinction explicit on
-      every record rather than hiding it behind a single ``grounded'' flag.
-\item \textbf{The completeness oracle both validates and corrects.} Across the seven
-      applications whose own route list could be dumped, authored-route validity is
-      $92.5$--$100\%$, confirming the surface is real and not invented; at the same time
-      the oracle earns its keep by finding genuine defects---a real coverage gap in
-      Ghost's admin API, and stale cross-layer mirrors caught by the same automated
-      pass---demonstrating that an instrument which can only confirm is worth less than one
-      that can also fail the dataset.
+\item \textbf{Grounding is mostly reachability-tier, not effect-tier.} All 1{,}397 interfaces
+      and 980 actions carry a grounding depth, but only 358 interfaces returned an observed
+      $2xx$ and only 276 of the 980 actions were confirmed by their own observed effect; the
+      remainder are route-confirmed or interface-tier. A benchmark scored against this ground
+      truth should distinguish records that are effect-proven from those that are only
+      reachability-proven, and the depth ladder records that distinction on every record
+      rather than reducing it to a single ``grounded'' flag.
+\item \textbf{The route oracle both measures agreement and surfaces omissions.} Across the
+      seven applications whose own route list could be dumped, validity is $92.5$--$100\%$,
+      indicating agreement with the reference route inventory; the same automated pass also
+      identifies annotation omissions---a real coverage gap in Ghost's admin API, and stale
+      cross-layer mirrors---so the instrument can fail the dataset, not only confirm it.
 \end{enumerate}
 
 % ======================================================================
@@ -1008,10 +1095,13 @@ This project is a dataset-and-methodology contribution, and its claims should be
 such. We set out the main limitations explicitly.
 
 \paragraph{No evaluation is run.} No crawler or agent is scored against the ground truth
-in this report. The two propositions in Section~\ref{sec:disc}---crawler under-count of
-multi-surface actions, and authority as the root cause of agentic vectors---are therefore
-\emph{framed} by the dataset, not demonstrated by it. Establishing either requires running
-a baseline tool (and reporting counts), which is the first item of future work.
+in this report. The observations in Section~\ref{sec:disc}---the potential crawler
+under-count of multi-surface actions, and the authority characterization of the agentic
+graphs---are therefore \emph{framed} by the dataset, not demonstrated by it. In particular,
+the authority analysis counts structural paths and declared controls in the annotated graphs;
+it does not establish that any path is exploitable or that any control fires at runtime.
+Establishing these requires running a baseline tool and a runtime enforcement study, the first
+items of future work.
 
 \paragraph{Grounding is mostly reachability-tier, and route-confirmation has limits.} Of
 the 1{,}397 \L1 interfaces, 1{,}039 (74\%) are route-confirmed only; just 358 returned an
@@ -1033,18 +1123,21 @@ $43.8\%$, Discourse $13.3\%$, Open~WebUI $2.9\%$; Table~\ref{tab:complete}). A b
 that scored raw precision against such a reference would penalise an agent for discovering a
 real route that the dataset deliberately omits. Any evaluation must therefore be restricted
 to a published, per-application \emph{scoped surface} rather than the whole live
-application. The route oracle itself covers only seven of the fifteen applications, and the
-size of the \cd{UNCHECKED} class (surface a static oracle cannot enumerate---for example
-the difference between Directus's 115 authored routes and its 65 OpenAPI-oracle routes,
-which is GraphQL, WebSocket and dynamically mounted surface) is not yet tabulated.
+application. The route oracle itself covers only seven of the fifteen applications; the size
+of the \cd{UNCHECKED} class per application (surface a static oracle cannot enumerate---for
+example Directus's 48 unchecked authored routes, the GraphQL, WebSocket and dynamically
+mounted surface absent from its served OpenAPI) is now reported as the \emph{unchecked} column
+of Table~\ref{tab:complete}, but only for those seven applications.
 
 \paragraph{Validation checks consistency, not semantic correctness.} The committed scripts
-(Section~\ref{sec:val}) verify closed vocabularies, referential integrity, cross-layer
-closure and uniqueness. They do \emph{not} establish that the \L2 requirements and effects,
-or the agentic trust/authority labels, are themselves correct---that remains a matter of
-author judgement. There is as yet no inter-annotator agreement study and no independently
-audited sample. On provenance---the sharpest question for a benchmark of this kind---we are
-explicit: the record content was \emph{drafted with language-model assistance and then
+(Section~\ref{sec:val}) verify closed vocabularies, semantic IO consistency, cross-layer
+closure, L1-key and per-application L2-id uniqueness, method-level binding consistency, and
+the agentic referential-integrity and evidence invariants. They do \emph{not} establish that
+the \L2 requirements and effects, or the agentic trust and authority labels, are themselves
+correct---that remains a matter of author judgement. An author-led spot-check of a small
+sample is reported in Section~\ref{sec:audit}, but there is as yet no inter-annotator
+agreement study and no independent audit of the full dataset. On provenance---a key threat to
+validity for a benchmark of this kind---we are explicit: the record content was \emph{drafted with language-model assistance and then
 verified by the author} against each application's source and runtime capture, and the
 committed, deterministic generator scripts (\cd{build_l1.py}, \cd{l1_data.py},
 \cd{build_l2.py}, \cd{l2_data.py}, and the agentic equivalents) encode that verified result
@@ -1056,14 +1149,18 @@ a $2xx$ or an effect), but the \L2 requirements/effects and the agentic trust/au
 labels are not yet covered by an independent human audit. That audit, and an
 inter-annotator agreement study on a sample, are planned and should accompany release.
 
-\paragraph{Reproducibility and CVE context.} Each environment is pinned by a version tag or
-image digest recorded in its \cd{environment.yaml} (for example VoceChat's image digest is
-stored there); some are snapshot, \texttt{-develop} or source-checkout builds (Keycloak
-\texttt{main}, Rocket.Chat \texttt{9.1.0-develop}, the five LLM checkouts) whose exact
-commit SHAs should be recorded for bit-for-bit reproduction. The CVE columns in
-Tables~\ref{tab:envweb} and~\ref{tab:envllm} establish that each application is
-security-relevant, but they are contextual: they are not linked to individual \L1/\L2
-records, and several recent pinned builds are already patched against the advisories listed.
+\paragraph{Reproducibility and CVE context.} Each environment records its deployed image and
+digest in \cd{deployment_manifest.yaml} and its source/annotation version in
+\cd{environment.yaml}; for three applications (Uptrace, Keycloak, MediaCMS) the deployed and
+source versions differ, and runtime evidence is not presented as confirmation of
+version-specific behaviour there (Section~\ref{sec:env}). Some builds are snapshot,
+\texttt{-develop} or source-checkout (Keycloak \texttt{main}, Rocket.Chat
+\texttt{9.1.0-develop}, the five LLM checkouts) whose exact commit SHAs should be recorded for
+bit-for-bit reproduction, and several run a floating \texttt{:latest}/\texttt{:main} tag
+pinned only by the recorded digest. The CVE columns in Tables~\ref{tab:envweb}
+and~\ref{tab:envllm} provide \emph{selection context} only: they are not linked to individual
+\L1/\L2 records, are not verified against the studied builds by this project, and several
+listed advisories are already fixed in the build used.
 
 % ======================================================================
 \section{Future Work}\label{sec:future}
@@ -1115,13 +1212,19 @@ records, and several recent pinned builds are already patched against the adviso
 % ======================================================================
 \section{Conclusion}
 % ======================================================================
-This project delivers an evidence-backed, multi-application ground-truth dataset
-(1{,}397 endpoints, 980 semantic flows, 327 agentic records) and a repeatable
-annotation-and-review workflow that reconciles source and runtime evidence, grades each
-record by observation depth, and checks every cross-layer reference. It enables rigorous benchmarking of security agents'
-ability to \emph{generate} an attack surface, provides a concrete framework for
-measuring agentic risk, and offers a reusable methodology and dataset for future
-extensions.
+This project delivers three contributions: a three-layer attack-surface schema (C1); a
+ground-truth dataset of fifteen open-source applications---1{,}397 traditional-web interface
+records, 980 \L2 semantic actions, and 327 agentic records---annotated with explicit coverage
+boundaries and supporting evidence (C2); and an evidence-grounded annotation-and-validation
+method that reconciles source with runtime capture, grades each record by observation depth,
+checks authored routes against each application's own route inventory, and enforces structural
+validity with committed scripts (C3). The dataset is a \emph{reference} for evaluating how
+well an agent discovers and describes an attack surface, and a framework for characterizing
+agentic authority paths. Its limitations are stated plainly: coverage is deliberately partial
+for several applications, most grounding is reachability-tier rather than effect-tier, and
+structural validation does not establish semantic correctness. A benchmark scored against the
+dataset should therefore use a published, per-application scoped surface, stratified by
+evidence depth---the subject of the future work in Section~\ref{sec:future}.
 
 % ======================================================================
 \section*{Data, Code, and Licence Availability}
