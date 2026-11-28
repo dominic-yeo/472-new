@@ -78,34 +78,28 @@ Agentic Attack Surface Enumeration\\[4pt] Across Vulnerable Applications}\\[1.6c
 % ----------------------------------------------------------------------
 \begin{abstract}
 \noindent
-AI agents are increasingly used to analyse software and explore web applications,
-yet existing agent-security benchmarks measure downstream task or vulnerability
-outcomes and provide little evidence of how effectively an agent \emph{discovers and
-describes} an application's attack surface. This project establishes a ground-truth
-foundation for that evaluation. We define a three-layer schema that represents an
-application's attack surface as (i)~deployed HTTP interfaces and their request/response
-contracts, (ii)~semantic business actions and the state they depend on, and
-(iii)~agent capabilities and data lineage. Using a repeatable workflow that reconciles
-white-box source analysis with black-box runtime capture and enforces cross-layer
-referential integrity, we produce an evidence-backed dataset across \textbf{fifteen}
-open-source vulnerable applications (ten traditional web applications and five
-LLM-integrated systems). The resulting dataset records \textbf{1{,}397 deployed
-endpoints}, \textbf{980 business semantic flows}, and \textbf{327 agentic capability
-records}. The dataset is \emph{evidence-graded}: every interface and action carries a
-runtime-observation depth and every agentic capability a runtime status, so that across
-the traditional-web corpus every interface and action carries a grounding depth rather than
-a binary flag: of the 1{,}397 interfaces, 358 are confirmed by an observed response and the
-remaining 1{,}039 only as reachable routes; of the 980 actions, 276 are confirmed by
-observed effect and 704 through a bound interface. The agentic layer is observed for 129 of
-307 records, each of the other 178 labelled by the precise reason it cannot be observed in a
-local, credential-free environment. Beyond the artefact, the project contributes a reusable
-annotation-and-review methodology and an evidence-grading discipline. No crawler or agent is
-run here, so the dataset is a reference, not an evaluation; its central proposition---that
-the root cause of agentic attack vectors is \emph{authority}, an untrusted input reaching a
-privileged tool---is one the schema makes directly measurable, and a first measurement over
-the five agentic applications finds 60 privileged tool capabilities reachable from untrusted
-input, 13 of them carrying no declared control. (The schema also represents one action
-exposed through multiple interfaces, a capability the present corpus exercises only rarely.)
+AI agents are increasingly used to analyse software and explore web applications, yet
+existing agent-security benchmarks measure downstream task or vulnerability outcomes and
+give little evidence of how well an agent \emph{discovers and describes} an application's
+attack surface. This project builds a ground-truth foundation for that evaluation. It makes
+three contributions. \textbf{(C1)}~A three-layer attack-surface \emph{schema} representing
+deployed HTTP interfaces and their request/response contracts, semantic business actions
+and the state they depend on, and agent-specific capabilities and data lineage---each layer
+operationalising established models (HTTP/OpenAPI, access-control and STRIPS/PDDL planning,
+and LLM threat modelling) into concrete annotatable fields. \textbf{(C2)}~A ground-truth
+\emph{dataset} covering fifteen open-source applications (ten traditional web, five
+LLM-integrated), with explicit coverage boundaries and supporting evidence: \textbf{1{,}397}
+traditional-web interface records (\L1), \textbf{980} semantic actions (\L2), and
+\textbf{327} agentic records (of which 20 are nested invocation surfaces, leaving 307
+independently graded). \textbf{(C3)}~An evidence-grounded \emph{annotation and validation}
+method that reconciles white-box source with black-box runtime capture, grades every record
+by observation depth, checks authored routes against each application's own route inventory,
+and enforces structural validity with committed scripts. No crawler or agent is scored here,
+so the dataset is a reference, not an evaluation. We report its scale, its grounding depth
+(358 of the 1{,}397 interfaces confirmed by an observed $2xx$ response, the rest as reachable
+routes; 129 of 307 agentic records runtime-observed), and its limitations---coverage is
+deliberately partial for some applications, and structural validation establishes
+consistency, not semantic correctness.
 \end{abstract}
 
 \tableofcontents
@@ -188,50 +182,59 @@ against.
 \item Evidence-grounded attack-surface analysis across \textbf{15} open-source
       vulnerable applications---\textbf{10} traditional web applications and \textbf{5}
       LLM-integrated systems---chosen to represent a variety of surface types.
-\item The attack surface is represented at three levels:
+\item The attack surface is represented at up to three levels:
       (a)~deployed web interactions and their request/response contracts;
-      (b)~semantic business actions and the state they depend on;
-      (c)~agent capabilities and data lineage.
+      (b)~semantic business actions and the state they depend on; and, for
+      LLM-integrated systems only,
+      (c)~agent-specific capabilities and data lineage, linked back to (a) and~(b).
 \item The surface is generated using a combination of black-box dynamic analysis and
       white-box static source analysis, reconciled against one another.
 \end{enumerate}
 
-\subsection{Contributions}
-\begin{enumerate}[leftmargin=1.6em,itemsep=2pt]
-\item \textbf{An evidence-backed, multi-application dataset} recording
-      application-specific surfaces with version and deployment context, observed
-      behaviour, semantic annotations, and supporting evidence:
-      \begin{itemize}[leftmargin=1.4em,itemsep=0pt]
-        \item \textbf{1{,}397} deployed endpoints (\L1);
-        \item \textbf{980} business semantic flows (\L2);
-        \item \textbf{327} agentic capability records.
-      \end{itemize}
-\item \textbf{A repeatable annotation and review workflow} that reconciles source and
-      runtime evidence, generates structured records, tracks unresolved cases, and
-      automatically checks cross-layer references.
-\item \textbf{An evidence-grading method for runtime grounding.} Each record is assigned
-      a runtime-observation depth from a fixed ladder; a completeness oracle measures
-      authored surface against each application's own route list; a multi-identity probe
-      records per-role reachability; and every agentic record that cannot be observed in
-      a local, credential-free environment is tagged with a blocker from a closed
-      taxonomy. The grading is honest by construction: a record is marked observed only
-      when a real response or effect is captured, never for a source-only path.
+\subsection{Contributions}\label{sec:contrib}
+The project makes three contributions.
+\begin{enumerate}[leftmargin=1.6em,itemsep=3pt]
+\item[\textbf{C1}] \textbf{Attack-surface schema design.} A three-layer representation of an
+      application's attack surface: (a)~deployed web interactions and their request/response
+      contracts; (b)~semantic business actions, their objects, and the state dependencies
+      between them; and (c)~agent-specific capabilities and data lineage. Each layer adapts
+      established models (Section~\ref{sec:schema}) into a concrete field set designed for
+      attack-surface annotation and evaluation; the adaptation---which fields to record and
+      how to connect the layers---is itself a design contribution, not a direct transcription
+      of any one standard.
+\item[\textbf{C2}] \textbf{Ground-truth dataset construction.} A systematic annotation of
+      \textbf{15} applications with explicit coverage boundaries and supporting evidence:
+      \textbf{1{,}397} traditional-web interface records (\L1, including API, page and static
+      surfaces), \textbf{980} \L2 semantic actions, and \textbf{327} agentic records (of which
+      20 are nested invocation surfaces, leaving 307 independently graded). The five
+      LLM-integrated applications are additionally annotated at the agentic layer; their web
+      \L1/\L2 is a focused, agent-relevant subset rather than a whole-application sweep
+      (Section~\ref{sec:scope-note}).
+\item[\textbf{C3}] \textbf{Evidence-grounded annotation and validation.} A repeatable method
+      that reconciles white-box source with black-box runtime capture, assigns each record a
+      runtime-observation depth from a fixed ladder, checks authored routes against each
+      application's own route inventory, and enforces structural validity with committed
+      scripts (Section~\ref{sec:val}). A record is graded observed only when a real response
+      or effect is captured, never for a source-only path; the grade is a property of the
+      evidence, not a claim of annotation accuracy.
 \end{enumerate}
 
 % ======================================================================
-\section{The Three-Layer Schema}
+\section{The Three-Layer Schema}\label{sec:schema}
 % ======================================================================
-The schema is the central contribution. Its design follows one principle: every field
-should derive from an established, independently recognised standard, so that a label is
-\emph{defensible}---traceable to a published definition---rather than ad hoc. The same
+The schema is the first contribution (C1). Its design follows one principle: each field
+should be \emph{motivated} by an established, independently recognised model, so that a
+label is defensible---traceable to a published definition---rather than ad hoc. The
+established models (HTTP/OpenAPI, OWASP, access-control and AI-planning formalisms, MITRE
+ATLAS) do not, however, prescribe a ready-made attack-surface schema; they supply concepts
+and vocabulary, and turning each into a concrete, annotatable, cross-linked field set is the
+design work of this layer. Throughout this section we therefore separate the \emph{borrowed
+concept} from the \emph{project-specific decision} that operationalises it. The same
 principle motivates the split into three layers by level of abstraction: L1 captures the
 deployed interface exactly as HTTP exposes it, L2 the business meaning of an action
 independent of how it is called, and the agentic layer the capability and data-flow
 structure specific to LLM-integrated systems. This mirrors how the surface is actually
-discovered---wire evidence first, meaning second, agent-specific lineage third---and lets
-each layer reuse the modelling vocabulary of its own mature source discipline
-(HTTP/OpenAPI for L1; access-control and AI-planning formalisms for L2; LLM threat
-modelling for the agentic layer), with each provenance made explicit below.
+discovered---wire evidence first, meaning second, agent-specific lineage third.
 Figure~\ref{fig:layers} shows the three layers and the identifier fields that bind them
 into one connected, validatable graph.
 
@@ -283,7 +286,10 @@ $\in$\{identifier, attribute, \dots\}, \cd{reference_capable}, \cd{mergeable},
 \cd{reference_fields}---operationalise the OWASP API Security Top~10 entry API1:2023
 \emph{Broken Object Level Authorization}, which turns on whether a request field names an
 object some other subject could reference; recording that property at the field level is
-what later lets L2 state an authorization requirement over it~\citep{owaspapi}. The
+what later lets L2 state an authorization requirement over it~\citep{owaspapi}. BOLA
+motivates identifying object references but does not define these fields: \cd{mergeable},
+\cd{reference_capable} and \cd{reference_fields} are project-specific labels introduced here
+to make that reference property explicit and machine-checkable. The
 visibility and reachability labels (\cd{gt.visibility.minimum} $\in$\{black\_box,
 grey\_box, white\_box\}, \cd{gt.black_box_reachable}, \cd{gt.reachability_conditions})
 follow the authentication- and authorization-state modelling of the OWASP Web Security
@@ -332,7 +338,11 @@ Delete). Facts are written in a closed predicate vocabulary---\cd{Exists}, \cd{K
 \cd{State}, \cd{Relation}, \cd{Can}, \cd{Authenticated}---so the effect of one action can
 be unified against the precondition of another, which makes a multi-step attack path
 amenable to machine checking (by a planner or a reachability query over the fact graph)
-rather than something merely asserted. Grounding the dependency structure in a planning
+rather than something merely asserted. STRIPS and PDDL supply the precondition/effect
+\emph{form}; the closed predicate set itself (\cd{Exists}, \cd{Know}, \cd{State},
+\cd{Relation}, \cd{Can}, \cd{Authenticated}) is a project-specific vocabulary chosen to span
+the state an attack path turns on, not something the formalisms prescribe. Grounding the
+dependency structure in a planning
 formalism is what lets an \L2 flow be represented as a dependency graph instead of a static
 list; running an actual planner over it is left to future work.
 
@@ -371,9 +381,11 @@ single object from entry (a \cd{context_source}) through the model decision and 
 \cd{becomes_context_source_ids} closing feedback loops---follows the staged adversary
 model of MITRE ATLAS, which describes compromise of an AI system as a progression across
 reconnaissance, access, and exfiltration stages rather than a single point of
-failure~\citep{atlas}. Representing the path explicitly is what lets the \emph{authority}
-question---can untrusted input reach a privileged tool, and is a control enforced on that
-edge---be read directly off the graph.
+failure~\citep{atlas}. ATLAS provides the threat concepts, not a schema: the seven record
+types above and the \cd{becomes_context_source_ids} lineage links are a project-specific
+operationalisation of those concepts for attack-surface annotation. Representing the path
+explicitly is what lets the \emph{authority} question---can untrusted input reach a
+privileged tool, and is a control recorded on that edge---be read directly off the graph.
 
 \begin{table}[ht]\centering\small
 \caption{Agentic record types and their principal fields.}\label{tab:ag}
@@ -481,9 +493,11 @@ media'' action---evidence to interface to meaning to business action.}
 \node[stage, above=1pt of os] {3 $\cdot$ EXIT};
 \end{tikzpicture}
 \caption{Agentic lineage: an untrusted channel message enters as a context source,
-the agent selects a tool, a control gates the edge, the terminal tool executes code as
-the sandbox, and the result exits via an output sink. The root cause of agentic attack
-vectors is authority on this path.}
+the agent selects a tool, a \emph{recorded} control may gate the edge, the terminal tool
+executes code as the sandbox identity, and the result exits via an output sink. This
+untrusted-input-to-privileged-tool path is the \emph{authority} relation the agentic layer
+makes explicit and countable (Section~\ref{sec:disc}); the figure shows one annotated path,
+not a claim that every agentic attack reduces to it.}
 \label{fig:ece}
 \end{figure}
 
@@ -493,13 +507,26 @@ deployment. We make the \emph{strength} of that reconciliation explicit rather t
 binary, through four instruments.
 
 \paragraph{Evidence-depth ladder.} Each \L1 interface carries a grounding depth on a
-fixed ladder---\cd{none} $\prec$ \cd{route-confirmed} (a request reached the handler,
-e.g.\ a $4xx$ that proves the route exists) $\prec$ \cd{observed} (at least one $2xx$)
-$\prec$ \cd{exercised} (observed across more than one identity or method). Each \L2
-action carries a tier of \cd{interface} (its bound \L1 routes were observed) or
-\cd{effect} (the action's state change was itself confirmed at runtime). The depth is a
-property of the evidence, so a reader can see not only \emph{whether} a record is
-grounded but \emph{how far}.
+fixed ladder, \cd{none} $\prec$ \cd{route-confirmed} $\prec$ \cd{observed} $\prec$
+\cd{exercised}, with each rung defined by what the runtime evidence actually shows.
+\cd{route-confirmed} means a request reached a \emph{routed handler} rather than a generic
+not-found, inferred from the response status and shape. This is the weakest rung and is read
+with care: a $4xx$ alone does not prove a handler was reached, because global authentication
+middleware or an SPA/catch-all fallback can also return $4xx$ for a path that has no
+dedicated route. Route-confirmation is therefore cross-checked against the route oracle where
+one exists (seven of fifteen applications; Section~\ref{sec:ground}, Table~\ref{tab:complete})
+and, where no oracle exists, treated as provisional (Section~\ref{sec:limits}).
+\cd{observed} means at least one $2xx$ whose body shape is consistent with the interface's
+expected behaviour; it evidences that the interface responds, not that a business operation
+completed successfully. \cd{exercised} means \cd{observed} under two or more identities or
+methods. Each \L2 action carries a tier of \cd{interface} or \cd{effect}. \cd{interface}
+means the \L1 route(s) the action is bound to were observed; because one observed \L1
+interface may back several \L2 actions, this grounds the interface the action runs over, not
+each action's semantics individually. \cd{effect} means the action's \emph{expected semantic
+outcome} was confirmed at runtime---data returned for a Read, a persisted state change for a
+Create/Update/Delete. The depth grades the strength of runtime evidence only; it is not a
+measure of annotation accuracy or of the correctness of the semantic labels, which is
+addressed separately (Sections~\ref{sec:val} and~\ref{sec:audit}).
 
 \paragraph{Completeness oracle.} Completeness is established by forcing \emph{two
 independent derivations to agree and then checking both against a third, authoritative
@@ -514,25 +541,36 @@ e.g.\ a mounted Express/Rails/FastAPI route list). Paths are normalised on both 
 the same URL template (concrete ids collapsed to \cd{/{n}}, method sets unioned) so the
 comparison is like-for-like.
 
-The diff is read in \emph{both} directions, and the two directions measure different
-things. \emph{Validity} is the share of checkable authored routes that the oracle confirms. An
-authored route the oracle does not contain is investigated: if it is a genuine error (a
-transcription slip, or a route removed at the pinned version) it is corrected at source, but
-if it is a real route the oracle structurally cannot see---present in the source and the
-runtime capture yet absent from the \emph{served} OpenAPI document (a system or GraphQL
-endpoint, say)---it is retained with a recorded justification. Residual sub-$100\%$ validity
-(Directus at $92.5\%$, VoceChat and Discourse just under) therefore counts these
-retained-with-justification routes, not uncorrected mistakes.
-\emph{Coverage} is the share of the oracle's live routes that the dataset inventories: an
-oracle route the dataset lacks is a genuine omission. The two fail for opposite reasons,
-so collapsing them into one number would hide both. Surface that a static oracle
-structurally cannot enumerate---dynamically mounted routers, sub-APIs packaged behind a
-single catch-all, static assets, and non-HTTP transports (WebSocket/DDP, gRPC, SSE)---is
-held out of the validity denominator as an \cd{UNCHECKED} class, so a route the oracle
-simply cannot see is never scored as invalid. Where the dataset deliberately scopes to a
-subset of a very large API (Discourse, Open~WebUI), low coverage is recorded as intentional
-rather than as a defect; where it is not intentional, the oracle surfaces a real gap to
-close---as it did for Ghost's admin-API families (Table~\ref{tab:complete}).
+The comparison is at the normalised-path level: both sides collapse concrete ids to
+\cd{/{n}} and union method sets, so a path matches when it appears on both sides (method-level
+agreement is not separately scored). The diff is read in \emph{both} directions, measured by
+two ratios over disjoint denominators. Let \emph{authored} be the \L1 paths the dataset
+declares, \emph{live} the paths the oracle lists, \emph{matched} their intersection, and
+\emph{unchecked} the authored paths the oracle structurally cannot see---dynamically mounted
+routers, sub-APIs behind a single catch-all, static assets, and non-HTTP transports
+(WebSocket/DDP, gRPC, SSE)---which are held out so a route the oracle cannot enumerate is
+never scored as invalid. Then \emph{checkable} $=$ authored $-$ unchecked, and
+\[
+\text{validity}=\frac{\text{matched}}{\text{checkable}},\qquad
+\text{route-inventory coverage}=\frac{\text{matched}}{\text{live}}.
+\]
+Validity asks whether the \emph{checkable} authored routes are ones the application itself
+serves; coverage (equivalently, \emph{oracle agreement}) asks how much of the application's
+own route inventory the dataset reproduces. For Directus, for example, authored $=115$,
+unchecked $=48$, so checkable $=67$; matched $=62$ against live $=65$, giving validity
+$62/67=92.5\%$ and coverage $62/65=95.4\%$. The difference between authored and live
+($115-65$) is \emph{not} the unchecked count; unchecked ($48$) is measured directly as the
+authored paths outside the oracle's scope. An authored, checkable route the oracle does not
+contain is investigated: a genuine error (a transcription slip, or a route removed at the
+pinned version) is corrected at source; residual sub-$100\%$ validity (Directus $92.5\%$;
+VoceChat and Discourse just under) is the handful of such cases still under review, reported
+rather than hidden. This instrument establishes \emph{agreement with each application's own
+route inventory}; it does not establish completeness of the whole attack surface (the oracle
+itself is partial, and covers only seven applications) nor the correctness of the \L2 semantic
+annotations. Where the dataset deliberately scopes to a subset of a very large API (Discourse,
+Open~WebUI), low coverage is recorded as intentional rather than as a defect; where it is not
+intentional, the oracle surfaces a real gap---as it did for Ghost's admin-API families
+(Table~\ref{tab:complete}).
 
 \paragraph{Multi-identity probing.} Interfaces are driven under more than one identity
 (anonymous, user, admin, and application-specific roles such as Vocechat's
@@ -554,42 +592,55 @@ driven), \cd{scheduling_required} (needs a timer/cron fire), \cd{external_integr
 \emph{reachability} limit from a \emph{principled} one.
 
 \subsection{Validation}\label{sec:val}
-Validity is enforced not by manual review but by a set of committed scripts run over the
-entire dataset; a record that fails any check is not shipped, and because the checks are
-version-controlled, an integrity regression is caught on the next run rather than assumed
-away. The checks fall into three groups.
+Structural validity is enforced by committed scripts rather than by manual review: a
+per-application core (\cd{validate_gt.py}) and a corpus runner (\cd{gt_validate_all.py}) that
+runs the core over every application, adds two further checks, and validates the agentic
+records. A record that fails any check is not shipped, and because the scripts are
+version-controlled an integrity regression is caught on the next run. The runner writes a
+machine-reproducible summary (\cd{validation_report.md}); the checks it performs are listed
+below, grouped by what they establish. These checks establish structural
+\emph{consistency}; they do not establish that the semantic labels are \emph{correct}, which
+is addressed separately by an author spot-check (Section~\ref{sec:audit}).
 \begin{itemize}[leftmargin=1.5em,itemsep=3pt]
-\item \textbf{Traditional (L1/L2).}
+\item \textbf{L1/L2 core (\cd{validate_gt.py}).}
       \emph{Closed vocabularies}---every predicate, \cd{value_kind}, parameter
       \cd{location}, \cd{crud} class and visibility value must come from its fixed
-      enumeration, so a typo cannot silently invent a new category.
-      \emph{Semantic consistency}---an \L1 node's \cd{semantic_outputs} must equal the set
+      enumeration.
+      \emph{Semantic IO consistency}---an \L1 node's \cd{semantic_outputs} must equal the set
       of mergeable resources it declares, and every \cd{flow=true} field must lift to a
       semantic input or output.
-      \emph{Cross-layer closure}---every \L2 \cd{l1_binding} must resolve to a real \L1
-      key, and its bound methods must be a subset of that node's observed methods.
-      \emph{Uniqueness}---no duplicate \L1 keys and no duplicate \L2 action ids anywhere in
-      the corpus.
-\item \textbf{Agentic.}
-      \emph{Referential integrity}---every \cd{*_id} (tool, context, memory, sink, edge,
-      control) resolves to a record that exists.
-      \emph{Lineage closure}---every writer, producer and output declared on a context
-      source, memory store, sink or edge resolves, so no data path dangles.
-      \emph{Enum validity}---\cd{trust_class}, \cd{effect_class}, \cd{execution_identity},
-      \cd{enforcement_mode} and the other labels are in range.
-      \emph{Cross-layer existence}---every \cd{l1_id} and \cd{related_l2_id} on an agentic
-      record points to a real L1/L2 node.
+      \emph{Cross-layer closure}---every \L2 \cd{l1_binding} must resolve to a real \L1 key.
+      \emph{L1 key uniqueness} within the application, and \emph{L2 coverage}---every
+      candidate \L1 API node is bound by at least one \L2 action.
+\item \textbf{Added checks (\cd{gt_validate_all.py}).}
+      \emph{L2 action-id uniqueness}---no duplicate \L2 id \emph{within an application}
+      (ids such as \cd{gt-action-001} are application-scoped and recur across applications by
+      design, so uniqueness is per-application, not global).
+      \emph{Method-level binding consistency}---each \L2 binding's \cd{methods} are a subset
+      of the bound \L1 node's \cd{methods}.
+\item \textbf{Agentic (\cd{gt_validate_all.py}).}
+      \emph{Referential integrity}---every intra-document \cd{*_id} (agent, tool, context,
+      memory, sink, edge, control) resolves to a record that exists.
+      \emph{Lineage closure}---every producer, output and \cd{becomes_context_source} link
+      resolves, so no data path dangles.
+      \emph{Enum validity}---\cd{trust_class}, \cd{effect_class} and \cd{enforcement_mode}
+      are in range.
       \emph{Evidence invariants}---an \cd{observed} record carries no blocker, and every
-      unobserved record carries exactly one blocker from the closed taxonomy, so the
-      grounding ledger can never be silently inconsistent.
-\item \textbf{Completeness.} The oracle diff of Section~\ref{sec:ground} runs in the same
-      pass, so validity and coverage are recomputed whenever the dataset changes and a
-      newly-introduced authored route absent from the oracle is flagged immediately---then
-      corrected or retained with a justification.
+      unobserved record carries exactly one blocker from the closed taxonomy. (Cross-layer
+      \cd{l1_id}/\cd{related_l2_id} links are checked only where the referenced web layer was
+      built; for LibreChat and LobeChat they are tracked as unresolved forward references
+      rather than validated, Section~\ref{sec:scope-note}.)
 \end{itemize}
-The current dataset passes every check: zero duplicate \L1 keys, zero duplicate \L2 ids,
-zero dangling cross-layer references, every enumeration in range, and all evidence
-invariants satisfied---a clean state that the committed scripts re-verify on each change.
+On the current dataset every conformant application passes every check---zero duplicate \L1
+keys, zero duplicate \L2 ids within an application, zero dangling intra-document references,
+every enumeration in range, and all evidence invariants satisfied
+(\cd{validation_report.md}). One exception is reported honestly: OpenClaw's \L1/\L2 describe
+agentic invocation surfaces in an extended \cd{kind} vocabulary (\cd{channel}, \cd{rpc},
+\cd{internal}) that the standard closed-kind core does not accept; the runner flags this layer
+as extended-vocabulary and validates it separately rather than silently widening the
+enumeration or counting it as a pass of the standard schema. The completeness oracle of
+Section~\ref{sec:ground} runs in the same workflow (\cd{completeness_report.md}), so validity
+and coverage are recomputed whenever the dataset changes.
 
 % ======================================================================
 \section{Environments (Dataset)}
@@ -600,23 +651,34 @@ the implementation stack (Rust, Go, Python, Ruby, Java, and Node/TypeScript back
 the transport and interaction model (classical REST, GraphQL, RPC-style REST,
 WebSocket/DDP, gRPC, server-sent events, OTLP, and ActivityPub), and the authentication
 model (session cookies, bearer and API keys, email-OTP, and full OIDC/SAML/OAuth flows).
-Each application---OpenClaw excepted, which has no advisory under that name
-(Table~\ref{tab:envllm})---is additionally anchored to genuine, publicly-documented
-vulnerabilities, so the inventoried surface is known to be security-relevant rather than
-incidental. Every environment is pinned to a specific build---a version tag or image
-digest recorded in its \cd{environment.yaml}, though several are snapshot, \texttt{-develop}
-or source-checkout builds whose commit SHAs are a reproducibility gap
-(Section~\ref{sec:limits})---and the version shown in the tables; the right-hand column
-names the published CVEs associated with each application,
-listed \emph{regardless} of whether this exact build is patched against them, together
-with the vulnerability class where an issue is not tied to a single CVE. Consistent with
-the dataset's attack-surface-only design, the ground truth inventories the \emph{surface}
-these issues live on, not an exploit for any of them.
+The published CVEs listed in Tables~\ref{tab:envweb} and~\ref{tab:envllm} provide
+\emph{context for application selection}---evidence that each application has a history of
+security-relevant issues of the kinds its surface exposes. They are not claimed to be present
+in, or exploitable against, the specific builds studied here, and this project does not verify
+them; several listed builds in fact post-date the relevant fix (Section~\ref{sec:limits}). For
+OpenClaw, no specific advisory is included in this study. Consistent with the dataset's
+attack-surface-only design, the ground truth inventories the \emph{surface} these issue
+classes live on, not an exploit for any of them.
+
+Each environment is pinned for reproducibility, and the report distinguishes the
+\emph{source version} read for annotation from the \emph{deployed image} used for runtime
+grounding. The tables below show the source/annotation version; the deployed runtime image
+and its digest are recorded per application in \cd{deployment_manifest.yaml}. For most
+applications the two coincide, but three do not and are documented as such: Uptrace was
+annotated from \texttt{2.1.0-rc.2} but grounded against the \texttt{2.1.0-rc.1} image;
+Keycloak was annotated from \texttt{main} (\texttt{999.0.0-SNAPSHOT}) but grounded against the
+released \texttt{26.0.8} image; and MediaCMS has no live container in the grounding
+snapshot---its runtime evidence comes from previously-captured samples and HAR traffic, not a
+re-driven deployment. Several other environments run a floating tag
+(\texttt{:latest}/\texttt{:main}) pinned only by the recorded image digest, and a few
+snapshot, \texttt{-develop} or source-checkout builds lack an exact commit SHA
+(Section~\ref{sec:limits}). Where the source and deployed versions differ, runtime evidence is
+not presented as confirmation of version-specific behaviour.
 
 \subsection{Traditional web applications}
-Table~\ref{tab:envweb} lists the ten traditional-web environments with their exact pinned
-version and implementation stack, and the published CVEs associated with each
-application (listed regardless of this build's patch status), plus the vulnerability class
+Table~\ref{tab:envweb} lists the ten traditional-web environments with their
+source/annotation version and implementation stack, and the published CVEs associated with
+each application (for selection context, per the note above), plus the vulnerability class
 where an issue is not tied to a single CVE.
 
 \begin{table}[htbp]\centering\footnotesize
@@ -679,12 +741,34 @@ writing and is not guaranteed exhaustive.}
 \section{Results: Captured Attack Surface}
 % ======================================================================
 
+\subsection{Representation scope and counting units}\label{sec:scope-note}
+Three counting conventions hold throughout. An \L1 record is one deployed interface
+(an API route, a rendered page, or a static resource), identified by a normalised URL
+template; the \textbf{1{,}397} figure is the traditional-web total across the ten web
+applications. An \L2 record is one \emph{semantic action}---a single
+Subject--Operation--Object operation, not an entire multi-step flow---so the \textbf{980}
+figure counts individual actions, several of which may chain into one flow. An agentic
+record is one node of the capability/lineage graph; the \textbf{327} figure includes 20
+nested \cd{invocation_surfaces} (sub-fields of agent records), leaving \textbf{307}
+independently graded records.
+
+The agentic layer is \emph{agent-specific and additional}: it is linked to relevant web
+interactions and actions but is not a mandatory third level for every application. The ten
+traditional-web applications have no agentic layer. Among the five LLM-integrated
+applications, the web \L1/\L2 that their agentic records reference is a \emph{focused,
+agent-relevant subset}, not a whole-application sweep, and is counted \emph{separately} from
+the 1{,}397 traditional-web total: AnythingLLM's 67-route Developer API, a 17-route scoped
+subset of Open~WebUI, and OpenClaw's 20 invocation-surface records (in an extended
+\cd{kind} vocabulary, Section~\ref{sec:val}). LibreChat and LobeChat carry only the agentic
+layer, with \cd{l1_id}/\cd{related_l2_id} links held as forward references to a web \L1/\L2
+that was not separately built for them.
+
 \begin{table}[ht]\centering\small
-\caption{Captured traditional-web attack surface ($\Sigma$ = 1{,}397 endpoints,
-980 semantic flows).}\label{tab:resweb}
+\caption{Captured traditional-web attack surface ($\Sigma$ = 1{,}397 interface records,
+980 semantic actions).}\label{tab:resweb}
 \begin{tabular}{@{}lrr@{}}
 \toprule
-\textbf{Environment} & \textbf{L1 endpoints} & \textbf{L2 semantic flows}\\
+\textbf{Environment} & \textbf{L1 records} & \textbf{L2 semantic actions}\\
 \midrule
 VoceChat    & 189 & 205\\
 MediaCMS    & 110 & 104\\
